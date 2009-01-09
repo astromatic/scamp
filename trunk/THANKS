@@ -1,0 +1,39 @@
+Mark Calabretta <mcalabre@atnf.csiro.au>
+        SCAMP makes extensive use of his nice WCS library
+
+Francois Ochsenbein <francois@astro.u-strasbg.fr>
+        The CDSClient tool provides on-line access to CDS reference catalogs.
+
+Alan Irwin <irwin@beluga.phys.uvic.ca>
+        SCAMP uses the PLPlot package maintained by Alan Irwin
+
+Ville Laurikari <vl@iki.fi>
+        for his VL_PROG_CC_WARNINGS (modified to ACX_PROG_CC_OPTIM)
+
+Steven G. Johnson <stevenj@alum.mit.edu>
+        for his acx_pthread.m4
+
+Erik Deul <deul@strw.leidenuniv.nl>
+Mario Radovich <radovich@na.astro.it>
+        SCAMP borrows several ideas from their astrometric reduction programs.
+
+Jan Kohnert <jkohnert@aip.de>
+        for providing .ahead focal-plane models for ESO instruments
+
+Akim Demaille <akim@lrde.epita.fr>
+        for solving the $datarootdir issue and providing the URBI_RESOLVE_DIR()
+        function.
+
+John Moustakas <john.moustakas@gmail.com>
+        for adding SDSS-R5 to astrometric catalogs
+
+Chiara Marmo <marmo@iap.fr>
+	for all her developments on the XSLT filter
+
+Eric Aubourg <Eric@aubourg.net>
+Wayne Barkhouse <wbark@astro.uiuc.edu>
+Mireille Dantel-Fort <mireille.dantel@obspm.fr>
+Daniel Durand <Daniel.Durand@nrc.ca>
+Pascal Fouque <pfouque@ast.obs-mip.fr>
+Joe Mohr <jmohr@uiuc.edu>
+        Help in discovering bugs or bringing suggestions

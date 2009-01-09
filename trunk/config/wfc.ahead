@@ -1,0 +1,32 @@
+COMMENT   1st order focal-plane model for WFCAM@INT (1x2035x4085+3x4085x2035)
+COMMENT   derived by SCAMP version 1.2.11-MP (2006-03-21)
+COMMENT   (c) 2006 Emmanuel BERTIN <bertin@iap.fr>
+COMMENT   
+CRPIX1  =      2.341263346E+03 / Reference pixel on this axis                  
+CRPIX2  =      3.621133823E+03 / Reference pixel on this axis                  
+CD1_1   =     -9.233775921E-05 / Linear projection matrix                      
+CD1_2   =      1.834277153E-06 / Linear projection matrix                      
+CD2_1   =      6.134426190E-07 / Linear projection matrix                      
+CD2_2   =      8.690331397E-05 / Linear projection matrix                      
+END     
+CRPIX1  =     -1.936431318E+03 / Reference pixel on this axis                  
+CRPIX2  =      3.501772902E+03 / Reference pixel on this axis                  
+CD1_1   =     -8.829834374E-05 / Linear projection matrix                      
+CD1_2   =      1.239326190E-06 / Linear projection matrix                      
+CD2_1   =      3.757550516E-07 / Linear projection matrix                      
+CD2_2   =      9.113656534E-05 / Linear projection matrix                      
+END     
+CRPIX1  =      2.277992259E+03 / Reference pixel on this axis                  
+CRPIX2  =     -6.997602052E+02 / Reference pixel on this axis                  
+CD1_1   =     -9.228724439E-05 / Linear projection matrix                      
+CD1_2   =      1.509898971E-06 / Linear projection matrix                      
+CD2_1   =      1.543284121E-06 / Linear projection matrix                      
+CD2_2   =      9.188445586E-05 / Linear projection matrix                      
+END     
+CRPIX1  =      2.310097883E+03 / Reference pixel on this axis                  
+CRPIX2  =      1.395773603E+03 / Reference pixel on this axis                  
+CD1_1   =     -9.233944429E-05 / Linear projection matrix                      
+CD1_2   =      1.338169921E-06 / Linear projection matrix                      
+CD2_1   =      1.316659123E-06 / Linear projection matrix                      
+CD2_2   =      9.213116696E-05 / Linear projection matrix                      
+END     

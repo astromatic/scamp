@@ -1,0 +1,57 @@
+%define name @PACKAGE_NAME@
+%define version @PACKAGE_VERSION@
+%define release 1
+
+Summary: compute astrometric and photometric solutions from SExtractor catalogs
+Name: %{name}
+Version: %{version}
+Release: %{release}
+Source0: ftp://ftp.iap.fr/pub/from_users/bertin/%{name}/%{name}-%{version}.tar.gz
+URL: http://terapix.iap.fr/soft/%{name}/
+License: GPLv3+
+Group: Sciences/Astronomy
+BuildRoot: %{_tmppath}/%{name}-buildroot
+BuildRequires: pkgconfig
+BuildRequires: fftw-devel >= 3.1
+BuildRequires: atlas-devel >= 3.6.0
+BuildRequires: plplot-devel >= 5.3.1
+
+%description
+SCAMP is a program that computes astrometric and photometric solutions from
+SExtractor catalogs
+
+%prep
+%setup -q
+
+%build
+if test "$USE_ICC"; then
+%configure --enable-icc
+else
+%configure
+fi
+make %{?_smp_mflags}
+
+%install
+rm -rf $RPM_BUILD_ROOT
+make install DESTDIR=$RPM_BUILD_ROOT
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc AUTHORS BUGS ChangeLog COPYING HISTORY INSTALL README THANKS
+%{_bindir}/@PACKAGE_NAME@
+%{_mandir}/man1/@PACKAGE_NAME@.1*
+%{_mandir}/manx/@PACKAGE_NAME@.x*
+%{_datadir}/@PACKAGE_NAME@
+
+%changelog
+* @DATE2@ @PACKAGER@ <@PACKAGE_BUGREPORT@>
+- Automatic RPM rebuild
+* Fri May 23 2003 Emmanuel Bertin <bertin@iap.fr>
+- Second RPM build
+* Wed Jan 1 2003 Emmanuel Bertin <bertin@iap.fr>
+- First RPM build
+
+# end of file

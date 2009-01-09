@@ -1,0 +1,1292 @@
+/*
+                                ChangeLog
+
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*
+*       Part of:        SCAMP
+*
+*       Author:         E. BERTIN (IAP)
+*
+*       Contents:       log of changes made to the SCAMP source
+*
+*       Last modify:    31/05/2008
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*/
+
+------------------------------------------------------------------------
+r721 | bertin | 2008-05-31 21:01:02 +0200 (Sat, 31 May 2008) | 3 lines
+
+Added default library paths to ATLAS autoconf script.
+Pushed version number to 1.4.6.
+
+------------------------------------------------------------------------
+r720 | bertin | 2008-05-15 21:17:08 +0200 (Thu, 15 May 2008) | 2 lines
+
+Fixed typos in FFTW M4 script (thanks to Peter Nugent).
+
+------------------------------------------------------------------------
+r719 | bertin | 2008-04-24 16:50:38 +0200 (Thu, 24 Apr 2008) | 3 lines
+
+Removed saturated and cropped objects from all checkplots.
+Pushed version number to 1.4.5.
+
+------------------------------------------------------------------------
+r716 | bertin | 2008-04-02 14:56:45 +0200 (Wed, 02 Apr 2008) | 2 lines
+
+Merged --with-plplot and --without-plplot options in one single AC_ARG_WITH
+(Greg Daues' suggestion).
+
+-------------------------------------------------------------------------------------
+r715 | bertin | 2008-03-27 16:22:11 +0100 (Thu, 27 Mar 2008) | 3 lines
+
+Added -shared-libgcc to LDFLAGS in RPM make recipes to avoid "Kernel too old"
+error message on old Linux systems.
+Updated icc optimization flags.
+
+------------------------------------------------------------------------
+r714 | bertin | 2008-03-27 15:35:33 +0100 (Thu, 27 Mar 2008) | 5 lines
+
+Added astrometric reference catalogs SDSS-R6 and DENIS-3.
+Replaced NOMAD-1.0 with NOMAD-1.
+Updated documentation.
+Pushed version number to 1.4.4.
+
+------------------------------------------------------------------------
+r712 | bertin | 2008-03-21 17:46:08 +0100 (Fri, 21 Mar 2008) | 2 lines
+
+Fixed compilation failure with the --without-plplot configure option.
+
+------------------------------------------------------------------------
+r696 | bertin | 2008-01-15 18:08:44 +0100 (Tue, 15 Jan 2008) | 2 lines
+
+Fixed typo in ATLAS m4 script (detection of multithreaded CBLAS).
+
+------------------------------------------------------------------------
+r693 | bertin | 2008-01-14 23:09:23 +0100 (Mon, 14 Jan 2008) | 3 lines
+
+Fixed preprocessor warnings in plot modules.
+Made astrometric and photometric plot module compilation optional.
+
+------------------------------------------------------------------------
+r692 | bertin | 2008-01-14 10:46:14 +0100 (Mon, 14 Jan 2008) | 2 lines
+
+Added extra-foolproofing against NaN in input catalogues.
+
+------------------------------------------------------------------------
+r689 | bertin | 2008-01-10 17:34:17 +0100 (Thu, 10 Jan 2008) | 2 lines
+
+Fixed error in the y^2.x^4 PV monomial (found by R.Haigron & J.Guibert).
+
+------------------------------------------------------------------------
+r682 | bertin | 2008-01-02 19:15:26 +0100 (Wed, 02 Jan 2008) | 2 lines
+
+Updated FITSWCS library to the latest version (IMPORTANT: sign of precession
+vector needs to be checked).
+
+------------------------------------------------------------------------
+r678 | bertin | 2007-12-20 13:59:34 +0100 (Thu, 20 Dec 2007) | 2 lines
+
+Spred checkplot functions over 3 modules (more than 5000 lines already!).
+
+------------------------------------------------------------------------
+r655 | bertin | 2007-11-09 17:31:07 +0100 (Fri, 09 Nov 2007) | 3 lines
+
+Fixed autoconf "laxness" with the FFTW library.
+Added photometric ref. std error in .head output.
+
+------------------------------------------------------------------------
+r654 | bertin | 2007-11-09 14:51:39 +0100 (Fri, 09 Nov 2007) | 2 lines
+
+Fixed pb with high S/N ref. statistics on single exposures.
+
+------------------------------------------------------------------------
+r653 | bertin | 2007-11-08 19:38:48 +0100 (Thu, 08 Nov 2007) | 4 lines
+
+Updated FFTW and ATLAS autoconfig detectors.
+Removed .svn files from dist archives.
+Version number pushed to 1.4.1.
+
+------------------------------------------------------------------------
+r645 | marmo | 2007-10-16 02:06:16 +0200 (Tue, 16 Oct 2007) | 1 line
+
+CHECKPLOT_TYPE PHOT_ERRORVSMAG added: magnitude difference versus magnitude
+scatter plot.
+
+------------------------------------------------------------------------
+r644 | bertin | 2007-10-10 01:23:38 +0200 (Wed, 10 Oct 2007) | 2 lines
+
+Added support for NOMAD-1.0 astrometric reference catalog.
+
+------------------------------------------------------------------------
+r642 | bertin | 2007-10-09 22:50:37 +0200 (Tue, 09 Oct 2007) | 3 lines
+
+Fixed issue with local catalogs centered around alpha=0h.
+Added --with-atlas configure option.
+
+------------------------------------------------------------------------
+r638 | bertin | 2007-10-04 17:04:32 +0200 (Thu, 04 Oct 2007) | 2 lines
+
+Updated ChangeLog and AUTHORS before release.
+
+------------------------------------------------------------------------
+r635 | marmo | 2007-10-03 19:46:54 +0200 (Wed, 03 Oct 2007) | 1 line
+
+wrong name for ALL_SKY plot fixed. Improving XSLT style-sheet.
+
+------------------------------------------------------------------------
+r634 | bertin | 2007-10-03 02:58:30 +0200 (Wed, 03 Oct 2007) | 2 lines
+
+Fixed segfault occuring because of checkplot filenames in XML.
+
+------------------------------------------------------------------------
+r633 | bertin | 2007-10-02 23:50:06 +0200 (Tue, 02 Oct 2007) | 6 lines
+
+Fixed issue with position and magnitude errors with 2MASS and USNO-B1.
+Changed default passband for SDSS catalogs to r.
+Changed output of diagnostic and messages to stdout (request of P.Capak).
+Added setlinebuf(stderr) on compatible machines (request of E.Aubourg).
+Version number pushed to 1.4.0.
+
+------------------------------------------------------------------------
+r632 | marmo | 2007-10-02 23:39:06 +0200 (Tue, 02 Oct 2007) | 1 line
+
+XSLT stylesheet minor typographical changes
+
+------------------------------------------------------------------------
+r631 | marmo | 2007-10-02 23:20:02 +0200 (Tue, 02 Oct 2007) | 3 lines
+
+ASTREF_WEIGHT configuration parameter adde in the output XML.
+
+------------------------------------------------------------------------
+r618 | marmo | 2007-09-18 16:00:32 +0200 (Tue, 18 Sep 2007) | 1 line
+
+chi replaced with the greek letter.
+
+------------------------------------------------------------------------
+r616 | marmo | 2007-09-17 18:51:49 +0200 (Mon, 17 Sep 2007) | 1 line
+
+chi2 statistics in XSLT style-sheet.
+
+------------------------------------------------------------------------
+r615 | marmo | 2007-09-17 18:31:09 +0200 (Mon, 17 Sep 2007) | 1 line
+
+Adding all match information in XSLT style-sheet.
+
+------------------------------------------------------------------------
+r614 | marmo | 2007-09-14 19:57:02 +0200 (Fri, 14 Sep 2007) | 1 line
+
+plot names in xml coherent with configuration structure.
+
+------------------------------------------------------------------------
+r610 | marmo | 2007-09-05 16:26:35 +0200 (Wed, 05 Sep 2007) | 6 lines
+
+Maximum number of checkplot pushed to 64.
+All available checkplots added in the XML output and translated in the
+XSLT stylesheet.
+Version number pushed to 1.3.13
+
+------------------------------------------------------------------------
+r609 | marmo | 2007-09-04 19:40:51 +0200 (Tue, 04 Sep 2007) | 4 lines
+
+Fgroups plot (if produced in png format) added in the xml and xslt
+output.
+
+------------------------------------------------------------------------
+r578 | marmo | 2007-08-06 18:43:57 +0200 (Mon, 06 Aug 2007) | 1 line
+
+XSLT style-sheet updated.
+
+------------------------------------------------------------------------
+r566 | bertin | 2007-07-31 15:27:52 +0200 (Tue, 31 Jul 2007) | 3 lines
+
+Fixed new compatibility pb with 2MASS queries at CDS.
+Pushed version number to 1.3.12
+
+------------------------------------------------------------------------
+r547 | bertin | 2007-07-17 13:44:26 +0200 (Tue, 17 Jul 2007) | 2 lines
+
+Updated the FITS library to the latest version.
+
+------------------------------------------------------------------------
+r509 | marmo | 2007-06-19 20:52:32 +0200 (Tue, 19 Jun 2007) | 1 line
+
+rpm building generalised.
+
+------------------------------------------------------------------------
+r492 | bertin | 2007-06-11 17:47:58 +0200 (Mon, 11 Jun 2007) | 4 lines
+
+Pushed maximum number of warnings to 1000.
+Removed correlation arcsec unit.
+Pushed version number to 1.3.11.
+
+------------------------------------------------------------------------
+r491 | marmo | 2007-06-11 16:59:50 +0200 (Mon, 11 Jun 2007) | 1 line
+
+Removed tokenize test
+
+------------------------------------------------------------------------
+r484 | bertin | 2007-06-05 19:22:17 +0200 (Tue, 05 Jun 2007) | 3 lines
+
+Added Chiara's fix for header transformations (not used in SCAMP though).
+This is the official 1.3.10 release version.
+
+------------------------------------------------------------------------
+r481 | marmo | 2007-06-04 19:13:39 +0200 (Mon, 04 Jun 2007) | 1 line
+
+some little improvements in the xsl file
+
+------------------------------------------------------------------------
+r480 | marmo | 2007-06-04 15:35:17 +0200 (Mon, 04 Jun 2007) | 1 line
+
+Error added in the xslt style-sheet
+
+------------------------------------------------------------------------
+r479 | bertin | 2007-06-01 16:54:12 +0200 (Fri, 01 Jun 2007) | 4 lines
+
+Added stdout support for XML output.
+Added support for maximum FWHM_THRESHOLDS (2nd parameter).
+Fixed segfault pb with empty command lines. 
+
+------------------------------------------------------------------------
+r476 | bertin | 2007-05-30 20:31:30 +0200 (Wed, 30 May 2007) | 4 lines
+
+Added astrometric reference catalog SDSS release 5 (thanks to J.Moustakas).
+Updated the documentation.
+Pushed version number to 1.3.10.
+
+------------------------------------------------------------------------
+r472 | marmo | 2007-05-28 23:12:53 +0200 (Mon, 28 May 2007) | 1 line
+
+bug in Microsoft Explorer displaying fixed.
+
+------------------------------------------------------------------------
+r471 | bertin | 2007-05-27 19:52:35 +0200 (Sun, 27 May 2007) | 2 lines
+
+Fixed the $datarootdir issue using an M4 script provided by Akim Demaille.
+
+------------------------------------------------------------------------
+r469 | bertin | 2007-05-23 19:00:49 +0200 (Wed, 23 May 2007) | 2 lines
+
+Authorized a different output flux scale for each detector.
+
+------------------------------------------------------------------------
+r468 | marmo | 2007-05-18 19:25:32 +0200 (Fri, 18 May 2007) | 1 line
+
+all XML tables are now in the xslt style-sheet
+
+------------------------------------------------------------------------
+r466 | marmo | 2007-05-14 20:24:02 +0200 (Mon, 14 May 2007) | 1 line
+
+improvements in XSLT style-sheet, double ExpoTime_Key in XML fixed.
+
+------------------------------------------------------------------------
+r460 | bertin | 2007-05-03 15:48:09 +0200 (Thu, 03 May 2007) | 4 lines
+
+Added new WFI and FORS2 focal plane models.
+Updated THANKS and configure.ac.
+Pushed version number to 1.3.8.
+
+------------------------------------------------------------------------
+r418 | bertin | 2007-03-26 13:18:33 +0200 (Mon, 26 Mar 2007) | 2 lines
+
+Added LOG to the VERBOSE_TYPE comment in default config.
+
+------------------------------------------------------------------------
+r412 | bertin | 2007-03-21 11:50:46 +0100 (Wed, 21 Mar 2007) | 3 lines
+
+Replaced flag warning in the case no sources are found.
+Added proper default URL to XSLT filter in RPM builds (new configure
+--with-xsl_url option).
+
+------------------------------------------------------------------------
+r411 | bertin | 2007-03-20 14:07:11 +0100 (Tue, 20 Mar 2007) | 2 lines
+
+Fixed MATCHing issue with bright artifacts on some fields.
+
+------------------------------------------------------------------------
+r410 | bertin | 2007-03-19 19:47:47 +0100 (Mon, 19 Mar 2007) | 2 lines
+
+Fixed point size inconsistency in FGROUPS plot.
+
+------------------------------------------------------------------------
+r409 | bertin | 2007-03-15 17:48:14 +0100 (Thu, 15 Mar 2007) | 2 lines
+
+Removed AC_FUNC_MALLOC in configure.ac (causes problems with icc).
+
+------------------------------------------------------------------------
+r408 | bertin | 2007-03-14 12:13:38 +0100 (Wed, 14 Mar 2007) | 2 lines
+
+Fixed wrong labeling of astrometric and photometric instruments in XML output.
+
+------------------------------------------------------------------------
+r407 | bertin | 2007-03-08 20:26:39 +0100 (Thu, 08 Mar 2007) | 4 lines
+
+Changed FWHM_THRESHOLDS default range.
+Updated to the latest version of the documentation.
+Fixed missing pthread option in making Pentium RPMS with icc.
+
+------------------------------------------------------------------------
+r406 | bertin | 2007-03-08 19:15:33 +0100 (Thu, 08 Mar 2007) | 2 lines
+
+Suppressed return value checks on pthread_mutex_destroy() after filling the
+astrometric matrix (seems to return errors without a reason from time to time;
+too many MUTEXes?).
+
+------------------------------------------------------------------------
+r391 | bertin | 2007-02-19 14:36:33 +0100 (Mon, 19 Feb 2007) | 4 lines
+
+Made FGROUPS points bigger and thicker.
+Added new FWHM_THRESHOLDS configuration keyword to filter out glitches.
+Changed flux exponent for longitude and latitude cross-correlations.
+
+------------------------------------------------------------------------
+r388 | bertin | 2007-02-18 09:21:20 +0100 (Sun, 18 Feb 2007) | 2 lines
+
+Fixed bug occuring while picking up integers in headers.
+
+------------------------------------------------------------------------
+r387 | bertin | 2007-02-17 05:32:40 +0100 (Sat, 17 Feb 2007) | 2 lines
+
+Fixed flag warning while reading catalogs.
+
+------------------------------------------------------------------------
+r384 | bertin | 2007-01-18 19:15:16 +0100 (Thu, 18 Jan 2007) | 4 lines
+
+Added a warning when no source with valid flags is available in a file.
+Changed aclient default path to "aclient" (must be in the path).
+Added a --with-cdsclient_exec option to configure.
+
+------------------------------------------------------------------------
+r382 | bertin | 2007-01-17 18:21:13 +0100 (Wed, 17 Jan 2007) | 2 lines
+
+Added options for compiling with icc (Intel compiler).
+
+------------------------------------------------------------------------
+r374 | bertin | 2007-01-08 15:01:01 +0100 (Mon, 08 Jan 2007) | 3 lines
+
+Fixed segmentation faults during XML writing with many input files.
+Pushed version to 1.3.3.
+
+------------------------------------------------------------------------
+r373 | bertin | 2006-12-27 18:46:13 +0100 (Wed, 27 Dec 2006) | 2 lines
+
+Fixed compilation pb with new option in monothreaded version.
+
+------------------------------------------------------------------------
+r372 | bertin | 2006-12-27 18:29:36 +0100 (Wed, 27 Dec 2006) | 5 lines
+
+Added reference passband info to XML output.
+Added sorting of passbands in GSC-2.2.
+Changed ASTREF_BAND status to that of a standard configuration parameter.
+Added updated version of the doc.
+
+------------------------------------------------------------------------
+r371 | bertin | 2006-12-26 21:32:45 +0100 (Tue, 26 Dec 2006) | 3 lines
+
+Changed default hi-pass matching filter wavelength to 1/64.
+Added ASTREFCAT_BAND "deep" option (tested with success).
+
+------------------------------------------------------------------------
+r369 | bertin | 2006-12-12 21:18:21 +0100 (Tue, 12 Dec 2006) | 4 lines
+
+Fixed the bug with more than 256 input files (thanks to Eric Aubourg).
+Set Checkplot device to PNG by default.
+Antialiasing turned on by default (automatically deactivated if convert is not
+found).
+
+------------------------------------------------------------------------
+r367 | bertin | 2006-12-05 16:35:23 +0100 (Tue, 05 Dec 2006) | 3 lines
+
+Added SDSS-R3 to default configuration comments, and cleaned up the comments.
+Pushed version number to 1.3.3b.
+
+------------------------------------------------------------------------
+r363 | bertin | 2006-10-31 18:34:47 +0100 (Tue, 31 Oct 2006) | 4 lines
+
+Added ASTREF_WEIGHT config. parameter for balancing the astrometric weights.
+Added computation and output of AstromCorr_Internal and
+AstromCorr_Internal_HighSN statistics.
+Removed documentation source and replaced it with the PDF version.
+
+------------------------------------------------------------------------
+r362 | bertin | 2006-10-30 22:10:30 +0100 (Mon, 30 Oct 2006) | 3 lines
+
+Fixed missing variable.
+Version number pushed to 1.3.2.
+
+------------------------------------------------------------------------
+r361 | bertin | 2006-10-30 22:05:45 +0100 (Mon, 30 Oct 2006) | 2 lines
+
+Added automatic "escalope" management feature: seems to work well although more
+tests are needed (configurable fudge factor might be needed).
+
+------------------------------------------------------------------------
+r360 | bertin | 2006-10-29 21:09:11 +0100 (Sun, 29 Oct 2006) | 2 lines
+
+Applied patch by Sergio Pascual for configuring the path to the XSL file.
+
+------------------------------------------------------------------------
+r357 | bertin | 2006-10-27 21:22:31 +0200 (Fri, 27 Oct 2006) | 3 lines
+
+Fixed uninitialized flags in astrometric reference catalog.
+Removed extra MutEx destruction which would crash the multithreaded version on
+some occasions.
+
+------------------------------------------------------------------------
+r356 | bertin | 2006-10-27 19:38:14 +0200 (Fri, 27 Oct 2006) | 3 lines
+
+Fixed typo in syntax.
+Updated man page.
+
+------------------------------------------------------------------------
+r355 | marmo | 2006-10-27 17:52:08 +0200 (Fri, 27 Oct 2006) | 1 line
+
+main.c modified to read catalog list in input
+
+------------------------------------------------------------------------
+r354 | bertin | 2006-10-26 21:34:37 +0200 (Thu, 26 Oct 2006) | 4 lines
+
+Added computation of astrometric dispersions and X/Y correlations
+for individual fields.
+Added new XML-VOTable FIELDs for the above parameters.
+Added missing <Phot*Reference> values in FGroups XML-VOTable Table.
+
+------------------------------------------------------------------------
+r352 | bertin | 2006-10-25 19:10:51 +0200 (Wed, 25 Oct 2006) | 5 lines
+
+Added new astrometric error statistics for field and fgroups: mean
+offsets with reference catalog and correlation coefficient between
+dispersion in X and Y (XML output still incomplete).
+Fixed missing part of <AstromSigma_Reference> UCD.
+
+------------------------------------------------------------------------
+r350 | bertin | 2006-10-09 22:38:16 +0200 (Mon, 09 Oct 2006) | 3 lines
+
+Updated XSL stylesheet to support VOTable-format.
+Pushed version number to 1.3.0 for immediate release!
+
+------------------------------------------------------------------------
+r348 | bertin | 2006-10-06 17:59:33 +0200 (Fri, 06 Oct 2006) | 2 lines
+
+Changed XML output to VOTable format.
+
+------------------------------------------------------------------------
+r347 | bertin | 2006-09-29 19:39:41 +0200 (Fri, 29 Sep 2006) | 2 lines
+
+Added a specific weight to each detection, computed prior to solving the
+astrometry to balance internal and external constraints (details of the
+balancing remain to be implementated).
+
+------------------------------------------------------------------------
+r346 | bertin | 2006-09-28 21:48:24 +0200 (Thu, 28 Sep 2006) | 5 lines
+
+Checked MATCHing behaviour on MEFs with various chiralities.
+Cleaned up MATCHing code.
+Upgraded to the latest version of FITS library (With VO support and error
+trapping/logging).
+Added UCDs and VOunits to merged catalog output.
+
+------------------------------------------------------------------------
+r345 | bertin | 2006-09-27 22:33:05 +0200 (Wed, 27 Sep 2006) | 3 lines
+
+Forced alphas of the astrometric reference catalog file to be in [0,360[.
+Fixed (once again) position angle and shear angle dependencies on chirality of
+projections. Additional checks with fancy mosaic geometries still to be done.
+
+------------------------------------------------------------------------
+r344 | bertin | 2006-09-26 20:37:50 +0200 (Tue, 26 Sep 2006) | 4 lines
+
+Added chirality info in WCS structure (computed automatically).
+Made the cross-correlation high-pass filter cut-off frequency depend on
+correlation frame size.
+MATCHing is still unstable (wrong signs here and there)!
+
+------------------------------------------------------------------------
+r342 | bertin | 2006-09-22 20:33:57 +0200 (Fri, 22 Sep 2006) | 4 lines
+
+Fixed reference catalog read errors with GSC-2.2 and UCAC-1.
+Updated to the latest version of FITSWCS library, adding support for ICRS and
+supergalactic coordinates.
+Fixed positioning accuracy pb of peaks in MATCHing section (yielding
+significant improvement in MATCHing contrast): automatic scaling parameters
+will have to be tuned again.
+
+------------------------------------------------------------------------
+r341 | bertin | 2006-09-21 18:58:13 +0200 (Thu, 21 Sep 2006) | 4 lines
+
+Completed the management of flags in astrometric and photometric solutions.
+Changed the default FLAGS_MASK to 0x00f0.
+Fixed potential issues while reading the headers.
+
+------------------------------------------------------------------------
+r340 | bertin | 2006-09-20 21:06:24 +0200 (Wed, 20 Sep 2006) | 3 lines
+
+Fixed bad sources read in the 2MASS astrometric catalog.
+Added more complete management of flags by accepting different flag values in
+the various processing steps (done in reading and MATCHing, remains to be done
+in astrometric and photometric solving).
+
+------------------------------------------------------------------------
+r339 | bertin | 2006-09-19 20:15:02 +0200 (Tue, 19 Sep 2006) | 2 lines
+
+Fixed potential header issues in low-level FITS routines.
+
+------------------------------------------------------------------------
+r336 | bertin | 2006-09-18 18:19:32 +0200 (Mon, 18 Sep 2006) | 3 lines
+
+Fixed MutEx being used after being destroyed.
+Moved some debug lines around.
+
+------------------------------------------------------------------------
+r335 | bertin | 2006-09-18 14:56:50 +0200 (Mon, 18 Sep 2006) | 3 lines
+
+Updated debugging version (for practical reasons).
+Changed slightly the management of singular MATCHing refinement matrices.
+
+------------------------------------------------------------------------
+r333 | bertin | 2006-08-27 20:58:37 +0200 (Sun, 27 Aug 2006) | 4 lines
+
+Fixed potential issues with the TNX projection.
+Added automatic detection of the number of CPUs on various platforms.
+Fixed issue with PHOTFLAG false values in .ahead files.
+
+------------------------------------------------------------------------
+r305 | baillard | 2006-07-19 15:28:15 +0200 (Wed, 19 Jul 2006) | 2 lines
+
+Change name
+
+------------------------------------------------------------------------
+r303 | baillard | 2006-07-19 15:05:48 +0200 (Wed, 19 Jul 2006) | 2 lines
+
+Change names
+
+------------------------------------------------------------------------
+r294 | baillard | 2006-07-18 13:54:08 +0200 (Tue, 18 Jul 2006) | 2 lines
+
+Move scamp to public repository
+
+------------------------------------------------------------------------
+r287 | bertin | 2006-07-14 17:43:35 +0200 (Fri, 14 Jul 2006) | 2 lines
+
+Doc: added footnotes with tips about FFTW and ATLAS installations.
+
+------------------------------------------------------------------------
+r258 | bertin | 2006-05-28 22:00:31 +0200 (Sun, 28 May 2006) | 2 lines
+
+Made the MATCHing code more modular in non-LOOSE modes. Offset bug in MATCHing
+refinement still present.
+
+------------------------------------------------------------------------
+r257 | bertin | 2006-05-25 22:05:59 +0200 (Thu, 25 May 2006) | 4 lines
+
+Fix provided (at last!) for the MATCHing refinement (shear) in all MOSAIC_TYPE
+modes. Some debug routines left, but deactivated. Intermediary projection types
+in non-LOOSE modes should be checked in the case of unusual input projections.
+ATLAS library detection script improved for multiplatform installs.
+--with-atlas_libpath[=<ATLAS library path>] configure option added.
+
+------------------------------------------------------------------------
+r248 | bertin | 2006-04-28 22:15:39 +0200 (Fri, 28 Apr 2006) | 2 lines
+
+Fixed the integration step for computing the barycenter of cross-correlation
+peak in MATCHing.
+
+------------------------------------------------------------------------
+r247 | bertin | 2006-04-28 00:24:57 +0200 (Fri, 28 Apr 2006) | 2 lines
+
+Fixed MATCHing contrast ratio for offsets clos to cross-correlation lag limits.
+
+------------------------------------------------------------------------
+r231 | bertin | 2006-04-09 21:48:06 +0200 (Sun, 09 Apr 2006) | 2 lines
+
+Added some text about the handling of photometric measurements.
+
+------------------------------------------------------------------------
+r223 | bertin | 2006-04-03 23:04:53 +0200 (Mon, 03 Apr 2006) | 3 lines
+
+Cleaned up the code and autoconf files.
+Doc: added the full .tex and ps components
+
+------------------------------------------------------------------------
+r222 | bertin | 2006-04-03 23:04:02 +0200 (Mon, 03 Apr 2006) | 1 line
+
+
+------------------------------------------------------------------------
+r220 | bertin | 2006-03-24 01:10:30 +0100 (Fri, 24 Mar 2006) | 6 lines
+
+Doc: Improved description of the photometric solution.
+Doc: added colour shift illustration and comparison of polynomial degrees.
+Doc: several buggy PS figures replaced.
+Doc: new intro figure.
+Doc: polishing prior to first public release.
+
+------------------------------------------------------------------------
+r219 | bertin | 2006-03-24 01:05:07 +0100 (Fri, 24 Mar 2006) | 4 lines
+
+Bug with new raw position computation fixed in MATCHing.
+Filtered buggy (too large) positional errors while reading samples (would
+confuse automatic MATCH_RESOL).
+Removed unused variables in incomplete parts of the code.
+
+------------------------------------------------------------------------
+r217 | bertin | 2006-03-23 00:42:53 +0100 (Thu, 23 Mar 2006) | 6 lines
+
+Changed displayed shifts in longitude to physical arcsec (*cos(lat)).
+Fixed missing rotation in MATCHing for MATCH_POSANGLE>90 and MOSAIC_TYPE LOOSE.
+Increased hi-pass MATCHing filter cutoff to 1/16.
+Position angle sign pb still unclarified in MATCHing.
+Doc: added section about outliers and illustration of a blending example.
+
+------------------------------------------------------------------------
+r214 | bertin | 2006-03-21 22:42:17 +0100 (Tue, 21 Mar 2006) | 2 lines
+
+Propagated the changes in scamp.spec.in to scamp-mp.spec.in
+
+------------------------------------------------------------------------
+r213 | bertin | 2006-03-21 22:40:56 +0100 (Tue, 21 Mar 2006) | 9 lines
+
+Simplified CHECKPLOT file names in default config
+Set MERGEDOUTCAT_TYPE to NONE in default.config
+Added copy of the all /usr/local/share/scamp in .spec definitions
+Added config subdir, with MEGACAM,WIRCAM and WFC .ahead files
+Removed Makefile.am in xsl/ (but xsl/ added in root Makefile.am)
+Doc: updated keyword list and description of DISTORT parameters
+Doc: Added the correct SCAMP MP speed-up plot
+Version number pushed to 1.2.11
+
+------------------------------------------------------------------------
+r209 | bertin | 2006-03-20 21:27:38 +0100 (Mon, 20 Mar 2006) | 2 lines
+
+Doc: added a detailed description of MATCH_RESOL and MATCH_NMAX, as well as
+DISTORT_KEYS and the distortion polynomials (the readability of the equations
+has still to be improved). Several references fixed.
+
+------------------------------------------------------------------------
+r202 | bertin | 2006-03-16 21:32:59 +0100 (Thu, 16 Mar 2006) | 2 lines
+
+Automatic MATCH_RESOL now takes into account limited source positional accuracy.
+
+------------------------------------------------------------------------
+r195 | bertin | 2006-03-13 21:59:42 +0100 (Mon, 13 Mar 2006) | 4 lines
+
+Finalized new MATCHing projection scheme.
+Added automatic MATCH_RESOL "0" option. Still somewhat too conservative for
+heavily crowded fields.
+"Bad" MATCHings now displayed as bold red ANSI.
+
+------------------------------------------------------------------------
+r194 | bertin | 2006-03-12 20:52:25 +0100 (Sun, 12 Mar 2006) | 2 lines
+
+Added consideration of determinant sign in position angle refinement and update.
+
+------------------------------------------------------------------------
+r191 | bertin | 2006-03-11 22:44:58 +0100 (Sat, 11 Mar 2006) | 4 lines
+
+Improved SHEAR_VS_AIRMASS plot.
+The computed shear is now the "absolute" one.
+Changed the virtual set used for MATCHing (experimental, does not work very
+well yet).
+
+------------------------------------------------------------------------
+r189 | bertin | 2006-03-10 22:17:00 +0100 (Fri, 10 Mar 2006) | 6 lines
+
+Set x,y correlation peak filtering LLLOPASS_LAMBDA back to (1/2.0) to improve
+MATCHing in very low-density fields.
+Set number of peak-fitting iterations to 1 to avoid divergences.
+Fixed the XML syntax for shear measurements.
+Improved SHEAR_VS_AIRMASS plots.
+Doc: description of CHECKPLOT_TYPE SHEAR_VS_AIRMASS added.
+
+------------------------------------------------------------------------
+r186 | bertin | 2006-03-09 20:09:42 +0100 (Thu, 09 Mar 2006) | 6 lines
+
+Fixed segfault in putgauss().
+putgauss() now declared as static to improve performance.
+Reactivated the fitting of the MATCHing correlation peak.
+Added a sorting MutEx in case of multithreading in MATCHing refinement
+(cleaner, and even necessary some day).
+Pushed version number to 1.2.9.
+
+------------------------------------------------------------------------
+r184 | bertin | 2006-03-08 19:08:07 +0100 (Wed, 08 Mar 2006) | 4 lines
+
+Added MATCHING refinement in MOSAIC_TYPE LOOSE.
+Replaced Gaussian PSFs in 2D histograms with pseudo-Gaussians.
+Added MATCH_NMAX 0 auto mode (this is now the default).
+
+------------------------------------------------------------------------
+r181 | bertin | 2006-03-07 20:24:16 +0100 (Tue, 07 Mar 2006) | 3 lines
+
+Shear angle is now expressed with respect to Y axis towards the X axis.
+Removed weighting in MATCHing refinement, awaiting a better understanding of
+what is going on.
+
+------------------------------------------------------------------------
+r178 | bertin | 2006-03-07 17:07:42 +0100 (Tue, 07 Mar 2006) | 2 lines
+
+Added SHEAR_VS_AIRMASS check-plot.
+
+------------------------------------------------------------------------
+r177 | bertin | 2006-03-03 20:41:24 +0100 (Fri, 03 Mar 2006) | 2 lines
+
+Doc: Corrected the expression of shear amplitude (factor 2X added).
+
+------------------------------------------------------------------------
+r176 | bertin | 2006-03-03 20:17:04 +0100 (Fri, 03 Mar 2006) | 4 lines
+
+Fixed position angle and shear computation bugs in MATCHing.
+Added <shear> and <shear_angle> tags to XML output.
+Replaced Gaussian PSFs with blocks in putgauss() to speed up pattern matching
+(experimental).
+
+------------------------------------------------------------------------
+r168 | bertin | 2006-03-01 22:41:22 +0100 (Wed, 01 Mar 2006) | 2 lines
+
+Added refinement step in MATCHing, including shear measurements. Some numerical
+problems remain, and refinement is not yet operational in MOSAIC_TYPE LOOSE
+mode.
+
+------------------------------------------------------------------------
+r165 | bertin | 2006-02-28 20:35:05 +0100 (Tue, 28 Feb 2006) | 2 lines
+
+Updated and cleaned up math section for MATCHing.
+
+------------------------------------------------------------------------
+r163 | bertin | 2006-02-27 21:25:27 +0100 (Mon, 27 Feb 2006) | 2 lines
+
+Added all the equations describing the linear distorsion matrix for MATCHing
+refinements.
+
+------------------------------------------------------------------------
+r140 | bertin | 2006-02-07 20:26:09 +0100 (Tue, 07 Feb 2006) | 4 lines
+
+Increased cut frequency of hipass filter in MATCHing.
+Added a linear fitting stage to MATCHing. Propagation of transformation
+parameters still incorrect.
+
+------------------------------------------------------------------------
+r136 | bertin | 2006-02-02 16:05:49 +0100 (Thu, 02 Feb 2006) | 7 lines
+
+Fixed buggy dx and dy outputs in xml files.
+Added missing units to xml file.
+Fixed XML/XSL filename mix-up that would prevent XML files with default
+filename to be created.
+Fixed array overflow in colour-shift line-fitting.
+Added support for magnitude vectors in merged catalog output.
+Added DISTORTION check-plot to default CHECKPLOT_TYPEs.
+
+------------------------------------------------------------------------
+r133 | bertin | 2006-01-30 21:54:44 +0100 (Mon, 30 Jan 2006) | 3 lines
+
+Added computation of average colour shift parameters in astrcolshift_fgroup().
+Added preliminary computation of merged magnitudes, error estimates,
+chi2/d.o.f. and magnitude dispersions.
+
+------------------------------------------------------------------------
+r130 | bertin | 2006-01-27 19:08:28 +0100 (Fri, 27 Jan 2006) | 2 lines
+
+Further progress on merged catalog output routine.
+
+------------------------------------------------------------------------
+r127 | bertin | 2006-01-25 18:17:49 +0100 (Wed, 25 Jan 2006) | 5 lines
+
+Added catout.c and catout.h modules handling merged catalog output.
+Added save of dummy merged catalogs.
+Added stdout pipe and SkyCat format for merged catalogs.
+Changed the way proper motions are computed and corrected for DCR (temporary
+solution).
+
+------------------------------------------------------------------------
+r124 | bertin | 2006-01-23 21:59:31 +0100 (Mon, 23 Jan 2006) | 4 lines
+
+Added correction of DRC to proper motions.
+Added new CORRECT_COLOURSHIFTS config option (not yet active).
+Improved ASTR_REFPROPER proper-motion check-plots.
+
+------------------------------------------------------------------------
+r122 | bertin | 2006-01-19 19:15:03 +0100 (Thu, 19 Jan 2006) | 2 lines
+
+Improved ASTR_COLSHIFT1D check-plots (added fitted lines and fixed a few bugs).
+
+------------------------------------------------------------------------
+r121 | bertin | 2006-01-18 19:22:37 +0100 (Wed, 18 Jan 2006) | 7 lines
+
+Improved pattern matching by tuning the apodisation of the cross-correlation.
+Fixed a bug that prevented displaying negative offsets.
+Changed "hidden" FORCECRVAL_NMIN keyword to FIXFOCALPLANE_NMIN.
+Added MATCH_NMAX parameter to specify the max number of detections in MATCHing.
+Version number pushed to 1.2.6.
+Doc: Updated to reflect changes above.
+
+------------------------------------------------------------------------
+r120 | bertin | 2006-01-17 20:40:28 +0100 (Tue, 17 Jan 2006) | 4 lines
+
+Doc: Added info about Gaussian fit in peakfinder
+MATCHing: fixed a bug with position angle sign on some instruments.
+Version number changed to 1.2.5d (another tuning version).
+
+------------------------------------------------------------------------
+r119 | bertin | 2006-01-16 20:53:45 +0100 (Mon, 16 Jan 2006) | 5 lines
+
+Added iterative correlation-peak-fitting procedure in MATCHing with improved
+performance.
+Further tuning remains to be done.
+Changed version number to 1.2.5c.
+
+------------------------------------------------------------------------
+r114 | bertin | 2006-01-11 21:11:39 +0100 (Wed, 11 Jan 2006) | 3 lines
+
+Fixed missing CCD boundaries on FGROUPS checkplots when 0 sources are detected.
+Fixed several MATCHing issues for large focal-planes.
+
+------------------------------------------------------------------------
+r111 | bertin | 2006-01-10 20:35:19 +0100 (Tue, 10 Jan 2006) | 3 lines
+
+Added experimental angle/scale finding function (de-activated) in match.c
+Fixed problem with missing PLPlot option in RPMs.
+
+------------------------------------------------------------------------
+r110 | bertin | 2006-01-09 00:26:12 +0100 (Mon, 09 Jan 2006) | 1 line
+
+Doc: fixed English with Henry-Joy McCracken.
+------------------------------------------------------------------------
+r109 | bertin | 2006-01-06 15:41:09 +0100 (Fri, 06 Jan 2006) | 4 lines
+
+Pushed maximum number of chars per option to 16384.
+Reduced maximum number of chars per individual filename to 512.
+Reduced maximum number of list members to 256 (except the number of catalogs).
+
+------------------------------------------------------------------------
+r105 | bertin | 2006-01-02 19:20:47 +0100 (Mon, 02 Jan 2006) | 2 lines
+
+Doc: added section about astrometric matching + 4 figures.
+
+------------------------------------------------------------------------
+r104 | bertin | 2005-12-30 19:17:23 +0100 (Fri, 30 Dec 2005) | 4 lines
+
+Doc: added commentaries to the catalog table + clean up other parts.
+Pushed NMAT_MUTEX and NMAT_MUTEX to 32 (gained 25% in speed on 8-core
+machines).
+
+------------------------------------------------------------------------
+r103 | bertin | 2005-12-29 20:52:00 +0100 (Thu, 29 Dec 2005) | 3 lines
+
+Doc: added detailed description of supported astrometric catalogs + full
+refererences and institutional acknowledgements.
+
+------------------------------------------------------------------------
+r102 | bertin | 2005-12-28 20:00:29 +0100 (Wed, 28 Dec 2005) | 3 lines
+
+Doc: added chapter concerning astrometric reference catalogs and a list
+of (tested) Vizier servers.
+
+------------------------------------------------------------------------
+r101 | bertin | 2005-12-28 18:31:03 +0100 (Wed, 28 Dec 2005) | 2 lines
+
+Forgotten fixfocalplane.ps figure added.
+
+------------------------------------------------------------------------
+r100 | bertin | 2005-12-28 18:30:25 +0100 (Wed, 28 Dec 2005) | 4 lines
+
+Doc: added sections about photometric instruments and mosaic pre-processing
+     + 1 figure.
+Improved rendering in DISTORTION check-plots.
+
+------------------------------------------------------------------------
+r99 | bertin | 2005-12-27 20:55:34 +0100 (Tue, 27 Dec 2005) | 2 lines
+
+Added new section about field groups and astrometric instruments +  2 figures.
+
+------------------------------------------------------------------------
+r98 | bertin | 2005-12-26 20:48:15 +0100 (Mon, 26 Dec 2005) | 2 lines
+
+Doc: added chapters about headers and other files, multiprocessing, source
+extraction guide and detection filtering.
+
+------------------------------------------------------------------------
+r97 | bertin | 2005-12-25 19:54:28 +0100 (Sun, 25 Dec 2005) | 2 lines
+
+Doc: completed the description of configuration parameters.
+
+------------------------------------------------------------------------
+r96 | bertin | 2005-12-23 21:13:20 +0100 (Fri, 23 Dec 2005) | 5 lines
+
+Changed configure default behaviour: dynamic linking and linking with PLPlot
+are now set by default.
+Updated INSTALL info.
+Further progress on documentation (mostly configuration parameters).
+
+------------------------------------------------------------------------
+r94 | bertin | 2005-12-22 18:27:45 +0100 (Thu, 22 Dec 2005) | 2 lines
+
+Further progress on SCAMP config parameter description.
+
+------------------------------------------------------------------------
+r93 | bertin | 2005-12-22 14:47:55 +0100 (Thu, 22 Dec 2005) | 2 lines
+
+Fixed one last time the PIX_TO_RETINA(pix) (last commit for today I promess!).
+
+------------------------------------------------------------------------
+r85 | bertin | 2005-12-20 20:21:29 +0100 (Tue, 20 Dec 2005) | 3 lines
+
+Improved Aesthetics of display and config.file.
+Changed PASSES keyword to NPASSES keyword
+
+------------------------------------------------------------------------
+r84 | bertin | 2005-12-20 19:09:57 +0100 (Tue, 20 Dec 2005) | 3 lines
+
+Removed more junk.
+Fixed huge bug in handling of background mesh-sizes.
+
+------------------------------------------------------------------------
+r68 | bertin | 2005-12-16 19:30:18 +0100 (Fri, 16 Dec 2005) | 3 lines
+
+Updated doc (new option formatting).
+Added Copyright info to .head files.
+
+------------------------------------------------------------------------
+r64 | bertin | 2005-12-15 21:02:13 +0100 (Thu, 15 Dec 2005) | 2 lines
+
+Documentation updated up to page 5.
+
+------------------------------------------------------------------------
+r63 | bertin | 2005-12-15 19:34:55 +0100 (Thu, 15 Dec 2005) | 2 lines
+
+Added appendix about the conversion of linear distortion coefficients.
+
+------------------------------------------------------------------------
+r62 | bertin | 2005-12-15 18:55:07 +0100 (Thu, 15 Dec 2005) | 5 lines
+
+Fixed CDi_j/CRPIXi values for 1st degree polynomials.
+Replace atoi() with strtol() to provide support for hexa in prefs.
+Added xsl/Makefile.in.
+Released as version 1.2.4.
+
+------------------------------------------------------------------------
+r61 | bertin | 2005-12-14 20:21:28 +0100 (Wed, 14 Dec 2005) | 3 lines
+
+Added CDi_j/CRPIXi only (no PV) WCS info for 1st order polynomial solutions.
+Fixed uppercase "SCAMP" in syntax output.
+
+------------------------------------------------------------------------
+r60 | bertin | 2005-12-14 15:14:46 +0100 (Wed, 14 Dec 2005) | 2 lines
+
+Fixed crash with catalogs extracted from NAXIS=3 data-cubes.
+
+------------------------------------------------------------------------
+r57 | bertin | 2005-12-03 07:06:17 +0100 (Sat, 03 Dec 2005) | 4 lines
+
+Added adaptive colour scale (in arcsec and %) to DISTORTION check-plots.
+Added support of SExtractor FLAGS_WEIGHT flags.
+Changed minor version number to 1.2.4.
+
+------------------------------------------------------------------------
+r56 | bertin | 2005-12-01 09:19:31 +0100 (Thu, 01 Dec 2005) | 2 lines
+
+Improved pixel scale mapping in DISTORTION check-plots.
+
+------------------------------------------------------------------------
+r55 | bertin | 2005-12-01 02:08:45 +0100 (Thu, 01 Dec 2005) | 2 lines
+
+Added preliminary pixel scale mapping to DISTORTION check-plots (CFHT request).
+
+------------------------------------------------------------------------
+r52 | bertin | 2005-11-29 05:27:08 +0100 (Tue, 29 Nov 2005) | 2 lines
+
+Fixed upper boundary for IMAFLAGS_MASK.
+
+------------------------------------------------------------------------
+r51 | bertin | 2005-11-26 07:51:56 +0100 (Sat, 26 Nov 2005) | 3 lines
+
+Added FLAGS_MASK and IMAFLAGS_MASK rejection mask config parameters.
+
+
+------------------------------------------------------------------------
+r48 | bertin | 2005-11-24 05:21:42 +0100 (Thu, 24 Nov 2005) | 3 lines
+
+Added "-j" option to make in spec files to speed up compilation
+
+
+------------------------------------------------------------------------
+r47 | bertin | 2005-11-24 04:36:57 +0100 (Thu, 24 Nov 2005) | 5 lines
+
+Modified reading of USNO-B1 catalog through aclient as a consequence of
+a format change in Vizier by F.Ochsenbein. *Attention*: old versions of
+USNO-B1 will not be read correctly any longer.
+xslt install added in RPMs.
+
+------------------------------------------------------------------------
+r45 | bertin | 2005-11-13 02:09:47 +0100 (Sun, 13 Nov 2005) | 3 lines
+
+Fixed SVN_URL usage.
+
+
+------------------------------------------------------------------------
+r44 | bertin | 2005-11-12 20:19:44 +0100 (Sat, 12 Nov 2005) | 6 lines
+
+Added hostname to XML output
+Changed default XSL URL
+Updated XSL style-sheet
+Stuck with missing support for IEEE exponential notation in XPATH.
+ 
+
+------------------------------------------------------------------------
+r42 | bertin | 2005-11-11 20:25:04 +0100 (Fri, 11 Nov 2005) | 3 lines
+
+Added user and path tags to XML and XSL files.
+
+
+------------------------------------------------------------------------
+r40 | bertin | 2005-11-11 19:41:53 +0100 (Fri, 11 Nov 2005) | 5 lines
+
+Changed XSL stylesheet access policy:
+ Recent browsers do not allow inclusion of dynamic XSL stylesheets from
+ other web-sites, hence priority is given to $pkgdatadir/scamp.xsl
+DTD reference removed.
+
+------------------------------------------------------------------------
+r39 | bertin | 2005-11-10 21:35:50 +0100 (Thu, 10 Nov 2005) | 3 lines
+
+Removed debugging feature in weighting
+
+
+------------------------------------------------------------------------
+r38 | bertin | 2005-11-10 21:34:32 +0100 (Thu, 10 Nov 2005) | 4 lines
+
+Added doc source and .xsl file to distribution
+(scamp.xsl is installed in $prefix/share/scamp/)
+
+
+------------------------------------------------------------------------
+r37 | bertin | 2005-11-07 19:55:44 +0100 (Mon, 07 Nov 2005) | 3 lines
+
+Updated autoconf files
+Added support for SDSS-R3 in ASTREF_CATALOG
+
+------------------------------------------------------------------------
+r35 | bertin | 2005-11-03 16:01:19 +0100 (Thu, 03 Nov 2005) | 3 lines
+
+Use cocat1 instead of cocat0 server at CDS by default for astrometric reference
+requests (cocat1 is a cluster front-end).
+
+------------------------------------------------------------------------
+r34 | bertin | 2005-11-03 14:37:38 +0100 (Thu, 03 Nov 2005) | 3 lines
+
+Fixed incompatibility with new CDSclient server on 2MASS catalogs
+(might change again in the future)
+
+------------------------------------------------------------------------
+r31 | bertin | 2005-10-27 17:26:51 +0200 (Thu, 27 Oct 2005) | 5 lines
+
+Added filtering of detection with too small astrometric and photometric errors
+Improved cplot_astintsysmap()
+Added cplot_astrefsysmap() CHECKPLOT function
+
+
+------------------------------------------------------------------------
+r27 | bertin | 2005-10-26 20:42:56 +0200 (Wed, 26 Oct 2005) | 3 lines
+
+Restored first astromsolve() pass and sigma-clipping
+Further improvements to astr_intsysmap()
+
+------------------------------------------------------------------------
+r23 | bertin | 2005-10-25 20:34:30 +0200 (Tue, 25 Oct 2005) | 2 lines
+
+More improvements in cplot_astintsysmap()
+
+------------------------------------------------------------------------
+r22 | bertin | 2005-10-24 21:34:37 +0200 (Mon, 24 Oct 2005) | 3 lines
+
+Further developments in cplot_astintsysmap()
+
+
+------------------------------------------------------------------------
+r19 | bertin | 2005-10-23 20:30:05 +0200 (Sun, 23 Oct 2005) | 3 lines
+
+Added new ASTR_INTSYSMAP check-plot (not tested yet)
+
+
+------------------------------------------------------------------------
+r10 | bertin | 2005-10-17 16:36:51 +0200 (Mon, 17 Oct 2005) | 1 line
+
+first SCAMP import
+------------------------------------------------------------------------
+-------------------------------- old ChangeLog --------------------------------
+Who     When            Where(mostly)   What
+
+EB      27/12/2002      -               Added ChangeLog
+
+EB      01/01/2003      scamp.spec      Added spec file
+
+EB      24/01/2003      get_reffield    Fixed bad format in GSC1 reading
+                        init_wcs()      Fixed array overflow when lng=lat=-1
+                        read_samples()  Improved source display while reading
+                        crossid_fgroup()Fixed array overflow when lng=lat=-1
+EB      27/01/2003      get_reffield    Added support for CDSclient exec path.
+
+EB      22/05/2003      fitscat_defs.h  Removed extra (long) preventing LFS.
+
+EB      23/05/2003      match_field()   Temporary change to matching procedure.
+                        preflist.h      IMAGER_TYPE MOSAIC_RIGID now by default
+
+EB      30/07/2003      match.c         Implemented full mosaic matching with
+                                        automatic histogram scaling.
+
+EB      01/08/2003      load_field()    Extended label managing to extensions.
+
+EB      19/10/2003      poly.c          Added poly_powers() function.
+
+EB      23/10/2003      write_wcs()     Added support for PV?_???? parameters.
+
+EB      26/10/2003      range_wcs()
+                        invert_wcs()    Fixed bug in step increment.
+
+EB      28/10/2003      write_wcs()     Fixed bug when writing PVs.
+
+EB      01/12/2003      sextodegde()    Fixed sign bug introduced sometime ago.
+                        -               Upgrade to the latest fitscat library.
+                                        Upgrade to the latest wcs library.
+
+EB      xx/xx/2004      -               Too many changes to mention!!
+
+EB      11/12/2004      -               New RPM build system.
+
+EB      20/12/2004      cplot_photerror()
+                                        Fixed no astrom plot with single cat.
+                        photstats_fgroup()
+					Fixed phot RMS estimate when fluxes<0
+
+EB      21/12/2004      xml_printfieldinfo()
+                                        changed .accept.xml to _accept.xml
+
+EB      29/12/2004      fitswcs.c
+			tnx.c           Replaced strtok() with strtok_r()
+                        get_astreffield()
+                                        Added support for UCAC-1,UCAC-2 and
+					2MASS astrometric catalogs.
+                        preflist.h      XWIN_IMAGE now default pos measurement.
+
+EB      11/01/2005      astrsolve.c     New multithreaded filling of the
+                                        astrometric matrix.
+
+EB      19/01/2005      -               New CHECKPLOT_RES and 
+                                        CHECKPLOT_ANTIALIAS keywords.
+
+EB      20/01/2005      makeit()        Replaced warning with error if no ref.
+                                        entry found for a group.
+                        cplot.c         New ASTR_REFERROR2D check-plot.
+
+
+EB      21/01/2005      cplot.c         Whole new plot design.
+
+EB      25/01/2005      cplot.c         New PHOT_ZPCORR3D check-plot.
+
+EB      26/01/2005      precess_wcs()
+                        load_field()    Image headers with equinox!=2000.0 are
+                                        now precessed to 2000.0.
+
+EB      27/01/2005      cplot.c         Histogram colours darkened a bit.
+
+EB      06/02/2005      cplot.c         Several plot bugs fixed.
+
+EB      08/02/2005      -               New MAGZERO_REFERR and MAGZERO_INTERR
+                                        keywords. Reference photometric fields
+                                        can now have their mag ZP adjusted too.
+
+EB      09/02/2005      cplot_photerrhisto()
+                                        1D histogram scaling bug fixed.
+                        load_astreffield()
+                                        Forgotten field->nset = 1, fixing the
+                                        black plot bug.
+
+EB      19/02/2005      read_astrefsamples()
+                        read_samples()  Fixed missing first sample.
+                        adjust_set()    Fixed 1/2-pixel offset and scaling bug.
+                        crval_to_crpix()Correct north/y-axis angle implemented.
+
+EB      20/02/2005      wcs_scale()     Fixed input vector incrementation.
+                        match_setas()   Authorized (again) moderately large
+                                        Gaussians (large length/angle errors).
+
+EB      21/02/2005      cplot.c         Replaced "dark plots" with warnings.
+                        update_wcsas()  Replaced confusing angle sign change
+                                        with scale sign check (for flipping).
+                        print_matchinfo()
+                                        Derived scale is now properly computed.
+                        preflist.h      MOSAIC_TYPE est desormais a UNCHANGED
+                                        par defaut.
+                        photsolve.c     Photometric "standards" are now taken
+                                        into account in both internal stats and
+                                        clipping.
+
+EB      25/02/2005      -               Fixed Segmentation fault pb with
+                                        splitted photometric overlaps.
+
+EB      27/02/2005      photsolve_fgroups()
+                                        Fixed NaNs with isolated fields
+                                        (this changes the photometric solution).
+                        read_samples()  Added filtering of detections outside
+                                        the image frame.
+
+EB      06/03/2005      -               Fixed completeness pb in photometric
+                                        internal stats and plots.
+                        cplot_subpixerrhisto1d()
+                                        New ASTR_SUBPIXERROR1D check-plot.
+
+EB      08/03/2005      poly.c          Removed buggy constant subtraction.
+
+EB      09/03/2005      astrsolve.c     Added support for X/YPEAK_IMAGE.
+                        cplot_pixerrhisto1d()
+                                        New ASTR_PIXERROR1D check-plot.
+
+EB      10/03/2005      photsolve.c     Fixed incompleteness in photometric
+                                        clipping.
+                                        Changed computation of reference
+                                        photometric residuals.
+                        preflist.h      MAGZERO_OUT desormais a 0.0 par defaut.
+                        Makefile.am     Fixed non-multithreaded ATLAS linking.
+                        xml_printfieldinfo()
+                                        Filtered out 1e-15 shift values.
+                        -               Move to 1.0.0 version.
+
+EB      14/03/2005      Makefile.am     added the -g option to gcc CFLAGS.
+
+EB      15/03/2005      cplot.c         Avoid the "black plplot" bug by
+                                        increasing the lower histo. threshold.
+
+EB      01/08/2005      fill_astromatrix() Fixed a bug with external contexts.
+                        read_samples()  Decrease weights of blended detections
+EB      05/08/2005      main()          Changed output of -v option
+                        preflist.h      CDSCLIENT_EXEC replaces CDSCLIENT_PATH
+
+EB      22/09/2005      xml_printfieldinfo()
+                                        Simplified XML output. XML_TYPE has
+                                        been replaced with WRITE_XML (boolean).
+                        main()          default.scamp replaced with scamp.conf.
+
+EB      23/09/2005      cplot.h         Increased CPLOT_NTYPES to 128 to avoid
+                                        some array overflows.
+
+EB      26/10/2005      makeit()        Restored first astrom pass and sigma
+                                        clipping.
+                        cplot.c         All instrucentric plots are now with the
+                                        east on the left.
+EB      27/10/2005      read_samples()  Added rejection of samples with too
+                                        small errors in flux or position.
+                        cplot.c         New ASTR_INTSYSMAP et ASTR_INTREFMAP
+                                        CHECKPLOTs added.
+
+EB      03/11/2005      get_astreffield()
+                                        Modified 2MASS input format to comply
+                                        with change in CDSclient server.
+                        preflist.h      Use cocat1 instead of cocat0 server
+                                        by default at CDS (cocat1 is a
+                                        cluster front-end).
+
+EB      07/11/2005      get_astreffield()
+                                        Fixed missing first entry in reference
+                                        catalog.
+                                        Added SDSS release 3 ASTREF_CATALOG
+
+EB      10/11/2005      write_xml()     Added TERAPIX website href to XSL file.
