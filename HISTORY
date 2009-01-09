@@ -1,0 +1,13 @@
+January 2007: 1.3.3
+	- Improved weighting scheme
+	- Support for different filters in astrometric reference catalog.
+October 2006: 1.3.0
+	- Bug fixes
+	- Improved MATCHing
+	- XML VOTable-compliant metadata output.
+March 2006: 1.2.11
+	- First public release
+January 03: 0.2
+	- Bug fixes.
+December 02: 0.1
+	- First running version.

@@ -1,0 +1,5 @@
+V1.0.1 (2005-03-17)
+Input MEF catalogs from the same instrument but with a different number of
+extensions produce a segmentation fault in MOSAIC_TYPE FIX_FOCALPLANE mode.
+
+				Emmanuel Bertin <bertin@iap.fr>

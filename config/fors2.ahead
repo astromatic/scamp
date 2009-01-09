@@ -1,0 +1,18 @@
+COMMENT   1st order focal-plane model for FORS2@VLT (2x2028x4096)
+COMMENT   derived by SCAMP version 2.3.5-MP (2007-03-08)
+COMMENT   (c) 2007 Jan Kohnert <jkohnert@aip.de>
+COMMENT   
+CRPIX1  =      8.185119900E+02 / Reference pixel on this axis                  
+CRPIX2  =      5.876095577E+01 / Reference pixel on this axis                  
+CD1_1   =     -7.003123555E-05 / Linear projection matrix                      
+CD1_2   =     -8.345097885E-08 / Linear projection matrix                      
+CD2_1   =     -9.835483304E-08 / Linear projection matrix                      
+CD2_2   =      6.997650238E-05 / Linear projection matrix                      
+END     
+CRPIX1  =      8.206462019E+02 / Reference pixel on this axis                  
+CRPIX2  =      7.819941289E+02 / Reference pixel on this axis                  
+CD1_1   =     -7.001353720E-05 / Linear projection matrix                      
+CD1_2   =      3.014174175E-09 / Linear projection matrix                      
+CD2_1   =      3.136601953E-08 / Linear projection matrix                      
+CD2_2   =      6.999533927E-05 / Linear projection matrix                      
+END     

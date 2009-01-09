@@ -1,0 +1,89 @@
+Copyright 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software
+Foundation, Inc.
+
+   This file is free documentation; the Free Software Foundation gives
+unlimited permission to copy, distribute and modify it.
+
+Basic Installation
+==================
+The simplest way to compile this package is:
+
+  1. `cd' to the directory containing the package's source code and type
+     `./configure' to configure the package for your system.
+  2. Type `make' to compile the package.
+  3. Type `make install' to install the programs and any data files and
+     documentation.
+
+Optional Features
+=================
+By default a single-threaded version of the executable is built, which
+is fine for machines with a single processor core. If the machine the software
+will run on has multiple processors, you might prefer to take advantage
+of parallel processing by enabling multi-threading. For this you must run
+configure with the --enable-threads option:
+
+     ./configure --enable-threads
+
+This will allow the program to run with up to 16 simultaneous threads
+(tasks), at the expense of a small overhead and a slightly higher memory
+usage. If your machine has more than 16 processors, say, 40 (!),
+you may increase the maximum number of threads allowed by using instead
+
+     ./configure --enable-threads=40
+
+The configure script will try by default to link the code with the PLPlot
+library ( http://www.plplot.org ). PLPlot is used to produce all the
+diagnostic plots during processing (the so-called "CHECKPLOTs"). It is
+however by no means mandatory, and may be deactivated with
+
+     ./configure --without-plplot
+
+Alternatively, it might be necessary to link PLPlot may from some unusual
+directory <plplotdir>. Use in that case:
+
+     ./configure --with-plplot=<plplotdir>
+
+SCAMP requires the "aclient" executable from the CDSclient package
+(get it from http://cdsweb.u-strasbg.fr/doc/cdsclient.html).
+If aclient is not in your PATH, you can specify an alternative path (including
+the executable filename) with
+
+     ./configure --with-cdsclient_exec=<aclient_exec>
+
+SCAMP is dynamically linked by default. Static-linking generally leads to
+faster (but fatter) executables. To enable it, configure with
+
+./configure --enable-static
+
+Compilers and Options
+=====================
+
+   Some systems require unusual options for compilation or linking that
+the `configure' script does not know about.  Run `./configure --help'
+for details on some of the pertinent environment variables.
+
+   You can give `configure' initial values for variables by setting
+them in the environment.  You can do that on the command line like this:
+
+     ./configure CC=c89 CFLAGS=-O2 LIBS=-lposix
+
+
+Installation Names
+==================
+
+   By default, `make install' will install the package's files in
+`/usr/local/bin', `/usr/local/man', etc.  You can specify an
+installation prefix other than `/usr/local' by giving `configure' the
+option `--prefix=PATH'.
+
+   You can specify separate installation prefixes for
+architecture-specific files and architecture-independent files.  If you
+give `configure' the option `--exec-prefix=PATH', the package will use
+PATH as the prefix for installing programs and libraries.
+Documentation and other data files will still use the regular prefix.
+
+   In addition, if you use an unusual directory layout you can give
+options like `--bindir=PATH' to specify different values for particular
+kinds of files.  Run `configure --help' for a list of the directories
+you can set and what kinds of files go in them.
+
