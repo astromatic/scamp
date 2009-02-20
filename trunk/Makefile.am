@@ -1,9 +1,9 @@
 # Main Makefile for SCAMP
-# Copyright (C) 2002-2008 Emmanuel Bertin.
+# Copyright (C) 2002-2009 Emmanuel Bertin.
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= man src
 dist_pkgdata_DATA	= config/*.ahead doc xsl/scamp.xsl
-EXTRA_DIST		= AUTHORS BUGS ChangeLog COPYING \
+EXTRA_DIST		= AUTHORS BUGS ChangeLog COPYRIGHT \
 			  HISTORY INSTALL README THANKS \
 			  acx_pthread.m4 acx_prog_cc_optim.m4 \
 			  acx_atlas.m4 acx_cdsclient.m4 acx_fftw.m4 \

@@ -9,7 +9,7 @@
 *
 *	Contents:       Read and write WCS header info.
 *
-*	Last modify:	04/01/2008
+*	Last modify:	20/02/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -315,7 +315,7 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/01/2008
+VERSION	20/02/2009
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
@@ -570,7 +570,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
         for (l=0; l<naxis; l++)
           for (j=0; j<100; j++)
             {
-            sprintf(str, "PV%d_%d", l+1, j);
+            sprintf(str, "PV%d_%d ", l+1, j);
             FITSREADF(buf, str, wcs->projp[j+l*100], 0.0);
             }
       }
@@ -1988,5 +1988,24 @@ double  sextodegde(char *dms)
   return val;
   }
 
+
+/******************************** fmod_0_p360 *******************************/
+/*
+Fold input angle in the [0,+360[ domain.
+*/
+double  fmod_0_p360(double angle)
+  {
+  return angle>0.0? fmod(angle,360.0) : fmod(angle,360.0)+360.0;
+  }
+
+
+/******************************** fmod_m90_p90 *******************************/
+/*
+Fold input angle in the [-90,+90[ domain.
+*/
+double  fmod_m90_p90(double angle)
+  {
+  return angle>0.0? fmod(angle+90.0,180.0)-90.0 : fmod(angle-90.0,180.0)+90.0;
+  }
 
 

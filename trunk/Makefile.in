@@ -36,10 +36,10 @@ subdir = .
 DIST_COMMON = README $(am__configure_deps) $(dist_pkgdata_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in $(srcdir)/scamp.spec.in \
-	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL \
-	THANKS autoconf/config.guess autoconf/config.sub \
-	autoconf/depcomp autoconf/install-sh autoconf/ltmain.sh \
-	autoconf/missing autoconf/mkinstalldirs
+	$(top_srcdir)/configure AUTHORS ChangeLog INSTALL THANKS \
+	autoconf/config.guess autoconf/config.sub autoconf/depcomp \
+	autoconf/install-sh autoconf/ltmain.sh autoconf/missing \
+	autoconf/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acx_atlas.m4 \
 	$(top_srcdir)/acx_cdsclient.m4 $(top_srcdir)/acx_fftw.m4 \
@@ -214,11 +214,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # Main Makefile for SCAMP
-# Copyright (C) 2002-2008 Emmanuel Bertin.
+# Copyright (C) 2002-2009 Emmanuel Bertin.
 AUTOMAKE_OPTIONS = foreign no-dependencies
 SUBDIRS = man src
 dist_pkgdata_DATA = config/*.ahead doc xsl/scamp.xsl
-EXTRA_DIST = AUTHORS BUGS ChangeLog COPYING \
+EXTRA_DIST = AUTHORS BUGS ChangeLog COPYRIGHT \
 			  HISTORY INSTALL README THANKS \
 			  acx_pthread.m4 acx_prog_cc_optim.m4 \
 			  acx_atlas.m4 acx_cdsclient.m4 acx_fftw.m4 \
