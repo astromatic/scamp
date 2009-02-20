@@ -1,12 +1,12 @@
 # configure.in for SCAMP
-# (C) E.Bertin 2002-2008
+# (c) E.Bertin 2002-2009
 # Process this file with autoconf to produce a configure script.
 # First, disable the annoying config.cache
 define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.5.1, [bertin@iap.fr])
+AC_INIT(scamp, 1.5.2, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)

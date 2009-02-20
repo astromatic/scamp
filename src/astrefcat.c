@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	27/03/2008
+*	Last modify:	20/02/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -99,7 +99,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/03/2008
+VERSION 20/02/2009
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -361,7 +361,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_SDSSR6:
-      sprintf(cmdline, "%s %s %d sdss5 -c %f12 %+f12 -r %16g -m 10000000",
+      sprintf(cmdline, "%s %s %d sdss6 -c %f12 %+f12 -r %16g -m 10000000",
 	prefs.cdsclient_path,
 	prefs.ref_server[0],
 	prefs.ref_port[0],

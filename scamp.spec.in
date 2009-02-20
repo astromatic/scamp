@@ -8,7 +8,7 @@ Version: %{version}
 Release: %{release}
 Source0: ftp://ftp.iap.fr/pub/from_users/bertin/%{name}/%{name}-%{version}.tar.gz
 URL: http://terapix.iap.fr/soft/%{name}/
-License: GPLv3+
+License: CeCILL
 Group: Sciences/Astronomy
 BuildRoot: %{_tmppath}/%{name}-buildroot
 BuildRequires: pkgconfig
@@ -40,7 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS BUGS ChangeLog COPYING HISTORY INSTALL README THANKS
+%doc AUTHORS BUGS ChangeLog COPYRIGHT HISTORY INSTALL README THANKS
 %{_bindir}/@PACKAGE_NAME@
 %{_mandir}/man1/@PACKAGE_NAME@.1*
 %{_mandir}/manx/@PACKAGE_NAME@.x*
