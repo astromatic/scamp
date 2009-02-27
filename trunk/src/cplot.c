@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	28/08/2008
+*	Last modify:	27/02/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -95,7 +95,7 @@ INPUT	Number of plots along the x axis,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/01/2005
+VERSION	27/02/2009
  ***/
 int	cplot_init(int nx, int ny, cplotenum cplottype)
   {
@@ -162,13 +162,13 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
       sprintf(str, "%dx%d", prefs.cplot_res[0], prefs.cplot_res[1]);
       plsetopt("-geometry", str);
       }
-    plsetopt("-drvopt","24bit");
+     plsetopt("-drvopt","24bit");
     }
   else
     {
 /*-- Small hack to reset driver options */
     argc = 0;
-    plParseOpts(&argc, NULL, PL_PARSE_NOPROGRAM);
+    plparseopts(&argc, NULL, PL_PARSE_NOPROGRAM);
     }
 
   plfontld(1);
