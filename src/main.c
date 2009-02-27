@@ -9,7 +9,7 @@
 *
 *	Contents:	Parsing of the command line.
 *
-*	Last modify:	28/08/2008
+*	Last modify:	27/02/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -66,7 +66,7 @@ int	main(int argc, char *argv[])
 
 #ifdef HAVE_PLPLOT
   if (argc>2)
-    plParseOpts(&argc, (const char **)argv, PL_PARSE_SKIP);
+    plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
 #endif
 
   QMALLOC(argkey, char *, argc);
@@ -114,7 +114,7 @@ int	main(int argc, char *argv[])
             fprintf(OUTPUT, "\nSYNTAX: %s", SYNTAX);
 #ifdef HAVE_PLPLOT
             fprintf(OUTPUT, "\nPLPLOT-specific options:\n");
-            plParseOpts(&argc, (const char **)argv, PL_PARSE_SKIP);
+            plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
 #endif
             exit(EXIT_SUCCESS);
             break;
