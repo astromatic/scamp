@@ -116,6 +116,7 @@ DATE2 = @DATE2@
 DATE3 = @DATE3@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DSYMUTIL = @DSYMUTIL@
 ECHO = @ECHO@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
@@ -140,6 +141,7 @@ LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MKDIR_P = @MKDIR_P@
+NMEDIT = @NMEDIT@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGER = @PACKAGER@
@@ -210,6 +212,7 @@ sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
@@ -711,65 +714,6 @@ rpm:	dist
 rpm-icc:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
 	USE_ICC="1" rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
-
-rpm-opteron:	dist
-	echo @PLPLOT_CFLAGS@
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="gcc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -g -funroll-loops -fomit-frame-pointer -Wall -march=opteron" TPXLDFLAGS="-static -shared-libgcc" TPXLIBS="-lplplotd -lpthread -llapack -lcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=x86_64 --clean $(PACKAGE_NAME).spec                                                            
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="gcc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -g -pthread -funroll-loops -fomit-frame-pointer -Wall -march=opteron" TPXLDFLAGS="-static -shared-libgcc" TPXLIBS="-lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=x86_64 --clean $(PACKAGE_NAME)-mp.spec                                                               
-
-rpm-athlon:	dist
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="gcc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -g -funroll-loops -fomit-frame-pointer -Wall -m32 -march=athlon -msse -mfpmath=sse -mtune=athlon" TPXLDFLAGS="-static -shared-libgcc" TPXLIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=athlon --clean $(PACKAGE_NAME).spec
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="gcc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -g -pthread -funroll-loops -fomit-frame-pointer -Wall -m32 -march=athlon -msse -mfpmath=sse -mtune=athlon" TPXLDFLAGS="-static -shared-libgcc" TPXLIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=athlon --clean $(PACKAGE_NAME)-mp.spec
-
-rpm-pentium:	dist
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="gcc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -g -pthread -funroll-loops -fomit-frame-pointer -Wall -m32 -march=i686 -msse -mfpmath=sse -mno-3dnow" TPXLDFLAGS="-static -shared-libgcc" TPXLIBS="-L/usr/lib/ -lpthread -L/usr/local/lib/atlas_pentium/ -llapack -lcblas -latlas -L/usr/local/lib/ -lplplotd -lfftw3f -lm" rpmbuild -ba --target=i686 --clean $(PACKAGE_NAME).spec
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="gcc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -g -pthread -funroll-loops -fomit-frame-pointer -Wall -m32 -march=i686 -msse -mfpmath=sse -mno-3dnow" TPXLDFLAGS="-static -shared-libgcc" TPXLIBS="-L/usr/lib/ -lpthread -L/usr/local/lib/atlas_pentium/ -llapack -lptcblas -latlas -L/usr/local/lib/ -lplplotd -lfftw3f -lm" rpmbuild -ba --target=i686 --clean $(PACKAGE_NAME)-mp.spec
-
-rpm-opteron-icc:	dist
-	echo @PLPLOT_CFLAGS@
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="icc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -axWPT -ip -unroll" TPXLDFLAGS="-static -shared-libgcc -static-intel" TPXLIBS="-lplplotd -lpthread -llapack -lcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=x86_64 --clean $(PACKAGE_NAME).spec                                                            
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="icc" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -axWPT -ip -unroll -pthread" TPXLDFLAGS="-static -shared-libgcc -static-intel" TPXLIBS="-lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=x86_64 --clean $(PACKAGE_NAME)-mp.spec                                                               
-
-rpm-athlon-icc:	dist
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="icc32" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -axKWNPTO -ip -unroll" TPXLDFLAGS="-static -shared-libgcc -static-intel" TPXLIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=athlon --clean $(PACKAGE_NAME).spec
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="icc32" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -axKWNPTO -ip -unroll -pthread" TPXLDFLAGS="-static -shared-libgcc -static-intel" TPXLIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm" rpmbuild -ba --target=athlon --clean $(PACKAGE_NAME)-mp.spec
-
-rpm-pentium-icc:	dist
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="icc32" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -axKWNPTO -ip -unroll -pthread" TPXLDFLAGS="-static -shared-libgcc -static-intel" TPXLIBS="-L/usr/lib/ -lpthread -L/usr/local/lib/atlas_pentium/ -llapack -lcblas -latlas -L/usr/local/lib/ -lplplotd -lfftw3f -lm" rpmbuild -ba --target=i686 --clean $(PACKAGE_NAME).spec
-	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
-	TPXCC="icc32" TPXFLAGS="@PLPLOT_CFLAGS@ -O3 -axKWNPB -ip -unroll -pthread" TPXLDFLAGS="-static -shared-libgcc -static-intel" TPXLIBS="-L/usr/lib/ -lpthread -L/usr/local/lib/atlas_pentium/ -llapack -lptcblas -latlas -L/usr/local/lib/ -lplplotd -lfftw3f -lm" rpmbuild -ba --target=i686 --clean $(PACKAGE_NAME)-mp.spec
-
-athlon:
-	$(MAKE) CFLAGS="@PLPLOT_CFLAGS@ -O3 -g -pthread -funroll-loops -fomit-frame-pointer -Wall -m32 -march=athlon -msse -mfpmath=sse -mtune=athlon" LIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm"
-
-pentium:
-	$(MAKE) CFLAGS="@PLPLOT_CFLAGS@ -O3 -g -pthread -funroll-loops -fomit-frame-pointer -Wall -m32 -march=i686 -msse -mfpmath=sse -mno-3dnow" LIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm"
-
-icc:
-	$(MAKE) CC="icc" CFLAGS="@PLPLOT_CFLAGS@ -O3 -axWP -ip -unroll -pthread"
-
-athlon-icc:
-	$(MAKE) CC="icc32" CFLAGS="@PLPLOT_CFLAGS@ -O3 -axKWNPTO -ip -unroll -pthread" LIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm"
-
-pentium-icc:
-	$(MAKE) CC="icc32" CFLAGS="@PLPLOT_CFLAGS@ -O3 -axKWNPTO -ip -unroll -pthread" LIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lptcblas -latlas -lfftw3f -lm"
-
-debug:
-	$(MAKE) CFLAGS="@PLPLOT_CFLAGS@ -O3 -funroll-loops -fomit-frame-pointer -Wall -m32 -g" LIBS="-L/usr/local/lib/ -L/usr/lib/ -lplplotd -lpthread -llapack -lcblas -latlas -lfftw3f -lm"
-
-profile:
-	$(MAKE) CFLAGS="@PLPLOT_CFLAGS@ -O3 -funroll-loops -Wall -pg"
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
