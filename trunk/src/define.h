@@ -24,11 +24,7 @@
 /*------------------------ what, who, when and where ------------------------*/
 
 #define         BANNER		"SCAMP"
-//#ifdef USE_THREADS
-//#define         MYVERSION       VERSION "-MP"
-//#else
 #define         MYVERSION       VERSION
-//#endif
 #define         COPYRIGHT	"Emmanuel BERTIN <bertin@iap.fr>"
 #define		WEBSITE		"http://astromatic.iap.fr/software/scamp/"
 #define         INSTITUTE	"IAP  http://www.iap.fr"
