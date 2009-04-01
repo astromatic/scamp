@@ -6,102 +6,124 @@
 	<!ENTITY asec "&#168;">
         <!ENTITY Delta "&#916;">
         <!ENTITY chi "&#967;">
-        <!ENTITY br "&#60;&#98;&#115;&#32;&#47;&#62;">
+         <!ENTITY darr "&#8595;">
 	]>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<!-- ****************** Global XSL template for SExtractor ****************
+     (C) E.Bertin and C.Marmo 2005-2009
+     ********************************************************************** -->
 
-<xsl:stylesheet version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
-<!-- *********************** Global XSL template ************************** -->
  <xsl:template match="/">
   <xsl:variable name="date" select="/VOTABLE/RESOURCE/RESOURCE[@name='MetaData']/PARAM[@name='Date']/@value"/>
   <xsl:variable name="time" select="/VOTABLE/RESOURCE/RESOURCE[@name='MetaData']/PARAM[@name='Time']/@value"/>
-  <html>
-
-<!-- HTML head  -->
-
-   <head>
-
-<!-- javascript -->
-
+  <HTML>
+   <HEAD>
 <!--  <script type="text/javascript" language="javascript"> -->
-
-    <script src="http://terapix.iap.fr/cplt/xsl/sorttable.js"/>
+    <script src="http://astromatic.iap.fr/xsl/sorttable.js"/>
 
     <style type="text/css">
-     p.sansserif {font-family: sans-serif}
+     p {
+      font-family: sans-serif;
+      }
      p.italic {font-style: italic}
-     body {background-color: white}
+     body {
+      margin: 10px;
+      background-color: #e0e0e0;
+      background-image: url("http://astromatic.iap.fr/xsl/body_bg.jpg");
+      background-repeat: repeat-x;
+      background-position: top;
+      min-width:662px;
+      }
      mono {font-family: monospace}
-     elen {font-family: monospace; font-size: 100%; font-weight: bold; color: green }
-     elep {font-family: monospace; font-size: 100%; font-weight: bold; color: red }
-     el {font-family: monospace; font-size: 100%; color: black}
-     a {text-decoration: none}
-
-     table.sortable a.sortheader
-      {
-      background-color:#FFEECC;
+     elen {
+      font-family: monospace;
+      font-weight: bold;
+      color: green
+      }
+     elep {
+      font-family: monospace;
+      font-weight: bold;
+      color: red
+      }
+     el {
+      font-family: monospace;
+      font-size: 100%;
       color: black;
+      }
+     elm {
+      font-family: monospace;
+      font-size: 67%;
+      white-space: nowrap;
+      }
+     a {text-decoration: none; font-style: bold; color: #476674}
+     a:hover {text-decoration: underline;}
+     #header {
+      padding: 5px;
+      min-width: 662px;
+      background-image: url("http://astromatic.iap.fr/xsl/astromaticleft.png");
+      background-repeat: repeat-x;
+      background-position: left top;
+      text-align: left;
+      font-size: 1.2em;
+      margin: 0 0 30px 0;
+      color:#d3e7f0;
+      font-weight: bold;
+      }
+     th {
+      background-color:#d3e7f0;
+      border-top: 1px solid white;
+      border-left: 1px solid white;
+      border-right: 1px solid #476674;
+      border-bottom: 1px solid #476674;
+      -moz-border-radius: 3px;
+      -khtml-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+      padding: 2px;
+      line-height: 12px;
+      }
+     td {
+      background-color:#f2f4f4;
+      padding-left: 2px;
+      padding-right: 2px;
+      }
+     table.sortable {
+      border-top: 1px solid #476674;
+      border-left: 1px solid #476674;
+      border-right: 1px solid white;
+      border-bottom: 1px solid white;
+      -moz-border-radius: 3px;
+      -khtml-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+      }
+     table.sortable a.sortheader {
+      background-color:#d3e7f0;
       font-weight: bold;
       font-size: 80%;
       text-decoration: none;
       display: button;
       }
-     table.sortable span.sortarrow
-      {
+
+     table.sortable span.sortarrow {
       color: black;
       font-weight: bold;
-      text-decoration: none;
+      text-decoration: blink;
       }
-     table.sortable a.sortheader.sub
-      {
-      vertical-align: sub;
-      }
-    </style>
+     table.sortable a.sortheader.sub {vertical-align: sub}
+     </style>
 
      <title>
       Processing summary on <xsl:value-of select="$date"/> at <xsl:value-of select="$time"/>
      </title>
-    </head>
-
-<!-- HTML body -->
-
+    </HEAD>
     <BODY>
-     <TABLE BORDER="0" CELLPADDING="0" CELLSPACING="0" WIDTH="100%">
-      <TR>
-       <TD ALIGN="LEFT">
-        <TABLE BORDER="0">
-         <TR>
-          <TD ALIGN="CENTER">
-           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixLogo.png" ALT="Terapix"/>
-          </TD>
-          <TD ALIGN="CENTER">
-           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixTitle.png" ALT="Logo"/>
-          </TD>
-          <TD ALIGN="CENTER" width="2000">
-           <FONT color="#669933">
-            <B> Processing summary</B>
-           </FONT>
-          </TD>
-          <TD ALIGN="CENTER">
-           <IMG SRC="http://terapix.iap.fr/cplt/xsl/terapixPicture.gif" ALT="Terapix banner"/>
-          </TD>
-         </TR>
-        </TABLE>
-       </TD>
-      </TR>
-      <TR>
-       <TD>
-        <TABLE BORDER="0" WIDTH="100%" BGCOLOR="#000000">
-         <TR>
-          <TH BGCOLOR="#000000" ALIGN="LEFT"><FONT SIZE="-1" COLOR="#FFFFFF"> Home > Tools > Data reduction</FONT></TH>
-         </TR>
-        </TABLE>
-       </TD>
-      </TR>
-     </TABLE>
-    <xsl:call-template name="VOTable"/>
+     <div id="header">
+      <a href="/"><img style="vertical-align: middle; border:0px" src="http://astromatic.iap.fr/xsl/astromatic.png" title="Astromatic home" alt="Astromatic.net" /></a>  Processing summary
+     </div>
+     <xsl:call-template name="VOTable"/>
    </BODY>
-  </html>
+  </HTML>
  </xsl:template>
 
 <!-- **************** Generic XSL template for VOTables ****************** -->
@@ -202,9 +224,6 @@
     An Error occured!!! </xsl:if>
    <xsl:value-of select="PARAM[@name='Error_Msg']/@value"/></b>
   </p>
-  <p>
-  <i>click to expand or hide tables</i>
-  </p>
  </xsl:template>
 
 <!-- ********************** XSL template for Fields ********************** -->
@@ -248,8 +267,8 @@
     </a>
    </xsl:if>
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: sans-serif; font-weight: bold;" onclick="showhideTable('scamp')">
-     Summary Table on Input Files
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('scamp')">
+     Summary Table on Input Files&nbsp;&darr;
     </BUTTON>
     <TABLE class="sortable" id="scamp" BORDER="2" style="display: none">
 <!--
@@ -263,45 +282,45 @@
  </TR>
 -->
      <TR>
-      <TH BGCOLOR="#FFEECC">Filename</TH>
-      <TH BGCOLOR="#FFEECC">Identifier</TH>
-      <TH BGCOLOR="#FFEECC">Next</TH>
-      <TH BGCOLOR="#FFEECC">Ndet</TH>
-      <TH BGCOLOR="#FFEECC">Flags</TH>
-      <TH BGCOLOR="#FFEECC">G</TH>
-      <TH BGCOLOR="#FFEECC">A</TH>
-      <TH BGCOLOR="#FFEECC">P</TH>
-      <TH BGCOLOR="#FFEECC">alpha</TH>
-      <TH BGCOLOR="#FFEECC">delta</TH>
-      <TH BGCOLOR="#FFEECC">Radius</TH>
-      <TH BGCOLOR="#FFEECC">Pixel scale</TH>
-      <TH BGCOLOR="#FFEECC">&Delta;Pixel Scale</TH>
-      <TH BGCOLOR="#FFEECC">&Delta;Position Angle</TH>
-      <TH BGCOLOR="#FFEECC">A/S contrast</TH>
-      <TH BGCOLOR="#FFEECC">&Delta;X</TH>
-      <TH BGCOLOR="#FFEECC">&Delta;Y</TH>
-      <TH BGCOLOR="#FFEECC">X/Y contrast</TH>
-      <TH BGCOLOR="#FFEECC">&chi;<sup>2</sup> <i>w.r.t.</i> Reference Astrometric Catalog</TH>
-      <TH BGCOLOR="#FFEECC">Shear</TH>
-      <TH BGCOLOR="#FFEECC">Shear Position Angle</TH>
-      <TH BGCOLOR="#FFEECC">MagZP.corr</TH>
+      <TH>Filename</TH>
+      <TH>Identifier</TH>
+      <TH>Next</TH>
+      <TH>Ndet</TH>
+      <TH>Flags</TH>
+      <TH>G</TH>
+      <TH>A</TH>
+      <TH>P</TH>
+      <TH>alpha</TH>
+      <TH>delta</TH>
+      <TH>Radius</TH>
+      <TH>Pixel scale</TH>
+      <TH>&Delta;Pixel Scale</TH>
+      <TH>&Delta;Position Angle</TH>
+      <TH>A/S contrast</TH>
+      <TH>&Delta;X</TH>
+      <TH>&Delta;Y</TH>
+      <TH>X/Y contrast</TH>
+      <TH>&chi;<sup>2</sup> <i>w.r.t.</i> Reference Astrometric Catalog</TH>
+      <TH>Shear</TH>
+      <TH>Shear Position Angle</TH>
+      <TH>MagZP.corr</TH>
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$name]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$ident]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$next]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$ndet]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <xsl:choose>
           <xsl:when test="TD[$headflag] = 'T'">
            <elen>H</elen>
@@ -319,17 +338,17 @@
           </xsl:otherwise>
          </xsl:choose>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$group]"/></el>
         </td>
-        <td align="left" BGCOLOR="#EEEEEE">
+        <td align="left">
          <el><xsl:value-of select="TD[$astrinstru]"/></el>
         </td>
-        <td align="left" BGCOLOR="#EEEEEE">
+        <td align="left">
          <el><xsl:value-of select="TD[$photinstru]"/></el>
         </td>
 <!-- Alpha -->
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el>
           <xsl:variable name="alpha" select="substring-before(string(TD[$coord]), ' ')"/>
           <xsl:value-of
@@ -339,7 +358,7 @@
          </el>
         </td>
 <!-- Delta -->
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <xsl:variable name="delta" select="substring-after(string(TD[$coord]), ' ')"/>
          <el>
           <xsl:choose>
@@ -359,25 +378,25 @@
          </el>
         </td>
 <!-- Radius -->
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$radius],'##0.000')"/>&amin;</el>
         </td>
 <!-- Pixel scale --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="pix1" select="number(substring-before(string(TD[$pixscale]), ' '))"/>
          <xsl:variable name="pix2" select="number(substring-after(string(TD[$pixscale]), ' '))"/>
          <el><xsl:value-of select="format-number(($pix1+$pix2) div 2.0, '##0.0000')"/>&asec;</el>
         </td>
 <!-- Delta Pixel scale --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$dpscale], '##0.0000')"/></el>
         </td>
 <!-- Delta Pos Angle --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$dposangle]"/>&deg;</el>
         </td>
 <!-- A/S contrast --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:choose>
           <xsl:when test="TD[$xycont] &lt; 2.0">
            <elep><xsl:value-of select="format-number(TD[$ascont], '##0.0')"/></elep>
@@ -388,15 +407,15 @@
          </xsl:choose>
         </td>
 <!-- Delta X -->
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$dx]"/>&deg;</el>
         </td>
 <!-- Delta Y -->
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$dy]"/>&deg;</el>
         </td>
 <!-- X/Y contrast --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:choose>
           <xsl:when test="TD[$xycont] &lt; 2.0">
            <elep><xsl:value-of select="format-number(TD[$xycont], '##0.0')"/></elep>
@@ -407,19 +426,19 @@
          </xsl:choose>
         </td>
 <!-- Chi2 --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$chi2ref], '######0.0')"/></el>
         </td>
 <!-- Shear --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$shear], '##0.00000')"/></el>
         </td>
 <!-- Shear Position Angle--> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$sposangle], '##0.0')"/>&deg;</el>
         </td>
 <!-- Zero-Point correction --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:choose>
           <xsl:when test="contains(TD[$zpcorr],'e')">
            <el><xsl:value-of select="format-number('0', '#0.000')"/></el>
@@ -503,96 +522,96 @@
    <xsl:variable name="mpplotflag" select="count(FIELD[@name='RefPropPlot'])"/>
    <xsl:variable name="mpplot" select="count(FIELD[@name='RefPropPlot']/preceding-sibling::FIELD)+1"/>
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: sans-serif; font-weight: bold;" onclick="showhideTable('fgroups')">
-     Groups Properties
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('fgroups')">
+     Groups Properties&nbsp;&darr;
     </BUTTON>
     <TABLE class="sortable" id="fgroups" BORDER="2" style="display: none">
      <TR>
-      <TH BGCOLOR="#FFEECC">Group Name</TH>
+      <TH>Group Name</TH>
       <xsl:if test="$fgplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Group Plot</TH>
+       <TH>Group Plot</TH>
       </xsl:if>      
-      <TH BGCOLOR="#FFEECC">Index</TH>
-      <TH BGCOLOR="#FFEECC">Nfields</TH>
-      <TH BGCOLOR="#FFEECC">Alpha</TH>
-      <TH BGCOLOR="#FFEECC">Delta</TH>
-      <TH BGCOLOR="#FFEECC">Pixel Scale</TH>
-      <TH BGCOLOR="#FFEECC">Maximum Radius</TH>
-      <TH BGCOLOR="#FFEECC">Reference Astrometric Catalog</TH>
-      <TH BGCOLOR="#FFEECC">Reference Astrometric Band</TH>
+      <TH>Index</TH>
+      <TH>Nfields</TH>
+      <TH>Alpha</TH>
+      <TH>Delta</TH>
+      <TH>Pixel Scale</TH>
+      <TH>Maximum Radius</TH>
+      <TH>Reference Astrometric Catalog</TH>
+      <TH>Reference Astrometric Band</TH>
       <xsl:if test="$chi2plotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">&chi;<sup>2</sup> Plot</TH>
+       <TH>&chi;<sup>2</sup> Plot</TH>
       </xsl:if>      
-      <TH BGCOLOR="#FFEECC">Internal Astrometric Sigma</TH>
-      <TH BGCOLOR="#FFEECC">Internal Astrometric Correlation</TH>
-      <TH BGCOLOR="#FFEECC">Internal &chi;<sup>2</sup></TH>
-      <TH BGCOLOR="#FFEECC">Detections for internal statistics</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Internal Astrometric Sigma</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Internal Astrometric Correlation</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Internal &chi;<sup>2</sup></TH>
-      <TH BGCOLOR="#FFEECC">High S/N Detections for Internal statistics</TH>
+      <TH>Internal Astrometric Sigma</TH>
+      <TH>Internal Astrometric Correlation</TH>
+      <TH>Internal &chi;<sup>2</sup></TH>
+      <TH>Detections for internal statistics</TH>
+      <TH>High S/N Internal Astrometric Sigma</TH>
+      <TH>High S/N Internal Astrometric Correlation</TH>
+      <TH>High S/N Internal &chi;<sup>2</sup></TH>
+      <TH>High S/N Detections for Internal statistics</TH>
       <xsl:if test="$ad1dplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">1-D Internal Error Plot</TH>
+       <TH>1-D Internal Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$ad2dplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">2-D Internal Error Plot</TH>
+       <TH>2-D Internal Error Plot</TH>
       </xsl:if>      
-      <TH BGCOLOR="#FFEECC">Offset from Reference Catalog</TH>
-      <TH BGCOLOR="#FFEECC">Sigma <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">Correlation <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">&chi;<sup>2</sup> <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">Detections for statistics <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Offset from Reference Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Sigma <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Correlation <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N &chi;<sup>2</sup> <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Detections for statistics <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>Offset from Reference Catalog</TH>
+      <TH>Sigma <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>Correlation <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>&chi;<sup>2</sup> <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>Detections for statistics <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>High S/N Offset from Reference Catalog</TH>
+      <TH>High S/N Sigma <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>High S/N Correlation <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>High S/N &chi;<sup>2</sup> <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>High S/N Detections for statistics <i>w.r.t.</i> Astrometric Ref Catalog</TH>
       <xsl:if test="$r1dplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">1-D External Error Plot</TH>
+       <TH>1-D External Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$r2dplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">2-D External Error Plot</TH>
+       <TH>2-D External Error Plot</TH>
       </xsl:if>      
-      <TH BGCOLOR="#FFEECC">Instrument Name</TH>
-      <TH BGCOLOR="#FFEECC">Internal Photometric Sigma</TH>
-      <TH BGCOLOR="#FFEECC">Internal &chi;<sup>2</sup></TH>
-      <TH BGCOLOR="#FFEECC">Detections for internal statistics</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Internal Photometric Sigma</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Internal &chi;<sup>2</sup></TH>
-      <TH BGCOLOR="#FFEECC">High S/N Detections for internal statistics</TH>
-      <TH BGCOLOR="#FFEECC">Sigma <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">&chi;<sup>2</sup> <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">Detections for statistics <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Sigma <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N &chi;<sup>2</sup> <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH BGCOLOR="#FFEECC">High S/N Detections for statistics <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>Instrument Name</TH>
+      <TH>Internal Photometric Sigma</TH>
+      <TH>Internal &chi;<sup>2</sup></TH>
+      <TH>Detections for internal statistics</TH>
+      <TH>High S/N Internal Photometric Sigma</TH>
+      <TH>High S/N Internal &chi;<sup>2</sup></TH>
+      <TH>High S/N Detections for internal statistics</TH>
+      <TH>Sigma <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>&chi;<sup>2</sup> <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>Detections for statistics <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>High S/N Sigma <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>High S/N &chi;<sup>2</sup> <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>High S/N Detections for statistics <i>w.r.t.</i> Photometric Ref Catalog</TH>
       <xsl:if test="$pherplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Internal Photometric Error Plot</TH>
+       <TH>Internal Photometric Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$phermagplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Internal Photometric Error vs. Magnitude Plot</TH>
+       <TH>Internal Photometric Error vs. Magnitude Plot</TH>
       </xsl:if>      
       <xsl:if test="$ZPplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Zero Point Differences Plot</TH>
+       <TH>Zero Point Differences Plot</TH>
       </xsl:if>      
       <xsl:if test="$ZP3plotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">3D-Zero Point Differences Plot</TH>
+       <TH>3D-Zero Point Differences Plot</TH>
       </xsl:if>      
       <xsl:if test="$csplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Color Shift Plot</TH>
+       <TH>Color Shift Plot</TH>
       </xsl:if>      
       <xsl:if test="$mpplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Proper Motion Plot</TH>
+       <TH>Proper Motion Plot</TH>
       </xsl:if>      
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$name]"/></el>
         </td>
         <xsl:if test="$fgplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$fgplot]"/>
@@ -608,14 +627,14 @@
           </a>
          </td>
         </xsl:if>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$index]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$nfields]"/></el>
         </td>
 <!-- Alpha -->
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el>
           <xsl:variable name="alpha" select="substring-before(string(TD[$field_coord]), ' ')"/>
           <xsl:value-of
@@ -625,7 +644,7 @@
          </el>
         </td>
 <!-- Delta -->
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <xsl:variable name="delta" select="substring-after(string(TD[$field_coord]), ' ')"/>
          <el>
           <xsl:choose>
@@ -645,12 +664,12 @@
          </el>
         </td>
 <!-- Pixel scale --> 
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="pix1" select="number(substring-before(string(TD[$pix_scale]), ' '))"/>
          <xsl:variable name="pix2" select="number(substring-after(string(TD[$pix_scale]), ' '))"/>
          <el><xsl:value-of select="format-number(($pix1+$pix2) div 2.0, '##0.0000')"/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el>
           <xsl:choose>
            <xsl:when test="TD[$maxr] &gt; 60.0">
@@ -664,14 +683,14 @@
           </xsl:choose>
         </el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$astrefcat]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$astrefband]"/></el>
         </td>
         <xsl:if test="$chi2plotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$chi2plot]"/>
@@ -687,38 +706,38 @@
           </a>
          </td>
         </xsl:if>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="sig1" select="number(substring-before(string(TD[$astsigint]), ' '))"/>
          <xsl:variable name="sig2" select="number(substring-after(string(TD[$astsigint]), ' '))"/>
          <el><xsl:value-of select='concat(format-number($sig1, "#0.0000"),"&asec; ",
                            format-number($sig2, "#0.0000"))'/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astcorrint], '#0.00000')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astchi2int], '####0.0')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$astndetint]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="sigH1" select="number(substring-before(string(TD[$astsigintH]), ' '))"/>
          <xsl:variable name="sigH2" select="number(substring-after(string(TD[$astsigintH]), ' '))"/>
          <el><xsl:value-of select='concat(format-number($sigH1, "#0.0000"),"&asec; ",
                            format-number($sigH2, "#0.0000"))'/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astcorrintH], '#0.00000')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astchi2intH], '####0.0')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$astndetintH]"/></el>
         </td>
         <xsl:if test="$ad1dplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$ad1dplot]"/>
@@ -735,7 +754,7 @@
          </td>
         </xsl:if>
         <xsl:if test="$ad2dplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$ad2dplot]"/>
@@ -751,50 +770,50 @@
           </a>
          </td>
         </xsl:if>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="off1" select="number(substring-before(string(TD[$astroffref]), ' '))"/>
          <xsl:variable name="off2" select="number(substring-after(string(TD[$astroffref]), ' '))"/>
          <el><xsl:value-of select='concat(format-number($off1, "#0.0000"),"&asec; ",
                            format-number($off2, "#0.0000"))'/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="rsig1" select="number(substring-before(string(TD[$astsigref]), ' '))"/>
          <xsl:variable name="rsig2" select="number(substring-after(string(TD[$astsigref]), ' '))"/>
          <el><xsl:value-of select='concat(format-number($rsig1, "#0.000"),"&asec; ",
                            format-number($rsig2, "#0.000"))'/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astcorrref], '#0.0000')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astchi2ref], '####0.0')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$astndetref]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="offH1" select="number(substring-before(string(TD[$astroffrefH]), ' '))"/>
          <xsl:variable name="offH2" select="number(substring-after(string(TD[$astroffrefH]), ' '))"/>
          <el><xsl:value-of select='concat(format-number($offH1, "#0.0000"),"&asec; ",
                            format-number($offH2, "#0.0000"))'/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <xsl:variable name="rsigH1" select="number(substring-before(string(TD[$astsigrefH]), ' '))"/>
          <xsl:variable name="rsigH2" select="number(substring-after(string(TD[$astsigrefH]), ' '))"/>
          <el><xsl:value-of select='concat(format-number($rsigH1, "#0.000"),"&asec; ",
                            format-number($rsigH2, "#0.000"))'/>&asec;</el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astcorrrefH], '#0.0000')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="format-number(TD[$astchi2refH], '####0.0')"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$astndetrefH]"/></el>
         </td>
         <xsl:if test="$r1dplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$r1dplot]"/>
@@ -811,7 +830,7 @@
          </td>
         </xsl:if>
         <xsl:if test="$r2dplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$r2dplot]"/>
@@ -827,47 +846,47 @@
           </a>
          </td>
         </xsl:if>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <xsl:value-of select="TD[$photname]"/>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$psigint]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$pchi2int]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$pndetint]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$psigintH]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$pchi2intH]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$pndetintH]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$psigref]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$pchi2ref]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$pndetref]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$psigrefH]"/></el>
         </td>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$pchi2refH]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$pndetrefH]"/></el>
         </td>
         <xsl:if test="$pherplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$pherplot]"/>
@@ -884,7 +903,7 @@
          </td>
         </xsl:if>      
         <xsl:if test="$phermagplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$phermagplot]"/>
@@ -901,7 +920,7 @@
          </td>
         </xsl:if>      
         <xsl:if test="$ZPplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$ZPplot]"/>
@@ -918,7 +937,7 @@
          </td>
         </xsl:if>      
         <xsl:if test="$ZP3plotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$ZP3plot]"/>
@@ -935,7 +954,7 @@
          </td>
         </xsl:if>      
         <xsl:if test="$csplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$csplot]"/>
@@ -952,7 +971,7 @@
          </td>
         </xsl:if>      
         <xsl:if test="$mpplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$mpplot]"/>
@@ -993,52 +1012,52 @@
    <xsl:variable name="shplotflag" select="count(FIELD[@name='ShearPlot'])"/>
    <xsl:variable name="shplot" select="count(FIELD[@name='ShearPlot']/preceding-sibling::FIELD)+1"/>
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: sans-serif; font-weight: bold;" onclick="showhideTable('astro')">
-     Astrometric Instruments
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('astro')">
+     Astrometric Instruments&nbsp;&darr;
     </BUTTON>
     <TABLE class="sortable" id="astro" BORDER="2" style="display: none">
      <TR>
-      <TH BGCOLOR="#FFEECC">Name</TH>
-      <TH BGCOLOR="#FFEECC">Index</TH>
-      <TH BGCOLOR="#FFEECC">Nfields</TH>
-      <TH BGCOLOR="#FFEECC">Number of Keywords</TH>
-      <TH BGCOLOR="#FFEECC">Keywords</TH>
+      <TH>Name</TH>
+      <TH>Index</TH>
+      <TH>Nfields</TH>
+      <TH>Number of Keywords</TH>
+      <TH>Keywords</TH>
       <xsl:if test="$distplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Distortion Plot</TH>
+       <TH>Distortion Plot</TH>
       </xsl:if>      
       <xsl:if test="$refsysplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Systematics <i>w.r.t.</i> Reference Catalog Plot</TH>
+       <TH>Systematics <i>w.r.t.</i> Reference Catalog Plot</TH>
       </xsl:if>      
       <xsl:if test="$pixplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Pixel Error Plot</TH>
+       <TH>Pixel Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$spixplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Sub Pixel Error Plot</TH>
+       <TH>Sub Pixel Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$shplotflag &gt; 0">
-       <TH BGCOLOR="#FFEECC">Shear Plot</TH>
+       <TH>Shear Plot</TH>
       </xsl:if>      
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$name]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$index]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$nfields]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$nkeys]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$keys]"/></el>
         </td>
         <xsl:if test="$distplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$distplot]"/>
@@ -1055,7 +1074,7 @@
          </td>
         </xsl:if>
         <xsl:if test="$refsysplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$refsysplot]"/>
@@ -1072,7 +1091,7 @@
          </td>
         </xsl:if>
         <xsl:if test="$pixplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$pixplot]"/>
@@ -1089,7 +1108,7 @@
          </td>
         </xsl:if>
         <xsl:if test="$spixplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$spixplot]"/>
@@ -1106,7 +1125,7 @@
          </td>
         </xsl:if>
         <xsl:if test="$shplotflag &gt; 0">
-         <td align="center" BGCOLOR="#EEEEEE">
+         <td align="center">
           <a target="_blank">
            <xsl:attribute name="href">
             <xsl:value-of select="TD[$shplot]"/>
@@ -1138,37 +1157,37 @@
    <xsl:variable name="nkeys" select="count(FIELD[@name='NKeys']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="keys" select="count(FIELD[@name='Keys']/preceding-sibling::FIELD)+1"/>
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: sans-serif; font-weight: bold;" onclick="showhideTable('phot')">
-     Photometric Instruments
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('phot')">
+     Photometric Instruments&nbsp;&darr;
     </BUTTON>
     <TABLE class="sortable" id="phot" BORDER="2" style="display: none">
      <TR>
-      <TH BGCOLOR="#FFEECC">Name</TH>
-      <TH BGCOLOR="#FFEECC">Index</TH>
-      <TH BGCOLOR="#FFEECC">Nfields</TH>
-      <TH BGCOLOR="#FFEECC">Output ZP</TH>
-      <TH BGCOLOR="#FFEECC">Number of Keywords</TH>
-      <TH BGCOLOR="#FFEECC">Keywords</TH>
+      <TH>Name</TH>
+      <TH>Index</TH>
+      <TH>Nfields</TH>
+      <TH>Output ZP</TH>
+      <TH>Number of Keywords</TH>
+      <TH>Keywords</TH>
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$name]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$index]"/></el>
         </td>
-        <td align="right" BGCOLOR="#EEEEEE">
+        <td align="right">
          <el><xsl:value-of select="TD[$nfields]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$magzerop]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$nkeys]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$keys]"/></el>
         </td>
        </tr>
@@ -1181,16 +1200,18 @@
 <!-- ********************** XSL template for Config File ********************** -->
   <xsl:template name="Config">
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: sans-serif; font-weight: bold;" onclick="showhideTable('config')">
-     Configuration File: <xsl:value-of select="PARAM[@name='Prefs_Name']/@value"/>
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('config')">
+     Configuration File:
+     <B><xsl:value-of select="PARAM[@name='Prefs_Name']/@value"/></B>
+     &darr;
     </BUTTON>
     <TABLE id="config" class="sortable" style="display: none">
      <TR>
-      <TH BGCOLOR="#FFEECC">Config Parameter</TH>
-      <TH BGCOLOR="#FFEECC">Value</TH>
+      <TH>Config Parameter</TH>
+      <TH>Value</TH>
      </TR>
      <xsl:for-each select="PARAM[position()>2]">
-      <tr BGCOLOR="#EEEEEE">
+      <tr>
        <td><el><xsl:value-of select="@name"/></el></td>
        <td><el><xsl:value-of select="@value"/></el></td>
       </tr>
@@ -1198,12 +1219,12 @@
     </TABLE>
    </p>
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: monospace; font-weight: bold: font-size: 80%;" onclick="showhideTable('commandline')">
-     Command Line
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('commandline')">
+     Command Line&nbsp;&darr;
     </BUTTON>
     <TABLE id="commandline" style="display: none">
      <TR>
-      <TD BGCOLOR="#FFEECC" style="font-size: 80%;"><el>Command Line: <xsl:value-of select="PARAM[@name='Command_Line']/@value"/></el></TD>
+      <TD style="font-size: 80%;"><el><xsl:value-of select="PARAM[@name='Command_Line']/@value"/></el></TD>
      </TR>
     </TABLE>
    </p>
@@ -1215,25 +1236,25 @@
    <xsl:variable name="time" select="count(FIELD[@name='Time']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="msg" select="count(FIELD[@name='Msg']/preceding-sibling::FIELD)+1"/>
    <p>
-    <BUTTON type="button" style="background:#CCEECC; font-family: monospace; font-weight: bold: font-size: 80%;" onclick="showhideTable('warnings')">
-     Warnings (limited to the last 1000)
+    <BUTTON type="button" title="click to expand" onclick="showhideTable('warnings')">
+     Warnings (limited to the last 1000)&nbsp;&darr;
     </BUTTON>
-    <TABLE id="warnings" style="display: none">
+    <TABLE id="warnings" class="sortable" style="display: none">
      <TR style="font-size: 80%;">
-      <TH BGCOLOR="#FFEECC">Date</TH>
-      <TH BGCOLOR="#FFEECC">Time</TH>
-      <TH BGCOLOR="#FFEECC">Message</TH>
+      <TH>Date</TH>
+      <TH>Time</TH>
+      <TH>Message</TH>
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
-        <td  BGCOLOR="#EEEEEE">
+        <td >
          <el><xsl:value-of select="TD[$date]"/></el>
         </td>
-        <td BGCOLOR="#EEEEEE">
+        <td>
          <el><xsl:value-of select="TD[$time]"/></el>
         </td>
-        <td align="center" BGCOLOR="#EEEEEE">
+        <td align="center">
          <el><xsl:value-of select="TD[$msg]"/></el>
         </td>
        </tr>
