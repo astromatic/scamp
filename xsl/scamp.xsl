@@ -6,11 +6,11 @@
 	<!ENTITY asec "&#168;">
         <!ENTITY Delta "&#916;">
         <!ENTITY chi "&#967;">
-         <!ENTITY darr "&#8595;">
+        <!ENTITY darr "&#8595;">
 	]>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <!-- ****************** Global XSL template for SExtractor ****************
-     (C) E.Bertin and C.Marmo 2005-2009
+     (C) E.Bertin and C.Marmo IAP/CNRS/UPMC 2005-2009
      ********************************************************************** -->
 
  <xsl:template match="/">
@@ -18,7 +18,7 @@
   <xsl:variable name="time" select="/VOTABLE/RESOURCE/RESOURCE[@name='MetaData']/PARAM[@name='Time']/@value"/>
   <HTML>
    <HEAD>
-<!--  <script type="text/javascript" language="javascript"> -->
+    <link rel="shortcut icon" type="image/x-icon" href="http://astromatic.iap.fr/xsl/favicon.ico" />
     <script src="http://astromatic.iap.fr/xsl/sorttable.js"/>
 
     <style type="text/css">
@@ -270,10 +270,10 @@
     <BUTTON type="button" title="click to expand" onclick="showhideTable('scamp')">
      Summary Table on Input Files&nbsp;&darr;
     </BUTTON>
-    <TABLE class="sortable" id="scamp" BORDER="2" style="display: none">
+    <TABLE class="sortable" id="scamp" style="display: none">
 <!--
  <TR>
-  <TH COLSPAN="3" BGCOLOR="#DDCC99" ALIGN="LEFT">
+  <TH COLSPAN="3" ALIGN="LEFT">
   <FONT SIZE="-1">
    <xsl:value-of select="ASTROM/nfield"/>
     input<xsl:if test="ASTROM/nfield &gt; 1">s</xsl:if>
@@ -525,7 +525,7 @@
     <BUTTON type="button" title="click to expand" onclick="showhideTable('fgroups')">
      Groups Properties&nbsp;&darr;
     </BUTTON>
-    <TABLE class="sortable" id="fgroups" BORDER="2" style="display: none">
+    <TABLE class="sortable" id="fgroups" style="display: none">
      <TR>
       <TH>Group Name</TH>
       <xsl:if test="$fgplotflag &gt; 0">
@@ -1015,7 +1015,7 @@
     <BUTTON type="button" title="click to expand" onclick="showhideTable('astro')">
      Astrometric Instruments&nbsp;&darr;
     </BUTTON>
-    <TABLE class="sortable" id="astro" BORDER="2" style="display: none">
+    <TABLE class="sortable" id="astro" style="display: none">
      <TR>
       <TH>Name</TH>
       <TH>Index</TH>
@@ -1160,7 +1160,7 @@
     <BUTTON type="button" title="click to expand" onclick="showhideTable('phot')">
      Photometric Instruments&nbsp;&darr;
     </BUTTON>
-    <TABLE class="sortable" id="phot" BORDER="2" style="display: none">
+    <TABLE class="sortable" id="phot" style="display: none">
      <TR>
       <TH>Name</TH>
       <TH>Index</TH>
