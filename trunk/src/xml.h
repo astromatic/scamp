@@ -9,7 +9,7 @@
 *
 *	Contents:	XML logging.
 *
-*	Last modify:	02/10/2007
+*	Last modify:	01/04/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -27,17 +27,10 @@
 #endif
 
 /*----------------------------- Internal constants --------------------------*/
-/*
-#define	XSL_URL	"file:///home/bertin/sources/scamp/xsl/scamp.xsl"
-*/
 #ifndef XSL_URL
 #define	XSL_URL	"."
 #endif
-/* Alternate XSLT file at TERAPIX: */
-/* will not work with recent browsers because of security limitations */
-/*
-#define	XSL_URL_ALT	"http://terapix.iap.fr/cplt/xsl/scamp.xsl"
-*/
+
 /*--------------------------------- typedefs --------------------------------*/
 /*------------------------------- functions ---------------------------------*/
 
@@ -50,3 +43,4 @@ extern void	end_xml(void),
 		init_xml(fieldstruct **fields, int nfield,
 				fgroupstruct **fgroups, int ngroup),
 		write_xmlerror(char *filename, char *msgerror);
+
