@@ -19,7 +19,7 @@
   <HTML>
    <HEAD>
     <link rel="shortcut icon" type="image/x-icon" href="http://astromatic.iap.fr/xsl/favicon.ico" />
-    <script src="http://astromatic.iap.fr/xsl/sorttable.js"/>
+    <script type="text/javascript" src="http://astromatic.iap.fr/xsl/sorttable.js"/>
 
     <style type="text/css">
      p {
