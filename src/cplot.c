@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	27/02/2009
+*	Last modify:	10/04/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -18,6 +18,7 @@
 #include	"config.h"
 #endif
 
+#include	<dlfcn.h>
 #include	<math.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -56,11 +57,14 @@ struct {cplotdevenum device; char *devname; char *extension;}
 		{CPLOT_SVG, "svg", ".svg"},
 		{CPLOT_NULL,"",""}};
 
-int	plotnum[CPLOT_NTYPES];
-int	plotdev[CPLOT_NTYPES];
-char	plotfilename[MAXCHAR];
-int	plotaaflag;
- 
+int		plotnum[CPLOT_NTYPES];
+int		plotdev[CPLOT_NTYPES];
+char		plotfilename[MAXCHAR];
+int		plotaaflag;
+void	(*myplimage)(PLFLT **idata, PLINT nx, PLINT ny,
+        PLFLT xmin, PLFLT xmax, PLFLT ymin, PLFLT ymax, PLFLT zmin, PLFLT zmax,
+        PLFLT Dxmin, PLFLT Dxmax, PLFLT Dymin, PLFLT Dymax);
+
 /****** cplot_check ***********************************************************
 PROTO	int cplot_check(cplotenum cplottype)
 PURPOSE	Check that the specified check-plot type has been requested by user,
@@ -95,10 +99,11 @@ INPUT	Number of plots along the x axis,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/02/2009
+VERSION	10/04/2009
  ***/
 int	cplot_init(int nx, int ny, cplotenum cplottype)
   {
+   void		*dl, *fptr;
    char		str[MAXCHAR],
 		*pstr;
    int		j, num, cval, dev, argc;
@@ -178,6 +183,12 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
   plscol0(7, 128,128,128);	/* Force the midground colour to grey */
   plscol0(8, 64,0,0);		/* Force the brown colour to darken */
   plinit();
+  dl = dlopen("libplplotd.so", RTLD_LAZY);
+  if ((fptr = dlsym(dl, "plimage")))
+    myplimage = fptr;
+  else
+    myplimage =  dlsym(dl, "c_plimage");
+  dlclose(dl);
 
   return RETURN_OK;
   }

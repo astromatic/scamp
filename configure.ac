@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.5.4, [bertin@iap.fr])
+AC_INIT(scamp, 1.5.5, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -67,7 +67,7 @@ AC_CHECK_LIB(m, sin)
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([stdlib.h string.h unistd.h sys/mman.h])
+AC_CHECK_HEADERS([stdlib.h string.h unistd.h sys/mman.h dlfcn.h])
 echo 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -83,7 +83,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_STAT
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS([atexit getenv memcpy memmove memset mkdir munmap strstr \
-sysconf setlinebuf])
+sysconf setlinebuf dlopen dlsym dlclose])
 AC_CHECK_FUNC([isnan], AC_DEFINE_UNQUOTED([HAVE_ISNAN2], 1,
 		[Second isnan check]))
 
