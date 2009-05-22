@@ -9,7 +9,7 @@
 *
 *	Contents:	functions for handling FITS keywords.
 *
-*	Last modify:	12/06/2007
+*	Last modify:	22/05/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -181,7 +181,7 @@ OUTPUT	RETURN_OK if something was found, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP),
         E.R. Deul - Handling of NaN
-VERSION	04/06/2007
+VERSION	18/05/2009
  ***/
 int	fitspick(char *fitsline, char *keyword, void *ptr, h_type *htype,
 		t_type *ttype, char *comment)
@@ -252,19 +252,19 @@ int	fitspick(char *fitsline, char *keyword, void *ptr, h_type *htype,
     {
     for (i=j; i<80 && fitsline[i]!=(char)'/' && fitsline[i]!=(char)'.'; i++);
 /*-- Handle floats*/
-    if (fitsline[i]==(char)'.') 
-      {
-      fixexponent(fitsline);
-      *((double *)ptr) = atof(fitsline+j);
-      *htype = H_EXPO;
-      *ttype = T_DOUBLE;
-      }
-    else
+    if (i==80 || fitsline[i]!=(char)'.') 
 /*---- Handle ints*/
       {
       *((int *)ptr) = atoi(fitsline+j);
       *htype = H_INT;
       *ttype = T_LONG;
+      }
+    else
+      {
+      fixexponent(fitsline);
+      *((double *)ptr) = atof(fitsline+j);
+      *htype = H_EXPO;
+      *ttype = T_DOUBLE;
       }
     }
 
@@ -569,22 +569,26 @@ int	fitswrite(char *fitsbuf, char *keyword, void *ptr, h_type htype,
 
 /****** fixexponent ***********************************************************
 PROTO	void fixexponent(char *s)
-PURPOSE	Replaces the FORTRAN 'D' exponent sign to 'E' in a FITS line.
+PURPOSE	Replaces the FORTRAN 'D' exponent sign to 'E' in a FITS line, and filter
+	out non-numerical characters
 INPUT	FITS line
 OUTPUT	-.
 NOTES	-.
-AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	25/04/97
+AUTHOR	E. Bertin (IAP)
+VERSION	22/05/2009
  ***/
 void	fixexponent(char *s)
 
   {
-   int	i;
+   int	c,i;
 
   s += 9;
-  for (i=71; ((int)*s) && (int)*s != '/' && i--; s++)
-    if ((int)*s == 'D' || (int)*s == 'd')
+  for (i=71; (c=(int)*s) && c != '/' && i--; s++)
+    if (c == 'D' || c == 'd')
       *s = (char)'E';
+    else if ((c<'0' || c>'9') && c != '+' && c != '-'
+		&& c != 'e' && c != 'E' && c != '.')
+      *s = ' ';
 
   return;
   }
