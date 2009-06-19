@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	10/04/2009
+*	Last modify:	19/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -61,6 +61,9 @@ int		plotnum[CPLOT_NTYPES];
 int		plotdev[CPLOT_NTYPES];
 char		plotfilename[MAXCHAR];
 int		plotaaflag;
+
+void	(*myplparseopts)(int *p_argc, const char **argv, PLINT mode);
+
 void	(*myplimage)(PLFLT **idata, PLINT nx, PLINT ny,
         PLFLT xmin, PLFLT xmax, PLFLT ymin, PLFLT ymax, PLFLT zmin, PLFLT zmax,
         PLFLT Dxmin, PLFLT Dxmax, PLFLT Dymin, PLFLT Dymax);
@@ -99,11 +102,10 @@ INPUT	Number of plots along the x axis,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	19/06/2009
  ***/
 int	cplot_init(int nx, int ny, cplotenum cplottype)
   {
-   void		*dl, *fptr;
    char		str[MAXCHAR],
 		*pstr;
    int		j, num, cval, dev, argc;
@@ -173,7 +175,7 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
     {
 /*-- Small hack to reset driver options */
     argc = 0;
-    plparseopts(&argc, NULL, PL_PARSE_NOPROGRAM);
+    myplparseopts(&argc, NULL, PL_PARSE_NOPROGRAM);
     }
 
   plfontld(1);
@@ -183,16 +185,42 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
   plscol0(7, 128,128,128);	/* Force the midground colour to grey */
   plscol0(8, 64,0,0);		/* Force the brown colour to darken */
   plinit();
-  dl = dlopen("libplplotd.so", RTLD_LAZY);
-  if ((fptr = dlsym(dl, "plimage")))
-    myplimage = fptr;
-  else
-    myplimage =  dlsym(dl, "c_plimage");
-  dlclose(dl);
 
   return RETURN_OK;
   }
 
+
+/****** cplot_fixplplot *******************************************************
+PROTO	void cplot_fixplplot(void)
+PURPOSE	Fix compatibility issues with different versions of the PLplot library.
+INPUT	-.
+OUTPUT	-.
+NOTES	.
+AUTHOR	E. Bertin (IAP)
+VERSION	19/06/2009
+ ***/
+void	cplot_fixplplot(void)
+  {
+   void		*dl, *fptr;
+
+  dl = dlopen("libplplotd.so", RTLD_LAZY);
+
+/* plParseOpts / plparseopts */
+  if ((fptr = dlsym(dl, "plparseopts")))
+    myplparseopts = fptr;
+  else
+    myplparseopts =  dlsym(dl, "plParseOpts");
+
+/* plimage / c_plimage */
+  if ((fptr = dlsym(dl, "plimage")))
+    myplimage = fptr;
+  else
+    myplimage =  dlsym(dl, "c_plimage");
+
+  dlclose(dl);
+
+  return;
+  }
 
 /****** cplot_end ************************************************************
 PROTO	int cplot_end(void)
