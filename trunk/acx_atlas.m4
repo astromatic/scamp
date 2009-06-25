@@ -200,9 +200,12 @@ dnl Check whether the multithreaded version of ATLAS is there too:
 	[Define if you have the parallel ATLAS libraries.])
       $4
     else
+      ATLAS_LIB="$ATLAS_LIBPATH -llapack -lcblas -latlas"
+      LIBS="$OLIBS"
+      AC_SUBST(ATLAS_LIB)
       ATLAS_ERROR="CBLAS/LAPack was compiled without multithreading support!"
       AC_SUBST(ATLAS_ERROR)
-      $5         
+      $4         
     fi
   else
     ATLAS_LIB="$ATLAS_LIBPATH -llapack -lcblas -latlas"

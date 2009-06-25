@@ -27033,9 +27033,12 @@ _ACEOF
 
       use_atlas=yes
     else
+      ATLAS_LIB="$ATLAS_LIBPATH -llapack -lcblas -latlas"
+      LIBS="$OLIBS"
+
       ATLAS_ERROR="CBLAS/LAPack was compiled without multithreading support!"
 
-      use_atlas=no
+      use_atlas=yes
     fi
   else
     ATLAS_LIB="$ATLAS_LIBPATH -llapack -lcblas -latlas"
@@ -27051,6 +27054,10 @@ fi
 
 if test "$use_atlas" = "yes"; then
   LIBS="$ATLAS_LIB $LIBS"
+  if test "$ATLAS_ERROR" != ""; then
+    { echo "$as_me:$LINENO: WARNING: $ATLAS_ERROR" >&5
+echo "$as_me: WARNING: $ATLAS_ERROR" >&2;}
+  fi
 else
   { { echo "$as_me:$LINENO: error: $ATLAS_ERROR Exiting." >&5
 echo "$as_me: error: $ATLAS_ERROR Exiting." >&2;}
