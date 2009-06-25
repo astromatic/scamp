@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for catout.c
 *
-*	Last modify:	06/10/2006
+*	Last modify:	25/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -30,7 +30,9 @@ typedef enum {CAT_NONE, CAT_ASCII_HEAD, CAT_ASCII, CAT_ASCII_SKYCAT,
 typedef struct mergedsample
   {
   double	wcspos[NAXIS];		/* Mean World Coordinate positions */
+  int		npos;			/* Number of available positions */
   float		wcsposerr[NAXIS];	/* Errors on mean WCS positions */
+  float		wcspostheta;		/* WCS error position angle */
   float		wcsposdisp[NAXIS];	/* Dispersion on mean WCS positions */
   float		wcsprop[NAXIS];		/* Proper motion vectors in WCS */
   float		wcsproperr[NAXIS];	/* Proper motion vector errors in WCS */

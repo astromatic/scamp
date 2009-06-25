@@ -9,7 +9,7 @@
 *
 *	Contents:	Produce and write merged catalogs.
 *
-*	Last modify:	28/09/2006
+*	Last modify:	25/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -37,6 +37,9 @@
 
 mergedsamplestruct    refmergedsample;
 keystruct       refmergedkey[] = {
+  {"NPOS", "Number of overlapping positions",
+        &refmergedsample.npos, H_INT, T_LONG,
+	"%4d", "", "meta.number", ""},
   {"X_WORLD", "Barycenter position along world x axis",
         &refmergedsample.wcspos[0], H_FLOAT, T_DOUBLE,
 	"%15e", "deg", "pos.eq.ra;stat.mean", "deg"},
@@ -49,10 +52,13 @@ keystruct       refmergedkey[] = {
   {"ERRB_WORLD", "RMS position error along minor world axis",
         &refmergedsample.wcsposerr[1], H_FLOAT, T_FLOAT,
 	"%12e", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
-  {"DISPA_WORLD", "RMS dispersion of pos along major world axis",
+  {"ERRTHETA_WORLD", "Error ellipse pos. angle (CCW/world-x)",
+        &refmergedsample.wcspostheta, H_FLOAT, T_FLOAT,
+	"%12e", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
+  {"DISPX_WORLD", "RMS dispersion of pos along x world axis",
         &refmergedsample.wcsposdisp[0], H_FLOAT, T_FLOAT,
 	"%12e", "deg", "stat.stdev;stat.max;pos.errorEllipse;meta.main", "deg"},
-  {"DISPB_WORLD", "RMS dispersion of pos along minor world axis",
+  {"DISPY_WORLD", "RMS dispersion of pos along y world axis",
         &refmergedsample.wcsposdisp[1], H_FLOAT, T_FLOAT,
 	"%12e", "deg", "stat.stdev;stat.min;pos.errorEllipse;meta.main", "deg"},
   {"PMX_WORLD", "Proper motion along world x axis",
@@ -69,20 +75,20 @@ keystruct       refmergedkey[] = {
 	"%12e", "deg", "stat.error;pos.pm;pos.eq.de;stat.fit", "mas/yr"},
   {"EPOCH", "Mean epoch",
         &refmergedsample.epoch, H_FLOAT, T_FLOAT,
-	"%12e", "time.epoch;stat.mean", ""},
-  {"NMAG", "Generic magnitude vector",
+	"%15.10f", "time.epoch;stat.mean", ""},
+  {"NMAG", "Number of overlaps for each band",
         &refmergedsample.nmag, H_INT, T_LONG,
 	"%4d", "", "meta.number", "",
 	1, &refmergedsample.nband},
-  {"MAG_VEC", "Generic magnitude vector",
+  {"MAG", "Magnitude for each band",
         &refmergedsample.mag, H_FLOAT, T_FLOAT,
 	"%8.4f", "mag", "phot.mag", "mag",
 	1, &refmergedsample.nband},
-  {"MAGERR_VEC", "Generic magnitude RMS error estimate vector",
+  {"MAGERR", "RMS mag error estimate for each band",
         &refmergedsample.magerr, H_FLOAT, T_FLOAT,
 	"%8.4f", "mag", "stat.error;phot.mag", "mag",
 	1, &refmergedsample.nband},
-  {"MAG_DISP", "Generic magnitude RMS dispersion",
+  {"MAG_DISP", "RMS mag dispersion for each band",
         &refmergedsample.magdisp, H_FLOAT, T_FLOAT,
 	"%8.4f", "mag", "stat.stdev;phot.mag", "mag",
 	1, &refmergedsample.nband},
@@ -102,7 +108,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 05/10/2008
+VERSION 25/06/2009
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -125,8 +131,10 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
    FILE			*ascfile;
    double		mag[MAXPHOTINSTRU], magerr[MAXPHOTINSTRU],
 			magdisp[MAXPHOTINSTRU], magchi2[MAXPHOTINSTRU],
-			wcspos[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
-			epoch, err2;
+			magref[MAXPHOTINSTRU],
+			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
+			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
+			epoch, err2, dummy;
    char			*buf;
    int			nmag[MAXPHOTINSTRU],
 			d,f,i,k,n,p,s,nm, npinstru, naxis;
@@ -211,28 +219,34 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
         for (n=set->nsample; n--; samp++)
           if (!samp->nextsamp && samp->prevsamp)
             {
+            memset(&msample, 0, sizeof(msample));
             for (p=0; p<npinstru; p++)
               {
-              mag[p] = magerr[p] = magdisp[p] = magchi2[p] = 0.0;
+              mag[p] = magerr[p] = magdisp[p] = magchi2[p] = magref[p] = 0.0;
               nmag[p] = 0;
               }
             for (samp2 = samp;
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
-              {
-              magerr[p] += 1.0/(err2 = samp2->magerr*samp2->magerr);
-              mag[p] += samp2->mag / err2;
-              magdisp[p] += (samp2->mag*samp2->mag);
-              nmag[p]++;
-              }
+              if (samp2->flux > 0.0 && (err2 = samp2->magerr*samp2->magerr)>0.0)
+                {
+                magerr[p] += 1.0 / err2;
+                mag[p] += samp2->mag / err2;
+                if (!nmag[p])
+                  magref[p] = samp2->mag;
+                magdisp[p] += (samp2->mag-magref[p]) * (samp2->mag - magref[p]);
+                nmag[p]++;
+                }
             for (p=0; p<npinstru; p++)
               {
               if ((nm=nmag[p]))
                 {
                 msample.mag[p] = mag[p] / magerr[p];
-                msample.magerr[p] = sqrt(nm / magerr[p]);
-                msample.magdisp[p] = sqrt(fabs(magdisp[p] / nm
-					- msample.mag[p]*msample.mag[p]));
+                msample.magerr[p] = sqrt(1.0 / magerr[p]);
+                msample.magdisp[p] = nm > 1?
+		sqrt(fabs(magdisp[p] / nm
+		 - (msample.mag[p] - magref[p])*(msample.mag[p] - magref[p])))
+		: 0.0;
                 }
               else
                 msample.mag[p] = msample.magerr[p] = msample.magdisp[p] = 99.0;
@@ -240,7 +254,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               }
             nm = 0;
             for (d=0; d<naxis; d++)
-                wcspos[d] = wcsprop[d] = wcsproperr[d] =  0.0;
+              wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
+		= wcsprop[d] = wcsproperr[d] = 0.0;
             epoch = 0.0;
             for (samp2 = samp;
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
@@ -248,23 +263,49 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               {
               for (d=0; d<naxis; d++)
                 {
+                err2 = samp2->wcsposerr[d]*samp2->wcsposerr[d];
                 wcspos[d] += samp2->wcspos[d];
+                if (err2 <= 0.0)
+                  err2 += 1*MAS / DEG;
+                wcsposerr[d] += 1.0 / err2;
+                wcspos[d] += samp2->wcspos[d] / err2;
 //			- colshiftscale[d][p+npinstru*refplabel];
+		if (!nm)
+                  wcsposref[d] = samp2->wcspos[d];
+                wcsposdisp[d] += (samp2->wcspos[d] - wcsposref[d])
+				* (samp2->wcspos[d] - wcsposref[d]);
                 wcsprop[d] += samp2->wcsprop[d];
                 wcsproperr[d] += samp2->wcsproperr[d]*samp2->wcsproperr[d];
                 }
               epoch += samp2->set->field->epoch;
+              msample.flags |= samp2->flags;
               nm++;
               }
             if (nm)
               {
               for (d=0; d<naxis; d++)
                 {
-                msample.wcspos[d] = wcspos[d] / nm;
+                msample.wcspos[d] = wcspos[d] / wcsposerr[d];
+                msample.wcsposerr[d] = sqrt(1.0/wcsposerr[d]);
+                msample.wcsposdisp[d] = nm > 1?
+		 sqrt(fabs(wcsposdisp[d] / nm
+		 - (msample.wcspos[d] - wcsposref[d])
+			*(msample.wcspos[d] - wcsposref[d])))
+		: 0.0;
                 msample.wcsprop[d] = (wcsprop[d]/nm) * DEG/MAS;
                 msample.wcsproperr[d] = sqrt(wcsproperr[d]/nm) * DEG/MAS;
                 }
+              if (msample.wcsposerr[0] < msample.wcsposerr[1])
+                {
+                dummy = msample.wcsposerr[0];
+                msample.wcsposerr[0] = msample.wcsposerr[1];
+                msample.wcsposerr[1] = dummy;
+                msample.wcspostheta = 90.0;
+                }
+              else
+                msample.wcspostheta = 0.0;
               msample.epoch = epoch / nm;
+              msample.npos = nm;
               }
             write_obj(objtab, buf);
             }
