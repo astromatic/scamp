@@ -234,6 +234,9 @@ ACX_ATLAS($atlas_libdir,$atlas_incdir,$use_pthreads,
 	[use_atlas=yes],[use_atlas=no])
 if test "$use_atlas" = "yes"; then
   LIBS="$ATLAS_LIB $LIBS"
+  if test "$ATLAS_ERROR" != ""; then
+    AC_MSG_WARN([$ATLAS_ERROR])
+  fi
 else
   AC_MSG_ERROR([$ATLAS_ERROR Exiting.])
 fi
