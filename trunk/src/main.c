@@ -9,7 +9,7 @@
 *
 *	Contents:	Parsing of the command line.
 *
-*	Last modify:	19/06/2009
+*	Last modify:	26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -48,6 +48,7 @@ int	main(int argc, char *argv[])
 
   {
    FILE         *fp;
+   double	tdiff, fields, dets;
    char		liststr[MAXCHAR],
                 **argkey, **argval,
                 *str,*listname,*listbuf;
@@ -190,7 +191,13 @@ int	main(int argc, char *argv[])
   endprefs();
 
   NFPRINTF(OUTPUT, "");
-  NPRINTF(OUTPUT, "> All done (in %.0f s)\n", prefs.time_diff);
+  tdiff = prefs.time_diff>0.0? prefs.time_diff : 1.0;
+  fields =  (double)prefs.nfile/tdiff;
+  dets = (double)prefs.ndets/tdiff;
+  NPRINTF(OUTPUT,
+	"> All done (in %.0f s: %.*f field%s/s , %.0f detection%s/s)\n",
+	prefs.time_diff, fields>0.1? 1: 2, fields, fields>1.0? "s":"",
+	dets, dets>1.0? "s":"");
 
   exit(EXIT_SUCCESS);
   }

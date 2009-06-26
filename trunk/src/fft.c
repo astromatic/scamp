@@ -298,7 +298,7 @@ INPUT	-.
 OUTPUT	-.
 NOTES	Global preferences are used for multhreading.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/09/2004
+VERSION	26/06/2009
  ***/
 void	fft_init(void)
  {
@@ -306,9 +306,11 @@ void	fft_init(void)
     {
 #ifdef USE_THREADS
 /*
+#ifdef HAVE_FFTWF_MP
     if (!fftwf_init_threads())
       error(EXIT_FAILURE, "*Error*: thread initialization failed in ", "FFTW");
     fftwf_plan_with_nthreads(prefs.nthreads);
+#endif
 */
     QPTHREAD_MUTEX_INIT(&fftmutex, NULL);
 #endif
@@ -326,7 +328,7 @@ INPUT	-.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/09/2004
+VERSION	26/06/2009
  ***/
 void	fft_end(void)
  {
@@ -336,7 +338,9 @@ void	fft_end(void)
     firsttimeflag = 0;
 #ifdef USE_THREADS
 /*
+#ifdef HAVE_FFTWF_MP
     fftwf_cleanup_threads();
+#endif
 */
     QPTHREAD_MUTEX_DESTROY(&fftmutex);
 #endif

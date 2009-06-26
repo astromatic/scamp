@@ -9,7 +9,7 @@
 *
 *       Contents:       Main loop
 *
-*       Last modify:    15/10/2007
+*       Last modify:    26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -132,6 +132,7 @@ void	makeit(void)
   nsample = 0;
   for (f=0; f<nfield; f++)
     nsample += fields[f]->nsample;
+  prefs.ndets = nsample;
 
   QPRINTF(OUTPUT, "\n----- %d detections loaded\n", nsample);
 
@@ -198,7 +199,6 @@ void	makeit(void)
   if (prefs.match_flag && prefs.astrefcat != ASTREFCAT_NONE)
     {
     fft_init();
-    NFPRINTF(OUTPUT, "");
     QPRINTF(OUTPUT, "\n----- Astrometric matching:\n\n");
 #ifdef USE_THREADS
     pthread_match_fields(fgroups, reffields, ngroup);
@@ -269,7 +269,7 @@ void	makeit(void)
       NFPRINTF(OUTPUT, str);
       nclip = astrclip_fgroup(fgroups[g], reffields[g], prefs.astrclip_nsig);
       NFPRINTF(OUTPUT, "");
-      QPRINTF(OUTPUT, "Group %2d: %d/%d detections removed\n",
+      QPRINTF(OUTPUT, " Group %2d: %d/%d detections removed\n",
 		g+1, nclip, fgroups[g]->nintmatch);
       }
 
@@ -392,7 +392,7 @@ void	makeit(void)
 	  {
           nclip = photclip_fgroup(fgroups[g], i, prefs.photclip_nsig);
           NFPRINTF(OUTPUT, "");
-          QPRINTF(OUTPUT, "Group %2d / P%-2d : %d/%d detections removed\n",
+          QPRINTF(OUTPUT, " Group %2d / P%-2d : %d/%d detections removed\n",
 	      g+1, i+1, nclip, fgroups[g]->nintmagmatch[i]);
           }
         }
@@ -453,6 +453,7 @@ void	makeit(void)
         }
     }
 
+  QPRINTF(OUTPUT, "\n");
 
 #ifdef HAVE_PLPLOT
   NFPRINTF(OUTPUT, "Generating photometric plots...");

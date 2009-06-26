@@ -9,7 +9,7 @@
 *
 *	Contents:	Include for prefs.c.
 *
-*	Last modify:	18/02/2007
+*	Last modify:	26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -194,6 +194,7 @@ typedef struct
   char		sdate_end[12];			/* SCAMP end date */
   char		stime_end[12];			/* SCAMP end time */
   double	time_diff;			/* Execution time */
+  int		ndets;				/* Final number of sources */
   }	prefstruct;
 
 prefstruct	prefs;
