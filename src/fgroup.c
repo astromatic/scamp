@@ -463,7 +463,7 @@ void	print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
     if (fgroup->lat != fgroup->lng)
       {
       QPRINTF(OUTPUT,
-	"\nGroup %2d: %d field%s at %s %s with radius %.4g'\n",
+	"\n Group %2d: %d field%s at %s %s with radius %.4g'\n",
         i+1,
         fgroup->nfield, fgroup->nfield>1 ? "s":"",
 	      degtosexal(fgroup->meanwcspos[fgroup->lng], str1),
@@ -473,7 +473,7 @@ void	print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
     else
       {
       QPRINTF(OUTPUT,
-	"\nGroup %2d: %d field%s at %.3g %.3g with radius %.4g\n",
+	"\n Group %2d: %d field%s at %.3g %.3g with radius %.4g\n",
         i+1,
         fgroup->nfield, fgroup->nfield>1 ? "s":"",
         fgroup->meanwcspos[0],

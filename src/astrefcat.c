@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	20/02/2009
+*	Last modify:	26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -57,7 +57,7 @@ keystruct       refkey[] = {
 astrefstruct	astrefcat[] = 
  {
   {"NONE", 0, 0, {""}},
-  {"file", 1, 0, {"mag",""}},
+  {"file", 12, 0, {"1","2","3","4","5","6","7","8","9","10","11","12",""}},
   {"USNO-A1.0", 2, 0, {"Bj", "Rf",""}},
   {"USNO-A2.0", 2, 0, {"Bj", "Rf",""}},
   {"USNO-B1.0", 3, 0, {"Bj", "Rf", "In",""}},
@@ -99,7 +99,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 20/02/2009
+VERSION 26/06/2009
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -164,12 +164,12 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       for (c=0; c<prefs.nastref_name; c++)
         {
         if ((tfield=load_astreffield(prefs.astref_name[c], wcspos, lng,lat,
-		naxis, maxradius)))
+		naxis, maxradius, band)))
           {
           if (tfield)
             {
             NFPRINTF(OUTPUT, "");
-            QPRINTF(OUTPUT, "%8d astrometric references loaded from %s\n",
+            QPRINTF(OUTPUT, " %d astrometric references loaded from %s\n",
 		tfield->set[0]->nsample, tfield->rfilename);
             }
           if (field)
@@ -883,22 +883,23 @@ void	save_astreffield(char *filename,  fieldstruct *reffield)
 
 /****** load_astreffield ******************************************************
 PROTO   fieldstruct *load_astreffield(char *filename, double *wcspos,
-			int lng, int lat, int naxis, double maxradius)
+			int lng, int lat, int naxis, double maxradius, int band)
 PURPOSE	Load a reference catalog in (pseudo-)LDAC format.
 INPUT   Catalog name,
-	Pointer to the field center coordinates,
-	Longitude index,
-	Latitude index,
-	Number of axes (dimensions),
-	Search radius (in degrees).
+	pointer to the field center coordinates,
+	longitude index,
+	latitude index,
+	number of axes (dimensions),
+	search radius (in degrees),
+	band index.
 OUTPUT  Pointer to the reference catalog field structure.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 09/02/2005
+VERSION 26/06/2009
 */
 fieldstruct	*load_astreffield(char *filename, double *wcspos,
 				int lng, int lat,
-				int naxis, double maxradius)
+				int naxis, double maxradius, int band)
   {
    catstruct	*cat;
    tabstruct	*tab;
@@ -915,7 +916,7 @@ fieldstruct	*load_astreffield(char *filename, double *wcspos,
   else
     rfilename++;
 
-  sprintf(str,"Examining Catalog %s", rfilename);
+  sprintf(str,"Examining Catalog %s...", rfilename);
   NFPRINTF(OUTPUT, str);
 
 /*-- Read input catalog */
@@ -958,7 +959,8 @@ fieldstruct	*load_astreffield(char *filename, double *wcspos,
   n = 0;
 
 /* Find the object table */
-  sprintf(str,"Loading Catalog %s", rfilename);
+  sprintf(str,"Loading Catalog %s...", rfilename);
+  NFPRINTF(OUTPUT, str);
   tab = cat->tab;
   set = NULL;
   nsample = 0;
@@ -971,7 +973,7 @@ fieldstruct	*load_astreffield(char *filename, double *wcspos,
       sprintf(str, "%s [%d]", rfilename, n+1);
     else
       strcpy(str, rfilename);
-    set = read_astrefsamples(set, tab, str, wcspos, lng, lat, naxis, maxradius);
+    set = read_astrefsamples(set,tab, str, wcspos,lng,lat,naxis,maxradius,band);
     nsample += set->nsample;
     n++;
     }
@@ -1006,7 +1008,7 @@ fieldstruct	*load_astreffield(char *filename, double *wcspos,
 PROTO	setstruct *read_astrefsamples(setstruct *set, tabstruct *tab,
 				char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
-				double maxradius)
+				double maxradius, int band)
 PURPOSE	Read a set of astrometric reference samples.
 INPUT	Set structure pointer,
 	Pointer to the tab that contains the catalog,
@@ -1015,16 +1017,17 @@ INPUT	Set structure pointer,
 	Longitude index,
 	Latitude index,
 	Number of axes (dimensions),
-	Search radius (in degrees).
+	Search radius (in degrees),
+	band index.
 OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 09/10/2007
+VERSION 26/06/2009
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
-				double maxradius)
+				double maxradius, int band)
 
 
   {
@@ -1115,6 +1118,13 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
   else
     mag = (float *)key->ptr;
 
+/* Check that catalog contains enough bands if needed */
+  if (band && (!key->naxis || band>=*key->naxisn))
+    {
+    sprintf(str, "*Error*: band #%d not found in catalog ", band+1);
+    error(EXIT_FAILURE, str, rfilename);
+    }
+
   if (!(key = name_to_key(keytab, "FLAGS")))
     warning("FLAGS parameter not found in catalog ", rfilename);
   flags = key? (unsigned short *)key->ptr : NULL;
@@ -1171,7 +1181,7 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     sample = set->sample + nsample;
     sample->set = set;
     sample->flags = objflags;
-    sample->mag = mag? *mag : *dmag;
+    sample->mag = mag? mag[band] : dmag[band];
     sample->wcspos[lng] = x;
     sample->wcspos[lat] = y;
     ea = erra? *erra : *derra;

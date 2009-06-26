@@ -9,7 +9,7 @@
 *
 *	Contents:	Functions to handle the configuration file.
 *
-*	Last modify:	08/01/2007
+*	Last modify:	26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -430,6 +430,13 @@ void	useprefs(void)
 		"NTHREADS defaulted to 2");
       }
     }
+#ifndef HAVE_ATLAS_MP
+   if (prefs.nthreads>1)
+     warning("This executable has been compiled using a version of the ATLAS "
+	"library without support for multithreading. ",
+	"Performance will be degraded.");
+#endif
+
 #else
   if (prefs.nthreads != 1)
     {

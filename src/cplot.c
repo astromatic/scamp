@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	19/06/2009
+*	Last modify:	26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -197,7 +197,7 @@ INPUT	-.
 OUTPUT	-.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/06/2009
+VERSION	26/06/2009
  ***/
 void	cplot_fixplplot(void)
   {
@@ -208,14 +208,16 @@ void	cplot_fixplplot(void)
 /* plParseOpts / plparseopts */
   if ((fptr = dlsym(dl, "plparseopts")))
     myplparseopts = fptr;
+  else if ((fptr = dlsym(dl, "c_plparseopts")))
+    myplparseopts = fptr;
   else
-    myplparseopts =  dlsym(dl, "plParseOpts");
+    myplparseopts = dlsym(dl, "plParseOpts");
 
 /* plimage / c_plimage */
   if ((fptr = dlsym(dl, "plimage")))
     myplimage = fptr;
   else
-    myplimage =  dlsym(dl, "c_plimage");
+    myplimage = dlsym(dl, "c_plimage");
 
   dlclose(dl);
 

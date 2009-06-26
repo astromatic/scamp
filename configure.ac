@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.5.7, [bertin@iap.fr])
+AC_INIT(scamp, 1.5.8, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -225,6 +225,9 @@ ACX_FFTW($fftw_libdir,$fftw_incdir,$use_pthreads,yes,
 	[use_fftw=yes],[use_fftw=no])
 if test "$use_fftw" = "yes"; then
   LIBS="$FFTW_LIBS $LIBS"
+  if test "$FFTW_WARN" != ""; then
+    AC_MSG_WARN([$FFTW_WARN])
+  fi
 else
   AC_MSG_ERROR([$FFTW_ERROR Exiting.])
 fi
@@ -234,8 +237,8 @@ ACX_ATLAS($atlas_libdir,$atlas_incdir,$use_pthreads,
 	[use_atlas=yes],[use_atlas=no])
 if test "$use_atlas" = "yes"; then
   LIBS="$ATLAS_LIB $LIBS"
-  if test "$ATLAS_ERROR" != ""; then
-    AC_MSG_WARN([$ATLAS_ERROR])
+  if test "$ATLAS_WARN" != ""; then
+    AC_MSG_WARN([$ATLAS_WARN])
   fi
 else
   AC_MSG_ERROR([$ATLAS_ERROR Exiting.])

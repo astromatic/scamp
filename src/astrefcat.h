@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for refcat.c.
 *
-*	Last modify:	27/03/2008
+*	Last modify:	26/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -27,7 +27,7 @@
 
 /*----------------------------- Internal constants --------------------------*/
 #define		MAX_SERVER	16
-#define		MAX_BAND	8	/* Maximum number of bands */
+#define		MAX_BAND	16	/* Maximum number of bands */
 #define		DENIS3_POSERR	(0.20*ARCSEC/DEG)
 #define		SDSSR3_POSERR	(0.10*ARCSEC/DEG)
 #define		USNOA1_POSERR	(0.25*ARCSEC/DEG)
@@ -68,13 +68,13 @@ extern fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
                                 int lng, int lat, int naxis, double maxradius),
 			*load_astreffield(char *filename, double *wcspos,
 				int lng, int lat,
-				int naxis, double maxradius);
+				int naxis, double maxradius, int band);
 
 extern setstruct	*read_astrefsamples(setstruct *set, tabstruct *tab,
 				char *rfilename,
 				double *wcspos,
 				int lng, int lat,
-				int naxis, double maxradius);
+				int naxis, double maxradius, int band);
 
 extern void		save_astreffield(char *filename, fieldstruct *reffield);
 
