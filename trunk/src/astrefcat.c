@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	26/06/2009
+*	Last modify:	29/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -99,7 +99,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 26/06/2009
+VERSION 29/06/2009
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -726,6 +726,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           sample->colour = mag[0] - mag[1];
         else
           sample->colour = 99.0;
+        sample->flux = 0.0;
         sample->wcspos[lng] = alpha;
         sample->wcspos[lat] = delta;
         sample->wcsposerr[lng] = poserr[lng];
@@ -1023,7 +1024,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 26/06/2009
+VERSION 29/06/2009
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1182,6 +1183,7 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     sample->set = set;
     sample->flags = objflags;
     sample->mag = mag? mag[band] : dmag[band];
+    sample->flux = 0.0;
     sample->wcspos[lng] = x;
     sample->wcspos[lat] = y;
     ea = erra? *erra : *derra;
