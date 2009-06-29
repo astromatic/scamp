@@ -9,7 +9,7 @@
 *
 *	Contents:	Compute proper motions.
 *
-*	Last modify:	01/02/2009
+*	Last modify:	29/06/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -52,7 +52,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/02/2009
+VERSION	29/06/2009
  ***/
 void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -151,7 +151,7 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
           samp2 = samp;
           while ((samp2=samp2->prevsamp))
             {
-            if (samp2->flux <= 0.0 || (samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             field2 = samp2->set->field;
             f2 = (field2==reffield ? nfield : field2->index);
