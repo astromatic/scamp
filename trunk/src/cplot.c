@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	26/06/2009
+*	Last modify:	28/08/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -102,7 +102,7 @@ INPUT	Number of plots along the x axis,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/06/2009
+VERSION	28/08/2009
  ***/
 int	cplot_init(int nx, int ny, cplotenum cplottype)
   {
@@ -169,7 +169,6 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
       sprintf(str, "%dx%d", prefs.cplot_res[0], prefs.cplot_res[1]);
       plsetopt("-geometry", str);
       }
-     plsetopt("-drvopt","24bit");
     }
   else
     {
@@ -197,13 +196,27 @@ INPUT	-.
 OUTPUT	-.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/06/2009
+VERSION	28/08/2009
  ***/
 void	cplot_fixplplot(void)
   {
-   void		*dl, *fptr;
+   void	*dl, *fptr;
+   char	libroot[64], str[64];
+   int	i;
 
-  dl = dlopen("libplplotd.so", RTLD_LAZY);
+  sprintf(libroot,"libplplotd.so");
+  if (!(dl = dlopen(libroot, RTLD_LAZY)))
+    for (i=0; i<20; i++)
+      {
+      sprintf(str, "%s.%d", libroot, i);
+      if ((dl = dlopen(str, RTLD_LAZY)))
+        break;
+      }
+  if (!dl)
+    {
+    dl = dlopen(libroot, RTLD_LAZY);
+    error(EXIT_FAILURE, dlerror(),"");
+    }
 
 /* plParseOpts / plparseopts */
   if ((fptr = dlsym(dl, "plparseopts")))
@@ -211,18 +224,19 @@ void	cplot_fixplplot(void)
   else if ((fptr = dlsym(dl, "c_plparseopts")))
     myplparseopts = fptr;
   else
-    myplparseopts = dlsym(dl, "plParseOpts");
+    myplparseopts =  dlsym(dl, "plParseOpts");
 
 /* plimage / c_plimage */
   if ((fptr = dlsym(dl, "plimage")))
     myplimage = fptr;
   else
-    myplimage = dlsym(dl, "c_plimage");
+    myplimage =  dlsym(dl, "c_plimage");
 
   dlclose(dl);
 
   return;
   }
+
 
 /****** cplot_end ************************************************************
 PROTO	int cplot_end(void)

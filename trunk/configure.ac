@@ -196,14 +196,13 @@ AC_ARG_ENABLE(prof,
         use_prof="no"
 	AC_MSG_RESULT([no]))
 
-# Provide a special option for static linking
-AC_MSG_CHECKING([for static linking])
-AC_ARG_ENABLE(static,
-	[AC_HELP_STRING([--enable-static],
-	[Choose linking with static libraries (off by default)])],
-        use_static=$enableval
+# Static linking with libtool
+AC_ARG_WITH(static-libtool,
+	[AC_HELP_STRING([--with-static-libtool],
+	[Static linking with ltdl (off by default)])],
+        use_static_libtool="$enableval"
 	AC_MSG_RESULT([yes]),
-        use_static="no"
+        use_static_libtool="no"
 	AC_MSG_RESULT([no]))
 
 ################# Actions to complete in case of multhreading ################
@@ -288,8 +287,8 @@ if test "$use_gprof" = "yes"; then
 fi
 
 # Static linking option
-if test "$use_static" = "yes"; then
-  LDFLAGS="-static -shared-libgcc $LDFLAGS"
+if test "$use_static_libtool" = "yes"; then
+  LDFLAGS="-static-libtool-libs $LDFLAGS"
 fi
 
 # Override automatic CFLAGS and LDFLAGS with those of user
