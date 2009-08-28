@@ -26,9 +26,9 @@ SExtractor catalogs
 
 %build
 if test "$USE_ICC"; then
-%configure --enable-icc
+%configure --enable-icc --with-static-libtool
 else
-%configure
+%configure --with-static-libtool
 fi
 make %{?_smp_mflags}
 
