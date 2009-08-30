@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	28/08/2009
+*	Last modify:	30/08/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -102,13 +102,14 @@ INPUT	Number of plots along the x axis,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	28/08/2009
+VERSION	30/08/2009
  ***/
 int	cplot_init(int nx, int ny, cplotenum cplottype)
   {
+   char		**devmenu, **devname;
    char		str[MAXCHAR],
 		*pstr;
-   int		j, num, cval, dev, argc;
+   int		j, num, cval, dev, argc, ndev, gdflag;
 
 /* Check that plot was requested */
   cval = cplot_check(cplottype);
@@ -153,8 +154,27 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
   if (cplot_device[j].device == CPLOT_PNG
 	|| cplot_device[j].device == CPLOT_JPEG)
     {
+/*-- Hack to check whether the PNG/JPEG/GIF driver is based on GD or not */
+    ndev = 100;	/* max number of plplot devices */
+    QMALLOC(devmenu, char *, ndev);
+    QMALLOC(devname, char *, ndev);
+    plgFileDevs((const char ***)&devmenu, (const char ***)&devname, &ndev);
+    gdflag = 0;
+    for (dev=0; dev<ndev; dev++)
+      if (!strncmp(devmenu[dev],"PNG", 3))
+        {
+        gdflag = 1;
+        break;
+        }
+    free(devmenu);
+    free(devname);
+
+/*-- gd driver is 8 bits by default */ 
+    if (gdflag)
+      plsetopt("-drvopt","24bit");
+
 /*-- Set custom resolutions */
-    if (prefs.cplot_antialiasflag)
+    if (gdflag && prefs.cplot_antialiasflag)
       {
 /*---- Oversample for antialiasing */
       sprintf(str, "%dx%d",
