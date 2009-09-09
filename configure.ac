@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.5.9, [bertin@iap.fr])
+AC_INIT(scamp, 1.5.11, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -33,9 +33,16 @@ AC_MSG_RESULT([******** Configuring:  $PACKAGE_NAME $VERSION ($date) ********])
 
 # Initialize the list of compilers to consider
 cclist="cc gcc"
-# Backup and reset the input CFLAGS
-mycflags="$CFLAGS"
-CFLAGS=""
+
+AC_MSG_CHECKING([if compilation flags are set automatically])
+AC_ARG_ENABLE(auto-flags,
+	[AC_HELP_STRING([--enable-auto-flags],
+	[Let the configure script choose the compilation flags \
+(off by default)])],
+	use_autoflag="yes"
+	AC_MSG_RESULT([yes]),
+	use_autoflag="no"
+	AC_MSG_RESULT([no]))
 
 # Provide special option for the Linux Intel C compiler
 AC_MSG_CHECKING([for Linux Intel C compiler mode])
@@ -56,9 +63,11 @@ AC_PROG_CC([$cclist])
 # C Compiler: Check that it is ANSI C and POSIX-compliant
 AM_PROG_CC_STDC
 AC_ISC_POSIX
-ACX_PROG_CC_OPTIM
-AC_DISABLE_STATIC
-#AC_DISABLE_SHARED
+if test "$use_autoflag" = "yes"; then
+  CFLAGS=""
+  LDFLAGS =""
+  ACX_PROG_CC_OPTIM
+fi
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
@@ -68,7 +77,7 @@ AC_CHECK_LIB(m, sin)
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([stdlib.h string.h unistd.h sys/mman.h dlfcn.h])
-echo 
+
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_TYPE_OFF_T
@@ -92,16 +101,6 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 datadir2=$(URBI_RESOLVE_DIR([$datadir]))
-
-# Provide special option for debugging
-AC_MSG_CHECKING([for debugger mode])
-AC_ARG_ENABLE(debug,
-	[AC_HELP_STRING([--enable-debug],
-	[Enable special mode for debugging (off by default)])],
-        use_debug="yes"
-	AC_MSG_RESULT([yes]),
-        use_debug="no"
-	AC_MSG_RESULT([no]))
 
 # Provide special options for PLPLOT
 AC_ARG_WITH(plplot,
@@ -196,13 +195,15 @@ AC_ARG_ENABLE(prof,
         use_prof="no"
 	AC_MSG_RESULT([no]))
 
-# Static linking with libtool
-AC_ARG_WITH(static-libtool,
-	[AC_HELP_STRING([--with-static-libtool],
-	[Static linking with ltdl (off by default)])],
-        use_static_libtool="$enableval"
+# Enable linking options for making the executable as portable as possible.
+AC_MSG_CHECKING([best linking option])
+AC_ARG_ENABLE(best-link,
+	[AC_HELP_STRING([--enable-best-link],
+	[Choose the right combination of static and dynamic linking to make \
+the executable as portable as possible (off by default)])],
+        use_best="yes"
 	AC_MSG_RESULT([yes]),
-        use_static_libtool="no"
+        use_best="no"
 	AC_MSG_RESULT([no]))
 
 ################# Actions to complete in case of multhreading ################
@@ -214,7 +215,7 @@ if test "$use_pthreads" = "yes"; then
 # CC, CFLAGS and LIBS are system and compiler-dependent
   ACX_PTHREAD
   CC="$PTHREAD_CC"
-  [CFLAGS="$CFLAGS $PTHREAD_CFLAGS -D_REENTRANT"]
+  [AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS -D_REENTRANT"]
   LIBS="$PTHREAD_LIBS $LIBS"
 fi
 AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
@@ -260,7 +261,7 @@ if test "$use_plplot" = "yes"; then
   AC_MSG_RESULT([yes])
   ACX_PLPLOT($plplot_dir,$plplot_incdir,,[use_plplot=no])
   if test "$use_plplot" = "yes"; then
-    [CFLAGS="$CFLAGS $PLPLOT_CFLAGS"]
+    [AM_CPPFLAGS="$AM_CPPFLAGS $PLPLOT_CFLAGS"]
     [LIBS="$PLPLOT_LIBS $LIBS"]
   else
     AC_MSG_WARN(PLPlot library not found/incomplete! Plotting deactivated.)
@@ -271,36 +272,32 @@ else
 fi
 AM_CONDITIONAL(USE_PLPLOT, test $use_plplot = "yes")
 
-# Debugging
-if test "$use_debug" = "yes"; then
-  CFLAGS="-g $CFLAGS"
-fi
-
 # Link with gprof option
 if test "$use_gprof" = "yes"; then
   if test "$use_icc" = "yes"; then
-    CFLAGS="$CFLAGS -pq"
+    AM_CFLAGS="$AM_CFLAGS -pq"
   else
-    CFLAGS="$CFLAGS -pg"
+    AM_CFLAGS="$AM_CFLAGS -pg"
   fi
-  use_static="no"
+  use_best="no"
 fi
 
-# Static linking option
-if test "$use_static_libtool" = "yes"; then
-  LDFLAGS="-static-libtool-libs $LDFLAGS"
+# "Best" linking option
+if test "$use_best" = "yes"; then
+  AM_LDFLAGS="-shared-libgcc -static-libtool-libs $AM_LDFLAGS"
 fi
 
-# Override automatic CFLAGS and LDFLAGS with those of user
-#if test -n "$mycflags"; then
-#CFLAGS="$mycflags"
-#fi
+AC_SUBST(AM_CFLAGS)
+AC_SUBST(AM_CPPFLAGS)
+AC_SUBST(AM_LDFLAGS)
+
 # Display compiler and linker flags
 AC_MSG_RESULT([***************************************************************])
-AC_MSG_RESULT([Compile cmdline:  $CC $CFLAGS])
-AC_MSG_RESULT([Link    cmdline:  $CC $LDFLAGS $LIBS])
+AC_MSG_RESULT([Compile cmdline:  $CC $AM_CPPFLAGS $CPPFLAGS $AM_CFLAGS $CFLAGS])
+AC_MSG_RESULT([Link    cmdline:  $CC $AM_LDFLAGS $LDFLAGS $LIBS])
 AC_MSG_RESULT([Default XSLT URL: $xsl_url])
 AC_MSG_RESULT([***************************************************************])
+
 AC_CONFIG_FILES([
 Makefile
 man/Makefile

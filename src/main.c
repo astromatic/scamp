@@ -9,7 +9,7 @@
 *
 *	Contents:	Parsing of the command line.
 *
-*	Last modify:	26/06/2009
+*	Last modify:	30/08/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -39,7 +39,9 @@
 "> to dump a default configuration file: " BANNER " -d \n" \
 "> to dump a default extended configuration file: " BANNER " -dd \n"
 
+#ifdef HAVE_PLPLOT
 extern void	(*myplparseopts)(int *p_argc, const char **argv, PLINT mode);
+#endif
 
 extern const char	notokstr[];
 
