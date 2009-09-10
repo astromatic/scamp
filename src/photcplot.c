@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	10/04/2009
+*	Last modify:	10/09/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -40,9 +40,6 @@ struct	focplanestruct {PLFLT x[5], y[5], z[5]; PLINT colour; char *str;};
 extern int		plotaaflag;
 
 int		comp_focz(const void *focplane1, const void *focplane2);
-extern void	(*myplimage)(PLFLT **idata, PLINT nx, PLINT ny,
-        PLFLT xmin, PLFLT xmax, PLFLT ymin, PLFLT ymax, PLFLT zmin, PLFLT zmax,
-        PLFLT Dxmin, PLFLT Dxmax, PLFLT Dymin, PLFLT Dymax);
 
 /****** cplot_photom *******************************************************
 PROTO	int cplot_photom(fgroupstruct **fgroups, int ngroup,
@@ -245,7 +242,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -461,7 +458,7 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        (*myplimage)(histo_hsn[d], CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
+       plimage(histo_hsn[d], CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
 		fgroup->projposmin[d], fgroup->projposmax[d], -maxlim, maxlim,
 		0.5, zmax_hsn[d],
 		fgroup->projposmin[d], fgroup->projposmax[d], -maxlim, maxlim);
@@ -523,7 +520,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP) C. MARMO (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -746,7 +743,7 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
       r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
       r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
-      (*myplimage)(histo_hsn, CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
+     plimage(histo_hsn, CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
 		xoffset, magmax, -maxlim, maxlim,
 		0.5, zmax_hsn,
 		xoffset, magmax, -maxlim, maxlim);

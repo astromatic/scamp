@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for cplot.c
 *
-*	Last modify:	19/06/2009
+*	Last modify:	10/09/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -94,8 +94,6 @@ typedef struct {cplotdevenum device; char *devname; char *extension;}
 
 /*---------------------------------- svgp -----------------------------------*/
 /*------------------------------- functions ---------------------------------*/
-
-extern void		cplot_fixplplot(void);
 
 extern int		cplot_aderrhisto1d(fgroupstruct *fgroup,
 					double hsn_thresh),

@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	10/04/2009
+*	Last modify:	10/09/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -40,9 +40,6 @@ extern int		plotaaflag;
 
 static void	distort_map(PLFLT x,PLFLT y, PLFLT *tx,PLFLT *ty,
 			    void *pltr_data); 
-extern void	(*myplimage)(PLFLT **idata, PLINT nx, PLINT ny,
-        PLFLT xmin, PLFLT xmax, PLFLT ymin, PLFLT ymax, PLFLT zmin, PLFLT zmax,
-        PLFLT Dxmin, PLFLT Dxmax, PLFLT Dymin, PLFLT Dymax);
 
 
 /****** cplot_allsky *******************************************************
@@ -2035,7 +2032,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2235,7 +2232,7 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        (*myplimage)(histo_hsn[d3], CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
+        plimage(histo_hsn[d3], CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim);
@@ -2297,7 +2294,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2477,7 +2474,7 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
     r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
     r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    (*myplimage)(histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
+    plimage(histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn,
 	-maxlim, maxlim, -maxlim, maxlim);
@@ -2549,7 +2546,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2743,7 +2740,7 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        (*myplimage)(histo_hsn[d3], CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
+        plimage(histo_hsn[d3], CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim);
@@ -2807,7 +2804,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -2981,7 +2978,7 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
     r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    (*myplimage)(histo_hsn, CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
+    plimage(histo_hsn, CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn,
 	-maxlim, maxlim, -maxlim, maxlim);
@@ -3054,7 +3051,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3329,7 +3326,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        (*myplimage)(histo_hsn[d3], CPLOT_PIXERR1DNX_HSN, CPLOT_PIXERR1DNY_HSN,
+        plimage(histo_hsn[d3], CPLOT_PIXERR1DNX_HSN, CPLOT_PIXERR1DNY_HSN,
 		0.5, maxwidth, -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
 		0.5, maxwidth, -maxlim, maxlim);
@@ -3413,7 +3410,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3671,7 +3668,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        (*myplimage)(histo_hsn[d3], CPLOT_SUBPIXERR1DNX_HSN,
+        plimage(histo_hsn[d3], CPLOT_SUBPIXERR1DNX_HSN,
 		CPLOT_SUBPIXERR1DNY_HSN,
 		-0.5, 0.5, -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
@@ -3753,7 +3750,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4030,7 +4027,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
           r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
           r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
           plscmap1l(1, 2, cpoint, r, g, b, NULL);
-          (*myplimage)(histo_hsn[d], CPLOT_ASTRCOLSHIFT1DNX_HSN,
+          plimage(histo_hsn[d], CPLOT_ASTRCOLSHIFT1DNX_HSN,
 		CPLOT_ASTRCOLSHIFT1DNY_HSN,
 		dmagmin, dmagmax, -maxlim, maxlim, 0.5, zmax_hsn[d],
 		dmagmin, dmagmax, -maxlim, maxlim);
@@ -4116,7 +4113,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/04/2009
+VERSION	10/09/2009
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4267,7 +4264,7 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
       r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
       r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
-      (*myplimage)(histo_hsn[d], CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
+      plimage(histo_hsn[d], CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn[d],
 	-maxlim, maxlim, -maxlim, maxlim);
