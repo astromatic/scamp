@@ -9,7 +9,7 @@
 *
 *	Contents:	Parsing of the command line.
 *
-*	Last modify:	30/08/2009
+*	Last modify:	10/09/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -39,10 +39,6 @@
 "> to dump a default configuration file: " BANNER " -d \n" \
 "> to dump a default extended configuration file: " BANNER " -dd \n"
 
-#ifdef HAVE_PLPLOT
-extern void	(*myplparseopts)(int *p_argc, const char **argv, PLINT mode);
-#endif
-
 extern const char	notokstr[];
 
 /********************************** main ************************************/
@@ -70,9 +66,8 @@ int	main(int argc, char *argv[])
     }
 
 #ifdef HAVE_PLPLOT
-  cplot_fixplplot();
   if (argc>2)
-    myplparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
+    plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
 #endif
 
   QMALLOC(argkey, char *, argc);
@@ -120,7 +115,7 @@ int	main(int argc, char *argv[])
             fprintf(OUTPUT, "\nSYNTAX: %s", SYNTAX);
 #ifdef HAVE_PLPLOT
             fprintf(OUTPUT, "\nPLPLOT-specific options:\n");
-            myplparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
+            plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
 #endif
             exit(EXIT_SUCCESS);
             break;
