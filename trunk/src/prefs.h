@@ -9,7 +9,7 @@
 *
 *	Contents:	Include for prefs.c.
 *
-*	Last modify:	26/06/2009
+*	Last modify:	02/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -89,6 +89,8 @@ typedef struct
   char		*(astref_name[MAXNGROUP]);/* Astrometric ref. cat. filenames */
   int           nastref_name;		/* nb of params */
   char		astref_bandname[MAXCHAR];/* Astrometric ref. band name */
+  double	astref_maglim[2];	/* Selection magnitude range */
+  int		nastref_maglim;		/* nb of params */
   char		*(astrefcent_key[NAXIS]);/* Astrom ref. cat. centroid keywords*/
   int		nastrefcent_key;	/* nb of params */
   char		*(astreferr_key[(NAXIS*(NAXIS+1))/2]);/* err.ellipse keywords*/

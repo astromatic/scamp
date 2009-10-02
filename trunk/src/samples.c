@@ -9,7 +9,7 @@
 *
 *	Contents:	Read and filter input samples from catalogs.
 *
-*	Last modify:	14/01/2008
+*	Last modify:	10/09/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -555,12 +555,12 @@ INPUT   set structure pointer,
 OUTPUT  The new pointer for the element that replaced the removed one.
 NOTES   -.
 AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-VERSION 01/03/99
+VERSION 10/09/2009
 */
 samplestruct	*remove_sample(setstruct *set, int isample)
 
   {
-   static samplestruct	exsample;
+   samplestruct		exsample;
    samplestruct		*sample;
    int			nsample;
 

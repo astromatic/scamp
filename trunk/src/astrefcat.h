@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for refcat.c.
 *
-*	Last modify:	26/06/2009
+*	Last modify:	02/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -47,7 +47,7 @@ typedef enum {ASTREFCAT_NONE, ASTREFCAT_FILE,
 		ASTREFCAT_2MASS, ASTREFCAT_DENIS3,
 		ASTREFCAT_UCAC1, ASTREFCAT_UCAC2,
 		ASTREFCAT_SDSSR3, ASTREFCAT_SDSSR5, ASTREFCAT_SDSSR6,
-		ASTREFCAT_NOMAD1}
+		ASTREFCAT_SDSSR7, ASTREFCAT_NOMAD1}
 			astrefenum;
 
 typedef struct
@@ -55,7 +55,8 @@ typedef struct
   char		name[16];		/* Catalog name */
   int		nband;			/* Number of available bands */
   int		defband;		/* Default band */
-  char		bandnames[MAX_BAND][32];/* Names of available bands */
+  char		bandnames[MAX_BAND][32];/* Real names of available bands */
+  char		cdsbandnames[MAX_BAND][32];/* CDS names of available bands */
   int		band;			/* Chosen band */
   char		*bandname;		/* Name of chosen band */
   }	astrefstruct;
@@ -68,13 +69,15 @@ extern fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
                                 int lng, int lat, int naxis, double maxradius),
 			*load_astreffield(char *filename, double *wcspos,
 				int lng, int lat,
-				int naxis, double maxradius, int band);
+				int naxis, double maxradius, int band,
+				double *maglim);
 
 extern setstruct	*read_astrefsamples(setstruct *set, tabstruct *tab,
 				char *rfilename,
 				double *wcspos,
 				int lng, int lat,
-				int naxis, double maxradius, int band);
+				int naxis, double maxradius, int band,
+				double *maglim);
 
 extern void		save_astreffield(char *filename, fieldstruct *reffield);
 
