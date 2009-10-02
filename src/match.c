@@ -9,7 +9,7 @@
 *
 *       Contents:       Pattern matching routines
 *
-*       Last modify:    20/03/2007
+*       Last modify:    10/09/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -73,18 +73,17 @@ INPUT	ptr to the field to be matched,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	28/09/2006
+VERSION	10/09/2009
  ***/
 void	match_field(fieldstruct *field, fieldstruct *reffield)
   {
    setstruct	*refset, *refset2, *set, *fieldset;
-   samplestruct	*refsample;
    char		str[128];
    double	wcspos[NAXIS],
 		angle,scale,dlng,dlat,sig, dlng2,dlat2,sig2, asig,
 		dangle,dscale, ddlng,ddlat, shear,sangle, sheartot, sangletot,
 		matchresol, refarea,area, refcrossec,crossec;
-   int		i,j,k, nrefsample, lng,lat, reflng,reflat,
+   int		i,j,k, lng,lat,
 		naxis, nmax;
 
   sprintf(str, "Matching field %s...", field->rfilename);
@@ -100,22 +99,8 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
 /* Prepare the WCS buffer by setting all elements to average values */
   for (k=0; k<naxis; k++)
     wcspos[k] = field->meanwcspos[k];
-/* Convert the reference set to the current field coordinate labeling */
-  reflng = reffield->lng;
-  reflat = reffield->lat;
+
   refset = reffield->set[0];
-  refsample = refset->sample;
-  nrefsample = refset->nsample;
-  for (j=0; j<nrefsample; j++)
-    {
-    wcspos[lng] = refsample[j].wcspos[reflng];
-    wcspos[lat] = refsample[j].wcspos[reflat];
-    for (k=0; k<naxis; k++)
-      refsample[j].wcspos[k] = wcspos[k];
-    }
-  refset->naxis = reffield->naxis = naxis;
-  refset->lng = reffield->lng = lng;
-  refset->lat = reffield->lat = lat;
 
   if (field->mosaic_type == MOSAIC_LOOSE)
     {
