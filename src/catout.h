@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for catout.c
 *
-*	Last modify:	25/06/2009
+*	Last modify:	19/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -49,6 +49,7 @@ typedef struct mergedsample
 
 /*-------------------------------- protos -----------------------------------*/
 
-void		writemergedcat_fgroup(char *filename, fgroupstruct *fgroup);
+void		writemergedcat_fgroup(char *filename, fgroupstruct *fgroup),
+		write_vo_fields(FILE *file, tabstruct *objtab);
 
 #endif

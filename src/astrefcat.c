@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	02/10/2009
+*	Last modify:	19/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -67,6 +67,7 @@ astrefstruct	astrefcat[] =
   {"DENIS-3", 3, 0, {"i", "J", "Ks",""}, {"I", "J", "K",""}},
   {"UCAC-1", 1, 0, {"R",""}, {"R",""}},
   {"UCAC-2", 1, 0, {"R",""}, {"R",""}},
+  {"UCAC-3", 1, 0, {"R",""}, {"R",""}},
   {"SDSS-R3", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
   {"SDSS-R5", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
   {"SDSS-R6", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
@@ -101,7 +102,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 02/10/2009
+VERSION 19/10/2009
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -113,12 +114,13 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    char		*ctype[NAXIS],
 		cmdline[MAXCHAR], str[MAXCHAR],
 		salpha[32],sdelta[32],
-		smag[MAX_BAND][32],smagerr[MAX_BAND][32],
+		smag[MAX_BAND][32],smagerr[MAX_BAND][32],sproperr[NAXIS][32],
 		sflag[4],
 		*bandname, *cdsbandname, *catname,
 		flag1,flag2;
    double	poserr[NAXIS],prop[NAXIS],properr[NAXIS],
-		mag[MAX_BAND],magerr[MAX_BAND], epoch, alpha,delta, dist, temp;
+		mag[MAX_BAND],magerr[MAX_BAND], epoch,epocha,epochd,
+		alpha,delta, dist, temp;
    int		b,c,d,i,n, nsample,nsamplemax, nobs, class, band, nband,
 		maglimflag;
 
@@ -426,6 +428,31 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		prefs.astref_maglim[1]);
       else
         sprintf(cmdline, "%s %s %d ucac2 -c %s %s -r %16g -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		prefs.ref_port[0],
+		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
+		maxradius*DEG/ARCMIN);
+      sprintf(str,"Querying %s at %s for astrometric reference stars...",
+	catname,
+	prefs.ref_server[0]);
+      NFPRINTF(OUTPUT, str);
+      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
+      for (i=2; i--;)			/* Skip the first 2 lines */
+        fgets(str, MAXCHAR, file);
+      break;
+    case ASTREFCAT_UCAC3:
+      if (maglimflag)
+        sprintf(cmdline, "%s %s %d ucac3 -c %s %s -r %16g -lm %f,%f -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		prefs.ref_port[0],
+		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
+		maxradius*DEG/ARCMIN,
+		prefs.astref_maglim[0],
+		prefs.astref_maglim[1]);
+      else
+        sprintf(cmdline, "%s %s %d ucac3 -c %s %s -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
 		prefs.ref_port[0],
@@ -757,19 +784,48 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           break;
 
         case ASTREFCAT_UCAC2:
-          sscanf(str, "%*8c %11s%11s %lf %lf %*f %lf %d %*d %*d %lf "
-		"%*f %lf %lf %lf %lf %*f %*f %*f %*f %*f %*f "
+          sscanf(str, "%*8c %11s%11s %*f %*f %lf %lf %d %*d %*d %lf "
+		"%lf %lf %lf %lf %lf %*f %*f %*f %*f %*f %*f "
 		"%*d %*d ; %lf",
 		salpha, sdelta,
-		&poserr[lng], &poserr[lat], &mag[0], &nobs, &epoch,
+		&poserr[lng], &mag[0], &nobs, &epocha, &epochd,
 		&prop[lng],&prop[lat], &properr[lng],&properr[lat],
 		&dist);
 /*-------- Avoid poor observations */
           if (nobs<2)
             continue;
+          poserr[lat] = poserr[lng];
+          epoch = 0.5*(epocha+epochd);
           alpha = atof(salpha);
           delta = atof(sdelta);
           magerr[0] = 0.1;	/* Just a default value */
+          poserr[lng] *= MAS/DEG;
+          poserr[lat] *= MAS/DEG;
+          dist *= ARCMIN/DEG;
+          break;
+
+        case ASTREFCAT_UCAC3:
+/*-------- Remove the annoying '|' character */
+          for (i=0; str[i]; i++)
+            if (str[i] == '|')
+              str[i] = ' ';
+          sscanf(str, "%*10c %11s%11s %*f %*f %lf %lf %lf %*lf %s %s %*d %*d"
+		"%d %*d%*d %*d %lf %lf %s %s "
+		"%*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s ; %lf",
+		salpha, sdelta,
+		&poserr[lng], &epocha, &epochd, smag[0], smagerr[0], &nobs,
+		&prop[lng],&prop[lat], sproperr[lng],sproperr[lat], &dist);
+/*-------- Avoid poor observations */
+          if (nobs<2)
+            continue;
+          poserr[lat] = poserr[lng];
+          epoch = 0.5*(epocha+epochd);
+          alpha = atof(salpha);
+          delta = atof(sdelta);
+          mag[0] = atof(smag[0]);
+          magerr[0] = (smagerr[0][0]=='-')? 0.9 : atof(smagerr[0]);
+          properr[lng] = (sproperr[lng][0]=='-')? 1000.0 : atof(sproperr[0]);
+          properr[lat] = (sproperr[lat][0]=='-')? 1000.0 : atof(sproperr[1]);
           poserr[lng] *= MAS/DEG;
           poserr[lat] *= MAS/DEG;
           dist *= ARCMIN/DEG;

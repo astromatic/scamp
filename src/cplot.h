@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for cplot.c
 *
-*	Last modify:	10/09/2009
+*	Last modify:	19/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -84,10 +84,9 @@ typedef enum {CPLOT_NONE, CPLOT_ALLSKY, CPLOT_FGROUPS, CPLOT_PHOTOM,
 	CPLOT_ADSYSMAP2D, CPLOT_REFSYSMAP2D}
 		cplotenum;
 
-typedef enum {CPLOT_NULL, CPLOT_XWIN, CPLOT_TK, CPLOT_XTERM, CPLOT_PLMETA,
-	CPLOT_PS, CPLOT_PSC, CPLOT_XFIG, CPLOT_LJIIP, CPLOT_LJHPGL, CPLOT_IMP,
-	CPLOT_PBM, CPLOT_PNG, CPLOT_JPEG, CPLOT_PSTEX, CPLOT_AQT, CPLOT_PDF,
-	CPLOT_SVG} cplotdevenum;
+typedef enum {CPLOT_NULL, CPLOT_XWIN, CPLOT_TK, CPLOT_PLMETA, CPLOT_PS,
+	CPLOT_PSC, CPLOT_XFIG, CPLOT_PNG, CPLOT_JPEG, CPLOT_PSTEX, CPLOT_AQT,
+	CPLOT_PDF, CPLOT_SVG} cplotdevenum;
 
 typedef struct {cplotdevenum device; char *devname; char *extension;}
 		devicestruct;

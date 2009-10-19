@@ -9,7 +9,7 @@
 *
 *	Contents:       Call a plotting library (PLPlot).
 *
-*	Last modify:	10/09/2009
+*	Last modify:	19/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -40,15 +40,10 @@ struct {cplotdevenum device; char *devname; char *extension;}
 		cplot_device[] = {{CPLOT_NULL, "null", ""},
 		{CPLOT_XWIN, "xwin",":0"},
 		{CPLOT_TK, "tk",""},
-		{CPLOT_XTERM, "xterm",""},
 		{CPLOT_PLMETA, "plmeta",".plm"},
 		{CPLOT_PS, "ps", ".ps"},
 		{CPLOT_PSC, "psc", ".ps"},
 		{CPLOT_XFIG, "xfig", ".fig"},
-		{CPLOT_LJIIP, "ljiip", ".lj"},
-		{CPLOT_LJHPGL, "lj_hpgl",".hpg"},
-		{CPLOT_IMP, "imp",".imp"},
-		{CPLOT_PBM, "pbm",".pbm"},
 		{CPLOT_PNG, "png",".png"},
 		{CPLOT_JPEG, "jpeg",".jpg"},
 		{CPLOT_PSTEX, "pstex", ".ps"},

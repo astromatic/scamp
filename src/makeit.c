@@ -504,6 +504,17 @@ void	makeit(void)
     write_aschead(filename, fields[f]);
     }
 
+  init_xml(fields, nfield, fgroups, ngroup);
+
+/* Processing end date and time */
+  thetime2 = time(NULL);
+  tm = localtime(&thetime2);
+  sprintf(prefs.sdate_end,"%04d-%02d-%02d",
+	tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
+  sprintf(prefs.stime_end,"%02d:%02d:%02d",
+	tm->tm_hour, tm->tm_min, tm->tm_sec);
+  prefs.time_diff = difftime(thetime2, thetime);
+
 /* Save merged catalogs */
   for (g=0; g<ngroup; g++)
     {
@@ -522,22 +533,11 @@ void	makeit(void)
     writemergedcat_fgroup(filename, fgroups[g]);
     }
 
-/* Processing end date and time */
-  thetime2 = time(NULL);
-  tm = localtime(&thetime2);
-  sprintf(prefs.sdate_end,"%04d-%02d-%02d",
-	tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday);
-  sprintf(prefs.stime_end,"%02d:%02d:%02d",
-	tm->tm_hour, tm->tm_min, tm->tm_sec);
-  prefs.time_diff = difftime(thetime2, thetime);
-
 /* Write XML */
   if (prefs.xml_flag)
-    {
-    init_xml(fields, nfield, fgroups, ngroup);
     write_xml(prefs.xml_name);
-    end_xml();
-    }
+
+  end_xml();
 
 /* Clean-up stuff */
   NFPRINTF(OUTPUT, "Cleaning up...");

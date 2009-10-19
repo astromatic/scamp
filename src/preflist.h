@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	28/08/2008
+*	Last modify:	19/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -57,8 +57,8 @@ pkeystruct key[] =
   {"ASTREF_BAND", P_STRING, prefs.astref_bandname},
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
-    "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "SDSS-R3", "SDSS-R5", "SDSS-R6",
-     "SDSS-R7", "NOMAD-1", ""}},
+    "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3", "SDSS-R3", "SDSS-R5",
+     "SDSS-R6", "SDSS-R7", "NOMAD-1", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
@@ -67,7 +67,7 @@ pkeystruct key[] =
   {"ASTREFERR_KEYS", P_STRINGLIST, prefs.astreferr_key, 0,0, 0.0,0.0,
    {""}, 2, (NAXIS*(NAXIS+1))/2, &prefs.nastreferr_key},
   {"ASTREFMAG_KEY", P_STRING, prefs.astrefmag_key},
-  {"ASTREF_MAGLIM", P_FLOATLIST, prefs.astref_maglim, 0,0, -99.0,99.0,
+  {"ASTREFMAG_LIMITS", P_FLOATLIST, prefs.astref_maglim, 0,0, -99.0,99.0,
     {""}, 2, 2, &prefs.nastref_maglim},
   {"ASTRINSTRU_KEY", P_STRINGLIST, prefs.astrinstru_key, 0,0, 0.0,0.0,
    {""}, 0, 35, &prefs.nastrinstru_key},
@@ -85,8 +85,7 @@ pkeystruct key[] =
   {"CHECKPLOT_ANTIALIAS", P_BOOL, &prefs.cplot_antialiasflag},
   {"CHECKPLOT_CKEY", P_STRING, prefs.cplot_colourkey},
   {"CHECKPLOT_DEV", P_KEYLIST, prefs.cplot_device, 0,0, 0.0,0.0,
-    {"NULL", "XWIN", "TK", "XTERM", "PLMETA", "PS", "PSC", "XFIG", "LJIIP",
-	"LJ_HPGL", "IMP", "PBM", "PNG", "JPEG", "PSTEX", "AQT", "PDF", "SVG",
+    {"NULL", "XWIN", "TK", "PLMETA", "PS", "PSC", "XFIG", "PNG", "JPEG", "PSTEX", "AQT", "PDF", "SVG",
 	""},
     0, MAXCHECK, &prefs.ncplot_device},
   {"CHECKPLOT_NAME", P_STRINGLIST, prefs.cplot_name, 0,0,0.0,0.0,
@@ -189,18 +188,18 @@ char *default_prefs[] =
 "REF_SERVER         cocat1.u-strasbg.fr # Internet addresses of catalog servers",
 "*REF_PORT               1660            # Ports to connect to catalog servers",
 "*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
-"ASTREF_CATALOG         USNO-B1         # NONE, FILE, USNO-A1, USNO-A2, USNO-B1,",
-"                                       # GSC-1.3, GSC-2.2, UCAC-1, UCAC-2,",
+"ASTREF_CATALOG         USNO-B1         # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
+"                                       # GSC-1.3,GSC-2.2, UCAC-1,UCAC-2,UCAC-3",
 "                                       # NOMAD-1, 2MASS, DENIS-3,",
-"                                       # SDSS-R3, SDSS-R5, SDSS-R6 or SDSS-R7",
+"                                       # SDSS-R3,SDSS-R5,SDSS-R6 or SDSS-R7",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
-"ASTREF_MAGLIM          -99.0,99.0      # Select magnitude range in ASTREF_BAND",
 "ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",
 "ASTREFCENT_KEYS        X_WORLD,Y_WORLD # Local ref.cat.centroid parameters",
 "ASTREFERR_KEYS         ERRA_WORLD, ERRB_WORLD, ERRTHETA_WORLD",
 "                                       # Local ref.cat.error ellipse parameters",
 "ASTREFMAG_KEY          MAG             # Local ref.cat.magnitude parameter",
+"ASTREFMAG_LIMITS       -99.0,99.0      # Select magnitude range in ASTREF_BAND",
 "SAVE_REFCATALOG        N               # Save ref catalogs in FITS-LDAC format?",
 "REFOUT_CATPATH         .               # Save path for reference catalogs",
 " ",
