@@ -166,6 +166,9 @@
    <xsl:for-each select="TABLE[@ID='Warnings']">
     <xsl:call-template name="Warnings"/>
    </xsl:for-each>
+   <xsl:for-each select="/VOTABLE/RESOURCE[@ID='SCAMP']/TABLE[@ID='Merged_List']">
+    <xsl:call-template name="sources"/>
+   </xsl:for-each>
   </xsl:for-each>
  </xsl:template>
 
@@ -1262,6 +1265,43 @@
      </xsl:for-each>
     </TABLE>
    </p>
+ </xsl:template>
+
+<!-- ******************** XSL template for Merged List ******************** -->
+ <xsl:template name="sources">
+  <xsl:choose> 
+   <xsl:when test="DATA/TABLEDATA">
+    <p>
+     <BUTTON type="button" onclick="showhideTable('merged')" title="click to expand">Merged List&nbsp;&darr;
+     </BUTTON>
+     <TABLE id="merged" class="sortable" style="display: none">
+      <TR>
+       <xsl:for-each select="FIELD">
+        <TH align="center"><xsl:attribute name="title"><xsl:value-of select="DESCRIPTION"/></xsl:attribute>
+         <elh><xsl:value-of select="@name"/></elh>
+         <BR />
+         <elhi>
+          <xsl:value-of select="@unit"/>
+          <xsl:if test="@unit = ''">-</xsl:if>
+         </elhi>
+        </TH>
+       </xsl:for-each>
+      </TR>
+      <xsl:for-each select="DATA/TABLEDATA">
+       <xsl:for-each select="TR">
+        <tr>
+         <xsl:for-each select="TD">
+          <td align="right" >
+           <el><xsl:value-of select="self::TD"/></el>
+          </td>
+         </xsl:for-each>
+        </tr>
+       </xsl:for-each>
+      </xsl:for-each>
+     </TABLE>
+    </p>
+   </xsl:when>
+  </xsl:choose>  
  </xsl:template>
 
  <xsl:template name="Rest">

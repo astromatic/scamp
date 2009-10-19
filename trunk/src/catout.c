@@ -9,7 +9,7 @@
 *
 *	Contents:	Produce and write merged catalogs.
 *
-*	Last modify:	29/06/2009
+*	Last modify:	19/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -47,7 +47,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 29/06/2009
+VERSION 19/10/2009
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -75,7 +75,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
 			epoch, err2, dummy;
    char			str[80],
-			*buf;
+			*buf, *rfilename;
    int			nmag[MAXPHOTINSTRU],
 			d,f,i,k,n,p,s,nm, npinstru, naxis;
 
@@ -92,14 +92,17 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   for (k=0; refmergedkey[k].name[0]; k++)
     {
     objkeys[k] = refmergedkey[k];
+    key = objkeys+k;
 /*-- A trick to access the fields of the dynamic mergedsample structure */
-    objkeys[k].ptr += (void *)&msample - (void *)&refmergedsample;
-    add_key(&objkeys[k],objtab, 0);
+    key->ptr += (void *)&msample - (void *)&refmergedsample;
+    key->nbytes = t_size[key->ttype]*(key->naxis? *key->naxisn : 1);
+    add_key(key,objtab, 0);
     }
 /* Create a new output catalog */
   if (prefs.mergedcat_type == CAT_ASCII_HEAD
 	|| prefs.mergedcat_type == CAT_ASCII
-	|| prefs.mergedcat_type == CAT_ASCII_SKYCAT)
+	|| prefs.mergedcat_type == CAT_ASCII_SKYCAT
+	|| prefs.mergedcat_type == CAT_ASCII_VOTABLE)
     {
     cat = NULL;
     if (prefs.mergedcatpipe_flag)
@@ -116,7 +119,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
         else
           fprintf(ascfile, "# %3d %-22.22s %-58.58s\n",
                 n, key->name,key->comment);
-        n += key->naxis? 1 : *key->naxisn;
+        n += key->naxis? *key->naxisn : 1;
         }
     else if (prefs.mergedcat_type == CAT_ASCII_SKYCAT && (key = objtab->key))
       {
@@ -134,14 +137,24 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
         }
       fprintf(ascfile, "\n------------------\n");
       }
-/*
-    else if (prefs.mergedcat_type == CAT_ASCII_VO && objtab->key) 
+    else if (prefs.mergedcat_type == CAT_ASCII_VOTABLE && objtab->key) 
       {
+/*---- A short, "relative" version of the filename */
+      if (!(rfilename = strrchr(filename, '/')))
+        rfilename = filename;
+      else
+        rfilename++;
       write_xml_header(ascfile);
-      write_vo_fields(ascfile);
+      fprintf(ascfile,
+	" <TABLE ID=\"Merged_List\" name=\"%s/out\">\n", rfilename);
+      fprintf(ascfile,
+        "  <DESCRIPTION>Table of detections merged by %s</DESCRIPTION>\n",
+	BANNER);
+      fprintf(ascfile,
+        "  <!-- Now comes the definition of each %s parameter -->\n", BANNER);
+      write_vo_fields(ascfile, objtab);
       fprintf(ascfile, "   <DATA><TABLEDATA>\n");
       }
-*/
     }
   else
     {
@@ -288,6 +301,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 		|| prefs.mergedcat_type == CAT_ASCII
 		|| prefs.mergedcat_type == CAT_ASCII_SKYCAT)
             print_obj(ascfile, objtab);
+          else if (prefs.mergedcat_type == CAT_ASCII_VOTABLE)
+            voprint_obj(ascfile, objtab);
           else
             write_obj(objtab, buf);
           }
@@ -303,6 +318,15 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     if (!prefs.mergedcatpipe_flag)
       fclose(ascfile);
     }
+  else if (prefs.mergedcat_type == CAT_ASCII_VOTABLE)
+    {
+    fprintf(ascfile, "    </TABLEDATA></DATA>\n");
+    fprintf(ascfile, "  </TABLE>\n");
+/*-- Add configuration file meta-data */
+    write_xml_meta(ascfile, NULL);
+    fprintf(ascfile, "</RESOURCE>\n");
+    fprintf(ascfile, "</VOTABLE>\n");
+    }
   else
     end_writeobj(cat, objtab, buf);
 
@@ -316,4 +340,59 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
   return;
   }
+
+/****** write_vo_fields *******************************************************
+PROTO	void	write_vo_fields(FILE *file, tabstruct *objtab)
+PURPOSE	Write the list of columns to an XML-VOTable file or stream
+INPUT	Pointer to the output file (or stream),
+	Pointer to the object table.
+OUTPUT	-.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION	19/10/2009
+ ***/
+void	write_vo_fields(FILE *file, tabstruct *objtab)
+  {
+   keystruct	*key;
+   char		datatype[40], arraysize[40], str[40];
+   int		i, d;
+
+  if (!objtab || !objtab->key)
+    return;
+  key=objtab->key;
+  for (i=0; i++<objtab->nkey; key=key->nextkey)
+    {
+/*--- indicate datatype, arraysize, width and precision attributes */
+/*--- Handle multidimensional arrays */
+    arraysize[0] = '\0';
+    if (key->naxis>1)
+      {
+      for (d=0; d<key->naxis; d++)
+        {
+        sprintf(str, "%s%d", d?"x":" arraysize=\"", key->naxisn[d]);
+        strcat(arraysize, str);
+        }
+      strcat(arraysize, "\"");
+      }
+    switch(key->ttype)
+      {
+      case T_BYTE:	strcpy(datatype, "unsignedByte"); break;
+      case T_SHORT:	strcpy(datatype, "short"); break;
+      case T_LONG:	strcpy(datatype, "int"); break;
+      case T_FLOAT:	strcpy(datatype, "float"); break;
+      case T_DOUBLE:	strcpy(datatype, "double"); break;
+      default:		error(EXIT_FAILURE,
+			"*Internal Error*: Unknown datatype in ",
+			"initcat()");
+      }
+    fprintf(file,
+	"  <FIELD name=\"%s\" ucd=\"%s\" datatype=\"%s\" unit=\"%s\"%s>\n",
+	key->name, key->voucd, datatype,key->vounit, arraysize);
+    fprintf(file, "   <DESCRIPTION>%s</DESCRIPTION>\n", key->comment);
+    fprintf(file, "  </FIELD>\n");
+    }
+
+  return;
+  }
+
 
