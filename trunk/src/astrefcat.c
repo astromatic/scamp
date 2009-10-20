@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	19/10/2009
+*	Last modify:	20/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -102,7 +102,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 19/10/2009
+VERSION 20/10/2009
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -851,7 +851,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         case ASTREFCAT_SDSSR6:
         case ASTREFCAT_SDSSR7:
           sscanf(str, "%*24c %*2c %10s%10s %lf %lf %*f %lf %d %*s %lf`%lf "
-			"%lf`%lf %lf`%lf %lf`%lf ; %lf",
+			"%lf`%lf %lf`%lf %lf`%lf %lf`%lf ; %lf",
 		salpha, sdelta,
 		&poserr[lng], &poserr[lat],
 		&epoch, &nobs,
@@ -1079,7 +1079,7 @@ void	save_astreffield(char *filename,  fieldstruct *reffield)
     for (k=0; refkey[k].name[0]; k++)
       {
       objkeys[k] = refkey[k];
-      objkeys[k].ptr += (void *)&objsample - (void *)&refsample; /* a trick */
+      (char *)objkeys[k].ptr += (char *)&objsample - (char *)&refsample; /* a trick */
       add_key(&objkeys[k],objtab, 0);
       }
     init_writeobj(cat, objtab, &buf);
