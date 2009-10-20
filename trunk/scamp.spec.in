@@ -8,14 +8,14 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: ftp://ftp.iap.fr/pub/from_users/bertin/%{name}/%{name}-%{version}.tar.gz
-URL: http://terapix.iap.fr/soft/%{name}/
+URL: http://astromatic.iap.fr/software/%{name}/
 License: CeCILL
 Group: Sciences/Astronomy
 BuildRoot: %{_tmppath}/%{name}-buildroot
 BuildRequires: pkgconfig
 BuildRequires: fftw-devel >= 3.1
 BuildRequires: atlas-devel >= 3.6.0
-BuildRequires: plplot-devel >= 5.3.1
+BuildRequires: plplot-devel >= 5.9.1
 
 %description
 SCAMP is a program that computes astrometric and photometric solutions from

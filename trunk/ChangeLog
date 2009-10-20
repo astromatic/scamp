@@ -9,10 +9,259 @@
 *
 *       Contents:       log of changes made to the SCAMP source
 *
-*       Last modify:    31/05/2008
+*       Last modify:    20/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
+
+------------------------------------------------------------------------
+r220 | bertin | 2009-10-20 17:47:10 +0200 (Tue, 20 Oct 2009) | 4 lines
+
+Fixed compilation warnings in astrefcat.c and catout.c
+Fixed SDSS z-band magnitude reading bug.
+Pushed version number to 1.6.2.
+
+------------------------------------------------------------------------
+r219 | bertin | 2009-10-19 19:26:21 +0200 (Mon, 19 Oct 2009) | 8 lines
+
+Added support for UCAC-3 reference catalogues.
+Dropped obsoleted PLPlot output image formats (XTerm,PBM,LHPGL,IMP).
+Added support for ASCII_VOTABLE merged catalogue output.
+Fixed crashes with merged catalogue ASCII outputs.
+Added support for merged lists in XSL stylesheet.
+Updated documentation.
+Pushed version number to 1.6.1.
+
+------------------------------------------------------------------------
+r218 | bertin | 2009-10-02 13:45:46 +0200 (Fri, 02 Oct 2009) | 6 lines
+
+Fixed warnings while generating the configure (thanks to S.Pascual).
+Added support for SDSS-R7 astrometric reference catalogue.
+Fixed catalogue read bug with some SDSS sources.
+Added ASTREF_MAGLIM configuration parameters to select astrometric references
+within a specific magnitude range.
+Pushed version number to 1.6.0.
+
+------------------------------------------------------------------------
+r217 | bertin | 2009-09-10 15:23:03 +0200 (Thu, 10 Sep 2009) | 2 lines
+
+Went back to using plimage() and plsetopts() straight without trying to fool
+around with dynamic libraries (kills compatibility with older PLplot 
+versions unfortunately).
+
+------------------------------------------------------------------------
+r216 | bertin | 2009-09-09 17:53:39 +0200 (Wed, 09 Sep 2009) | 5 lines
+
+Added --enable-auto-flags.
+Added --enable-best-link configure option.
+Added rpm-best option in Makefile.am.
+Cleaned up configure file.
+
+------------------------------------------------------------------------
+r215 | bertin | 2009-08-30 19:16:41 +0200 (Sun, 30 Aug 2009) | 2 lines
+
+Fixed portability issue with the RPM version of PLplot (no gd).
+
+------------------------------------------------------------------------
+r214 | bertin | 2009-08-28 22:29:29 +0200 (Fri, 28 Aug 2009) | 3 lines
+
+Fixed issue with libltdl on the binary version.
+Fixed pb with plplot library version.
+
+------------------------------------------------------------------------
+r213 | bertin | 2009-08-27 23:48:24 +0200 (Thu, 27 Aug 2009) | 3 lines
+
+Prepared code for ASCII merged catalogue output.
+Pushed version number to 1.5.9.
+
+------------------------------------------------------------------------
+r212 | bertin | 2009-06-29 15:50:31 +0200 (Mon, 29 Jun 2009) | 2 lines
+
+Removed Valgrind warning in astrprop_fgroup().
+
+------------------------------------------------------------------------
+r211 | bertin | 2009-06-26 17:03:39 +0200 (Fri, 26 Jun 2009) | 8 lines
+
+Replaced configuration error with warning if FFTW is not multithreaded and
+multithreading has been activated (the default).
+Added autoconfig support for FFTW multithreaded versions combined in libfftw3.
+Added runtime warning if ATLAS is not multithreaded and multithreading is on.
+Added the possibility to select a specific band in reference astrometric
+catalog file.
+Fixed warning with plParseOpts().
+Improved log display.
+Pushed version number to 1.5.8.
+
+------------------------------------------------------------------------
+r210 | bertin | 2009-06-25 18:43:50 +0200 (Thu, 25 Jun 2009) | 2 lines
+
+Made parallel version of ATLAS not mandatory for the multithread option.
+
+------------------------------------------------------------------------
+r209 | bertin | 2009-06-25 17:01:45 +0200 (Thu, 25 Jun 2009) | 3 lines
+
+Improved and completed merged output catalogue (can now be used directly
+as an input reference catalogue).
+Pushed version number to  1.5.7.
+
+------------------------------------------------------------------------
+r208 | bertin | 2009-06-19 19:11:21 +0200 (Fri, 19 Jun 2009) | 3 lines
+
+Fixed compatibility problems of older PLPlot versions with plparseopt().
+Pushed version number to 1.5.6.
+
+------------------------------------------------------------------------
+r207 | bertin | 2009-05-22 14:30:02 +0200 (Fri, 22 May 2009) | 3 lines
+
+Added filtering of non-numerical characters for floating-point FITS keywords
+(thanks to D.G. Bonfield for the suggestion).
+Included Chiara's MissFITS fix in fitspick().
+
+------------------------------------------------------------------------
+r205 | bertin | 2009-04-10 21:31:31 +0200 (Fri, 10 Apr 2009) | 3 lines
+
+Fixed plimage() issue with older versions of PLplot library.
+Version number pushed to 1.5.5.
+
+------------------------------------------------------------------------
+r204 | bertin | 2009-04-09 11:15:49 +0200 (Thu, 09 Apr 2009) | 1 line
+
+Pushed version number to 1.5.4.
+------------------------------------------------------------------------
+r203 | bertin | 2009-04-01 18:53:27 +0200 (Wed, 01 Apr 2009) | 2 lines
+
+More junk cleaning.
+
+------------------------------------------------------------------------
+r202 | bertin | 2009-04-01 18:16:35 +0200 (Wed, 01 Apr 2009) | 2 lines
+
+Had forgotten to regenerate configure file.
+
+------------------------------------------------------------------------
+r201 | bertin | 2009-04-01 18:08:19 +0200 (Wed, 01 Apr 2009) | 2 lines
+
+Forgot an attribute in <script />.
+
+------------------------------------------------------------------------
+r200 | bertin | 2009-04-01 18:04:48 +0200 (Wed, 01 Apr 2009) | 4 lines
+
+Fixed icc 11 compilations options on x86-64 architecture.
+Cleaned up obsolete references.
+Added favicon to XSLT filter.
+
+------------------------------------------------------------------------
+r199 | bertin | 2009-04-01 13:36:48 +0200 (Wed, 01 Apr 2009) | 2 lines
+
+Updated XSLT filter (AstrOmatic theme).
+
+------------------------------------------------------------------------
+r195 | bertin | 2009-03-23 19:38:10 +0100 (Mon, 23 Mar 2009) | 7 lines
+
+Cleaned up Makefile.am RPM options.
+Fixed rpm build issue on Fedora Core 10.
+Fixed display of max thread number in configure help.
+Updated icc compilation flags to 11.0 syntax.
+Set the license string to CeCILL in the .spec file.
+Pushed version number to 1.5.3.
+
+------------------------------------------------------------------------
+r194 | bertin | 2009-02-27 18:54:17 +0100 (Fri, 27 Feb 2009) | 1 line
+
+Removed PLPlot warnings.
+------------------------------------------------------------------------
+r193 | bertin | 2009-02-20 20:08:18 +0100 (Fri, 20 Feb 2009) | 5 lines
+
+Fixed bug which would cause the mapping to depend on the ordering of PVs.
+Changed software license to CeCILL (French equivalent of GPL).
+Fixed SDSS-R6 catalog query (SDSS-R5 was queried instead, thanks J.Moustakas).
+Pushed version number to 1.5.2.
+
+------------------------------------------------------------------------
+r192 | bertin | 2009-02-01 20:30:29 +0100 (Sun, 01 Feb 2009) | 2 lines
+
+Added filtering of sources with negative fluxes or saturated in colour-shift
+estimates.
+
+------------------------------------------------------------------------
+r191 | bertin | 2009-01-18 23:04:13 +0100 (Sun, 18 Jan 2009) | 1 line
+
+Set documentation mime-type.
+------------------------------------------------------------------------
+r189 | root | 2009-01-09 17:24:37 +0100 (Fri, 09 Jan 2009) | 1 line
+
+Changed trunk directory name
+------------------------------------------------------------------------
+r188 | bertin | 2008-10-06 00:57:45 +0200 (Mon, 06 Oct 2008) | 3 lines
+
+Added merged catalogue output.
+Added simple computation of formal proper motion errors.
+
+------------------------------------------------------------------------
+r187 | bertin | 2008-10-01 19:11:48 +0200 (Wed, 01 Oct 2008) | 2 lines
+
+Updated FITS library to the latest version.
+
+------------------------------------------------------------------------
+r186 | bertin | 2008-10-01 18:20:50 +0200 (Wed, 01 Oct 2008) | 2 lines
+
+Fixed superfluous -static-intel LDFLAGS in compiler optimization script.
+
+------------------------------------------------------------------------
+r185 | bertin | 2008-10-01 16:09:30 +0200 (Wed, 01 Oct 2008) | 2 lines
+
+Added rpm-icc target.
+
+------------------------------------------------------------------------
+r184 | bertin | 2008-10-01 15:58:30 +0200 (Wed, 01 Oct 2008) | 4 lines
+
+Updated autotools scripts (thanks to Greg Daues for pointing this out).
+Updated compiler autoconfiguration script.
+Version is now 1.5.1.
+
+------------------------------------------------------------------------
+r183 | bertin | 2008-09-01 17:46:20 +0200 (Mon, 01 Sep 2008) | 2 lines
+
+Cleaned up configure script a bit.
+
+------------------------------------------------------------------------
+r182 | bertin | 2008-08-29 17:11:56 +0200 (Fri, 29 Aug 2008) | 2 lines
+
+Fixed duplicated libraries in link line.
+
+------------------------------------------------------------------------
+r181 | bertin | 2008-08-28 18:43:59 +0200 (Thu, 28 Aug 2008) | 6 lines
+
+Redesigned completely configure and RPM scripts to support dynamic linking
+with ATLAS, FFTW and PLPlot by default (finally gave up on static linking).
+Fixed various issues with FFTW and PLPlot autoconfiguration scripts.
+The RPM archive code is now systematically multithreaded.
+Added support for PDF and SVG plot outputs.
+Pushed version number to 1.5.0.
+
+------------------------------------------------------------------------
+r180 | bertin | 2008-08-26 16:38:33 +0200 (Tue, 26 Aug 2008) | 2 lines
+
+Fixed issue with detection of the threaded FFTW library.
+
+------------------------------------------------------------------------
+r179 | bertin | 2008-08-02 16:40:00 +0200 (Sat, 02 Aug 2008) | 2 lines
+
+Added a specific RPM build command-line to allow proper static linking of
+libraries like PlPlot while maintaining dynamic linking for libgcc and
+libpthread.
+
+------------------------------------------------------------------------
+r178 | bertin | 2008-07-30 20:36:43 +0200 (Wed, 30 Jul 2008) | 3 lines
+
+Fixed overflows of internal chi2s on huge data samples (# of associations
+>2^31) and the consequences of check-plots.
+Pushed version number to 1.4.7.
+
+------------------------------------------------------------------------
+r177 | bertin | 2008-07-25 20:57:13 +0200 (Fri, 25 Jul 2008) | 3 lines
+
+Replaced byte-swapping routine with a "safer" version.
+Added Aquaterm support in Check-plots.
 
 ------------------------------------------------------------------------
 r721 | bertin | 2008-05-31 21:01:02 +0200 (Sat, 31 May 2008) | 3 lines
@@ -37,7 +286,7 @@ r716 | bertin | 2008-04-02 14:56:45 +0200 (Wed, 02 Apr 2008) | 2 lines
 Merged --with-plplot and --without-plplot options in one single AC_ARG_WITH
 (Greg Daues' suggestion).
 
--------------------------------------------------------------------------------------
+------------------------------------------------------------------------
 r715 | bertin | 2008-03-27 16:22:11 +0100 (Thu, 27 Mar 2008) | 3 lines
 
 Added -shared-libgcc to LDFLAGS in RPM make recipes to avoid "Kernel too old"
