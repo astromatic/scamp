@@ -94,7 +94,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     objkeys[k] = refmergedkey[k];
     key = objkeys+k;
 /*-- A trick to access the fields of the dynamic mergedsample structure */
-    key->ptr += (void *)&msample - (void *)&refmergedsample;
+    (char *)key->ptr += (char *)&msample - (char *)&refmergedsample;
     key->nbytes = t_size[key->ttype]*(key->naxis? *key->naxisn : 1);
     add_key(key,objtab, 0);
     }
