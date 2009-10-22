@@ -9,7 +9,7 @@
 *
 *	Contents:	Produce and write merged catalogs.
 *
-*	Last modify:	19/10/2009
+*	Last modify:	22/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -76,6 +76,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			epoch, err2, dummy;
    char			str[80],
 			*buf, *rfilename;
+   long			dptr;
    int			nmag[MAXPHOTINSTRU],
 			d,f,i,k,n,p,s,nm, npinstru, naxis;
 
@@ -89,12 +90,13 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   objtab = new_tab("LDAC_OBJECTS");
 /* Set key pointers */
   QCALLOC(objkeys, keystruct, (sizeof(refmergedkey) / sizeof(keystruct)));
+  dptr = (long)((char *)&msample - (char *)&refmergedsample);
   for (k=0; refmergedkey[k].name[0]; k++)
     {
     objkeys[k] = refmergedkey[k];
     key = objkeys+k;
 /*-- A trick to access the fields of the dynamic mergedsample structure */
-    (char *)key->ptr += (char *)&msample - (char *)&refmergedsample;
+    key->ptr = (void *)((char *)key->ptr + dptr);
     key->nbytes = t_size[key->ttype]*(key->naxis? *key->naxisn : 1);
     add_key(key,objtab, 0);
     }

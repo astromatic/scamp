@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	20/10/2009
+*	Last modify:	22/10/2009
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -1009,7 +1009,7 @@ INPUT   Catalog name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 21/12/2004
+VERSION 22/10/2009
 */
 void	save_astreffield(char *filename,  fieldstruct *reffield)
   {
@@ -1028,6 +1028,7 @@ void	save_astreffield(char *filename,  fieldstruct *reffield)
   samplestruct	*sample,
 		objsample;
   char		*buf;
+  long		dptr;
   int		i,k,n,s;
 
 /* Create a new output catalog */
@@ -1076,10 +1077,11 @@ void	save_astreffield(char *filename,  fieldstruct *reffield)
     objtab->cat = cat;
 /*-- Set key pointers */
     QCALLOC(objkeys, keystruct, (sizeof(refkey) / sizeof(keystruct)));
+    dptr = (long)((char *)&objsample - (char *)&refsample);
     for (k=0; refkey[k].name[0]; k++)
       {
       objkeys[k] = refkey[k];
-      (char *)objkeys[k].ptr += (char *)&objsample - (char *)&refsample; /* a trick */
+      objkeys[k].ptr = (void *)((char *)objkeys[k].ptr + dptr); /* a trick */
       add_key(&objkeys[k],objtab, 0);
       }
     init_writeobj(cat, objtab, &buf);
