@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.6.2, [bertin@iap.fr])
+AC_INIT(scamp, 1.6.3, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -85,6 +85,8 @@ fi
 AC_C_CONST
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
+AC_TYPE_LONG_LONG_INT
+AC_TYPE_UNSIGNED_LONG_LONG_INT
 AC_STRUCT_TM
 AC_TYPE_UID_T
 
