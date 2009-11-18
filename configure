@@ -24291,7 +24291,7 @@ fi
     if test x$acx_fftw_ok = xyes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define FFTW_H "fftw.h"
+#define FFTW_H "fftw3.h"
 _ACEOF
 
     else
@@ -24590,7 +24590,7 @@ fi
     if test x$acx_fftw_ok = xyes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define FFTW_H "$fftw_libdir/include/fftw3.h"
+#define FFTW_H $fftw_libdir"/include/fftw3.h
 _ACEOF
 
     else
@@ -24734,7 +24734,7 @@ fi
       if test x$acx_fftw_ok = xyes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define FFTW_H "fftw.h"
+#define FFTW_H "fftw3.h"
 _ACEOF
 
       else
@@ -24889,7 +24889,7 @@ fi
 
   if test x$acx_fftw_ok = xyes; then
 
-cat >>confdefs.h <<\_ACEOF
+cat >>confdefs.h <<_ACEOF
 #define FFTW_H "$fftw_incdir/fftw3.h"
 _ACEOF
 
