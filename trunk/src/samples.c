@@ -794,7 +794,7 @@ OUTPUT  -.
 NOTES   Memory for the new samples is reallocated if needed. All input data are
 	reordered.
 AUTHOR  E. Bertin (IAP)
-VERSION 28/12/2004
+VERSION 02/03/2010
 */
 void	union_samples(samplestruct *samplein, setstruct *set,
 		int nsamplein, double radius, unionmodenum mode)
@@ -947,6 +947,7 @@ void	union_samples(samplestruct *samplein, setstruct *set,
 						set->ncontext*sizeof(double));
           *sample3 = *samplein;
           sample3->context = context;
+          sample3->set = set;
           sample3++;
           n3++;
           }
