@@ -9,7 +9,7 @@
 *
 *       Contents:       Pattern matching routines
 *
-*       Last modify:    10/09/2009
+*       Last modify:    16/02/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -73,7 +73,7 @@ INPUT	ptr to the field to be matched,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	16/02/2010
  ***/
 void	match_field(fieldstruct *field, fieldstruct *reffield)
   {
@@ -173,7 +173,7 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       match_refine(set, refset2, matchresol,
 	&dangle, &dscale, &sangle, &shear, &ddlng, &ddlat);
 /*---- Apply refinement */
-      update_wcsas(set->wcs, set->wcs->chirality*dangle, dscale);
+      update_wcsas(set->wcs, dangle, dscale);
       update_wcsss(set->wcs, sangle, shear);
       update_wcscc(set->wcs, -ddlng, -ddlat);
       end_set(refset2);
@@ -300,7 +300,7 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       {
       set = field->set[i];
       update_wcsas(set->wcs, dangle, dscale);
-      update_wcsss(set->wcs, set->wcs->chirality*sangle, shear);
+      update_wcsss(set->wcs, sangle, shear);
       update_wcsll(set->wcs, -ddlng, -ddlat);
       locate_set(set);
       }
@@ -1147,7 +1147,7 @@ void	match_refine(setstruct *set, setstruct *refset, double matchresol,
 		sig, rlim, r2,r2min, reflng,reflat,
 		lng1,lat1,lng2,lat2, latmin,latmax,
 		dlng12,dlat12, wi, x,y, det,
-		a11,a12,a21,a22, b11, c11,c12,c21,c22;
+		a11,a12,a21,a22, b11,b12,b21,b22, c11,c12,c21,c22;
    int		d,i, nrefsample, nsample, nsamp2, nsamp2b, lng,lat,
 		naxis;
 
@@ -1269,8 +1269,8 @@ void	match_refine(setstruct *set, setstruct *refset, double matchresol,
         alpha[4] += wi*lat2*lat2;
         alpha[5] += wi*lat2;
         alpha[8] += wi;
-        dlng12 = lng2 - lng1;
-        dlat12 = lat2 - lat1;
+        dlng12 = lng1 - lng2;
+        dlat12 = lat1 - lat2;
         blng[0] += wi*lng2*dlng12;
         blng[1] += wi*lat2*dlng12;
         blng[2] += wi*dlng12;
@@ -1306,11 +1306,15 @@ void	match_refine(setstruct *set, setstruct *refset, double matchresol,
       }
 
 /*-- Replace A with the A' matrix such as A'.CD = CD.A, that is A' = CD.A.CD-1 */
-    b11 = a22/det;
-    a12 = -a12/det;
-    a21 = -a21/det;
-    a22 = a11/det;
-    a11 = b11;
+    det = c11*c22 - c12*c21;
+    b11 = (a11*c22-a12*c21)/det;
+    b12 = (a12*c11-a11*c12)/det;
+    b21 = (a21*c22-a22*c21)/det;
+    b22 = (a22*c11-a21*c12)/det;
+    a11 = c11*b11+c12*b21;
+    a12 = c11*b12+c12*b22;
+    a21 = c21*b11+c22*b21;
+    a22 = c21*b12+c22*b22;
 
     x = sqrt((a11+a22)*(a11+a22) + (a12-a21)*(a12-a21));
     y = sqrt((a11-a22)*(a11-a22) + (a12+a21)*(a12+a21));
@@ -1323,8 +1327,8 @@ void	match_refine(setstruct *set, setstruct *refset, double matchresol,
 /*-- The new CRVAL corresponds approximately to a shifted raw coordinate */
     for (d=0; d<naxis; d++)
       rawpos[d] = wcs->crpix[d];
-    rawpos[lng] += blng[2];
-    rawpos[lat] += blat[2];
+    rawpos[lng] -= blng[2];
+    rawpos[lat] -= blat[2];
     raw_to_wcs(wcs, rawpos, wcspos);
 
     *dlng = wcspos[lng] - wcs->crval[lng];
@@ -1441,7 +1445,7 @@ INPUT	ptr to the WCS structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/09/2006
+VERSION	16/02/2010
  ***/
 void	update_wcsas(wcsstruct *wcs, double angle, double scale)
   {
@@ -1459,12 +1463,12 @@ void	update_wcsas(wcsstruct *wcs, double angle, double scale)
 
   c = wcs->cd;
 
-/* A = C*B */
+/* A = B*C */
 /* The B matrix is made of 2 numbers */
   fascale = fabs(scale);
   sgn = (scale<0.0)? -1.0 : 1.0;
-  if (wcs->chirality < 0)
-    angle = -angle;
+//  if (wcs->chirality < 0)
+//    angle = -angle;
   cas = cos(angle*DEG)*fascale;
   sas = sin(angle*DEG)*fascale;
   for (i=0; i<naxis; i++)
@@ -1479,7 +1483,7 @@ void	update_wcsas(wcsstruct *wcs, double angle, double scale)
       {
       val = 0.0;
       for (k=0; k<naxis; k++)
-        val += c[k+j*naxis]*b[i+k*naxis];
+        val += b[k+j*naxis]*c[i+k*naxis];
       *(at++) = val;
       }
 
@@ -1507,7 +1511,7 @@ INPUT	ptr to the WCS structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/05/2005
+VERSION	16/02/2010
  ***/
 void	update_wcsss(wcsstruct *wcs, double sangle, double ratio)
   {
@@ -1524,7 +1528,7 @@ void	update_wcsss(wcsstruct *wcs, double sangle, double ratio)
     return;
 
   c = wcs->cd;
-/* A = C*B */
+/* A = B*C */
 /* The B matrix is made of 2 numbers */
   cas = cos(2*sangle*DEG);
   sas = sin(2*sangle*DEG);
@@ -1539,7 +1543,7 @@ void	update_wcsss(wcsstruct *wcs, double sangle, double ratio)
       {
       val = 0.0;
       for (k=0; k<naxis; k++)
-        val += c[k+j*naxis]*b[i+k*naxis];
+        val += b[k+j*naxis]*c[i+k*naxis];
       *(at++) = val;
       }
 
@@ -1653,7 +1657,7 @@ INPUT	ptr to the WCS structure,
 OUTPUT	-.
 NOTES	The new celestial position is an approximation of the exact one.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/01/2004
+VERSION	16/02/2010
  ***/
 void	update_wcsll(wcsstruct *wcs, double dlng, double dlat)
   {
@@ -1687,7 +1691,7 @@ void	update_wcsll(wcsstruct *wcs, double dlng, double dlat)
 	- sin(wcspos[lat]*DEG)*cos(dalpha)))/DEG
 	: 0.0;
 
-/* A = C*B */
+/* A = B*C */
   c = wcs->cd;
 /* The B matrix is made of 2 numbers */
   cas = cos(-angle*DEG);
@@ -1705,7 +1709,7 @@ void	update_wcsll(wcsstruct *wcs, double dlng, double dlat)
       {
       val = 0.0;
       for (k=0; k<naxis; k++)
-        val += c[k+j*naxis]*b[i+k*naxis];
+        val += b[k+j*naxis]*c[i+k*naxis];
       *(at++) = val;
       }
 
