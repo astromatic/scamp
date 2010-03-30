@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for refcat.c.
 *
-*	Last modify:	19/10/2009
+*	Last modify:	30/03/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -37,17 +37,18 @@
 #define		USNOA2_BMAGERR	0.40
 #define		USNOB1_BMAGERR	0.40
 #define         NOMAD1_MAGERR   0.30
+#define         GSC_MAGERR	0.20
 
 #define		ASTREF_ASSOCRADIUS	(0.2*ARCSEC/DEG)
 
 /*--------------------------------- typedefs --------------------------------*/
 typedef enum {ASTREFCAT_NONE, ASTREFCAT_FILE,
 		ASTREFCAT_USNOA1, ASTREFCAT_USNOA2, ASTREFCAT_USNOB1,
-		ASTREFCAT_GSC1, ASTREFCAT_GSC2,
+		ASTREFCAT_GSC1, ASTREFCAT_GSC22, ASTREFCAT_GSC23,
 		ASTREFCAT_2MASS, ASTREFCAT_DENIS3,
 		ASTREFCAT_UCAC1, ASTREFCAT_UCAC2, ASTREFCAT_UCAC3,
 		ASTREFCAT_SDSSR3, ASTREFCAT_SDSSR5, ASTREFCAT_SDSSR6,
-		ASTREFCAT_SDSSR7, ASTREFCAT_NOMAD1}
+		ASTREFCAT_SDSSR7, ASTREFCAT_NOMAD1, ASTREFCAT_PPMX}
 			astrefenum;
 
 typedef struct

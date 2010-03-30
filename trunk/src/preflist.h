@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	19/10/2009
+*	Last modify:	30/03/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -57,8 +57,8 @@ pkeystruct key[] =
   {"ASTREF_BAND", P_STRING, prefs.astref_bandname},
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
-    "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3", "SDSS-R3", "SDSS-R5",
-     "SDSS-R6", "SDSS-R7", "NOMAD-1", ""}},
+    "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3",
+     "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "NOMAD-1", "PPMX", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
@@ -186,11 +186,12 @@ char *default_prefs[] =
 "#---------------------------- Reference catalogs ------------------------------",
 " ",
 "REF_SERVER         cocat1.u-strasbg.fr # Internet addresses of catalog servers",
-"*REF_PORT               1660            # Ports to connect to catalog servers",
+"*REF_PORT               80              # Ports to connect to catalog servers",
 "*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
 "ASTREF_CATALOG         USNO-B1         # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
-"                                       # GSC-1.3,GSC-2.2, UCAC-1,UCAC-2,UCAC-3",
-"                                       # NOMAD-1, 2MASS, DENIS-3,",
+"                                       # GSC-1.3,GSC-2.2,GSC-2.3,",
+"                                       # UCAC-1,UCAC-2,UCAC-3",
+"                                       # NOMAD-1, PPMX, 2MASS, DENIS-3,",
 "                                       # SDSS-R3,SDSS-R5,SDSS-R6 or SDSS-R7",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
