@@ -6,7 +6,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.6.5, [bertin@iap.fr])
+AC_INIT(scamp, 1.7.0, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -161,7 +161,7 @@ AC_ARG_WITH(cdsclient_exec,
 	[AC_HELP_STRING([--with-cdsclient_exec=<aclient executable>],
 	[Provide an alternative default path to the aclient executable])],
     cdsclient_exec="$withval",
-    cdsclient_exec="aclient"
+    cdsclient_exec="aclient_cgi"
     )
 
 # Provide a special option for the default XSLT URL

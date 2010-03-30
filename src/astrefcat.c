@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	22/10/2009
+*	Last modify:	30/03/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -62,7 +62,9 @@ astrefstruct	astrefcat[] =
   {"USNO-A2.0", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
   {"USNO-B1.0", 3, 0, {"Bj", "Rf", "In",""}, {"B1", "R1", "I",""}},
   {"GSC-1.3", 1, 0, {"V",""}, {"V",""}},
-  {"GSC-2.2", 4, 1, {"Bj", "V", "Rf", "In",""}, {"F", "J", "V", "N",""}},
+  {"GSC-2.2", 4, 0, {"Bj", "V", "Rf", "In",""}, {"F", "J", "V", "N",""}},
+  {"GSC-2.3", 6, 2, {"U", "B", "Bj", "V", "Rf", "In", ""},
+			{"U", "B", "F", "J", "V", "N", ""}},
   {"2MASS", 3, 0, {"J", "H", "Ks",""}, {"J", "H", "K",""}},
   {"DENIS-3", 3, 0, {"i", "J", "Ks",""}, {"I", "J", "K",""}},
   {"UCAC-1", 1, 0, {"R",""}, {"R",""}},
@@ -74,14 +76,11 @@ astrefstruct	astrefcat[] =
   {"SDSS-R7", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
   {"NOMAD-1.0", 6, 2, {"B", "V", "R", "J", "H", "Ks",""},
 			{"B", "V", "R", "J", "H", "K",""}},
+  {"PPMX", 7, 3, {"B", "V", "R", "Rf", "J", "H", "Ks",""},
+			{"B", "V", "R", "C", "J", "H", "K",""}},
   {""}
  };
 
-/*
-const char	astrefcatname[][16] = {"NONE", "file",
-		"USNO-A1.0","USNO-A2.0", "USNO-B1.0", "GSC-1.3","GSC-2.2",
-		"2MASS", "UCAC-1","UCAC-2", "SDSS-R3"},
-*/
 const char	astref_ctype[NAXIS][8]= {"RA---STG", "DEC--STG"};
 
 const double	astref_crpix[NAXIS] = {8192.5, 8192.5},
@@ -102,7 +101,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 20/10/2009
+VERSION 30/03/2010
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -112,7 +111,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    samplestruct	*sample;
    FILE		*file;
    char		*ctype[NAXIS],
-		cmdline[MAXCHAR], str[MAXCHAR],
+		cmdline[MAXCHAR], str[MAXCHAR],sport[16],
 		salpha[32],sdelta[32],
 		smag[MAX_BAND][32],smagerr[MAX_BAND][32],sproperr[NAXIS][32],
 		sflag[4],
@@ -127,6 +126,11 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 /* One needs 2 angular coordinates here! */
   if (naxis<2)
     return NULL;
+
+  if (prefs.ref_port[0]==80 || prefs.ref_port[0]==0)
+    sprintf(sport,"");
+  else
+    sprintf(sport, " %d", prefs.ref_port[0]);
 
 /* If these are not angular coordinates, file mode becomes mandatory */
   if (lng == lat && refcat!=ASTREFCAT_FILE)
@@ -200,10 +204,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     case ASTREFCAT_USNOA1:
       if (maglimflag)
         sprintf(cmdline,
-	"%s %s %d pmm1 -e7 -sr -c %s %s -r %16g -l%s %f,%f -m 10000000 -si",
+	"%s %s%s pmm1 -e7 -sr -c %s %s -r %16g -l%s %f,%f -m 10000000 -si",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
@@ -211,10 +215,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		prefs.astref_maglim[1]);
       else	
         sprintf(cmdline,
-	"%s %s %d pmm1 -e7 -sr -c %s %s -r %16g -m 10000000 -si",
+	"%s %s%s pmm1 -e7 -sr -c %s %s -r %16g -m 10000000 -si",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -228,10 +232,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     case ASTREFCAT_USNOA2:
       if (maglimflag)
         sprintf(cmdline,
-	"%s %s %d pmm2 -e7 -sr -c %s %s -r %16g -l%s %f,%f -m 10000000 -si",
+	"%s %s%s pmm2 -e7 -sr -c %s %s -r %16g -l%s %f,%f -m 10000000 -si",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
@@ -239,10 +243,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		prefs.astref_maglim[1]);
       else
         sprintf(cmdline,
-	"%s %s %d pmm2 -e7 -sr -c %s %s -r %16g -m 10000000 -si",
+	"%s %s%s pmm2 -e7 -sr -c %s %s -r %16g -m 10000000 -si",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -255,20 +259,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_USNOB1:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d usnob1 -c %s %s -r %16g -lm%s %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s usnob1 -c %s %s -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d usnob1 -c %s %s -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s usnob1 -c %s %s -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
 
@@ -283,20 +287,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     case ASTREFCAT_GSC1:
       if (maglimflag)
         sprintf(cmdline,
-	"%s %s %d gsc1.3 -c %s %s -r %16g -lm %f,%f  -n 10000000 -s 5",
+	"%s %s%s gsc1.3 -c %s %s -r %16g -lm %f,%f  -n 10000000 -s 5",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
         sprintf(cmdline,
-	"%s %s %d gsc1.3 -c %s %s -r %16g -n 10000000 -s 5",
+	"%s %s%s gsc1.3 -c %s %s -r %16g -n 10000000 -s 5",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -307,13 +311,13 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       for (i=2; i--;)			/* Skip the first 2 lines */
         fgets(str, MAXCHAR, file);
       break;
-    case ASTREFCAT_GSC2:
+    case ASTREFCAT_GSC22:
       if (maglimflag)
         sprintf(cmdline,
-		"%s %s %d gsc2.2 -c %s %s -r %16g -l%s %f,%f -m 10000000",
+		"%s %s%s gsc2.2 -c %s %s -r %16g -l%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
@@ -321,10 +325,38 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		prefs.astref_maglim[1]);
       else
         sprintf(cmdline,
-		"%s %s %d gsc2.2 -c %s %s -r %16g -m 10000000",
+		"%s %s%s gsc2.2 -c %s %s -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
+		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
+		maxradius*DEG/ARCMIN);
+      sprintf(str,"Querying %s at %s for astrometric reference stars...",
+	catname,
+	prefs.ref_server[0]);
+      NFPRINTF(OUTPUT, str);
+      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
+      for (i=2; i--;)			/* Skip the first 2 lines */
+        fgets(str, MAXCHAR, file);
+      break;
+    case ASTREFCAT_GSC23:
+      if (maglimflag)
+        sprintf(cmdline,
+		"%s %s%s gsc2.3 -c %s %s -r %16g -l%s %f,%f -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
+		maxradius*DEG/ARCMIN,
+		cdsbandname,
+		prefs.astref_maglim[0],
+		prefs.astref_maglim[1]);
+      else
+        sprintf(cmdline,
+		"%s %s%s gsc2.3 -c %s %s -r %16g -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -338,10 +370,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     case ASTREFCAT_2MASS:
       if (maglimflag)
         sprintf(cmdline,
-	"%s %s %d find2m -c %f12,%+f12 -r %16g -l%s %f,%f -m 10000000",
+	"%s %s%s find2m -c %f12,%+f12 -r %16g -l%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
@@ -349,10 +381,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		prefs.astref_maglim[1]);
       else
         sprintf(cmdline,
-	"%s %s %d find2m -c %f12,%+f12 -r %16g -m 10000000",
+	"%s %s%s find2m -c %f12,%+f12 -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -366,10 +398,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     case ASTREFCAT_DENIS3:
       if (maglimflag)
         sprintf(cmdline,
-		"%s %s %d denis3 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
+		"%s %s%s denis3 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
@@ -377,10 +409,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		prefs.astref_maglim[1]);
       else
         sprintf(cmdline,
-		"%s %s %d denis3 -c %f12,%+f12 -r %16g -m 10000000",
+		"%s %s%s denis3 -c %f12,%+f12 -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -393,19 +425,19 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_UCAC1:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d ucac1 -c %s %s -r %16g -lm %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s ucac1 -c %s %s -r %16g -lm %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d ucac1 -c %s %s -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s ucac1 -c %s %s -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -418,19 +450,19 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_UCAC2:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d ucac2 -c %s %s -r %16g -lm %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s ucac2 -c %s %s -r %16g -lm %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d ucac2 -c %s %s -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s ucac2 -c %s %s -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -443,19 +475,19 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_UCAC3:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d ucac3 -c %s %s -r %16g -lm %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s ucac3 -c %s %s -r %16g -lm %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d ucac3 -c %s %s -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s ucac3 -c %s %s -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -468,20 +500,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_SDSSR3:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d sdss3 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss3 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d sdss3 -c %f12 %+f12 -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss3 -c %f12 %+f12 -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -494,20 +526,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_SDSSR5:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d sdss5 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss5 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d sdss5 -c %f12 %+f12 -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss5 -c %f12 %+f12 -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -520,20 +552,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_SDSSR6:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d sdss6 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss6 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d sdss6 -c %f12 %+f12 -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss6 -c %f12 %+f12 -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -546,20 +578,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_SDSSR7:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d sdss7 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss7 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d sdss7 -c %f12 %+f12 -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s sdss7 -c %f12 %+f12 -r %16g -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -572,20 +604,20 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       break;
     case ASTREFCAT_NOMAD1:
       if (maglimflag)
-        sprintf(cmdline, "%s %s %d nomad1 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
+        sprintf(cmdline, "%s %s%s nomad1 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
 		prefs.cdsclient_path,
 		prefs.ref_server[0],
-		prefs.ref_port[0],
+		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN,
 		cdsbandname,
 		prefs.astref_maglim[0],
 		prefs.astref_maglim[1]);
       else
-        sprintf(cmdline, "%s %s %d nomad1 -c %f12,%+f12 -r %16g -m 10000000",
+        sprintf(cmdline, "%s %s%s nomad1 -c %f12,%+f12 -r %16g -m 10000000",
 	      prefs.cdsclient_path,
 	      prefs.ref_server[0],
-	      prefs.ref_port[0],
+	      sport,
 	      wcspos[lng], wcspos[lat],
 	      maxradius*DEG/ARCMIN);
       sprintf(str,"Querying %s at %s for astrometric reference stars...",
@@ -594,6 +626,31 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       NFPRINTF(OUTPUT, str);
       QPOPEN(file, cmdline, "r");       /* popen() is POSIX.2 compliant */
       for (i=2; i--;)                   /* Skip the first 2 lines */
+        fgets(str, MAXCHAR, file);
+      break;
+    case ASTREFCAT_PPMX:
+      if (maglimflag)
+        sprintf(cmdline, "%s %s%s ppmx -c %s %s -r %16g -lm %f,%f -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
+		maxradius*DEG/ARCMIN,
+		prefs.astref_maglim[0],
+		prefs.astref_maglim[1]);
+      else
+        sprintf(cmdline, "%s %s%s ppmx -c %s %s -r %16g -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
+		maxradius*DEG/ARCMIN);
+      sprintf(str,"Querying %s at %s for astrometric reference stars...",
+	catname,
+	prefs.ref_server[0]);
+      NFPRINTF(OUTPUT, str);
+      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
+      for (i=2; i--;)			/* Skip the first 2 lines */
         fgets(str, MAXCHAR, file);
       break;
     default:
@@ -694,13 +751,15 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           epoch = 1960.0;
           break;
 
-        case ASTREFCAT_GSC2:
+        case ASTREFCAT_GSC22:
           sscanf(str,"%*s %lf %lf %lf %lf %lf %s ,%4c %s ,%4c %s ,%4c %s ,%4c"
 		" %d %*f %*f %*f %*d ; %lf",
 		&alpha, &delta, &epoch, &poserr[lng], &poserr[lat],
 		smag[0],smagerr[0], smag[1],smagerr[1], smag[2],smagerr[2], 
 		smag[3],smagerr[3],
 		&class, &dist);
+          if (class==5)
+            continue;
           smagerr[0][4]=smagerr[1][4]=smagerr[2][4]=smagerr[3][4]='\0';
           for (b=0; b<nband; b++)
             if (*smag[b] == '-')
@@ -717,6 +776,46 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           temp=magerr[1];magerr[1]=magerr[2];magerr[2]=temp;
           poserr[lng] *= ARCSEC/DEG;
           poserr[lat] *= ARCSEC/DEG;
+          dist *= ARCSEC/DEG;
+          break;
+
+        case ASTREFCAT_GSC23:
+/*-------- Remove the annoying '|' character */
+          for (i=0; str[i]; i++)
+            if (str[i] == '|')
+              str[i] = ' ';
+          sscanf(str, "%*33c %10s%10s %lf %lf %lf %s ,%4c %*s %s ,%4c %*s"
+			" %s ,%4c %*s %s ,%4c %*s %s ,%4c %*s %s ,%4c %*s %d"
+			" %*f %*f %*f ; %lf",
+		salpha, sdelta,
+		&poserr[lng], &poserr[lat], &epoch,
+		smag[0], smagerr[0], smag[1], smagerr[1], 
+		smag[2], smagerr[2], smag[3], smagerr[3], 
+		smag[4], smagerr[4], smag[5], smagerr[5], 
+		&class, &dist);
+          if (class==5)
+            continue;
+          smagerr[0][4]=smagerr[1][4]=smagerr[2][4]=smagerr[3][4]
+		=smagerr[4][4]=smagerr[4][4]='\0';
+          alpha = atof(salpha);
+          delta = atof(sdelta);
+          poserr[lng] *= ARCSEC/DEG;
+          poserr[lat] *= ARCSEC/DEG;
+          for (b=0; b<nband; b++)
+            if (*smag[b] == '-')
+              mag[b] = magerr[b] = 99.0;
+            else
+              {
+              mag[b] = atof(smag[b]);
+              magerr[b] = atof(smagerr[b]);
+              }
+/*-------- Swap to sort passbands by lambda */
+          temp=mag[0];mag[0]=mag[4];mag[4]=temp;
+          temp=magerr[0];magerr[0]=magerr[4];magerr[4]=temp;
+          temp=mag[1];mag[1]=mag[5];mag[5]=temp;
+          temp=magerr[1];magerr[1]=magerr[5];magerr[5]=temp;
+          temp=mag[3];mag[3]=mag[5];mag[5]=temp;
+          temp=magerr[3];magerr[3]=magerr[5];magerr[5]=temp;
           dist *= ARCSEC/DEG;
           break;
 
@@ -890,6 +989,39 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           poserr[lng] *= MAS/DEG;
           poserr[lat] *= MAS/DEG;
           dist *= ARCMIN/DEG;
+          break;
+
+        case ASTREFCAT_PPMX:
+	  /*-------- Remove the annoying '|' character */
+          for (i=0; str[i]; i++)
+            if (str[i] == '|')
+              str[i] = ' ';
+	  sscanf(str, "%*s %10s%10s %lf %lf %lf %lf %lf %lf %lf %lf"
+		 " %s %s %s %s %s %s %s %s %s %s %s %3c%*21c ; %lf",
+		salpha, sdelta, &prop[lng], &prop[lat], &epocha, &epochd,
+		&poserr[lng], &poserr[lat], &properr[lng], &properr[lat],
+		smag[3],smag[2], smag[0],smagerr[0], smag[1],smagerr[1],
+		smag[4],smagerr[4], smag[5],smagerr[5], smag[6],smagerr[6],
+		&dist);
+          alpha = atof(salpha);
+          delta = atof(sdelta);
+          epoch = 0.5*(epocha+epochd);
+          poserr[lng] *= MAS/DEG;
+          poserr[lat] *= MAS/DEG;
+          prop[lng] *= MAS/DEG;
+          prop[lat] *= MAS/DEG;
+          properr[lng] *= MAS/DEG;
+          properr[lat] *= MAS/DEG;
+          smagerr[6][3] = '\0';
+          for (b=0; b<nband; b++)
+            if (*smag[b] == '-')
+              mag[b] = magerr[b] = 99.0;
+            else
+              {
+              mag[b] = atof(smag[b]);
+              magerr[b] = (b!=2 && b!=3)? atof(smagerr[b])*0.001 : GSC_MAGERR;
+              }
+          dist *= ARCSEC/DEG;
           break;
 
         case ASTREFCAT_NONE:
