@@ -9,10 +9,17 @@
 *
 *       Contents:       log of changes made to the SCAMP source
 *
-*       Last modify:    16/04/2010
+*       Last modify:    20/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
+
+------------------------------------------------------------------------
+r234 | bertin | 2010-04-20 16:13:47 +0200 (Tue, 20 Apr 2010) | 4 lines
+
+Added a copy of the CeCILL version 2 license and updated the COPYRIGHT file.
+Updated ChangeLog.
+Updated the documention.
 
 ------------------------------------------------------------------------
 r233 | bertin | 2010-03-30 18:46:10 +0200 (Tue, 30 Mar 2010) | 5 lines
