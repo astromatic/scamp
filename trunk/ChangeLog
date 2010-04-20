@@ -9,10 +9,50 @@
 *
 *       Contents:       log of changes made to the SCAMP source
 *
-*       Last modify:    20/10/2009
+*       Last modify:    16/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
+
+------------------------------------------------------------------------
+r233 | bertin | 2010-03-30 18:46:10 +0200 (Tue, 30 Mar 2010) | 5 lines
+
+Switched to HTTP protocol by replacing the "aclient" client with "aclient_cgi"
+by default, and setting the default port to 80 (suggestion by A.Rawat).
+Added support for GSC-2.3 and PPMX astrometric reference catalogues.
+Pushed version number to 2.7.0.
+
+------------------------------------------------------------------------
+r232 | bertin | 2010-03-02 18:23:47 +0100 (Tue, 02 Mar 2010) | 4 lines
+
+Fixed bug with shear correction in MATCHing (thanks to Shantanu and Huan for reporting this issue).
+Fixed bug with multiple reference catalogue files.
+Pushed version number to 2.6.5.
+
+------------------------------------------------------------------------
+r231 | bertin | 2010-01-21 21:07:02 +0100 (Thu, 21 Jan 2010) | 2 lines
+
+Added CFH12k and VIRCam .ahead focal plane models.
+
+------------------------------------------------------------------------
+r230 | bertin | 2009-11-18 17:47:51 +0100 (Wed, 18 Nov 2009) | 2 lines
+
+Fixed issue with FFTW configure for custom library paths.
+
+------------------------------------------------------------------------
+r229 | bertin | 2009-11-02 17:22:54 +0100 (Mon, 02 Nov 2009) | 2 lines
+
+Added support for 64 bit binary table elements in FITS library (thanks to J.P. McFarland).
+
+------------------------------------------------------------------------
+r226 | bertin | 2009-10-22 20:44:35 +0200 (Thu, 22 Oct 2009) | 2 lines
+
+Fixed compilation issue with gcc caused by incorrect pointer arithmetic.
+
+------------------------------------------------------------------------
+r222 | bertin | 2009-10-20 17:55:43 +0200 (Tue, 20 Oct 2009) | 2 lines
+
+Updated ChangeLog, README and .spec file.
 
 ------------------------------------------------------------------------
 r220 | bertin | 2009-10-20 17:47:10 +0200 (Tue, 20 Oct 2009) | 4 lines
