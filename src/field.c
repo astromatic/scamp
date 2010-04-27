@@ -251,7 +251,7 @@ fieldstruct	*load_field(char *filename)
 /* Compare the dummy photometric FITS header to the ones previously stored */
   for (j=0; j<prefs.nphotinstrustr; j++)
     if (!strncmp((const char *)prefs.photinstrustr[j], photombuf,
-	80*prefs.nphotinstru_key) && field->nset == prefs.nphotinstruext[j])
+	80*prefs.nphotinstru_key))
       {
       field->photomlabel = j;
       break;
@@ -259,7 +259,6 @@ fieldstruct	*load_field(char *filename)
   if (j>=prefs.nphotinstrustr)
     {
     QMEMCPY(photombuf, prefs.photinstrustr[prefs.nphotinstrustr], char, FBSIZE);
-    prefs.nphotinstruext[prefs.nphotinstrustr] = field->nset;
     field->photomlabel = prefs.nphotinstrustr++;
     }
   free(photombuf);

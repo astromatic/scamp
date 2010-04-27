@@ -552,7 +552,6 @@ void	print_instruinfo(void)
   for (i=0; i<prefs.nphotinstrustr; i++)
     {
     QPRINTF(OUTPUT, "\nInstrument P%-2d:\n", i+1);
-    QPRINTF(OUTPUT, "%d extensions\n", prefs.nphotinstruext[i]);
     len = fitsfind(prefs.photinstrustr[i], "END     ");
     for (l=0; l<len; l++)
       {
