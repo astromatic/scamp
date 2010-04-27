@@ -892,8 +892,6 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.number;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"MagZeroPoint_Output\" datatype=\"float\""
 	" ucd=\"phot.mag;phot.calib;arith.zp\" unit=\"mag\"/>\n");
-  fprintf(file, "   <FIELD name=\"NExtensions\" datatype=\"int\""
-	" ucd=\"meta.number;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"NKeys\" datatype=\"int\""
 	" ucd=\"meta.number\"/>\n");
   fprintf(file, "   <FIELD name=\"Keys\" datatype=\"*\""
@@ -908,9 +906,9 @@ int	write_xml_meta(FILE *file, char *msgerror)
         if (fgroups_xml[g]->field[f]->photomlabel==i)
           f2++;
     fprintf(file, "    <TR>\n"
-	"     <TD>P%d</TD><TD>%d</TD><TD>%d</TD><TD>%.6g</TD><TD>%d</TD>\n"
+	"     <TD>P%d</TD><TD>%d</TD><TD>%d</TD><TD>%.6g</TD>\n"
 	"     <TD>%d</TD><TD>%32.32s",
-	i+1, i+1, f2, prefs.magzero_out[i],  prefs.nphotinstruext[i],
+	i+1, i+1, f2, prefs.magzero_out[i],
 	len, prefs.photinstrustr[i]);
     for (l=1; l<len; l++)
       fprintf(file, ",%32.32s", prefs.photinstrustr[i]+l*80);

@@ -130,7 +130,6 @@ typedef struct
   int		nphotinstru_key;		/* nb of params */
   char		**photinstrustr;		/* Photom instrument labels */
   int		nphotinstrustr;			/* nb of params */
-  int		*nphotinstruext;		/* nb of extensions per instru*/
   char		airmass_key[72];	/* FITS keyword for air mass */
   char		expotime_key[72];	/* FITS keyword for expo. time */
   char		extcoeff_key[72];	/* FITS keyword for extinction coeff */

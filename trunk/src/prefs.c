@@ -487,7 +487,6 @@ void	useprefs(void)
   QCALLOC(prefs.nastrinstruext, int, prefs.nfile);
   QCALLOC(prefs.photinstrustr, char *, prefs.nfile);
   prefs.nphotinstrustr = 0;
-  QCALLOC(prefs.nphotinstruext, int, prefs.nfile);
 
 /* Photometric solution */
   for (i=prefs.nmagzero_out; i<MAXPHOTINSTRU; i++)
@@ -560,7 +559,6 @@ void	endprefs(void)
     for (i=0; i<prefs.nphotinstrustr; i++)
       free(prefs.photinstrustr[i]);
     free(prefs.photinstrustr);
-    free(prefs.nphotinstruext);
     }
   prefs.nastrinstrustr = 0;
 
