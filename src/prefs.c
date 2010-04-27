@@ -9,7 +9,7 @@
 *
 *	Contents:	Functions to handle the configuration file.
 *
-*	Last modify:	26/06/2009
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -484,8 +484,10 @@ void	useprefs(void)
 /* Field label strings */
   QCALLOC(prefs.astrinstrustr, char *, prefs.nfile);
   prefs.nastrinstrustr = 0;
+  QCALLOC(prefs.nastrinstruext, int, prefs.nfile);
   QCALLOC(prefs.photinstrustr, char *, prefs.nfile);
   prefs.nphotinstrustr = 0;
+  QCALLOC(prefs.nphotinstruext, int, prefs.nfile);
 
 /* Photometric solution */
   for (i=prefs.nmagzero_out; i<MAXPHOTINSTRU; i++)
@@ -554,8 +556,14 @@ void	endprefs(void)
     for (i=0; i<prefs.nastrinstrustr; i++)
       free(prefs.astrinstrustr[i]);
     free(prefs.astrinstrustr);
+    free(prefs.nastrinstruext);
+    for (i=0; i<prefs.nphotinstrustr; i++)
+      free(prefs.photinstrustr[i]);
+    free(prefs.photinstrustr);
+    free(prefs.nphotinstruext);
     }
   prefs.nastrinstrustr = 0;
 
   return;
   }
+

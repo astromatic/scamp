@@ -9,7 +9,7 @@
 *
 *	Contents:	XML logging.
 *
-*	Last modify:	21/03/2008
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -177,7 +177,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	21/03/2008
+VERSION	27/04/2010
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -794,6 +794,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.record;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"NFields\" datatype=\"int\""
 	" ucd=\"meta.number;meta.dataset\"/>\n");
+  fprintf(file, "   <FIELD name=\"NExtensions\" datatype=\"int\""
+	" ucd=\"meta.number;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"NKeys\" datatype=\"int\""
 	" ucd=\"meta.number\"/>\n");
   fprintf(file, "   <FIELD name=\"Keys\" datatype=\"*\""
@@ -847,8 +849,9 @@ int	write_xml_meta(FILE *file, char *msgerror)
         if (fgroups_xml[g]->field[f]->astromlabel==i)
           f2++;
     fprintf(file, "    <TR>\n"
-	"     <TD>A%d</TD><TD>%d</TD><TD>%d</TD>\n     <TD>%d</TD><TD>%32.32s",
-	i+1, i+1, f2,
+	"     <TD>A%d</TD><TD>%d</TD><TD>%d</TD><TD>%d</TD>\n"
+	"     <TD>%d</TD><TD>%32.32s",
+	i+1, i+1, f2, prefs.nastrinstruext[i],
 	len, prefs.astrinstrustr[i]);
     for (l=1; l<len; l++)
       fprintf(file, ",%32.32s", prefs.astrinstrustr[i]+l*80);
@@ -889,6 +892,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.number;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"MagZeroPoint_Output\" datatype=\"float\""
 	" ucd=\"phot.mag;phot.calib;arith.zp\" unit=\"mag\"/>\n");
+  fprintf(file, "   <FIELD name=\"NExtensions\" datatype=\"int\""
+	" ucd=\"meta.number;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"NKeys\" datatype=\"int\""
 	" ucd=\"meta.number\"/>\n");
   fprintf(file, "   <FIELD name=\"Keys\" datatype=\"*\""
@@ -903,9 +908,9 @@ int	write_xml_meta(FILE *file, char *msgerror)
         if (fgroups_xml[g]->field[f]->photomlabel==i)
           f2++;
     fprintf(file, "    <TR>\n"
-	"     <TD>P%d</TD><TD>%d</TD><TD>%d</TD><TD>%.6g</TD>\n"
+	"     <TD>P%d</TD><TD>%d</TD><TD>%d</TD><TD>%.6g</TD><TD>%d</TD>\n"
 	"     <TD>%d</TD><TD>%32.32s",
-	i+1, i+1, f2, prefs.magzero_out[i],
+	i+1, i+1, f2, prefs.magzero_out[i],  prefs.nphotinstruext[i],
 	len, prefs.photinstrustr[i]);
     for (l=1; l<len; l++)
       fprintf(file, ",%32.32s", prefs.photinstrustr[i]+l*80);
@@ -1132,7 +1137,7 @@ INPUT	Output stream (file) pointer,
 OUTPUT	RETURN_OK if the keyword exists, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	06/10/2006
+VERSION	27/04/2010
  ***/
 int	write_xmlconfigparam(FILE *file, char *name, char *unit,
 		 char *ucd, char *format)
@@ -1229,7 +1234,7 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
 		name, ucd);
       break;
     case P_STRING:
-      sprintf(value, (char *)key[i].ptr);
+      strcpy(value, (char *)key[i].ptr);
       fprintf(file, "   <PARAM name=\"%s\" datatype=\"char\" arraysize=\"*\""
 	" ucd=\"%s\" value=\"%s\"/>\n",
 	name, ucd, value);
@@ -1238,13 +1243,13 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
       n = *(key[i].nlistptr);
       if (n)
         {
-        sprintf(value, ((char **)key[i].ptr)[0]);
+        strcpy(value, ((char **)key[i].ptr)[0]);
         fprintf(file, "   <PARAM name=\"%s\" datatype=\"char\""
 		" arraysize=\"*\" ucd=\"%s\" value=\"%s",
 		name, ucd, value);
         for (j=1; j<n; j++)
           {
-          sprintf(value, ((char **)key[i].ptr)[j]);
+          strcpy(value, ((char **)key[i].ptr)[j]);
           fprintf(file, ",%s", value);
           }
         fprintf(file, "\"/>\n");
@@ -1255,7 +1260,7 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
 		name, ucd);
       break;
     case P_KEY:
-      sprintf(value, key[i].keylist[*((int *)key[i].ptr)]);
+      strcpy(value, key[i].keylist[*((int *)key[i].ptr)]);
       fprintf(file, "   <PARAM name=\"%s\" datatype=\"char\" arraysize=\"*\""
 	" ucd=\"%s\" value=\"%s\"/>\n",
 	name, ucd, value);
@@ -1264,13 +1269,13 @@ int	write_xmlconfigparam(FILE *file, char *name, char *unit,
       n = *(key[i].nlistptr);
       if (n)
         {
-        sprintf(value, key[i].keylist[((int *)key[i].ptr)[0]]);
+        strcpy(value, key[i].keylist[((int *)key[i].ptr)[0]]);
         fprintf(file, "   <PARAM name=\"%s\" datatype=\"char\""
 		" arraysize=\"*\" ucd=\"%s\" value=\"%s",
 		name, ucd, value);
         for (j=1; j<n; j++)
           {
-          sprintf(value, key[i].keylist[((int *)key[i].ptr)[j]]);
+          strcpy(value, key[i].keylist[((int *)key[i].ptr)[j]]);
           fprintf(file, ",%s", value);
           }
         fprintf(file, "\"/>\n");

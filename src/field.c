@@ -9,7 +9,7 @@
 *
 *	Contents:	Handle catalogs.
 *
-*	Last modify:	12/12/2006
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -57,7 +57,7 @@ OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used. The function is not reentrant because
 	of static variables (prefs structure members are updated).
 AUTHOR  E. Bertin (IAP)
-VERSION 12/12/2006
+VERSION 27/04/2010
 */
 fieldstruct	*load_field(char *filename)
   {
@@ -230,7 +230,7 @@ fieldstruct	*load_field(char *filename)
 /* Compare the dummy astrometric FITS header to the ones previously stored */
   for (j=0; j<prefs.nastrinstrustr; j++)
     if (!strncmp((const char *)prefs.astrinstrustr[j], astrombuf,
-	80*prefs.nastrinstru_key))
+	80*prefs.nastrinstru_key) && field->nset == prefs.nastrinstruext[j])
       {
       field->astromlabel = j;
       break;
@@ -238,6 +238,7 @@ fieldstruct	*load_field(char *filename)
   if (j>=prefs.nastrinstrustr)
     {
     QMEMCPY(astrombuf, prefs.astrinstrustr[prefs.nastrinstrustr], char,FBSIZE);
+    prefs.nastrinstruext[prefs.nastrinstrustr] = field->nset;
     field->astromlabel = prefs.nastrinstrustr++;
     }
   free(astrombuf);
@@ -250,7 +251,7 @@ fieldstruct	*load_field(char *filename)
 /* Compare the dummy photometric FITS header to the ones previously stored */
   for (j=0; j<prefs.nphotinstrustr; j++)
     if (!strncmp((const char *)prefs.photinstrustr[j], photombuf,
-	80*prefs.nphotinstru_key))
+	80*prefs.nphotinstru_key) && field->nset == prefs.nphotinstruext[j])
       {
       field->photomlabel = j;
       break;
@@ -258,6 +259,7 @@ fieldstruct	*load_field(char *filename)
   if (j>=prefs.nphotinstrustr)
     {
     QMEMCPY(photombuf, prefs.photinstrustr[prefs.nphotinstrustr], char, FBSIZE);
+    prefs.nphotinstruext[prefs.nphotinstrustr] = field->nset;
     field->photomlabel = prefs.nphotinstrustr++;
     }
   free(photombuf);
