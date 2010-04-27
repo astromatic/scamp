@@ -9,7 +9,7 @@
 *
 *	Contents:	Catalog headers for catout.c
 *
-*	Last modify:	29/06/2009
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -86,7 +86,7 @@ keystruct		refmergedkey[] = {
 
 /* Skycat header */
 
-char	skycathead[] = "QueryResult\n\n"
+const char	skycathead[] = "QueryResult\n\n"
 	"# Config entry for original catalog server:\n"
 	"serv_type: catalog\n"
 	"long_name: SExtractor catalog\n"
@@ -95,5 +95,5 @@ char	skycathead[] = "QueryResult\n\n"
 	"# End config entry\n\n"
 	"id\tra\tdec\tmag";
 
-char	skycattail[] = "[EOD]";
+const char	skycattail[] = "[EOD]";
 

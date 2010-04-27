@@ -9,7 +9,7 @@
 *
 *	Contents:	Include for prefs.c.
 *
-*	Last modify:	02/10/2009
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -130,6 +130,7 @@ typedef struct
   int		nphotinstru_key;		/* nb of params */
   char		**photinstrustr;		/* Photom instrument labels */
   int		nphotinstrustr;			/* nb of params */
+  int		*nphotinstruext;		/* nb of extensions per instru*/
   char		airmass_key[72];	/* FITS keyword for air mass */
   char		expotime_key[72];	/* FITS keyword for expo. time */
   char		extcoeff_key[72];	/* FITS keyword for extinction coeff */
@@ -153,6 +154,7 @@ typedef struct
   int		nastrinstru_key;		/* nb of params */
   char		**astrinstrustr;		/* Astrom instrument labels */
   int		nastrinstrustr;			/* nb of params */
+  int		*nastrinstruext;		/* nb of extensions per instru*/
   stabilityenum	stability_type[MAXASTRINSTRU];	/* How stable the devices are*/
   int           nstability_type;		/* nb of params */
   char          *(context_name[MAXCONTEXT]);	/* Names of context-keys */

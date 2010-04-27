@@ -9,7 +9,7 @@
 *
 *	Contents:	Handle groups of fields.
 *
-*	Last modify:	30/01/2006
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -527,7 +527,7 @@ INPUT	-.
 OUTPUT	-.
 NOTES	Global preferences are used.
 AUTHOR	E. Bertin (IAP)
-VERSION	11/07/2004
+VERSION	27/04/2010
  ***/
 void	print_instruinfo(void)
   {
@@ -538,6 +538,7 @@ void	print_instruinfo(void)
   for (i=0; i<prefs.nastrinstrustr; i++)
     {
     QPRINTF(OUTPUT, "\nInstrument A%-2d:\n", i+1);
+    QPRINTF(OUTPUT, "%d extensions\n", prefs.nastrinstruext[i]);
     len = fitsfind(prefs.astrinstrustr[i], "END     ");
     for (l=0; l<len; l++)
       {
@@ -551,6 +552,7 @@ void	print_instruinfo(void)
   for (i=0; i<prefs.nphotinstrustr; i++)
     {
     QPRINTF(OUTPUT, "\nInstrument P%-2d:\n", i+1);
+    QPRINTF(OUTPUT, "%d extensions\n", prefs.nphotinstruext[i]);
     len = fitsfind(prefs.photinstrustr[i], "END     ");
     for (l=0; l<len; l++)
       {

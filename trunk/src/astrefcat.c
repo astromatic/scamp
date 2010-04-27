@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	30/03/2010
+*	Last modify:	27/04/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -101,7 +101,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 30/03/2010
+VERSION 27/04/2010
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -908,7 +908,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           for (i=0; str[i]; i++)
             if (str[i] == '|')
               str[i] = ' ';
-          sscanf(str, "%*10c %11s%11s %*f %*f %lf %lf %lf %*lf %s %s %*d %*d"
+          sscanf(str, "%*10c %11s%11s %*f %*f %lf %lf %lf %*f %s %s %*d %*d"
 		"%d %*d%*d %*d %lf %lf %s %s "
 		"%*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s %*s ; %lf",
 		salpha, sdelta,
