@@ -1,0 +1,32 @@
+COMMENT   1st order focal-plane model for MiniMo@WIYN (4x1088x4096)
+COMMENT   derived by SCAMP version 1.7.0 (2010-04-20)
+COMMENT   (c) Emmanuel BERTIN <bertin@iap.fr>
+COMMENT   
+CRPIX1  =      2.067052138E+03 / Reference pixel on this axis                  
+CRPIX2  =      2.039415822E+03 / Reference pixel on this axis                  
+CD1_1   =      5.958150960E-09 / Linear projection matrix                      
+CD1_2   =      3.904837162E-05 / Linear projection matrix                      
+CD2_1   =      3.907700620E-05 / Linear projection matrix                      
+CD2_2   =     -1.804719817E-08 / Linear projection matrix                      
+END     
+CRPIX1  =      1.106992956E+03 / Reference pixel on this axis                  
+CRPIX2  =      2.039401166E+03 / Reference pixel on this axis                  
+CD1_1   =      8.143716890E-09 / Linear projection matrix                      
+CD1_2   =      3.904997997E-05 / Linear projection matrix                      
+CD2_1   =      3.907569591E-05 / Linear projection matrix                      
+CD2_2   =     -1.427051975E-08 / Linear projection matrix                      
+END     
+CRPIX1  =     -3.245315328E+01 / Reference pixel on this axis                  
+CRPIX2  =      2.037078780E+03 / Reference pixel on this axis                  
+CD1_1   =     -1.963603763E-08 / Linear projection matrix                      
+CD1_2   =      3.904171363E-05 / Linear projection matrix                      
+CD2_1   =      3.905030324E-05 / Linear projection matrix                      
+CD2_2   =      3.197281412E-08 / Linear projection matrix                      
+END     
+CRPIX1  =     -9.929849250E+02 / Reference pixel on this axis                  
+CRPIX2  =      2.036570483E+03 / Reference pixel on this axis                  
+CD1_1   =     -3.414785694E-08 / Linear projection matrix                      
+CD1_2   =      3.905096695E-05 / Linear projection matrix                      
+CD2_1   =      3.903165763E-05 / Linear projection matrix                      
+CD2_2   =      3.274614367E-08 / Linear projection matrix                      
+END     
