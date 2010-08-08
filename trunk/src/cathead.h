@@ -9,7 +9,7 @@
 *
 *	Contents:	Catalog headers for catout.c
 *
-*	Last modify:	27/04/2010
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -61,6 +61,12 @@ keystruct		refmergedkey[] = {
   {"EPOCH", "Mean epoch",
 	&refmergedsample.epoch, H_FLOAT, T_FLOAT,
 	"%15.10f", "yr", "time.epoch;stat.mean", "yr"},
+  {"EPOCH_MIN", "Minimum epoch",
+	&refmergedsample.epochmin, H_FLOAT, T_FLOAT,
+	"%15.10f", "yr", "time.epoch;stat.min", "yr"},
+  {"EPOCH_MAX", "Maximum epoch",
+	&refmergedsample.epochmax, H_FLOAT, T_FLOAT,
+	"%15.10f", "yr", "time.epoch;stat.max", "yr"},
   {"NMAG", "Number of overlaps for each band",
 	&refmergedsample.nmag, H_INT, T_LONG,
 	"%4d", "", "meta.number", "",

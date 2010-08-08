@@ -476,13 +476,13 @@ void	makeit(void)
     }
 
 /* Compute proper motions and other 2nd order corrections */
-  for (g=0; g<ngroup; g++)
-    {
-/*-- Reproject all fields from a group to a common projection (update) */
-    sprintf(str, "Computing proper motions in group %d", g+1);
-    NFPRINTF(OUTPUT, str);
-    astrprop_fgroup(fgroups[g]);
-    }
+  if (prefs.propmotion_flag)
+    for (g=0; g<ngroup; g++)
+      {
+      sprintf(str, "Computing proper motions in group %d", g+1);
+      NFPRINTF(OUTPUT, str);
+      astrprop_fgroup(fgroups[g]);
+      }
 
 #ifdef HAVE_PLPLOT
   NFPRINTF(OUTPUT, "Generating proper-motion plots...");
@@ -516,21 +516,24 @@ void	makeit(void)
   prefs.time_diff = difftime(thetime2, thetime);
 
 /* Save merged catalogs */
-  for (g=0; g<ngroup; g++)
+  if (prefs.mergedcat_type != CAT_NONE)
     {
-/*-- Write one catalog per field group */
-    sprintf(str, "Saving merged catalog for group %d", g+1);
-    NFPRINTF(OUTPUT, str);
-    strcpy(filename, prefs.mergedcat_name);
-    if (!(pstr = strrchr(filename, '.')))
+    for (g=0; g<ngroup; g++)
       {
-      pstr = filename+strlen(filename);
-      extension[0] = (char)'\0';
+/*---- Write one catalog per field group */
+      sprintf(str, "Saving merged catalog for group %d", g+1);
+      NFPRINTF(OUTPUT, str);
+      strcpy(filename, prefs.mergedcat_name);
+      if (!(pstr = strrchr(filename, '.')))
+        {
+        pstr = filename+strlen(filename);
+        extension[0] = (char)'\0';
+        }
+      else
+        strcpy(extension, pstr);
+      sprintf(pstr, "_%d%s", g+1, extension);
+      writemergedcat_fgroup(filename, fgroups[g]);
       }
-    else
-      strcpy(extension, pstr);
-    sprintf(pstr, "_%d%s", g+1, extension);
-    writemergedcat_fgroup(filename, fgroups[g]);
     }
 
 /* Write XML */

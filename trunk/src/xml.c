@@ -9,7 +9,7 @@
 *
 *	Contents:	XML logging.
 *
-*	Last modify:	27/04/2010
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -177,7 +177,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	27/04/2010
+VERSION	03/08/2010
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -1022,7 +1022,7 @@ int	write_xml_meta(FILE *file, char *msgerror)
     write_xmlconfigparam(file,"Astref_Weight", "",
 			 "meta.id;stat.fit.param", "%.6g");
     write_xmlconfigparam(file, "AstrClip_NSigma", "",
-		"meta.id;stat.param;pos", "%d");
+		"meta.id;stat.param;pos", "%.6g");
     write_xmlconfigparam(file, "Correct_ColourShifts", "",
 		"meta.code;obs.param", "%c");
 /*-- Photometric solution */

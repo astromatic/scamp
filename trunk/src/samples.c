@@ -9,7 +9,7 @@
 *
 *	Contents:	Read and filter input samples from catalogs.
 *
-*	Last modify:	10/09/2009
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -55,7 +55,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 14/01/2008
+VERSION 03/08/2010
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -310,14 +310,21 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       {
       if (*flags & prefs.flags_mask)
         continue;
-      if ((fluxrad && *fluxrad < minrad) || (dfluxrad && *dfluxrad < dminrad)
-	|| (fluxrad && *fluxrad > maxrad) || (dfluxrad && *dfluxrad < dmaxrad))
-        continue;
 /*---- Mapping from SExtractor flags is straightforward */
       objflags = *flags & (OBJ_CROWDED|OBJ_MERGED|OBJ_SATUR);
-      if (objflags & 4)		/* A saturated object */
+      if (objflags & OBJ_SATUR)		/* A saturated object */
         set->nsaturated++;
+      else if ((fluxrad && *fluxrad < minrad)
+		|| (dfluxrad && *dfluxrad < dminrad)
+		|| (fluxrad && *fluxrad > maxrad)
+		|| (dfluxrad && *dfluxrad < dmaxrad))
+        continue;
       }
+    else if ((fluxrad && *fluxrad < minrad)
+		|| (dfluxrad && *dfluxrad < dminrad)
+		|| (fluxrad && *fluxrad > maxrad)
+		|| (dfluxrad && *dfluxrad < dmaxrad))
+        continue;
     if (wflags)
       {
       if ((*wflags & prefs.wflags_mask))

@@ -9,7 +9,7 @@
 *
 *	Contents:	Compute proper motions.
 *
-*	Last modify:	29/06/2009
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -238,7 +238,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/10/2008
+VERSION	03/08/2010
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -252,10 +252,12 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 		*wcsscale,
 		sig, wi,xi,yi, delta;
    double	epoch, dmag;
-   int		d,f,f1,ff,s,n, naxis, nfield, nsamp, lng,lat, celflag, propflag;
+   int		d,f,f1,ff,s,n, naxis, nfield, nsamp, lng,lat, celflag,
+		colcorflag, propflag;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
+  colcorflag = prefs.colourshift_flag;
   naxis = fgroup->naxis;
   nfield = fgroup->nfield;
   wcs = fgroup->wcs;
@@ -305,7 +307,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
               ff = f1*nfield + field2->index;
               xi = field2->epoch - epoch;
               dmag = samp2->mag - samp1->mag;
-/*------------ DRC correction */
+/*------------ DCR correction */
               for (d=0; d<naxis; d++)
                 {
                 sig = samp2->wcsposerr[d];
@@ -313,8 +315,9 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
                 if (sig>0.0)
                   {
                   wi = 1.0/sig;
-                  yi = samp2->projpos[d] - samp1->projpos[d]
-			- dmag*csscale[d][ff] - cszero[d][ff];
+                  yi = samp2->projpos[d] - samp1->projpos[d];
+                  if (colcorflag)
+                    yi -= dmag*csscale[d][ff] + cszero[d][ff];
                   ss[d] += wi;
                   sx[d] += wi*xi;
                   sy[d] += wi*yi;
@@ -327,14 +330,15 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           propflag = 1;
           for (d=0; d<naxis; d++)
             {
-            coorderr[d] = coord[d] = samp->projpos[d];
+            coord[d] = samp->projpos[d];
+            coorderr[d] = 0.0;
             if (ss[d] > 0.0)
               {
               delta = ss[d]*sxx[d] - sx[d]*sx[d];
               if (delta != 0.0)
                 {
                 coord[d] += (ss[d]*sxy[d] - sx[d]*sy[d])/delta;
-                coorderr[d] += sqrt(ss[d]/delta);
+                coorderr[d] = sqrt(ss[d]/delta);
                 continue;
                 }
               }
@@ -345,18 +349,11 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             {
 /*---------- Project shifted coordinates onto the sky... */
             raw_to_wcs(wcs, coord, coord);
-            raw_to_wcs(wcs, coorderr, coorderr);
 /*---------- ... and recover the proper motion vector in celestial coords */
             for (d=0; d<naxis; d++)
-              {
               coord[d] -= samp->wcspos[d];
-              coorderr[d] -= samp->wcspos[d];
-              }
             if (celflag)
-              {
               coord[lng] *= cos(samp->wcspos[lat]*DEG);
-              coorderr[lng] *= cos(samp->wcspos[lat]*DEG);
-              }
             while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
               for (d=0; d<naxis; d++)
@@ -364,11 +361,6 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
                 samp2->wcsprop[d] = coord[d];
                 samp2->wcsproperr[d] = fabs(coorderr[d]);
                 }
-/*
-printf("%g %g %g %g\n", coord[0], coord[1], samp->prevsamp->mag, samp->prevsamp->fwhm);
-*/
-
-
             }
           else
             while ((samp2=samp2->prevsamp)
