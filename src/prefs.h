@@ -9,7 +9,7 @@
 *
 *	Contents:	Include for prefs.c.
 *
-*	Last modify:	27/04/2010
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -164,8 +164,10 @@ typedef struct
   int           ngroup_deg;			/* nb of params */
   double	astrclip_nsig;			/* Astrom. clipping threshold*/
   double	astref_weight;			/* Ref.cat. relative weight */
+/* Proper motions */
+  int		propmotion_flag;		/* Compute proper motions? */
 /* Differential Chromatic Refraction (DRC) */
-  int		colourshift_flag;		/* Correct for colour shifts? */
+  int		colourshift_flag;		/* Correct colour shift in pm?*/
 
 /* Check-plots */
   cplotenum	cplot_device[MAXCHECK];		/* check-plot format */

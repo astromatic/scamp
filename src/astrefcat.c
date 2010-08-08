@@ -9,7 +9,7 @@
 *
 *	Contents:	Manage astrometric reference catalogs (query and load).
 *
-*	Last modify:	27/04/2010
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -101,7 +101,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/04/2010
+VERSION 30/07/2010
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -169,37 +169,41 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		1 : 0;
 
 /* Call the right catalog */
+  if (refcat==ASTREFCAT_FILE)
+    {
+    field = NULL;
+    for (c=0; c<prefs.nastref_name; c++)
+      {
+      if ((tfield=load_astreffield(prefs.astref_name[c], wcspos, lng,lat,
+		naxis, maxradius, band, prefs.astref_maglim)))
+        {
+        if (tfield)
+          {
+          NFPRINTF(OUTPUT, "");
+          QPRINTF(OUTPUT, " %d astrometric references loaded from %s\n",
+		tfield->set[0]->nsample, tfield->rfilename);
+          }
+        if (field)
+          {
+          union_samples(tfield->set[0]->sample, field->set[0],
+		tfield->set[0]->nsample,
+		ASTREF_ASSOCRADIUS, UNION_WCS);
+          field->nsample = field->set[0]->nsample;
+          end_field(tfield);
+          }
+        else field=tfield;
+        }
+      }
+    if (!field)
+        error(EXIT_FAILURE,"*Error*: No appropriate FITS-LDAC astrometric ",
+			"reference catalog found");
+    return field;
+    }
+
   switch(refcat)
     {
     case ASTREFCAT_FILE:
-      field = NULL;
-      for (c=0; c<prefs.nastref_name; c++)
-        {
-        if ((tfield=load_astreffield(prefs.astref_name[c], wcspos, lng,lat,
-		naxis, maxradius, band, prefs.astref_maglim)))
-          {
-          if (tfield)
-            {
-            NFPRINTF(OUTPUT, "");
-            QPRINTF(OUTPUT, " %d astrometric references loaded from %s\n",
-		tfield->set[0]->nsample, tfield->rfilename);
-            }
-          if (field)
-            {
-            union_samples(tfield->set[0]->sample, field->set[0],
-			tfield->set[0]->nsample,
-			ASTREF_ASSOCRADIUS, UNION_WCS);
-            field->nsample = field->set[0]->nsample;
-            end_field(tfield);
-            }
-          else field=tfield;
-          }
-        }
-      if (!field)
-        error(EXIT_FAILURE,"*Error*: No appropriate FITS-LDAC astrometric ",
-			"reference catalog found");
-
-      return field;
+/*---- Already exited at this point */
       break;
     case ASTREFCAT_USNOA1:
       if (maglimflag)
@@ -221,13 +225,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_USNOA2:
       if (maglimflag)
@@ -249,13 +246,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_USNOB1:
       if (maglimflag)
@@ -276,13 +266,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
 
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_GSC1:
       if (maglimflag)
@@ -303,13 +286,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_GSC22:
       if (maglimflag)
@@ -331,13 +307,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_GSC23:
       if (maglimflag)
@@ -359,13 +328,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_2MASS:
       if (maglimflag)
@@ -387,13 +349,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first line */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_DENIS3:
       if (maglimflag)
@@ -415,13 +370,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first line */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_UCAC1:
       if (maglimflag)
@@ -440,13 +388,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_UCAC2:
       if (maglimflag)
@@ -465,13 +406,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_UCAC3:
       if (maglimflag)
@@ -490,13 +424,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_SDSSR3:
       if (maglimflag)
@@ -516,13 +443,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_SDSSR5:
       if (maglimflag)
@@ -542,13 +462,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_SDSSR6:
       if (maglimflag)
@@ -568,13 +481,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_SDSSR7:
       if (maglimflag)
@@ -594,13 +500,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_NOMAD1:
       if (maglimflag)
@@ -620,13 +519,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 	      sport,
 	      wcspos[lng], wcspos[lat],
 	      maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	      catname,
-	      prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");       /* popen() is POSIX.2 compliant */
-      for (i=2; i--;)                   /* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     case ASTREFCAT_PPMX:
       if (maglimflag)
@@ -645,17 +537,19 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		sport,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
-      sprintf(str,"Querying %s at %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[0]);
-      NFPRINTF(OUTPUT, str);
-      QPOPEN(file, cmdline, "r");	/* popen() is POSIX.2 compliant */
-      for (i=2; i--;)			/* Skip the first 2 lines */
-        fgets(str, MAXCHAR, file);
       break;
     default:
       return NULL;
     }
+
+  strcat(cmdline, " 2>/dev/null");
+  sprintf(str,"Querying %s at %s for astrometric reference stars...",
+	catname,
+	prefs.ref_server[0]);
+  NFPRINTF(OUTPUT, str);
+  QPOPEN(file, cmdline, "r");		/* popen() is POSIX.2 compliant */
+  for (i=2; i--;)			/* Skip the first 2 lines */
+    fgets(str, MAXCHAR, file);
 
   set = init_set();
   prop[lng] = prop[lat] = properr[lng] = properr[lat] = 0.0;
@@ -879,6 +773,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           magerr[0] = 0.1;	/* Just a default value */
           poserr[lng] *= MAS/DEG;
           poserr[lat] *= MAS/DEG;
+          prop[lng] *= MAS/DEG;
+          prop[lat] *= MAS/DEG;
+          properr[lng] *= MAS/DEG;
+          properr[lat] *= MAS/DEG;
           dist *= ARCMIN/DEG;
           break;
 
@@ -900,6 +798,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           magerr[0] = 0.1;	/* Just a default value */
           poserr[lng] *= MAS/DEG;
           poserr[lat] *= MAS/DEG;
+          prop[lng] *= MAS/DEG;
+          prop[lat] *= MAS/DEG;
+          properr[lng] *= MAS/DEG;
+          properr[lat] *= MAS/DEG;
           dist *= ARCMIN/DEG;
           break;
 
@@ -925,6 +827,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           magerr[0] = (smagerr[0][0]=='-')? 0.9 : atof(smagerr[0]);
           properr[lng] = (sproperr[lng][0]=='-')? 1000.0 : atof(sproperr[0]);
           properr[lat] = (sproperr[lat][0]=='-')? 1000.0 : atof(sproperr[1]);
+          prop[lng] *= MAS/DEG;
+          prop[lat] *= MAS/DEG;
+          properr[lng] *= MAS/DEG;
+          properr[lat] *= MAS/DEG;
           poserr[lng] *= MAS/DEG;
           poserr[lat] *= MAS/DEG;
           dist *= ARCMIN/DEG;

@@ -9,7 +9,7 @@
 *
 *	Contents:	Produce and write merged catalogs.
 *
-*	Last modify:	22/10/2009
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -47,7 +47,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 19/10/2009
+VERSION 03/08/2010
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -73,7 +73,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			magref[MAXPHOTINSTRU],
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
-			epoch, err2, dummy;
+			epoch,epochmin,epochmax, err2, dummy;
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
@@ -249,6 +249,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
 		= wcsprop[d] = wcsproperr[d] = 0.0;
           epoch = 0.0;
+          epochmin = BIG;
+          epochmax = -BIG;
           for (samp2 = samp;
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
@@ -270,6 +272,10 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               wcsproperr[d] += samp2->wcsproperr[d]*samp2->wcsproperr[d];
               }
             epoch += samp2->set->field->epoch;
+            if (samp2->set->field->epoch < epochmin)
+              epochmin = samp2->set->field->epoch;
+            if (samp2->set->field->epoch > epochmax)
+              epochmax = samp2->set->field->epoch;
             msample.flags |= samp2->flags;
             nm++;
             }
@@ -297,6 +303,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             else
               msample.wcspostheta = 0.0;
             msample.epoch = epoch / nm;
+            msample.epochmin = epochmin;
+            msample.epochmax = epochmax;
             msample.npos = nm;
             }
           if (prefs.mergedcat_type == CAT_ASCII_HEAD

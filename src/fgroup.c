@@ -9,7 +9,7 @@
 *
 *	Contents:	Handle groups of fields.
 *
-*	Last modify:	27/04/2010
+*	Last modify:	03/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -440,7 +440,7 @@ INPUT	Pointer to an array of fgroup pointers,
 OUTPUT	-.
 NOTES	Global preferences are used.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/09/2004
+VERSION	03/08/2010
  ***/
 void	print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
   {
@@ -481,8 +481,8 @@ void	print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
         fgroup->maxradius);
       }
     QIPRINTF(OUTPUT,
-	"                  instruments     center coordinates "
-	"    radius    scale");
+	"                  instruments  epoch      center coordinates "
+	"    radius   scale ");
     fields = fgroup->field;
     for (f=fgroup->nfield; f--;)
       {
@@ -491,10 +491,12 @@ void	print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
       lat = field->lat;
       if (lat != lng)
         {
-        QPRINTF(OUTPUT,"%-20.20s A%-2d P%-2d %c %s %s %#7.4g' %#7.4g\"\n",
+        QPRINTF(OUTPUT,
+		"%-20.20s A%-2d P%-2d %c %#6.1f  %s %s %#7.4g' %#7.4g\"\n",
 		field->rfilename,
 		field->astromlabel+1,field->photomlabel+1,
 		field->photomflag? '*': ' ',
+		field->epoch,
 		degtosexal(field->meanwcspos[lng], str1),
 		degtosexde(field->meanwcspos[lat], str2),
 		field->maxradius*DEG/ARCMIN,
@@ -503,7 +505,7 @@ void	print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
       else
         {
         QPRINTF(OUTPUT,
-		"%-20.20s A%-2d P%-2d %#+11.3g %#+11.3g %#7.4g  %#7.4g\n",
+	"%-20.20s A%-2d P%-2d           %#+11.4e %#+11.4e %#7.4g %#7.4g\n",
 		field->rfilename,
 		field->astromlabel+1,field->photomlabel+1,
 		field->meanwcspos[0],
