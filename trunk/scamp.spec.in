@@ -8,7 +8,7 @@ Name: %{name}
 Version: %{version}
 Release: %{release}
 Source0: ftp://ftp.iap.fr/pub/from_users/bertin/%{name}/%{name}-%{version}.tar.gz
-URL: http://astromatic.iap.fr/software/%{name}/
+URL: http://astromatic.net/software/%{name}/
 License: CeCILL V2
 Group: Sciences/Astronomy
 BuildRoot: %{_tmppath}/%{name}-buildroot

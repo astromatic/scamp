@@ -9,7 +9,7 @@
 *
 *	Contents:	global definitions.
 *
-*	Last modify:	01/04/2009
+*	Last modify:	24/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -26,7 +26,7 @@
 #define         BANNER		"SCAMP"
 #define         MYVERSION       VERSION
 #define         COPYRIGHT	"Emmanuel BERTIN <bertin@iap.fr>"
-#define		WEBSITE		"http://astromatic.iap.fr/software/scamp/"
+#define		WEBSITE		"http://astromatic.net/software/scamp/"
 #define         INSTITUTE	"IAP  http://www.iap.fr"
 
 /*----------------------------- Physical constants --------------------------*/

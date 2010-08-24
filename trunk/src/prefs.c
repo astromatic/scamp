@@ -9,7 +9,7 @@
 *
 *	Contents:	Functions to handle the configuration file.
 *
-*	Last modify:	27/04/2010
+*	Last modify:	24/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -384,7 +384,8 @@ void	useprefs(void)
 
   {
    FILE			*testfile;
-   char			teststr[80];
+   char			teststr[80],
+			*pstr;
    unsigned short	ashort=1;
    int			i, flag;
 #ifdef USE_THREADS
@@ -445,6 +446,14 @@ void	useprefs(void)
 	"this build of " BANNER " is single-threaded");
     }
 #endif
+
+/*---------------------------- Measurement arrays --------------------------*/
+  strcpy(prefs.photflux_rkey, prefs.photflux_key);
+  strtok(prefs.photflux_rkey,"([{}])");
+  prefs.photflux_num = (pstr = strtok(NULL,"([{}])"))? atoi(pstr) : 1;
+  strcpy(prefs.photfluxerr_rkey, prefs.photfluxerr_key);
+  strtok(prefs.photfluxerr_rkey,"([{}])");
+  prefs.photfluxerr_num = (pstr = strtok(NULL,"([{}])"))? atoi(pstr) : 1;
 
 /*------------------------------- Contexts ---------------------------------*/
   if (prefs.ncontext_group != prefs.ncontext_name)

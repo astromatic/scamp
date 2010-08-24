@@ -9,7 +9,7 @@
 *
 *	Contents:	Include for prefs.c.
 *
-*	Last modify:	03/08/2010
+*	Last modify:	24/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -124,8 +124,12 @@ typedef struct
 
 /* Photometric solution */
   int		solvphotom_flag;		/* Compute photometric sol.? */
-  char		photflux_key[72];		/* Flux measurement cat.param.*/
-  char		photfluxerr_key[72];		/* Flux error cat.parameter */
+  char		photflux_key[72];		/* Name of phot. flux key */
+  char		photflux_rkey[72];		/* Reduced phot. flux key */
+  int		photflux_num;			/* Phot. aperture # */
+  char		photfluxerr_key[72];		/* Name of phot. flux err. key*/
+  char		photfluxerr_rkey[72];		/* Reduced phot. flux err. key*/
+  int		photfluxerr_num;		/* Phot.flux err. aperture # */
   char		*(photinstru_key[72]);		/* Photom instrument keywords*/
   int		nphotinstru_key;		/* nb of params */
   char		**photinstrustr;		/* Photom instrument labels */
