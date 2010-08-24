@@ -9,7 +9,7 @@
 *
 *	Contents:	Read and filter input samples from catalogs.
 *
-*	Last modify:	03/08/2010
+*	Last modify:	24/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -55,7 +55,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 03/08/2010
+VERSION 24/08/2010
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -167,27 +167,61 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
   else
     errb = (float *)key->ptr;
 
-  if (!(key = name_to_key(keytab, prefs.photflux_key)))
+  if (!(key = name_to_key(keytab, prefs.photflux_rkey)))
     {
     sprintf(str, "*Error*: %s parameter not found in catalog ",
-		prefs.photflux_key);
+		prefs.photflux_rkey);
     error(EXIT_FAILURE, str, rfilename);
     }
   if (key->ttype == T_DOUBLE)
     dflux = (double *)key->ptr;
   else
     flux = (float *)key->ptr;
+  n = prefs.photflux_num - 1;
+  if (n)
+    {
+    if (key->naxis==1 && n<key->naxisn[0])
+      {
+      if (key->ttype == T_DOUBLE)
+        dflux += n;
+      else
+        flux += n;
+      }
+    else
+      {
+      sprintf(str, "Not enough apertures for %s in catalog %s: ",
+	prefs.photflux_rkey, rfilename);
+      warning(str, "using first aperture");
+      }
+    }
 
-  if (!(key = name_to_key(keytab, prefs.photfluxerr_key)))
+  if (!(key = name_to_key(keytab, prefs.photfluxerr_rkey)))
     {
     sprintf(str, "*Error*: %s parameter not found in catalog ",
-		prefs.photfluxerr_key);
+		prefs.photfluxerr_rkey);
     error(EXIT_FAILURE, str, rfilename);
     }
   if (key->ttype == T_DOUBLE)
     dfluxerr = (double *)key->ptr;
   else
     fluxerr = (float *)key->ptr;
+  n = prefs.photfluxerr_num - 1;
+  if (n)
+    {
+    if (key->naxis==1 && n<key->naxisn[0])
+      {
+      if (key->ttype == T_DOUBLE)
+        dfluxerr += n;
+      else
+        fluxerr += n;
+      }
+    else
+      {
+      sprintf(str, "Not enough apertures for %s in catalog %s: ",
+	prefs.photfluxerr_rkey, rfilename);
+      warning(str, "using first aperture");
+      }
+    }
 
   /* Load optional SExtractor FLAGS parameter */
   if (!(key = name_to_key(keytab, "FLAGS")))
@@ -300,7 +334,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     if (!(n%10000))
 #endif
       {
-      sprintf(str,"Catalog %s: Object #%d / %d samples stored",
+      sprintf(str,"Catalogue %s: Object #%d / %d samples stored",
 		rfilename,n,nsample);
       NFPRINTF(OUTPUT, str);
       }
