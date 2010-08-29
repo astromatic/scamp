@@ -5,11 +5,11 @@
 *
 *	Part of:	SCAMP
 *
-*	Author:		E.BERTIN (IAP, Leiden observatory & ESO)
+*	Author:		E.BERTIN (IAP)
 *
 *	Contents:	Type definitions related to samples
 *
-*	Last modify:	11/01/2008
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -54,7 +54,9 @@ typedef struct sample
   float		rawposerr[NAXIS];	/* Uncertainty on raw coordinates */
   float		wcsposerr[NAXIS];	/* Errors on WCS positions */
   float		wcsprop[NAXIS];		/* Proper motion vectors in the WCS */
-  float		wcsproperr[NAXIS];	/* Proper motion vectors in the WCS */
+  float		wcsproperr[NAXIS];	/* P. motion vector errors in the WCS */
+  float		wcsparal;		/* Trigonometric parallax */
+  float		wcsparalerr;		/* Trigonometric parallax error */
   float		weight;			/* Relative weight in solutions */
   float		flux;			/* Flux */
   float		fluxerr;		/* Flux uncertainty (1-sigma) */

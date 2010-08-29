@@ -9,7 +9,7 @@
 *
 *	Contents:	Keywords for the configuration file.
 *
-*	Last modify:	03/08/2010
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -100,6 +100,7 @@ pkeystruct key[] =
 	"ASTR_COLSHIFT1D" , "ASTR_REFPROPER", "ASTR_INTSYSMAP",
 	"ASTR_REFSYSMAP", ""},
     0, MAXCHECK, &prefs.ncplot_type},
+  {"COMPUTE_PARALLAXES", P_BOOL, &prefs.parallax_flag},
   {"COMPUTE_PROPERMOTIONS", P_BOOL, &prefs.propmotion_flag},
   {"CORRECT_COLOURSHIFTS", P_BOOL, &prefs.colourshift_flag},
   {"CROSSID_RADIUS", P_FLOAT, &prefs.crossid_radius, 0,0, 0.0,1e31},
@@ -241,6 +242,7 @@ char *default_prefs[] =
 "DISTORT_DEGREES        3               # Polynom degree for each group",
 "*ASTREF_WEIGHT          1.0             # Relative weight of ref.astrom.cat.",
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
+"*COMPUTE_PARALLAXES     Y               # Compute trigonom. parallaxes (Y/N)?",
 "*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
 " ",

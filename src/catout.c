@@ -9,7 +9,7 @@
 *
 *	Contents:	Produce and write merged catalogs.
 *
-*	Last modify:	03/08/2010
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -35,7 +35,7 @@
 #ifdef USE_THREADS
 #include "threads.h"
 #endif
-
+#include "xml.h"
 
 
 /****** writemergedcat_fgroup *************************************************
@@ -47,7 +47,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 03/08/2010
+VERSION 29/08/2010
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -73,6 +73,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			magref[MAXPHOTINSTRU],
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
+			wcsparal,wcsparalerr,
 			epoch,epochmin,epochmax, err2, dummy;
    char			str[80],
 			*buf, *rfilename;
@@ -271,6 +272,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               wcsprop[d] += samp2->wcsprop[d];
               wcsproperr[d] += samp2->wcsproperr[d]*samp2->wcsproperr[d];
               }
+            wcsparal += samp2->wcsparal;
+            wcsparalerr += samp2->wcsparalerr*samp2->wcsparalerr;
             epoch += samp2->set->field->epoch;
             if (samp2->set->field->epoch < epochmin)
               epochmin = samp2->set->field->epoch;
@@ -302,6 +305,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               }
             else
               msample.wcspostheta = 0.0;
+            msample.wcsparal = (wcsparal/nm) * DEG/MAS;
+            msample.wcsparalerr = sqrt(wcsparalerr/nm) * DEG/MAS;
             msample.epoch = epoch / nm;
             msample.epochmin = epochmin;
             msample.epochmax = epochmax;

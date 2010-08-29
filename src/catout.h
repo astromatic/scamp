@@ -9,7 +9,7 @@
 *
 *	Contents:	Include file for catout.c
 *
-*	Last modify:	03/08/2010
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -36,6 +36,8 @@ typedef struct mergedsample
   float		wcsposdisp[NAXIS];	/* Dispersion on mean WCS positions */
   float		wcsprop[NAXIS];		/* Proper motion vectors in WCS */
   float		wcsproperr[NAXIS];	/* Proper motion vector errors in WCS */
+  float		wcsparal;		/* Parallax in mas */
+  float		wcsparalerr;		/* Parallax error mas */
   float		epochmin;		/* Min epoch for observations */
   float		epoch;			/* Mean epoch for observations */
   float		epochmax;		/* Max epoch for observations */
