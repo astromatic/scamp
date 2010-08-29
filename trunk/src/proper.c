@@ -7,9 +7,9 @@
 *
 *	Author:		E.BERTIN (IAP)
 *
-*	Contents:	Compute proper motions.
+*	Contents:	Compute DCR, proper motions and parallaxes.
 *
-*	Last modify:	03/08/2010
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -238,26 +238,29 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	03/08/2010
+VERSION	29/08/2010
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
    fieldstruct	*field,*field1,*field2;
    setstruct	*set;
    samplestruct	*samp,*samp1,*samp2;
-   wcsstruct	*wcs;
-   double	ss[NAXIS],sx[NAXIS],sxx[NAXIS],sy[NAXIS],sxy[NAXIS],
+   wcsstruct	*wcs, *wcsec;
+   char		*wcsectype[NAXIS];
+   double	alpha[25], beta[5],
 		sigma[NAXIS], coord[NAXIS], coorderr[NAXIS],
+		projpos[NAXIS], ecpos[NAXIS], pfac1[NAXIS],pfac2[NAXIS],
 		**csscale, **cszero,
 		*wcsscale,
-		sig, wi,xi,yi, delta;
-   double	epoch, dmag;
+		sig, wi,wis,yi, dt,epoch, dmag, bec,cbec,lec,
+		pfac,paral,paralerr;
    int		d,f,f1,ff,s,n, naxis, nfield, nsamp, lng,lat, celflag,
-		colcorflag, propflag;
+		colcorflag, propflag, paralflag, ncoeff;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
   colcorflag = prefs.colourshift_flag;
+  paralflag = prefs.parallax_flag;
   naxis = fgroup->naxis;
   nfield = fgroup->nfield;
   wcs = fgroup->wcs;
@@ -267,6 +270,16 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   wcsscale = fgroup->meanwcsscale;
   csscale = fgroup->intcolshiftscale;
   cszero = fgroup->intcolshiftzero;
+  paral = paralerr = 0.0;
+
+/* Set up a WCS structure to handle ecliptic coordinates */
+  for (d=0; d<naxis; d++)
+    QMALLOC(wcsectype[d], char, 16); 
+  strcat(wcsectype[lng], "ELON-AIT");
+  strcat(wcsectype[lat], "ELAT-AIT");
+  wcsec = create_wcs(wcsectype, NULL, NULL, NULL, NULL, 2);
+  for (d=0; d<naxis; d++)
+    free(wcsectype[d]); 
 
 /* Index fields within the group for local usage */
   for (f=0; f<nfield; f++)
@@ -282,67 +295,110 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
       samp = set->sample;
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp)
-         {
-         for (d=0; d<naxis; d++)
-           {
-           ss[d] = sx[d] = sy[d] = sxx[d] = sxy[d] = 0.0;
-           }
-         for (samp1=samp; samp1 && samp1->set->field->astromlabel>=0;
-		 samp1=samp1->prevsamp)
-	  {
+          {
+/*-------- Initialize matrices */
+          memset(alpha, 0, 25*sizeof(double));
+          memset(beta, 0, 5*sizeof(double));
+          samp1 = samp;
           field1 = samp1->set->field;
           f1 = field1->index;
           epoch = field1->epoch;
+          if (paralflag)
+            {
+/*---------- Compute parallax factors for detection #1 from ecliptic coords */
+/*---------- (still quick and dirty, needs more proper determination) */
+            ecpos[lng] = samp1->wcspos[lng];
+            ecpos[lat] = samp1->wcspos[lat];
+            eq_to_celsys(wcsec, ecpos);
+            bec = ecpos[lat]*DEG;
+            lec = field1->epoch - 0.246; /* l_sun ~ 0 when fractional part=0 */
+            lec = ecpos[lng]*DEG - (lec - floor(lec))*2*PI;		/* l - l_sun */
+            ecpos[lng] -= (fabs(cbec=cos(bec)) > 1e-12?
+			(ARCSEC/DEG)*sin(lec)/cbec : 0.0);
+            ecpos[lat] -= (ARCSEC/DEG)*cos(lec)*sin(bec);
+            celsys_to_eq(wcsec, ecpos);
+            wcs_to_raw(wcs, ecpos, projpos);
+            pfac1[lng] = projpos[lng] - samp1->projpos[lng];
+            pfac1[lat] = projpos[lat] - samp1->projpos[lat];
+            }
+          wis = 1.0/wcs_scale(wcs, samp1->projpos);
           for (d=0; d<naxis; d++)
             {
 /*---------- Another simplistic treatment of position uncertainties */
             sig = samp1->wcsposerr[d];
-            sigma[d] = sig*sig;
+            sig = sig*sig;
+             if (sig>0.0)
+              {
+              wi = wis/sig;
+              alpha[d*6+12] += wi;
+              }
             }
           samp2 = samp;
-          while ((samp2=samp2->prevsamp)
-		&& samp2->set->field->astromlabel>=0)
+          while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
+            {
+            field2 = samp2->set->field;
+            ff = f1*nfield + field2->index;
+            dt = field2->epoch - epoch;
+            dmag = samp2->mag - samp1->mag;
+            if (paralflag)
               {
-              field2 = samp2->set->field;
-              ff = f1*nfield + field2->index;
-              xi = field2->epoch - epoch;
-              dmag = samp2->mag - samp1->mag;
-/*------------ DCR correction */
-              for (d=0; d<naxis; d++)
+/*------------ Compute parallax factors for detection #n */
+/*------------ (still quick and dirty, needs more proper determination) */
+              ecpos[lng] = samp2->wcspos[lng];
+              ecpos[lat] = samp2->wcspos[lat];
+              eq_to_celsys(wcsec, ecpos);
+              bec = ecpos[lat]*DEG;
+              lec = field2->epoch - 0.246;
+              lec = ecpos[lng]*DEG - (lec - floor(lec))*2*PI;
+              ecpos[lng] -= (fabs(cbec=cos(bec)) > 1e-12?
+			(ARCSEC/DEG)*sin(lec)/cbec : 0.0);
+              ecpos[lat] -= (ARCSEC/DEG)*cos(lec)*sin(bec);
+              celsys_to_eq(wcsec, ecpos);
+              wcs_to_raw(wcs, ecpos, projpos);
+              pfac2[lng] = projpos[lng] - samp2->projpos[lng];
+              pfac2[lat] = projpos[lat] - samp2->projpos[lat];
+              }
+            for (d=0; d<naxis; d++)
+              {
+              sig = samp2->wcsposerr[d];
+              sig *= sig;
+              if (sig>0.0)
                 {
-                sig = samp2->wcsposerr[d];
-                sig = sig*sig + sigma[d];
-                if (sig>0.0)
+                yi = samp2->projpos[d] - samp1->projpos[d];
+                if (colcorflag)
+/*-------------- DCR correction */
+                  yi -= dmag*csscale[d][ff] + cszero[d][ff];
+                wi = wis/sig;
+                alpha[d*6] += wi*dt*dt;
+                alpha[d*6+12] += wi;
+                alpha[d*6+10] = (alpha[d*6+2] += wi*dt);
+                beta[d] += wi*yi*dt;
+                beta[d+2] += wi*yi;
+                if (paralflag)
                   {
-                  wi = 1.0/sig;
-                  yi = samp2->projpos[d] - samp1->projpos[d];
-                  if (colcorflag)
-                    yi -= dmag*csscale[d][ff] + cszero[d][ff];
-                  ss[d] += wi;
-                  sx[d] += wi*xi;
-                  sy[d] += wi*yi;
-                  sxx[d] += wi*xi*xi;
-                  sxy[d] += wi*xi*yi;
+                  pfac = pfac2[d] - pfac1[d];
+                  alpha[d+20] = (alpha[d*5+4] += wi*dt*pfac);
+                  alpha[d+22] = (alpha[d*5+14] += wi*pfac);
+                  alpha[24] += wi*pfac*pfac;
+                  beta[4] += wi*yi*pfac;
                   }
                 }
               }
             }
+          ncoeff = paralflag? 5 : 4;
+          clapack_dposv(CblasRowMajor, CblasUpper, ncoeff, 1, alpha, ncoeff,
+			beta, ncoeff);
+          clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
           propflag = 1;
           for (d=0; d<naxis; d++)
             {
-            coord[d] = samp->projpos[d];
-            coorderr[d] = 0.0;
-            if (ss[d] > 0.0)
-              {
-              delta = ss[d]*sxx[d] - sx[d]*sx[d];
-              if (delta != 0.0)
-                {
-                coord[d] += (ss[d]*sxy[d] - sx[d]*sy[d])/delta;
-                coorderr[d] = sqrt(ss[d]/delta);
-                continue;
-                }
-              }
-            propflag = 0;
+            coord[d] = samp->projpos[d] + beta[d];
+            coorderr[d] = sqrt(alpha[d*(ncoeff+1)]/wis);
+            }
+          if (paralflag)
+            {
+            paral = beta[4];
+            paralerr = sqrt(alpha[24]);
             }
           samp2 = samp;
           if (propflag)
@@ -356,17 +412,24 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
               coord[lng] *= cos(samp->wcspos[lat]*DEG);
             while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
+              {
               for (d=0; d<naxis; d++)
                 {
                 samp2->wcsprop[d] = coord[d];
                 samp2->wcsproperr[d] = fabs(coorderr[d]);
                 }
+              samp2->wcsparal = paral;
+              samp2->wcsparalerr = paralerr;
+              }
             }
           else
             while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
+              {
               for (d=0; d<naxis; d++)
                 samp2->wcsprop[d] = samp2->wcsproperr[d] = 0.0;
+              samp2->wcsparal = samp2->wcsparalerr = 0.0;
+              }
           }
       }
     }

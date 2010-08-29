@@ -9,7 +9,7 @@
 *
 *	Contents:	Include for prefs.c.
 *
-*	Last modify:	24/08/2010
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -168,6 +168,8 @@ typedef struct
   int           ngroup_deg;			/* nb of params */
   double	astrclip_nsig;			/* Astrom. clipping threshold*/
   double	astref_weight;			/* Ref.cat. relative weight */
+/* Parallaxes */
+  int		parallax_flag;			/* Compute parallaxes? */
 /* Proper motions */
   int		propmotion_flag;		/* Compute proper motions? */
 /* Differential Chromatic Refraction (DRC) */

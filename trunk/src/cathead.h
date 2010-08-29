@@ -9,7 +9,7 @@
 *
 *	Contents:	Catalog headers for catout.c
 *
-*	Last modify:	03/08/2010
+*	Last modify:	29/08/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 */
@@ -54,10 +54,16 @@ keystruct		refmergedkey[] = {
 	"%10e", "mas/yr", "pos.pm;pos.eq.de;stat.fit", "mas/yr"},
   {"PMXERR_WORLD", "P.motion uncertainty along world x axis",
 	&refmergedsample.wcsproperr[0], H_FLOAT, T_FLOAT,
-	"%10e", "mas/yr", "stat.error; pos.pm;pos.eq.ra;stat.fit", "mas/yr"},
+	"%10e", "mas/yr", "stat.error;pos.pm;pos.eq.ra;stat.fit", "mas/yr"},
   {"PMYERR_WORLD", "P.motion uncertainty along world y axis",
 	&refmergedsample.wcsproperr[1], H_FLOAT, T_FLOAT,
 	"%10e", "mas/yr", "stat.error;pos.pm;pos.eq.de;stat.fit", "mas/yr"},
+  {"PARALLAX_WORLD", "Trigonometric parallax",
+	&refmergedsample.wcsparal, H_FLOAT, T_FLOAT,
+	"%10e", "mas", "pos.parallax.trig;stat.fit", "mas"},
+  {"PARALLAXERR_WORLD", "Trignonometric parallax uncertainty",
+	&refmergedsample.wcsproperr, H_FLOAT, T_FLOAT,
+	"%10e", "mas", "stat.error;pos.parallax.trig;stat.fit", "mas"},
   {"EPOCH", "Mean epoch",
 	&refmergedsample.epoch, H_FLOAT, T_FLOAT,
 	"%15.10f", "yr", "time.epoch;stat.mean", "yr"},
