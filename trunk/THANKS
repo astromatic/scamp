@@ -1,3 +1,6 @@
+TERAPIX project <http://terapix.iap.fr>
+	Financial and technical support
+
 Mark Calabretta <mcalabre@atnf.csiro.au>
         SCAMP makes extensive use of his nice WCS library
 
@@ -34,6 +37,13 @@ Eric Aubourg <Eric@aubourg.net>
 Wayne Barkhouse <wbark@astro.uiuc.edu>
 Mireille Dantel-Fort <mireille.dantel@obspm.fr>
 Daniel Durand <Daniel.Durand@nrc.ca>
-Pascal Fouque <pfouque@ast.obs-mip.fr>
-Joe Mohr <jmohr@uiuc.edu>
+Pascal Fouqué <pfouque@ast.obs-mip.fr>
+Jean-Baptiste Marquette <marquett@iap.fr>
+Patrick Hudelot <hudelot@iap.fr>
+John P. McFarland <mcfarland@astro.rug.nl>
+Shantanu Desai <shantanu@illinois.edu>
+Joe Mohr <jmohr@usm.lmu.de>
+Huan Lin <hlin@fnal.gov>
+Hervé Bouy <hbouy@cab.inta-csic.es>
         Help in discovering bugs or bringing suggestions
+

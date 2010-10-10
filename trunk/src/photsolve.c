@@ -1,18 +1,32 @@
-  /*
- 				photsolve.c
-
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*
+*				photsolve.c
 *
-*	Part of:	SCAMP
+* Compute the "global" photometric solution.
 *
-*	Author:		E.BERTIN (IAP)
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*	Contents:	Compute the "global" photometric solution.
+*	This file part of:	SCAMP
 *
-*	Last modify:	30/07/2008
+*	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
 *
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+*	Author:			Emmanuel Bertin (IAP)
+*
+*	License:		GNU General Public License
+*
+*	SCAMP is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+* 	(at your option) any later version.
+*	SCAMP is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*	You should have received a copy of the GNU General Public License
+*	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
+*
+*	Last modified:		10/10/2010
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
@@ -46,7 +60,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/05/2007
+VERSION	30/08/2010
  ***/
 void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -302,8 +316,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 
 /*---- Solve! */
       NFPRINTF(OUTPUT, "Solving the global photometry matrix...");
-      clapack_dpotrf(CblasRowMajor, CblasUpper, ncoefftot, alpha, ncoefftot);
-      clapack_dpotrs(CblasRowMajor, CblasUpper,
+      clapack_dposv(CblasRowMajor, CblasUpper,
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
       }
 
