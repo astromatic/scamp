@@ -1,18 +1,107 @@
-/*
-                                ChangeLog
+#
+#				ChangeLog
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#
+#	This file part of:	SCAMP
+#
+#	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
+#
+#	Author:			Emmanuel Bertin (IAP)
+#
+#	License:		GNU General Public License
+#
+#	SCAMP is free software: you can redistribute it and/or modify
+#	it under the terms of the GNU General Public License as published by
+#	the Free Software Foundation, either version 3 of the License, or
+# 	(at your option) any later version.
+#	SCAMP is distributed in the hope that it will be useful,
+#	but WITHOUT ANY WARRANTY; without even the implied warranty of
+#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#	GNU General Public License for more details.
+#	You should have received a copy of the GNU General Public License
+#	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
+#
+#	Last modified:		10/10/2010
+#
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*
-*       Part of:        SCAMP
-*
-*       Author:         E. BERTIN (IAP)
-*
-*       Contents:       log of changes made to the SCAMP source
-*
-*       Last modify:    20/04/2010
-*
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+------------------------------------------------------------------------
+r246 | bertin | 2010-08-30 00:30:25 +0200 (Mon, 30 Aug 2010) | 4 lines
+
+Added parallaxes (not yet fully functional) in merged catalogue.
+Added COMPUTE_PARALLAXES configuration keyword.
+Pushed version number to 1.8.2.
+
+------------------------------------------------------------------------
+r245 | bertin | 2010-08-25 00:17:54 +0200 (Wed, 25 Aug 2010) | 4 lines
+
+Added support for measurement vectors in PHOTFLUX_KEY and PHOTFLUXERR_KEY
+(thanks to P.Hudelot).
+Updated website URL in various places.
+Pushed version number 1.8.1.
+
+------------------------------------------------------------------------
+r244 | bertin | 2010-08-08 21:57:07 +0200 (Sun, 08 Aug 2010) | 13 lines
+
+Added CORRECT_COLOURSHIFTS config option (defaulted to N) to correct proper
+motion measurements from differential chromatic refraction effects (colour
+shift measurements still not very robust though).
+Added COMPUTE_PROPERMOTIONS config option.
+Fixed AstrClip_NSigma values in XML metadata output.
+Added epochs to the info displayed for fields in each group.
+Added EPOCH_MIN and EPOCH_MAX data fields in merged output catalogues.
+Simplified calls to astrometric references catalogues.
+Filtered out the debug output from aclient_cgi.
+Fixed proper motion reading bug with some astrometric reference catalogues.
+Fixed scaling bug for proper motion uncertainties in mergde output catalogues.
+Fixed incorrect reading of the DATE-OBS FITS keyword when EPOCH and MJD-OBS are
+missing.
+Added SuprimeCam focal plane model (thanks to H.Bouy).
+Pushed SCAMP version number to 1.8.0.
+
+------------------------------------------------------------------------
+r243 | bertin | 2010-07-20 13:20:38 +0200 (Tue, 20 Jul 2010) | 2 lines
+
+Fixed TFORM error message in fitshead.c (thanks to S.Guieu).
+
+------------------------------------------------------------------------
+r242 | bertin | 2010-07-02 13:35:31 +0200 (Fri, 02 Jul 2010) | 2 lines
+
+Fixed fistpick() issue with slashes within strings (thanks to F.Schuller).
+
+------------------------------------------------------------------------
+r241 | bertin | 2010-07-01 22:04:29 +0200 (Thu, 01 Jul 2010) | 2 lines
+
+Added MiniMo focal-plane model (thanks to F.Durret).
+
+------------------------------------------------------------------------
+r240 | bertin | 2010-05-20 11:27:47 +0200 (Thu, 20 May 2010) | 2 lines
+
+Added Mosaic2 focal-plane model (thanks to F.Durret).
+
+------------------------------------------------------------------------
+r239 | bertin | 2010-04-27 16:20:49 +0200 (Tue, 27 Apr 2010) | 2 lines
+
+Removed number of extensions as a discriminant factor for photometric
+instruments (but kept it for astrometric instruments).
+
+------------------------------------------------------------------------
+r238 | bertin | 2010-04-27 16:15:56 +0200 (Tue, 27 Apr 2010) | 3 lines
+
+Made the number of extensions a discriminant factor for astrometric and
+photometric instruments.
+Fixed minor compilation warnings on MacOS X.
+
+------------------------------------------------------------------------
+r237 | bertin | 2010-04-20 17:41:35 +0200 (Tue, 20 Apr 2010) | 2 lines
+
+Included missing LICENSE file in the source archive.
+
+------------------------------------------------------------------------
+r235 | bertin | 2010-04-20 17:02:10 +0200 (Tue, 20 Apr 2010) | 2 lines
+
+Updated ChangeLog.
 
 ------------------------------------------------------------------------
 r234 | bertin | 2010-04-20 16:13:47 +0200 (Tue, 20 Apr 2010) | 4 lines
@@ -32,7 +121,8 @@ Pushed version number to 2.7.0.
 ------------------------------------------------------------------------
 r232 | bertin | 2010-03-02 18:23:47 +0100 (Tue, 02 Mar 2010) | 4 lines
 
-Fixed bug with shear correction in MATCHing (thanks to Shantanu and Huan for reporting this issue).
+Fixed bug with shear correction in MATCHing (thanks to Shantanu Desai and
+Huan Lin for reporting this issue).
 Fixed bug with multiple reference catalogue files.
 Pushed version number to 2.6.5.
 
@@ -49,7 +139,8 @@ Fixed issue with FFTW configure for custom library paths.
 ------------------------------------------------------------------------
 r229 | bertin | 2009-11-02 17:22:54 +0100 (Mon, 02 Nov 2009) | 2 lines
 
-Added support for 64 bit binary table elements in FITS library (thanks to J.P. McFarland).
+Added support for 64 bit binary table elements in FITS library (thanks to
+J.P. McFarland).
 
 ------------------------------------------------------------------------
 r226 | bertin | 2009-10-22 20:44:35 +0200 (Thu, 22 Oct 2009) | 2 lines

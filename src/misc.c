@@ -1,18 +1,32 @@
 /*
-                                  misc.c
-
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*				misc.c
 *
-*       Part of:        SCAMP
+* Miscellaneous functions
 *
-*       Author:         E.BERTIN (IAP)
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*       Contents:       Miscellaneous routines
+*	This file part of:	SCAMP
 *
-*       Last modify:    05/08/2003
+*	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
 *
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+*	Author:			Emmanuel Bertin (IAP)
+*
+*	License:		GNU General Public License
+*
+*	SCAMP is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+* 	(at your option) any later version.
+*	SCAMP is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*	You should have received a copy of the GNU General Public License
+*	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
+*
+*	Last modified:		10/10/2010
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
@@ -33,10 +47,10 @@
 
 /******* fast_median **********************************************************
 PROTO	double fast_median(double *arr, int n)
-PURPOSE	Fast median from an input array, optimized version based on the
-	select() routine (Numerical Recipes, 2nd ed. Section 8.5 and
-	http://www.eso.org/~ndevilla/median/). If n is even, then the result
-	is the average of the 2 "central" values.
+PURPOSE	Fast median from an input array, based on the quick-select algorithm
+	described by N. Devillard at
+        http://ansi.c.sources.free.fr/median/median/index.html. If n is even,
+	then the result is the average of the 2 "central" values.
 INPUT	Input pixel array ptr,
 	number of input pixels,
 OUTPUT	Value of the median.

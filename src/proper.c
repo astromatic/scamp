@@ -1,18 +1,32 @@
-  /*
- 				proper.c
-
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+/*
+*				proper.c
 *
-*	Part of:	SCAMP
+* Compute differential chromatic refraction, proper motions and parallaxes.
 *
-*	Author:		E.BERTIN (IAP)
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
-*	Contents:	Compute DCR, proper motions and parallaxes.
+*	This file part of:	SCAMP
 *
-*	Last modify:	29/08/2010
+*	Copyright:		(C) 2008-2010 IAP/CNRS/UPMC
 *
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
+*	Author:			Emmanuel Bertin (IAP)
+*
+*	License:		GNU General Public License
+*
+*	SCAMP is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+* 	(at your option) any later version.
+*	SCAMP is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*	You should have received a copy of the GNU General Public License
+*	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
+*
+*	Last modified:		10/10/2010
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
@@ -255,7 +269,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 		sig, wi,wis,yi, dt,epoch, dmag, bec,cbec,lec,
 		pfac,paral,paralerr;
    int		d,f,f1,ff,s,n, naxis, nfield, nsamp, lng,lat, celflag,
-		colcorflag, propflag, paralflag, ncoeff;
+		colcorflag, propflag, paralflag, ncoeff,ncoeffp1;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
@@ -271,6 +285,8 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   csscale = fgroup->intcolshiftscale;
   cszero = fgroup->intcolshiftzero;
   paral = paralerr = 0.0;
+  ncoeff = paralflag? 5 : 4;
+  ncoeffp1 = ncoeff+1;
 
 /* Set up a WCS structure to handle ecliptic coordinates */
   for (d=0; d<naxis; d++)
@@ -297,8 +313,8 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         if (!samp->nextsamp && samp->prevsamp)
           {
 /*-------- Initialize matrices */
-          memset(alpha, 0, 25*sizeof(double));
-          memset(beta, 0, 5*sizeof(double));
+          memset(alpha, 0, ncoeff*ncoeff*sizeof(double));
+          memset(beta, 0, ncoeff*sizeof(double));
           samp1 = samp;
           field1 = samp1->set->field;
           f1 = field1->index;
@@ -312,7 +328,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             eq_to_celsys(wcsec, ecpos);
             bec = ecpos[lat]*DEG;
             lec = field1->epoch - 0.246; /* l_sun ~ 0 when fractional part=0 */
-            lec = ecpos[lng]*DEG - (lec - floor(lec))*2*PI;		/* l - l_sun */
+            lec = ecpos[lng]*DEG - (lec - floor(lec))*2*PI;	/* l - l_sun */
             ecpos[lng] -= (fabs(cbec=cos(bec)) > 1e-12?
 			(ARCSEC/DEG)*sin(lec)/cbec : 0.0);
             ecpos[lat] -= (ARCSEC/DEG)*cos(lec)*sin(bec);
@@ -321,7 +337,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             pfac1[lng] = projpos[lng] - samp1->projpos[lng];
             pfac1[lat] = projpos[lat] - samp1->projpos[lat];
             }
-          wis = 1.0/wcs_scale(wcs, samp1->projpos);
+          wis = wcs_scale(wcs, samp1->projpos);
           for (d=0; d<naxis; d++)
             {
 /*---------- Another simplistic treatment of position uncertainties */
@@ -330,7 +346,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
              if (sig>0.0)
               {
               wi = wis/sig;
-              alpha[d*6+12] += wi;
+              alpha[(d+2)*ncoeffp1] += wi;
               }
             }
           samp2 = samp;
@@ -369,9 +385,9 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 /*-------------- DCR correction */
                   yi -= dmag*csscale[d][ff] + cszero[d][ff];
                 wi = wis/sig;
-                alpha[d*6] += wi*dt*dt;
-                alpha[d*6+12] += wi;
-                alpha[d*6+10] = (alpha[d*6+2] += wi*dt);
+                alpha[d*ncoeffp1] += wi*dt*dt;
+                alpha[(d+2)*ncoeffp1] += wi;
+                alpha[2*ncoeff+ncoeffp1*d] = (alpha[d*ncoeffp1+2] += wi*dt);
                 beta[d] += wi*yi*dt;
                 beta[d+2] += wi*yi;
                 if (paralflag)
@@ -379,13 +395,12 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
                   pfac = pfac2[d] - pfac1[d];
                   alpha[d+20] = (alpha[d*5+4] += wi*dt*pfac);
                   alpha[d+22] = (alpha[d*5+14] += wi*pfac);
-                  alpha[24] += wi*pfac*pfac;
+                  alpha[24] += wi*(pfac*pfac+1.0);
                   beta[4] += wi*yi*pfac;
                   }
                 }
               }
             }
-          ncoeff = paralflag? 5 : 4;
           clapack_dposv(CblasRowMajor, CblasUpper, ncoeff, 1, alpha, ncoeff,
 			beta, ncoeff);
           clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
@@ -393,7 +408,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           for (d=0; d<naxis; d++)
             {
             coord[d] = samp->projpos[d] + beta[d];
-            coorderr[d] = sqrt(alpha[d*(ncoeff+1)]/wis);
+            coorderr[d] = sqrt(alpha[d*ncoeffp1]*wis);
             }
           if (paralflag)
             {

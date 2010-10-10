@@ -50,11 +50,6 @@ the executable filename) with
 
      ./configure --with-cdsclient_exec=<aclient_exec>
 
-SCAMP is dynamically linked by default. Static-linking generally leads to
-faster (but fatter) executables. To enable it, configure with
-
-./configure --enable-static
-
 Compilers and Options
 =====================
 
