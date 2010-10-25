@@ -7,9 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
-*
-*	Author:			Emmanuel Bertin (IAP)
+*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -39,7 +37,7 @@
 
 #define         BANNER		"SCAMP"
 #define         MYVERSION       VERSION
-#define         COPYRIGHT       "1998-2010 IAP/CNRS/UPMC"
+#define         COPYRIGHT       "2010 IAP/CNRS/UPMC"
 #define		DISCLAIMER	BANNER " comes with ABSOLUTELY NO WARRANTY\n" \
 		"You may redistribute copies of " BANNER "\n" \
 		"under the terms of the GNU General Public License."
