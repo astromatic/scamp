@@ -7,9 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
-#
-#	Author:			Emmanuel Bertin (IAP)
+#	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -30,8 +28,8 @@
 
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= man src
-dist_pkgdata_DATA	= config/*.ahead doc xsl/scamp.xsl
-EXTRA_DIST		= AUTHORS BUGS ChangeLog COPYRIGHT \
+dist_pkgdata_DATA	= config/*.ahead xsl/scamp.xsl
+EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYRIGHT \
 			  HISTORY INSTALL LICENSE README THANKS \
 			  acx_pthread.m4 acx_prog_cc_optim.m4 \
 			  acx_atlas.m4 acx_cdsclient.m4 acx_fftw.m4 \

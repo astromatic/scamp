@@ -1,13 +1,13 @@
 #
 #				configure.ac
 #
+# Process this file with autoconf to generate a configure script.
+#
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
-#
-#	Author:			Emmanuel Bertin (IAP)
+#	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
 #
 #	SCAMP is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 #	Last modified:		09/10/2010
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-# Process this file with autoconf to produce a configure script.
 
 # First, disable the annoying config.cache
 define([AC_CACHE_LOAD],)

@@ -1,6 +1,3 @@
-TERAPIX project <http://terapix.iap.fr>
-	Financial and technical support
-
 Mark Calabretta <mcalabre@atnf.csiro.au>
         SCAMP makes extensive use of his nice WCS library
 
@@ -14,7 +11,7 @@ Ville Laurikari <vl@iki.fi>
         for his VL_PROG_CC_WARNINGS (modified to ACX_PROG_CC_OPTIM)
 
 Steven G. Johnson <stevenj@alum.mit.edu>
-        for his acx_pthread.m4
+        For his AC_PTHREAD (modified to ACX_PTHREAD)
 
 Erik Deul <deul@strw.leidenuniv.nl>
 Mario Radovich <radovich@na.astro.it>
@@ -46,4 +43,7 @@ Joe Mohr <jmohr@usm.lmu.de>
 Huan Lin <hlin@fnal.gov>
 Hervé Bouy <hbouy@cab.inta-csic.es>
         Help in discovering bugs or bringing suggestions
+
+TERAPIX project <http://terapix.iap.fr>
+	Financial and technical support
 

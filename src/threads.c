@@ -7,9 +7,8 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 2002-2010 IAP/CNRS/UPMC
-*
-*	Author:			Emmanuel Bertin (IAP)
+*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*				(C) Mark Hays (original tutorial)
 *
 *	License:		GNU General Public License
 *
@@ -25,7 +24,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		13/10/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -84,7 +83,7 @@ OUTPUT	-.
 NOTES   From Mark Hays' POSIX tutorial.
 	See e.g. http://www.cs.ualberta.ca/~paullu/C681/mark.hays.threads.html.
 AUTHOR  E. Bertin (IAP)
-VERSION 01/07/2003
+VERSION 04/01/2010
  ***/
 void threads_gate_end(threads_gate_t *gate)
 
@@ -94,6 +93,7 @@ void threads_gate_end(threads_gate_t *gate)
   QPTHREAD_MUTEX_DESTROY(&gate->block);
   QPTHREAD_COND_DESTROY(&gate->condvar);
   QPTHREAD_COND_DESTROY(&gate->last);
+  free(gate);
 
   return;
   }
