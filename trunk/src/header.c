@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		16/11/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -112,7 +112,7 @@ INPUT	Name of the ASCII file,
 OUTPUT	RETURN_OK if the file was found, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/11/2007
+VERSION	16/11/2010
  ***/
 int	write_aschead(char *filename, fieldstruct *field)
   {
@@ -210,7 +210,8 @@ int	write_aschead(char *filename, fieldstruct *field)
 	    "write_aschead()");
       }
 
-      fprintf(file, "END     \n");
+    fprintf(file, "END     \n");
+    free_tab(tab);
     }
 
   fclose(file);

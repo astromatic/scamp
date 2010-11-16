@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		16/11/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -250,7 +250,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/08/2010
+VERSION	16/11/2010
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -288,7 +288,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 
 /* Set up a WCS structure to handle ecliptic coordinates */
   for (d=0; d<naxis; d++)
-    QMALLOC(wcsectype[d], char, 16); 
+    QCALLOC(wcsectype[d], char, 16); 
   strcat(wcsectype[lng], "ELON-AIT");
   strcat(wcsectype[lat], "ELAT-AIT");
   wcsec = create_wcs(wcsectype, NULL, NULL, NULL, NULL, 2);
@@ -341,10 +341,10 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 /*---------- Another simplistic treatment of position uncertainties */
             sig = samp1->wcsposerr[d];
             sig = sig*sig;
-             if (sig>0.0)
+            if (sig>0.0)
               {
               wi = wis/sig;
-              alpha[(d+2)*ncoeffp1] += wi;
+              alpha[(d+2)*ncoeffp1] += 0.1*wi;
               }
             }
           samp2 = samp;
@@ -446,6 +446,8 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           }
       }
     }
+
+  end_wcs(wcsec);
 
   return;
   }

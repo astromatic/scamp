@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		16/11/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 29/08/2010
+VERSION 16/11/2010
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -261,6 +261,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
           for (d=0; d<naxis; d++)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
 		= wcsprop[d] = wcsproperr[d] = 0.0;
+          wcsparal = wcsparalerr = 0.0;
           epoch = 0.0;
           epochmin = BIG;
           epochmax = -BIG;

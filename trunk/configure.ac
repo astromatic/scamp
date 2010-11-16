@@ -9,6 +9,8 @@
 #
 #	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
 #
+#	License:		GNU General Public License
+#
 #	SCAMP is free software: you can redistribute it and/or modify
 #	it under the terms of the GNU General Public License as published by
 #	the Free Software Foundation, either version 3 of the License, or
