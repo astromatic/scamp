@@ -25,21 +25,6 @@
 *	Last modified:		10/10/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-/*
- 				proper.h
-
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*
-*	Part of:	SCAMP
-*
-*	Author:		E.BERTIN (IAP, Leiden observatory & ESO)
-*
-*	Contents:	Declarations related to proper motions
-*
-*	Last modify:	06/03/2005
-*
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*/
 
 #ifndef _FITSWCS_H_
 #include "fitswcs.h"
