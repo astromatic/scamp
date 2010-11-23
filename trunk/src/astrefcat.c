@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		23/11/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -113,7 +113,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 30/07/2010
+VERSION 23/11/2010
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -189,12 +189,9 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       if ((tfield=load_astreffield(prefs.astref_name[c], wcspos, lng,lat,
 		naxis, maxradius, band, prefs.astref_maglim)))
         {
-        if (tfield)
-          {
-          NFPRINTF(OUTPUT, "");
-          QPRINTF(OUTPUT, " %d astrometric references loaded from %s\n",
+        NFPRINTF(OUTPUT, "");
+        QPRINTF(OUTPUT, " %d astrometric references loaded from %s\n",
 		tfield->set[0]->nsample, tfield->rfilename);
-          }
         if (field)
           {
           union_samples(tfield->set[0]->sample, field->set[0],
@@ -949,8 +946,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
       if (!(n%10000))
         {
-        sprintf(str,"Catalog %s (%s band) : Object #%d / %d samples stored",
-		catname,bandname, n,nsample);
+        sprintf(str,"%-.36s (%s band) : %d / %d references stored",
+		catname,bandname, nsample,n);
         NFPRINTF(OUTPUT, str);
         }
 /*------ Apply some selection over flags, fluxes,.. */
@@ -1415,8 +1412,8 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     read_obj(keytab,tab, buf);
     if (!(n%10000))
       {
-      sprintf(str,"Catalog %s: Object #%d / %d samples stored",
-		rfilename,n,nsample);
+      sprintf(str,"%-.36s: %d / %d references stored",
+		rfilename,nsample,n);
       NFPRINTF(OUTPUT, str);
       }
 /*---- Apply some selection over flags, fluxes... */

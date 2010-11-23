@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		23/11/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -554,7 +554,7 @@ INPUT	Pointer to the WCS projection structure,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/10/2005
+VERSION	23/11/2010
  ***/
 int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
 				double ymin, double ymax)
@@ -588,7 +588,7 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
   alphabeg = fmod(wcs2->wcsmin[lng], 360.0);
   alphaend = fmod(wcs2->wcsmax[lng], 360.0);
   while (alphaend<alphabeg)
-    alphaend += 360.0;
+    alphabeg -= 360.0;
   deltabeg = wcs2->wcsmin[lat];
   deltaend = wcs2->wcsmax[lat];
 
@@ -629,7 +629,7 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
   alphabeg = fmod (alphabeg, 360.0);
   alphaend += alphastep;
   while (alphaend<alphabeg)
-    alphaend += 360.0;
+    alphabeg -= 360.0;
 
   deltastep = deltaend - deltabeg;
 /* Quantize at the 15 degrees level */
@@ -3063,7 +3063,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	23/11/2010
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3293,7 +3293,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   for (i=0; i<CPLOT_NPIXERRHISTBIN; i++)
     cutbin[i] = boffset+(i+0.5)/bscale;
-  for (i=0; i<=CPLOT_PIXERR1DNX+1; i++)
+  for (i=0; i<=CPLOT_PIXERR1DNX; i++)
     cutx[i] = 0.5 + (PLFLT)i/CPLOT_PIXERR1DNX*(maxwidth-0.5);
 
   firstflag = 1;
