@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		23/11/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -346,8 +346,8 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     if (!(n%10000))
 #endif
       {
-      sprintf(str,"Catalogue %s: Object #%d / %d samples stored",
-		rfilename,n,nsample);
+      sprintf(str,"%-.36s : %d / %d detections stored",
+		rfilename,nsample,n);
       NFPRINTF(OUTPUT, str);
       }
 /*---- Apply some selection over flags, fluxes... */
@@ -847,7 +847,7 @@ OUTPUT  -.
 NOTES   Memory for the new samples is reallocated if needed. All input data are
 	reordered.
 AUTHOR  E. Bertin (IAP)
-VERSION 02/03/2010
+VERSION 23/11/2010
 */
 void	union_samples(samplestruct *samplein, setstruct *set,
 		int nsamplein, double radius, unionmodenum mode)
@@ -855,8 +855,8 @@ void	union_samples(samplestruct *samplein, setstruct *set,
   {
    samplestruct	*sample,*sample2,*sample3;
    double	*context,
-		radius2,min,max, dx,dy, dfac;
-   int		n,n2,n3, nin, nin2, nsample,nsamplemax, matchflag, lng,lat;
+		radius2,minin,min,max, dx,dy, dfac;
+   int		n,n2,n3, nin, nsample,nsamplemax, matchflag, lng,lat;
 
 /* Allocate memory for new samples if necessary */
   nsample = set->nsample;
@@ -867,6 +867,7 @@ void	union_samples(samplestruct *samplein, setstruct *set,
   radius2 = radius*radius;
   lng = set->lng;
   lat = set->lat;
+  sort_coord = lat<0? set->naxis-1 : lat;
   switch(mode)
     {
     case UNION_RAW:
@@ -876,15 +877,12 @@ void	union_samples(samplestruct *samplein, setstruct *set,
 /*---- Find the starting element */
       sample3 = sample + nsample;
       n = n3 = nsample;
-      min = sample->rawpos[sort_coord] - radius;
-      for (nin2=nsamplein; nin2--; samplein++)
-        if (samplein->rawpos[sort_coord] >= min)
-          break;
+      minin = sample->rawpos[sort_coord] - radius;
 /*---- Go! */
       for (nin=nsamplein; nin--; samplein++)
         {
         matchflag = 0;
-        if (nin>=nin2 && n)
+        if (samplein->rawpos[sort_coord] >= minin && n)
           {
           min = samplein->rawpos[sort_coord] - radius;
           max = min + 2.0*radius;
@@ -921,15 +919,12 @@ void	union_samples(samplestruct *samplein, setstruct *set,
 /*---- Find the starting element */
       sample3 = sample + nsample;
       n = n3 = nsample;
-      min = sample->projpos[sort_coord] - radius;
-      for (nin2=nsamplein; nin2--; samplein++)
-        if (samplein->projpos[sort_coord] >= min)
-          break;
+      minin = sample->projpos[sort_coord] - radius;
 /*---- Go! */
       for (nin=nsamplein; nin--; samplein++)
         {
         matchflag = 0;
-        if (nin>=nin2 && n)
+        if (samplein->projpos[sort_coord] >= minin && n)
           {
           min = samplein->projpos[sort_coord] - radius;
           max = min + 2.0*radius;
@@ -966,15 +961,12 @@ void	union_samples(samplestruct *samplein, setstruct *set,
 /*---- Find the starting element */
       sample3 = sample + nsample;
       n = n3 = nsample;
-      min = sample->wcspos[sort_coord] - radius;
-      for (nin2=nsamplein; nin2--; samplein++)
-        if (samplein->wcspos[sort_coord] >= min)
-          break;
+      minin = sample->wcspos[sort_coord] - radius;
 /*---- Go! */
       for (nin=nsamplein; nin--; samplein++)
         {
         matchflag = 0;
-        if (nin>=nin2 && n)
+        if (samplein->wcspos[sort_coord] >= minin && n)
           {
           min = samplein->wcspos[sort_coord] - radius;
           max = min + 2.0*radius;
