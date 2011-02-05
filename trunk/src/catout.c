@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/11/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 16/11/2010
+VERSION 05/02/2011
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -91,7 +91,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			*buf, *rfilename;
    long			dptr;
    int			nmag[MAXPHOTINSTRU],
-			d,f,i,k,n,p,s,nm, npinstru, naxis;
+			d,f,i,k,n,p,s,nm, npinstru, naxis, N;
 
   if (prefs.mergedcat_type == CAT_NONE)
     return;
@@ -212,7 +212,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     objtab->cat = cat;
     init_writeobj(cat, objtab, &buf);
     }
-
+N=0;
   for (f=0; f<fgroup->nfield; f++)
     {
     field = fgroup->field[f];
@@ -277,7 +277,6 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
                 err2 += 1*MAS / DEG;
               wcsposerr[d] += 1.0 / err2;
               wcspos[d] += samp2->wcspos[d] / err2;
-//			- colshiftscale[d][p+npinstru*refplabel];
               if (!nm)
                 wcsposref[d] = samp2->wcspos[d];
               wcsposdisp[d] += (samp2->wcspos[d] - wcsposref[d])
@@ -285,6 +284,25 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               wcsprop[d] += samp2->wcsprop[d];
               wcsproperr[d] += samp2->wcsproperr[d]*samp2->wcsproperr[d];
               }
+/*
+raw_to_wcs(fgroup->wcs, samp2->toto, samp2->toto);
+printf("%d %.7f %.7f %.5f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %d\n", N,
+samp2->wcspos[0],
+samp2->wcspos[1],
+samp2->set->field->epoch,
+(samp2->wcspos[0]-wcsposref[0])*cos(samp2->wcspos[0]*DEG)*DEG/MAS,
+(samp2->wcspos[1]-wcsposref[1])*DEG/MAS,
+samp2->wcsposerr[0]*DEG/MAS,
+samp2->wcsposerr[1]*DEG/MAS,
+samp2->wcsprop[0]*DEG/MAS,
+samp2->wcsprop[1]*DEG/MAS,
+samp2->wcsproperr[0]*DEG/MAS,
+samp2->wcsproperr[1]*DEG/MAS,
+samp2->wcspos[0]-
+-(samp2->wcspos[0]-samp2->toto[0])*cos(samp2->wcspos[0]*DEG)*DEG/MAS,
+-(samp2->wcspos[1]-samp2->toto[1])*DEG/MAS,
+samp2->flags);
+*/
             wcsparal += samp2->wcsparal;
             wcsparalerr += samp2->wcsparalerr*samp2->wcsparalerr;
             epoch += samp2->set->field->epoch;
@@ -292,7 +310,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               epochmin = samp2->set->field->epoch;
             if (samp2->set->field->epoch > epochmax)
               epochmax = samp2->set->field->epoch;
-            msample.flags |= samp2->flags;
+            msample.sexflags |= samp2->sexflags;
+            msample.scampflags |= samp2->scampflags;
             nm++;
             }
           if (nm)
@@ -333,6 +352,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             voprint_obj(ascfile, objtab);
           else
             write_obj(objtab, buf);
+N++;
           }
       }
     }

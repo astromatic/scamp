@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -252,6 +252,8 @@ void	makeit(void)
   NFPRINTF(OUTPUT, "Generating group plots...");
   for (g=0; g<ngroup; g++)
     cplot_fgroup(fgroups[g], reffields[g]);
+  for (g=0; g<ngroup; g++)
+    cplot_astrepoch3d(fgroups[g]);
 /* Plot photometric relations */
   cplot_photom(fgroups, ngroup, reffields);
   for (i=0; i<prefs.nastrinstrustr; i++)
@@ -491,6 +493,7 @@ void	makeit(void)
   if (prefs.propmotion_flag)
     for (g=0; g<ngroup; g++)
       {
+      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
       sprintf(str, "Computing proper motions in group %d", g+1);
       NFPRINTF(OUTPUT, str);
       astrprop_fgroup(fgroups[g]);

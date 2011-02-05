@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		31/01/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -43,10 +43,12 @@
 
 /*-------------------------------- flags ------------------------------------*/
 
-#define		OBJ_CROWDED     0x0001
-#define		OBJ_MERGED      0x0002
-#define		OBJ_SATUR       0x0004
-#define		OBJ_TRUNC       0x0008
+#define		OBJ_CROWDED	0x0001
+#define		OBJ_MERGED	0x0002
+#define		OBJ_SATUR	0x0004
+#define		OBJ_TRUNC	0x0008
+
+#define		ASTROM_CLIPPED	0x0001
 
 /*--------------------------------- typedefs --------------------------------*/
 
@@ -76,7 +78,8 @@ typedef struct sample
   float		magerr;			/* Magnitude uncertainty (1-sigma) */
   float		colour;			/* A colour index */
   float		fwhm;			/* Full Width at Half Maximum */
-  int		flags;			/* Source flags */
+  short		sexflags;		/* Source extraction flags */
+  short		scampflags;		/* SCAMP flags */		
   }	samplestruct;
 
 typedef struct set

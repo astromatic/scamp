@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		31/01/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -520,7 +520,7 @@ INPUT	Ptr to the set structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/10/2006
+VERSION	31/01/2011
  ***/
 void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 			int ncoefftot,
@@ -703,7 +703,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
             }
           }
 /*------ Drop it if the object is saturated or truncated */
-        if ((samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+        if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
           continue;
 /*------ Compute the relative positional variance for this source */
         sigma2 = 0.0;
@@ -721,7 +721,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
         for (samp3 = samp; samp3 != samp2; samp3=samp3->prevsamp)
           {
 /*------ Drop it if the object is saturated or truncated */
-          if (!(samp3->flags & (OBJ_SATUR|OBJ_TRUNC)))
+          if (!(samp3->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
             {
 /*---------- Compute the relative weight of the pair */
             sigma3 = 0.0;
@@ -1381,7 +1381,7 @@ INPUT	ptr to a group of fields pointers,
 OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/07/2008
+VERSION	31/01/2011
  ***/
 void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -1438,7 +1438,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp)
 	  {
-          if ((samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+          if ((samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
             continue;
           for (i=0; i<naxis; i++)
             mean[i] = mean_hsn[i] = 0.0;
@@ -1446,7 +1446,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
           for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
 	    {
-            if ((samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+            if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
               continue;
             for (i=0; i<naxis; i++)
               mean[i] += samp2->projpos[i];
@@ -1473,7 +1473,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
             for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
 	      {
-              if ((samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+              if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                 continue;
               corr = corr_hsn = 1.0;
               for (i=0; i<naxis; i++)
@@ -1501,7 +1501,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
               for (samp3=samp2; (samp3=samp3->prevsamp)
 			&& samp3->set->field->astromlabel>=0;)
                 {
-                if ((samp3->flags & (OBJ_SATUR|OBJ_TRUNC)))
+                if ((samp3->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                   continue;
                 field3 = samp3->set->field;
                 for (i=0; i<naxis; i++)
@@ -1571,14 +1571,14 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
   samp = set->sample;
   for (n=nsamp; n--; samp++)
     {
-    if ((samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+    if ((samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
       continue;
     for (i=0; i<naxis; i++)
       mean[i] = mean_hsn[i] = 0.0;
     nmean = nmean_hsn = 0;
     for (samp2 = samp; (samp2=samp2->nextsamp);)
       {
-      if ((samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+      if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
         continue;
       field2 = samp2->set->field;
       sn2 = samp2->fluxerr>0.0? samp2->flux/samp2->fluxerr: 0.0;
@@ -1757,7 +1757,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/04/2008
+VERSION	05/02/2011
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
@@ -1792,7 +1792,7 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
       samp = set->sample;
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp
-		&& !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
           {
           for (i=0; i<naxis; i++)
             mean[i] = 0.0;
@@ -1800,7 +1800,7 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
           for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
             {
-            if ((samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+            if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
               continue;
             for (i=0; i<naxis; i++)
               mean[i] += samp2->projpos[i];

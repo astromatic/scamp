@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -101,8 +101,8 @@ keystruct		refmergedkey[] = {
 	&refmergedsample.magdisp, H_FLOAT, T_FLOAT,
 	"%8.4f", "mag", "stat.stdev;phot.mag", "mag",
 	1, &refmergedsample.nband},
-  {"FLAGS", "SCAMP flags",
-	&refmergedsample.flags, H_INT, T_SHORT,
+  {"FLAGS", "Extraction flags",
+	&refmergedsample.sexflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},
   {""},
   };

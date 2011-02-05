@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -110,7 +110,7 @@ pkeystruct key[] =
 	"SHEAR_VS_AIRMASS", "PHOT_ERROR", "PHOT_ERRORVSMAG", "PHOT_ZPCORR", "ASTR_CHI2",
 	"ASTR_INTERROR2D", "ASTR_REFERROR2D", "PHOT_ZPCORR3D",
 	"ASTR_COLSHIFT1D" , "ASTR_REFPROPER", "ASTR_INTSYSMAP",
-	"ASTR_REFSYSMAP", ""},
+	"ASTR_REFSYSMAP", "ASTR_OBSDATE3D", ""},
     0, MAXCHECK, &prefs.ncplot_type},
   {"COMPUTE_PARALLAXES", P_BOOL, &prefs.parallax_flag},
   {"COMPUTE_PROPERMOTIONS", P_BOOL, &prefs.propmotion_flag},
@@ -254,7 +254,7 @@ char *default_prefs[] =
 "DISTORT_DEGREES        3               # Polynom degree for each group",
 "*ASTREF_WEIGHT          1.0             # Relative weight of ref.astrom.cat.",
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
-"*COMPUTE_PARALLAXES     Y               # Compute trigonom. parallaxes (Y/N)?",
+"*COMPUTE_PARALLAXES     N               # Compute trigonom. parallaxes (Y/N)?",
 "*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
 " ",

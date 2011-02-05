@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -60,7 +60,8 @@ typedef struct mergedsample
   float		magerr[MAXPHOTINSTRU];	/* Mean mag. uncertainty (1-sigma) */
   float		magdisp[MAXPHOTINSTRU];	/* Mean mag. dispersion (1-sigma) */
   int		nband;			/* Number of available bands */
-  int		flags;			/* Merging flags */
+  int		sexflags;		/* Merged SExtractor flags */
+  int		scampflags;		/* Merged SCAMP flags */
   }	mergedsamplestruct;
 
 /*-------------------------------- protos -----------------------------------*/

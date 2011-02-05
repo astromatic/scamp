@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/11/2010
+*	Last modified:		31/01/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -48,11 +48,13 @@
 #include	"samples.h"
 
 extern devicestruct	cplot_device[];
+struct	focplanestruct {PLFLT x[5], y[5], z[5]; PLINT colour; char *str;};
 extern int		plotaaflag;
 
 static void	distort_map(PLFLT x,PLFLT y, PLFLT *tx,PLFLT *ty,
 			    void *pltr_data); 
 
+int	comp_focz(const void *focplane1, const void *focplane2);
 
 /****** cplot_allsky *******************************************************
 PROTO	int cplot_allsky(fgroupstruct **fgroups, int ngroup)
@@ -1183,7 +1185,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/04/2008
+VERSION	31/01/2011
  ***/
 int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -1379,7 +1381,7 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
         nsamp = set->nsample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->flags & (OBJ_SATUR|OBJ_TRUNC))
+          if (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC))
             continue;
 /*-------- Reset mean and count */
           for (d=0; d<naxis; d++)
@@ -1406,7 +1408,7 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
             {
-            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             for (d=0; d<naxis; d++)
               {
@@ -1498,7 +1500,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/04/2008
+VERSION	31/01/2011
  ***/
 int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 			double hsn_thresh)
@@ -1694,12 +1696,12 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
         nsamp = set->nsample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->flags & (OBJ_SATUR|OBJ_TRUNC))
+          if (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC))
             continue;
 /*-------- Explore backward */
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0);
-          if (!samp2 || (samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+          if (!samp2 || (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
             continue;
 /*-------- Reset mean and count */
           for (d=0; d<naxis; d++)
@@ -2044,7 +2046,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2132,13 +2134,13 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
       samp = set->sample;
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp
-		&& !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
 	  {
           samp2 = samp;
           while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
             {
-            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             for (d2=0; d2<naxis; d2++)
               {
@@ -2306,7 +2308,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2386,13 +2388,13 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
       samp = set->sample;
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp
-		&& !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
           {
           samp2 = samp;
           while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
               {
-              if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+              if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
                 continue;
               dx = (samp2->projpos[0]-samp->projpos[0])*pixscale[0];
               dy = (samp2->projpos[1]-samp->projpos[1])*pixscale[1];
@@ -2558,7 +2560,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2642,12 +2644,12 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
     nsamp = set->nsample;
     samp = set->sample;
     for (n=nsamp; n--; samp++)
-      if (samp->nextsamp && !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+      if (samp->nextsamp && !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
         {
         samp2 = samp;
         while ((samp2=samp2->nextsamp))
           {
-          if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+          if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
             continue;
           for (d2=0; d2<naxis; d2++)
             {
@@ -2816,7 +2818,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -2893,12 +2895,12 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     samp = set->sample;
     for (n=nsamp; n--; samp++)
       if (samp->nextsamp && !samp->prevsamp
-		&& !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
         {
         samp2 = samp;
         while ((samp2=samp2->nextsamp))
           {
-          if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+          if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
             continue;
           dx = (samp2->projpos[0]-samp->projpos[0])*pixscale[0];
           dy = (samp2->projpos[1]-samp->projpos[1])*pixscale[1];
@@ -3063,7 +3065,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/11/2010
+VERSION	31/01/2011
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3190,7 +3192,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         samp = set->sample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->flags & (OBJ_SATUR|OBJ_TRUNC))
+          if (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC))
             continue;
 /*-------- Reset mean and count */
           for (d2=0; d2<naxis; d2++)
@@ -3200,7 +3202,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->nextsamp))
             {
-            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3210,7 +3212,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
             {
-            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3422,7 +3424,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3529,7 +3531,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         samp = set->sample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->flags & (OBJ_SATUR|OBJ_TRUNC))
+          if (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC))
             continue;
 /*-------- Reset mean and count */
           for (d2=0; d2<naxis; d2++)
@@ -3539,7 +3541,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->nextsamp))
             {
-            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3549,7 +3551,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
             {
-            if (samp2->flags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3762,7 +3764,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -3870,7 +3872,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
           samp1 = set->sample;
           for (n=nsamp; n--; samp1++)
             if (!samp1->nextsamp && samp1->prevsamp
-		&& !(samp1->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp1->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
               {
 /*------------ Look for a counterpart from the right photometric instrument */
               for (samp = samp1; samp && samp->set->field->photomlabel>=0;
@@ -3880,7 +3882,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 /*-------------- or the flux is negative */
                 if (samp->set->field->photomlabel != instru1
 			|| samp->flux <= 0.0
-			|| (samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                   continue;
                 for (samp2=samp1; samp2 && samp2->set->field->photomlabel>=0;
 			samp2=samp2->prevsamp)
@@ -3889,7 +3891,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 /*---------------- or if the flux is negative */
                   if (samp2==samp || samp2->set->field->photomlabel != instru2
 			|| samp2->flux <= 0.0
-			|| (samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                     continue;
                   dmag = samp2->mag - samp->mag;
                   mdmag += dmag;
@@ -3933,7 +3935,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 /*-------------- or the flux is negative */
                 if (samp->set->field->photomlabel != instru1
 			|| samp->flux <= 0.0
-			|| (samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                   continue;
                 for (samp2=samp1; samp2 && samp2->set->field->photomlabel>=0;
 			samp2=samp2->prevsamp)
@@ -3942,7 +3944,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 /*---------------- or if the flux is negative */
                   if (samp2==samp || samp2->set->field->photomlabel != instru2
 			|| samp2->flux <= 0.0
-			|| (samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                     continue;
                   ix = (int)((samp2->mag - samp->mag - xoffset)*xscale);
                   for (d=0; d<naxis; d++)
@@ -4125,7 +4127,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4187,8 +4189,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
     samp = set->sample;
     for (n=nsamp; n--; samp++)
       if ((samp2=samp->nextsamp) && !samp->prevsamp
-	&& !(samp->flags & (OBJ_SATUR|OBJ_TRUNC))
-	&& !(samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+	&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+	&& !(samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
         {
 /*------ Do not plot objects with bad S/N on proper motions */
         err = samp->wcsproperr[lng]*samp->wcsproperr[lng]
@@ -4320,4 +4322,224 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 
   return RETURN_OK;
   }
+
+
+/****** cplot_astrepoch3d *******************************************************
+PROTO	int cplot_astrepoch3d(fgroupstruct *fgroup)
+PURPOSE	Plot field position and observation epochs in 3D.
+INPUT	Pointer to the field group.
+OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
+NOTES	crossid_fgroup() must have been run on all groups first.
+AUTHOR	E. Bertin (IAP)
+VERSION	05/02/2011
+ ***/
+int	cplot_astrepoch3d(fgroupstruct *fgroup)
+  {
+   struct focplanestruct *focplane, *focplanet;
+   fieldstruct	**fields,
+		*field;
+   wcsstruct	*wcsin,*wcsout;
+   PLFLT	cpoint[3], r[3],g[3],b[3], xl[3], yl[3], zl[3],
+		dx,dy,dz, lim, xmin,xmax, ymin,ymax, zmin,zmax, x1,y1, col;
+   PLINT	lwid;
+   double	rawpos[NAXIS],rawpos2[NAXIS], wcspos[NAXIS],wcspos2[NAXIS],
+		raw,rawmax, dd,ddmax;
+   char		str[80];
+   int		f,i,imax,s,stxt, npointmax,
+		nx,ny, nset, lng,lat;
+
+  nx = ny = 1;
+  if (cplot_init(nx, ny , CPLOT_ASTREPOCH3D) == RETURN_ERROR)
+    {
+    cplot_end(CPLOT_ASTREPOCH3D);
+    return RETURN_OK;
+    }
+
+  plscmap1n(256);
+  cpoint[0] = 0.0; r[0] = 1.0; g[0] = 0.0; b[0] = 0.0;
+  cpoint[1] = 0.5; r[1] = 1.0; g[1] = 1.0; b[1] = 0.0;
+  cpoint[2] = 1.0; r[2] = 0.0; g[2] = 1.0; b[2] = 0.0;
+  plscmap1l(1, 3, cpoint, r, g, b, NULL);
+  plschr(0.0,0.5);
+
+  wcsout = fgroup->wcs;
+  lng = wcsout->lng;
+  lat = wcsout->lat;
+  fields = fgroup->field;
+  npointmax = nset = 0;
+  for (f=0; f<fgroup->nfield; f++)
+    {
+    nset = fields[f]->nset;
+    npointmax++;
+    }
+
+  QMALLOC(focplane, struct focplanestruct, npointmax*nset);
+  focplanet = focplane;
+  zmin = BIG;
+  zmax = -BIG;
+  for (f=0; f<fgroup->nfield; f++)
+    {
+    field= fields[f];
+      {
+      lim = field->epoch;
+      if (lim<zmin)
+        zmin = lim;
+      if (lim>zmax)
+        zmax = lim;
+/*---- Find the set with highest projpos[lng] and lowest projpos[lat] */
+      rawmax = -BIG;
+      stxt = 0;
+      for (s=0; s<field->nset; s++)
+        {
+        wcsin = field->set[s]->wcs;
+        for (i=0; i<wcsin->naxis; i++)
+          rawpos2[i] = wcsin->naxisn[i]/2.0;
+        raw_to_wcs(wcsin, rawpos2, wcspos2);
+        wcspos[lng] = wcspos2[wcsin->lng];
+        wcspos[lat] = wcspos2[wcsin->lat];
+        wcs_to_raw(wcsout, wcspos, rawpos);
+        if ((raw=rawpos[0]-rawpos[1]) > rawmax)
+          {
+          rawmax = raw;
+          stxt = s;
+          }
+        }
+      for (s=0; s<field->nset; s++)
+        {
+        wcsin = field->set[s]->wcs;
+/*------ Initialize the input coordinates to an "average" value */
+        for (i=0; i<wcsin->naxis; i++)
+          rawpos2[i] = wcsin->naxisn[i]/2.0;
+
+/*------ 1st corner */
+        rawpos2[wcsin->lng] = 0.0;
+        rawpos2[wcsin->lat] = 0.0;
+        raw_to_wcs(wcsin, rawpos2, wcspos2);
+        wcspos[lng] = wcspos2[wcsin->lng];
+        wcspos[lat] = wcspos2[wcsin->lat];
+        wcs_to_raw(wcsout, wcspos, rawpos);
+        focplanet->x[4] = focplanet->x[0] = rawpos[lng];
+        focplanet->y[4] = focplanet->y[0] = rawpos[lat];
+/*------ 2nd corner */
+        rawpos2[wcsin->lng] = wcsin->naxisn[wcsin->lng]-1.0;
+        raw_to_wcs(wcsin, rawpos2, wcspos2);
+        wcspos[lng] = wcspos2[wcsin->lng];
+        wcspos[lat] = wcspos2[wcsin->lat];
+        wcs_to_raw(wcsout, wcspos, rawpos);
+        focplanet->x[1] = rawpos[lng];
+        focplanet->y[1] = rawpos[lat];
+/*------ 3rd corner */
+        rawpos2[wcsin->lat] = wcsin->naxisn[wcsin->lat]-1.0;
+        raw_to_wcs(wcsin, rawpos2, wcspos2);
+        wcspos[lng] = wcspos2[wcsin->lng];
+        wcspos[lat] = wcspos2[wcsin->lat];
+        wcs_to_raw(wcsout, wcspos, rawpos);
+        focplanet->x[2] = rawpos[lng];
+        focplanet->y[2] = rawpos[lat];
+/*------ Last corner */
+        rawpos2[wcsin->lng] = 0.0;
+        raw_to_wcs(wcsin, rawpos2, wcspos2);
+        wcspos[lng] = wcspos2[wcsin->lng];
+        wcspos[lat] = wcspos2[wcsin->lat];
+        wcs_to_raw(wcsout, wcspos, rawpos);
+        focplanet->x[3] = rawpos[lng];
+        focplanet->y[3] = rawpos[lat];
+        focplanet->z[0] = focplanet->z[1] = focplanet->z[2]
+		= focplanet->z[3] = focplanet->z[4] = lim;
+        focplanet->colour = field->cplot_colour;
+        if (field->photomflag==1 && field->cplot_colour == 15)
+          focplanet->colour = 9;
+        focplanet->str = (s==stxt? field->rfilename : NULL);
+        focplanet++;
+        }
+      }
+    }
+  dz = zmax - zmin;
+  zmin -= dz*0.2;
+  zmax += dz*0.05;
+/* Sort fields by increasing z */
+  qsort(focplane, npointmax*nset, sizeof(struct focplanestruct), comp_focz);
+/* Now plot! */
+  yl[0] = yl[1] = 0.0;
+  plcol0(15);
+  lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
+  plwid(lwid);
+  pladv(0);
+  plvpor(0.0, 1.0, 0.0, 0.95);
+  plwind(-0.75, 0.75, -0.6, 1.1);
+  dx = fgroup->projposmax[lng] - fgroup->projposmin[lng];
+  dy = fgroup->projposmax[lat] - fgroup->projposmin[lat];
+  if (dy>dx)
+    dx = dy;
+  xmin = 0.5*(fgroup->projposmin[lng]+fgroup->projposmax[lng]) - 0.55*dx;
+  xmax = 0.5*(fgroup->projposmin[lng]+fgroup->projposmax[lng]) + 0.55*dx;
+  ymin = 0.5*(fgroup->projposmin[lat]+fgroup->projposmax[lat]) - 0.55*dx;
+  ymax = 0.5*(fgroup->projposmin[lat]+fgroup->projposmax[lat]) + 0.55*dx;
+  plw3d(1.0, 1.0, 1.0, xmin, xmax, ymin, ymax, zmin, zmax, 50.0, -20.0);
+  plbox3("bfnstu", "AXIS1", 0.0, 0,
+	"bfnstu", "AXIS2", 0.0, 0,
+	"bcdfmnstuv", "date [year]", 0.0, 0);
+  xl[0] = xl[1] = xmin;
+  xl[2] = xmax;
+  yl[0] = ymin;
+  yl[1] = yl[2] = ymax;
+  zl[0] = zl[1] = zl[2];
+  pllsty(2);
+  plcol0(15);
+  plline3(3, xl, yl, zl);
+  pllsty(1);
+  plpsty(0);
+  focplanet = focplane;
+  for (s=npointmax*nset; s--; focplanet++)
+    {
+    col = (focplanet->z[0] - zmin)/(zmax - zmin);
+    plcol1(col);
+    plfill3(5, focplanet->x, focplanet->y, focplanet->z);
+    if (focplanet->colour!=15)
+      {
+      plwid(2*lwid);
+      plcol0(focplanet->colour);
+      }
+    else
+      plcol0(15);
+    plline3(5, focplanet->x, focplanet->y, focplanet->z); 
+    plwid(lwid);
+/*-- Find the point with highest projpos[lng] and lowest projpos[lat] */
+    if (focplanet->str)
+      {
+      ddmax = -BIG;
+      imax = 0;
+      for (i=0; i<5; i++)
+        if ((dd = focplanet->x[i]-focplanet->y[i])> ddmax)
+          {
+          ddmax = dd;
+          imax = i;
+          }
+      x1=plP_w3wcx(focplanet->x[imax],focplanet->y[imax],focplanet->z[imax]);
+      y1=plP_w3wcy(focplanet->x[imax],focplanet->y[imax],focplanet->z[imax]);
+//      plptex(x1, y1-0.02, 1.0, -0.26, 1.1, focplanet->str);
+      }
+    plcol0(15);
+    }
+  xl[0] = xmin;
+  xl[1] = xl[2] = xmax;
+  yl[0] = yl[1] = ymin;
+  yl[2] = ymax;
+  zl[0] = zl[1] = zl[2];
+  pllsty(2);
+  plline3(3, xl, yl, zl);
+  pllsty(1);
+  sprintf(str, "Group ##%d : Observation dates", fgroup->no);
+  pllab("", "", str);
+
+/*-- Free array of points */
+  free(focplane);
+
+  plend();
+
+  cplot_astrepoch3d(fgroup);		/* Recursive stuff */
+
+  return RETURN_OK;
+  }
+
 
