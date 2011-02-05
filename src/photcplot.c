@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -254,7 +254,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -359,7 +359,8 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
             for (samp = samp1; samp && samp->set->field->photomlabel>=0;
 		samp=samp->prevsamp)
               if (samp->set->field->photomlabel == instru
-		&& samp->flux > 0.0 && !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& samp->flux > 0.0
+		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                 {
                 samp2 = samp;
                 break;
@@ -374,7 +375,8 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 /*------------ Don't bother if field is a different instru or photometric ref */
 /*------------ or the flux is negative or the source is cropped/saturated */
               if (samp2->set->field->photomlabel != instru
-		|| samp2->flux <= 0.0 || (samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| samp2->flux <= 0.0
+		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                 continue;
               dy = samp2->mag - samp->mag;
               for (d=0; d<fgroup->naxis; d++)
@@ -532,7 +534,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP) C. MARMO (IAP)
-VERSION	10/09/2009
+VERSION	31/01/2011
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -656,7 +658,8 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
             for (samp = samp1; samp && samp->set->field->photomlabel>=0;
 		samp=samp->prevsamp)
               if (samp->set->field->photomlabel == instru
-		&& samp->flux > 0.0 && !(samp->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& samp->flux > 0.0
+		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                 {
                 samp2 = samp;
                 break;
@@ -671,7 +674,8 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 /*------------ Don't bother if field is a different instru or photometric ref */
 /*------------ or the flux is negative */
               if (samp2->set->field->photomlabel != instru
-		|| samp2->flux <= 0.0 || (samp2->flags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| samp2->flux <= 0.0
+		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                 continue;
               dy = samp2->mag - samp->mag;
               ix = (int)((samp->mag-xoffset)*xscale);
@@ -805,7 +809,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/07/2008
+VERSION	05/02/2011
  ***/
 int	cplot_photzp3d(fgroupstruct *fgroup)
   {
@@ -967,8 +971,8 @@ int	cplot_photzp3d(fgroupstruct *fgroup)
     ymin = 0.5*(fgroup->projposmin[lat]+fgroup->projposmax[lat]) - 0.55*dx;
     ymax = 0.5*(fgroup->projposmin[lat]+fgroup->projposmax[lat]) + 0.55*dx;
     plw3d(1.0, 1.0, 1.0, xmin, xmax, ymin, ymax, zmin, zmax, 50.0, -20.0);
-    plbox3("bnstu", "AXIS1", 0.0, 0,
-	"bnstu", "AXIS2", 0.0, 0,
+    plbox3("bfnstu", "AXIS1", 0.0, 0,
+	"bfnstu", "AXIS2", 0.0, 0,
 	"bcdmnstuv", "#gDZP [mag]", 0.0, 0);
     xl[0] = xl[1] = xmin;
     xl[2] = xmax;

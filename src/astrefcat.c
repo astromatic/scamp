@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/11/2010
+*	Last modified:		31/01/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -113,7 +113,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 23/11/2010
+VERSION 31/01/2011
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -1001,7 +1001,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         sample->wcsprop[lat] = prop[lat];
         sample->wcsproperr[lng] = properr[lng];
         sample->wcsproperr[lat] = properr[lat];
-        sample->flags = 0;	/* Flags are not relevant for ref. sources*/
+        sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
         sample->set = set;
         nsample++;
         }
@@ -1297,7 +1297,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 02/10/2009
+VERSION 31/01/2011
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1459,7 +1459,7 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 
     sample = set->sample + nsample;
     sample->set = set;
-    sample->flags = objflags;
+    sample->sexflags = objflags;
     sample->mag = mag? mag[band] : dmag[band];
     sample->flux = 0.0;
     sample->wcspos[lng] = x;

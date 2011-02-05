@@ -18,7 +18,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2005-2010 Emmanuel Bertin - IAP/CNRS/UPMC
+#	Copyright:		(C) 2005-2011 Emmanuel Bertin - IAP/CNRS/UPMC
 #				& Chiara Marmo - IAP/CNRS
 #
 #	License:		GNU General Public License
@@ -34,7 +34,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		16/11/2010
+#	Last modified:		05/02/2011
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -266,6 +266,7 @@
    <xsl:variable name="group" select="count(FIELD[@name='Group']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="astrinstru" select="count(FIELD[@name='Astr_Instrum']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="photinstru" select="count(FIELD[@name='Phot_Instrum']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="epoch" select="count(FIELD[@name='Observation_Date']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="coord" select="count(FIELD[@name='Field_Coordinates']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="radius" select="count(FIELD[@name='Max_Radius']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="pixscale" select="count(FIELD[@name='Pixel_Scale']/preceding-sibling::FIELD)+1"/>
@@ -318,6 +319,7 @@
       <TH>G</TH>
       <TH>A</TH>
       <TH>P</TH>
+      <TH>Date</TH>
       <TH>alpha</TH>
       <TH>delta</TH>
       <TH>Radius</TH>
@@ -374,6 +376,10 @@
         </td>
         <td align="left">
          <el><xsl:value-of select="TD[$photinstru]"/></el>
+        </td>
+<!-- Observation date -->
+        <td align="right">
+         <el><xsl:value-of select="TD[$epoch]"/></el>
         </td>
 <!-- Alpha -->
         <td align="center">

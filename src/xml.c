@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -189,7 +189,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	03/08/2010
+VERSION	05/02/2011
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -355,6 +355,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.code;phot\"/>\n");
   fprintf(file, "   <FIELD name=\"Photom_Link\" datatype=\"boolean\""
 	" ucd=\"meta.code;phot\"/>\n");
+  fprintf(file, "   <FIELD name=\"Observation_Date\" datatype=\"double\""
+	" ucd=\"time.epoch;obs.field\" unit=\"yr\"/>\n");
   fprintf(file, "   <FIELD name=\"Field_Coordinates\" datatype=\"double\""
 	" arraysize=\"%d\" ucd=\"pos.eq;obs.image\" unit=\"%s\"/>\n",
 	naxis, lng!=lat? "deg":"pix");
@@ -429,12 +431,13 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	"     <TD>%s</TD><TD>%s</TD>\n"
 	"     <TD>%d</TD><TD>%d</TD><TD>%d</TD><TD>%d</TD><TD>%c</TD>\n"
 	"     <TD>%d</TD><TD>%d</TD><TD>A%d</TD><TD>P%d</TD><TD>%c</TD><TD>%c</TD>\n"
-	"     <TD>%.10g",
+	"     <TD>%.9f</TD><TD>%.10g",
 	field->rfilename, field->ident,
 	field->nset,field->naxis,field->lng,field->lat,field->headflag?'T':'F',
 	field->nsample, field->fgroup->no,
 		field->astromlabel+1,field->photomlabel+1,
 		field->photomflag==1? 'T':'F',field->photomflag==1? 'T':'F',
+	field->epoch,
 	field->meanwcspos[0]);
     for (d=1; d<field->naxis; d++)
       fprintf(file, " %.10g", field->meanwcspos[d]);

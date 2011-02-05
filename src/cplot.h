@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -93,7 +93,7 @@ typedef enum {CPLOT_NONE, CPLOT_ALLSKY, CPLOT_FGROUPS, CPLOT_PHOTOM,
 	CPLOT_DISTORT, CPLOT_SHEAR, CPLOT_PHOTERROR, CPLOT_PHOTERRORVSMAG,
 	CPLOT_PHOTZP, CPLOT_CHI2, CPLOT_ADERROR2D, CPLOT_REFERROR2D,
 	CPLOT_PHOTZP3D, CPLOT_ASTRCOLSHIFT1D, CPLOT_REFPROP,
-	CPLOT_ADSYSMAP2D, CPLOT_REFSYSMAP2D}
+	CPLOT_ADSYSMAP2D, CPLOT_REFSYSMAP2D, CPLOT_ASTREPOCH3D}
 		cplotenum;
 
 typedef enum {CPLOT_NULL, CPLOT_XWIN, CPLOT_TK, CPLOT_PLMETA, CPLOT_PS,
@@ -117,6 +117,7 @@ extern int		cplot_aderrhisto1d(fgroupstruct *fgroup,
 					int instru, double hsn_thresh),
 			cplot_astrcolshift1d(fgroupstruct *fgroup,
 					double hsn_thresh),
+			cplot_astrepoch3d(fgroupstruct *fgroup),
 			cplot_astrefprop(fgroupstruct *fgroup,
 					fieldstruct *reffield,
 					double hsn_thresh),

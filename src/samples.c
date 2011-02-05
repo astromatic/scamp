@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/11/2010
+*	Last modified:		31/01/2010
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 24/08/2010
+VERSION 31/01/2011
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -89,7 +89,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
    unsigned int		*imaflags;
    int			*lxm,*lym,
 			i, n, nsample,nsamplemax, nnobjflag,
-			nobj, headflag, head0flag, errorflag, fflag, objflags;
+			nobj, headflag, head0flag, errorflag, fflag, sexflags;
    unsigned short	*flags, *wflags;
    short		*sxm,*sym;
 
@@ -338,7 +338,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 /* Now examine each vector of the shipment */
   for (n=0; nobj--; n++)
     {
-    objflags = 0;
+    sexflags = 0;
     read_obj(keytab,tab, buf);
 #ifdef USE_THREADS
     if (!(n%10000) && prefs.nthreads<2)
@@ -357,8 +357,8 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       if (*flags & prefs.flags_mask)
         continue;
 /*---- Mapping from SExtractor flags is straightforward */
-      objflags = *flags & (OBJ_CROWDED|OBJ_MERGED|OBJ_SATUR);
-      if (objflags & OBJ_SATUR)		/* A saturated object */
+      sexflags = *flags & (OBJ_CROWDED|OBJ_MERGED|OBJ_SATUR);
+      if (sexflags & OBJ_SATUR)		/* A saturated object */
         set->nsaturated++;
       else if ((fluxrad && *fluxrad < minrad)
 		|| (dfluxrad && *dfluxrad < dminrad)
@@ -376,7 +376,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       if ((*wflags & prefs.wflags_mask))
         continue;
       if (*wflags)
-        objflags |= OBJ_TRUNC;
+        sexflags |= OBJ_TRUNC;
       }
     if (imaflags && (*imaflags & prefs.imaflags_mask))
       continue;
@@ -430,11 +430,12 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       realloc_samples(set, nsamplemax);
       }
 
-    if (!objflags)
+    if (!sexflags)
       nnobjflag++;
     sample = set->sample + nsample;
     sample->set = set;
-    sample->flags = objflags;
+    sample->sexflags = sexflags;
+    sample->scampflags = 0;
     sample->flux = f;
     sample->fluxerr = ferr;
     sample->mag = (sample->flux>0.0)? -2.5*log10(sample->flux) : 99.0;
