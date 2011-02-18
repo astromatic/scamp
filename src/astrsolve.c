@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2011
+*	Last modified:		18/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1757,7 +1757,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/02/2011
+VERSION	18/02/2011
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
@@ -1765,7 +1765,7 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
    fieldstruct	**fields,
 		*field;
    setstruct	*set;
-   samplestruct	*samp,*samp2;
+   samplestruct	*samp,*samp2, *prevsamp2;
    double	dx2[NAXIS],clip[NAXIS],mean[NAXIS],
 		ksig2;
    int		i,f,n,s, naxis,nfield,nsamp, flag, nmean, nclip;
@@ -1809,7 +1809,7 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
           if (nmean>1)
             {
             for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2=samp2->prevsamp)
+		samp2 = prevsamp2)
               {
               flag = 0;
               for (i=0; i<naxis; i++)
@@ -1818,13 +1818,15 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
                 if (dx2[i]*dx2[i] > clip[i])
                   flag = 1;
                 }
+              prevsamp2 = samp2->prevsamp;
               if (flag)
                 {
-/*-------------- Remove outlier */
+/*-------------- Remove (unlink) outlier */
                 if (samp2->nextsamp)
                   samp2->nextsamp->prevsamp = samp2->prevsamp;
                 if (samp2->prevsamp)
                   samp2->prevsamp->nextsamp = samp2->nextsamp;
+                samp2->prevsamp = samp2->nextsamp = NULL;
                 nclip++;
                 }
               }

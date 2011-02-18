@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/02/2011
+*	Last modified:		09/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -101,8 +101,14 @@ keystruct		refmergedkey[] = {
 	&refmergedsample.magdisp, H_FLOAT, T_FLOAT,
 	"%8.4f", "mag", "stat.stdev;phot.mag", "mag",
 	1, &refmergedsample.nband},
-  {"FLAGS", "Extraction flags",
+  {"COLOR", "Color index",
+	&refmergedsample.colour, H_FLOAT, T_FLOAT,
+	"%8.4f", "", "phot.color", "mag"},
+  {"FLAGS_EXTRACTION", "Extraction flags",
 	&refmergedsample.sexflags, H_INT, T_SHORT,
+	"%3d", "", "meta.code.qual", ""},
+  {"FLAGS_SCAMP", "Calibration flags",
+	&refmergedsample.scampflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},
   {""},
   };

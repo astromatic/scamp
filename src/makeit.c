@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/02/2011
+*	Last modified:		18/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -481,19 +481,32 @@ void	makeit(void)
     cplot_photerrhistomag(fgroups[g], reffields[g], prefs.sn_thresh[1]);
 #endif
 
-/* Compute 2nd order colour shifts */
-  for (g=0; g<ngroup; g++)
+/* Cross-ID one last time if necessary */
+  if (prefs.propmotion_flag || prefs.mergedcat_type != CAT_NONE
+	|| cplot_check(CPLOT_ASTRCOLSHIFT1D)!=RETURN_ERROR
+	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
+	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
     {
-    sprintf(str, "Computing colour shifts in group %d", g+1);
-    NFPRINTF(OUTPUT, str);
-    astrcolshift_fgroup(fgroups[g], reffields[g]);
+//    for (g=0; g<ngroup; g++)
+//      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+
+/*-- Compute colour indices */
+    NFPRINTF(OUTPUT, "Computing global color indices");
+    colour_fgroup(fgroups, ngroup);
+
+/*-- Compute 2nd order colour shifts */
+    for (g=0; g<ngroup; g++)
+      {
+      sprintf(str, "Computing colour shifts in group %d", g+1);
+      NFPRINTF(OUTPUT, str);
+      astrcolshift_fgroup(fgroups[g], reffields[g]);
+      }
     }
 
 /* Compute proper motions and other 2nd order corrections */
   if (prefs.propmotion_flag)
     for (g=0; g<ngroup; g++)
       {
-      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
       sprintf(str, "Computing proper motions in group %d", g+1);
       NFPRINTF(OUTPUT, str);
       astrprop_fgroup(fgroups[g]);
@@ -505,6 +518,8 @@ void	makeit(void)
     cplot_astrcolshift1d(fgroups[g], prefs.sn_thresh[1]);
   for (g=0; g<ngroup; g++)
     cplot_astrefprop(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_adprophisto2d(fgroups[g], prefs.sn_thresh[1]);
 #endif
 
 /* Save headers */

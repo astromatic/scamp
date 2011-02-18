@@ -2046,7 +2046,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2166,7 +2166,7 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
                   }
                 }
 	      }
-            if (samp2->flux/samp2->fluxerr>=hsn_thresh)
+            if (samp2->flux >= hsn_thresh*samp2->fluxerr)
               {
               for (d2=0; d2<naxis; d2++)
                 {
@@ -2308,7 +2308,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2420,7 +2420,7 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
                 if (cy>cutymax)
                   cutymax = cy;
                 }
-              if (samp2->flux/samp2->fluxerr >= hsn_thresh)
+              if (samp2->flux >= hsn_thresh*samp2->fluxerr)
                 {
                 ix = (int)((dx - offset_hsn)*scale_hsn);
                 iy = (int)((dy - offset_hsn)*scale_hsn);
@@ -2560,7 +2560,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2675,7 +2675,7 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
                 }
               }
 	    }
-          if (samp2->flux/samp2->fluxerr>=hsn_thresh)
+          if (samp2->flux >= hsn_thresh*samp2->fluxerr)
             {
             for (d2=0; d2<naxis; d2++)
               {
@@ -2818,7 +2818,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -2926,7 +2926,7 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
             if (cy>cutymax)
               cutymax = cy;
             }
-          if (samp2->flux/samp2->fluxerr>=hsn_thresh)
+          if (samp2->flux >= hsn_thresh*samp2->fluxerr)
             {
             ix = (int)((dx - offset_hsn)*scale_hsn);
             iy = (int)((dy - offset_hsn)*scale_hsn);
@@ -3065,7 +3065,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3236,7 +3236,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
                 if (ix>=0 && ix<CPLOT_PIXERR1DNX+1)
                   {
                   sig2 = 1.0/*fabs(samp->wcsposerr[d])*/;
-                  if (sig2>0.0 && samp->flux/samp->fluxerr>=hsn_thresh)
+                  if (sig2>0.0 && samp->flux >= hsn_thresh*samp->fluxerr)
                     {
                     line[d3][ix] += dy/sig2;
                     weight[d3][ix] += 1.0/sig2;
@@ -3257,7 +3257,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
                   }
                 }
 	      }
-            if (samp->flux/samp->fluxerr>=hsn_thresh)
+            if (samp->flux >= hsn_thresh*samp->fluxerr)
               {
               for (d2=0; d2<naxis; d2++)
                 {
@@ -3424,7 +3424,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3576,7 +3576,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
                 if (ix>=0 && ix<CPLOT_SUBPIXERR1DNX)
                   {
                   sig2 = 1.0/*fabs(samp->wcsposerr[d])*/;
-                  if (sig2>0.0 && samp->flux/samp->fluxerr>=hsn_thresh)
+                  if (sig2>0.0 && samp->flux >= hsn_thresh*samp->fluxerr)
                     {
                     line[d3][ix] += dy/sig2;
                     weight[d3][ix] += 1.0/sig2;
@@ -3597,7 +3597,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
                   }
                 }
 	      }
-            if (samp->flux/samp->fluxerr>=hsn_thresh)
+            if (samp->flux >= hsn_thresh*samp->fluxerr)
               {
               for (d2=0; d2<naxis; d2++)
                 {
@@ -3764,7 +3764,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -3842,6 +3842,40 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   for (i=0; i<CPLOT_NADERRHISTBIN; i++)
     cutbin[i] = boffset+(i+0.5)/bscale;
 
+/* Find the range in Delta-mag. */
+  mdmag = mdmag2 = ndmag = 0.0;
+  for (f=0; f<nfield; f++)
+    {
+    field = fgroup->field[f];
+    for (s=0; s<field->nset; s++)
+      {
+      set = field->set[s];
+      nsamp = set->nsample;
+      samp = set->sample;
+      for (n=nsamp; n--; samp++)
+        if (!samp->nextsamp && samp->prevsamp)
+          {
+          dmag = samp->colour;
+          mdmag += dmag;
+          mdmag2 += dmag*dmag;
+          ndmag += 1.0;
+          }
+      }
+    }
+
+  if (ndmag)
+    {
+    mdmag /= ndmag;
+    sdmag = sqrt(fabs(mdmag2-mdmag*mdmag)/ndmag);
+    }
+  else
+    sdmag = mdmag = 0.0;
+  dmagmin = mdmag - 2.0*sdmag;
+  dmagmax = mdmag + 2.0*sdmag;
+  xoffset = xoffset_hsn = dmagmin;
+  xscale = CPLOT_ASTRCOLSHIFT1DNX/(dmagmax - dmagmin);
+  xscale_hsn = CPLOT_ASTRCOLSHIFT1DNX_HSN/(dmagmax - dmagmin);
+
   for (instru1=0; instru1<ninstru; instru1++)
     {
     for (instru2=0; instru2<ninstru; instru2++)
@@ -3859,62 +3893,6 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
         memset(cuty_hsn[d], 0, CPLOT_NADERRHISTBIN*sizeof(PLFLT));
         cutymax[d] = cutymax_hsn[d] = zmax[d] = zmax_hsn[d] = 0.0;
         }
-
-/*---- Find the range in Delta-mag. */
-      mdmag = mdmag2 = ndmag = 0.0;
-      for (f=0; f<nfield; f++)
-        {
-        field = fgroup->field[f];
-        for (s=0; s<field->nset; s++)
-          {
-          set = field->set[s];
-          nsamp = set->nsample;
-          samp1 = set->sample;
-          for (n=nsamp; n--; samp1++)
-            if (!samp1->nextsamp && samp1->prevsamp
-		&& !(samp1->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-              {
-/*------------ Look for a counterpart from the right photometric instrument */
-              for (samp = samp1; samp && samp->set->field->photomlabel>=0;
-			samp=samp->prevsamp)
-                {
-/*-------------- Don't bother if field is a different instru or photom. ref */
-/*-------------- or the flux is negative */
-                if (samp->set->field->photomlabel != instru1
-			|| samp->flux <= 0.0
-			|| (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-                  continue;
-                for (samp2=samp1; samp2 && samp2->set->field->photomlabel>=0;
-			samp2=samp2->prevsamp)
-                  {
-/*---------------- Don't bother if field is a different instru or photom. ref*/
-/*---------------- or if the flux is negative */
-                  if (samp2==samp || samp2->set->field->photomlabel != instru2
-			|| samp2->flux <= 0.0
-			|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-                    continue;
-                  dmag = samp2->mag - samp->mag;
-                  mdmag += dmag;
-                  mdmag2 += dmag*dmag;
-                  ndmag += 1.0;
-                  }
-                }
-              }
-          }
-        }
-
-      if (ndmag)
-        {
-        mdmag /= ndmag;
-        sdmag = sqrt(fabs(mdmag2-mdmag*mdmag)/ndmag);
-        }
-      else
-        sdmag = mdmag = 0.0;
-      dmagmin = mdmag - 2.0*sdmag;
-      dmagmax = mdmag + 2.0*sdmag;
-      xoffset = xoffset_hsn = dmagmin;
-      xscale = CPLOT_ASTRCOLSHIFT1DNX/(dmagmax - dmagmin);
-      xscale_hsn = CPLOT_ASTRCOLSHIFT1DNX_HSN/(dmagmax - dmagmin);
 
       for (f=0; f<nfield; f++)
         {
@@ -3946,7 +3924,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 			|| samp2->flux <= 0.0
 			|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
                     continue;
-                  ix = (int)((samp2->mag - samp->mag - xoffset)*xscale);
+                  ix = (int)((samp1->colour - xoffset)*xscale);
                   for (d=0; d<naxis; d++)
                     {
                     dy = (samp2->projpos[d]-samp->projpos[d])*pixscale[d];
@@ -3966,10 +3944,10 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
                         cutymax[d] = cy;
                       }
                     }
-                  if (samp->flux/samp->fluxerr < hsn_thresh
-			|| samp2->flux/samp2->fluxerr < hsn_thresh)
+                  if (samp->flux < hsn_thresh*samp->fluxerr
+			|| samp2->flux < hsn_thresh*samp2->fluxerr)
                     continue;
-                  ix = (int)((samp2->mag - samp->mag - xoffset_hsn)*xscale_hsn);
+                  ix = (int)((samp1->colour - xoffset_hsn)*xscale_hsn);
                   for (d=0; d<naxis; d++)
                     {
                     dy = (samp2->projpos[d]-samp->projpos[d])*pixscale[d];
@@ -4127,7 +4105,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4209,7 +4187,7 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
           if (z>zmax[0])
             zmax[0] = z;
           }
-        if (samp2->flux/samp2->fluxerr>=hsn_thresh)
+        if (samp2->flux >= hsn_thresh*samp2->fluxerr)
           {
           ix = (int)((samp->wcsprop[lng]*DEG/MAS - offset_hsn)*scale_hsn);
           iy = (int)((samp2->wcsprop[lng]*DEG/MAS - offset_hsn)*scale_hsn);
@@ -4229,7 +4207,7 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
           if (z>zmax[1])
             zmax[1] = z;
           }
-        if (samp2->flux/samp2->fluxerr>=hsn_thresh)
+        if (samp2->flux >= hsn_thresh*samp2->fluxerr)
           {
           ix = (int)((samp->wcsprop[lat]*DEG/MAS - offset_hsn)*scale_hsn);
           iy = (int)((samp2->wcsprop[lat]*DEG/MAS - offset_hsn)*scale_hsn);
@@ -4541,5 +4519,252 @@ int	cplot_astrepoch3d(fgroupstruct *fgroup)
 
   return RETURN_OK;
   }
+
+
+/****** cplot_adprophisto2d ****************************************************
+PROTO	int cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
+PURPOSE	Plot astrometric difference between star pairs as a 2D histogram.
+INPUT	Pointer to the field group,
+	S/N threshold for the high-S/N sample.
+OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
+NOTES	crossid_fgroup() must have been run on all groups first.
+AUTHOR	E. Bertin (IAP)
+VERSION	18/02/2011
+ ***/
+int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
+  {
+   fieldstruct	*field;
+   wcsstruct	*wcs;
+   setstruct	*set;
+   samplestruct	*samp, *samp2;
+   char		str[64];
+   double	offset,offset_hsn, scale,scale_hsn, boffset,bscale,
+		cutxmax,cutxmax_hsn, cutymax,cutymax_hsn, cx,cy, dx,dy;
+   PLFLT	**histo,**histo_hsn,
+		rawpos[NAXIS],rawpos2[NAXIS], wcspos[NAXIS],wcspos2[NAXIS],
+		pixscale[NAXIS],
+		xl[5], yl[5],r[2],g[2],b[2],cpoint[2],
+		*clevel,*cutbin,*cutx,*cutx_hsn,*cuty,*cuty_hsn,
+		lim,maxlim, z,zmax,zmax_hsn;
+   PLINT	lwid;
+   int		d,d2, f,i,s,n, ix,iy,
+		nsamp;
+
+  if (cplot_init(1,1, CPLOT_ADPROP2D) == RETURN_ERROR)
+    {
+    cplot_end(CPLOT_ADPROP2D);
+    return RETURN_OK;
+    }
+
+  wcs = fgroup->wcs;
+  if (!wcs)
+    return RETURN_ERROR;
+  for (d=0; d<fgroup->naxis; d++)
+    rawpos2[d] = rawpos[d] = wcs->naxisn[d]/2.0;
+  raw_to_wcs(wcs, rawpos, wcspos);
+
+  for (d=0; d<fgroup->naxis; d++)
+    {
+    rawpos2[d] += 1.0;
+    raw_to_wcs(wcs, rawpos2, wcspos2);
+    pixscale[d] = wcs_dist(wcs, wcspos, wcspos2)*DEG/MAS;	/* in mas */
+    rawpos2[d] -= 1.0;
+    }
+
+  maxlim = 0.0;
+  for (d2=0; d2<fgroup->naxis; d2++)
+    if ((lim=fgroup->sig_interr[d2]*DEG/MAS*3.0) > maxlim)
+      maxlim = lim;
+  if (maxlim<=0.0)
+    maxlim = 1.0;
+  plAlloc2dGrid(&histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN);
+  plAlloc2dGrid(&histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN);
+  offset = offset_hsn = -maxlim;
+  scale = CPLOT_ADERR2DN / (2.0*maxlim);
+  scale_hsn = CPLOT_ADERR2DN_HSN / (2.0*maxlim);
+
+  boffset = -maxlim;
+  bscale = CPLOT_NADERRHISTBIN / (2.0*maxlim);
+
+  QMALLOC(cutbin, PLFLT, CPLOT_NADERRHISTBIN);
+  QCALLOC(cutx, PLFLT, CPLOT_NADERRHISTBIN);
+  QCALLOC(cuty, PLFLT, CPLOT_NADERRHISTBIN);
+  QCALLOC(cutx_hsn, PLFLT, CPLOT_NADERRHISTBIN);
+  QCALLOC(cuty_hsn, PLFLT, CPLOT_NADERRHISTBIN);
+  QMALLOC(clevel, PLFLT, CPLOT_NSHADES);
+
+  plscmap1n(256);
+  cpoint[0] = 0.0;
+  cpoint[1] = 1.0;
+
+  cutxmax = cutxmax_hsn = cutymax = cutymax_hsn = 0.0;;
+  zmax = zmax_hsn = 0.0;
+  for (f=0; f<fgroup->nfield; f++)
+    {
+    field = fgroup->field[f];
+    for (s=0; s<field->nset; s++)
+      {
+      set = field->set[s];
+      nsamp = set->nsample;
+      samp = set->sample;
+      for (n=nsamp; n--; samp++)
+        if (!samp->nextsamp && samp->prevsamp
+		&& samp->wcsproperr[0]>0.0
+		&& samp->wcsproperr[1]>0.0)
+          {
+          dx = samp->wcsprop[0]*DEG/MAS;
+          dy = samp->wcsprop[1]*DEG/MAS;
+          ix = (int)((dx - offset)*scale);
+          iy = (int)((dy - offset)*scale);
+          if (ix>=0 && ix<CPLOT_ADERR2DN && iy>=0 && iy<CPLOT_ADERR2DN)
+            {
+            z = (histo[ix][iy] += 1.0);
+            if (z>zmax)
+              zmax = z;
+            }
+          ix = (int)((dx - boffset)*bscale);
+          if (ix>=0 && ix<CPLOT_NADERRHISTBIN)
+            {
+            cx = (cutx[ix] += 1.0);
+            if (cx>cutxmax)
+              cutxmax = cx;
+            }
+          iy = (int)((dy - boffset)*bscale);
+          if (iy>=0 && iy<CPLOT_NADERRHISTBIN)
+            {
+            cy = (cuty[iy] += 1.0);
+            if (cy>cutymax)
+              cutymax = cy;
+            }
+          if (samp->wcsprop[0]*samp->wcsprop[0]
+		+samp->wcsprop[1]*samp->wcsprop[1] >
+		hsn_thresh*hsn_thresh*(samp->wcsproperr[0]*samp->wcsproperr[0]
+		+samp->wcsproperr[1]*samp->wcsproperr[1]))
+                {
+                ix = (int)((dx - offset_hsn)*scale_hsn);
+                iy = (int)((dy - offset_hsn)*scale_hsn);
+                if (ix>=0 && ix<CPLOT_ADERR2DN_HSN
+			&& iy>=0 && iy<CPLOT_ADERR2DN_HSN)
+                  {
+                  z = (histo_hsn[ix][iy] += 1.0);
+                  if (z>zmax_hsn)
+                    zmax_hsn = z;
+                  }
+                ix = (int)((dx - boffset)*bscale);
+                if (ix>=0 && ix<CPLOT_NADERRHISTBIN)
+                  {
+                  cx = (cutx_hsn[ix] += 1.0);
+                  if (cx>cutxmax_hsn)
+                    cutxmax_hsn = cx;
+                  }
+                iy = (int)((dy - boffset)*bscale);
+                if (iy>=0 && iy<CPLOT_NADERRHISTBIN)
+                  {
+                  cy = (cuty_hsn[iy] += 1.0);
+                  if (cy>cutymax_hsn)
+                    cutymax_hsn = cy;
+                  }
+                }
+          }
+      }
+    }
+
+/* Adjust histogram to fit in the displayed box */
+  for (i=0; i<CPLOT_NADERRHISTBIN; i++)
+    {
+    cutbin[i] = boffset+(i+0.5)/bscale;
+    cutx[i] = -maxlim + cutx[i]/cutxmax*maxlim/2.0;
+    cutx_hsn[i] = -maxlim + cutx_hsn[i]/cutxmax_hsn*maxlim/2.0;
+    cuty[i] = -maxlim + cuty[i]/cutymax*maxlim/2.0;
+    cuty_hsn[i] = -maxlim + cuty_hsn[i]/cutymax_hsn*maxlim/2.0;
+    }
+
+  lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
+  plwid(lwid);
+  plenv(-maxlim, maxlim, -maxlim, maxlim, 1, -2);
+
+/* Use a non-linear shade level distribution */
+  if (zmax>=1.0)
+    {
+    for (i=0; i<CPLOT_NSHADES; i++)
+      clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax+0.5;
+    r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
+    r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
+    plscmap1l(1, 2, cpoint, r, g, b, NULL);
+    plshades(histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
+	-maxlim,maxlim, -maxlim,maxlim,
+	clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
+    }
+  else
+    {
+    plcol(1);
+    plptex(0.0, maxlim/2.0, 1.0, 0.0, 0.5, "No overlapping detections!");
+    }
+
+  if (zmax_hsn>=1.0)
+    {
+    r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
+    r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
+    plscmap1l(1, 2, cpoint, r, g, b, NULL);
+    plimage(histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
+	-maxlim,maxlim, -maxlim, maxlim,
+	0.5, zmax_hsn,
+	-maxlim, maxlim, -maxlim, maxlim);
+    }
+
+  plscolbg(255,255,255);	/* Force the background colour to white */
+  plscol0(15, 0,0,0);		/* Force the foreground colour to black */
+  plschr(0.0,0.5);
+/* Pixel footprint */
+  plcol(15);
+  pllsty(3);
+  xl[0] = xl[1] = xl[4] = pixscale[0]/2.0;
+  yl[0] = yl[3] = yl[4] = pixscale[1]/2.0;
+  xl[2] = xl[3] = -xl[0];
+  yl[1] = yl[2] = -yl[0];
+  plline(5, xl, yl);
+  pllsty(1);
+/* 1D histograms */
+  plcol(13);
+  plwid(2*lwid);
+  plline(CPLOT_NADERRHISTBIN, cutbin, cutx);
+  plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
+  plcol(7);
+  plline(CPLOT_NADERRHISTBIN, cutbin, cutx_hsn);
+  plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
+  plwid(lwid);
+  plcol(15);
+  plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
+  sprintf(str, "Group ##%d: 2D proper motions", fgroup->no);
+  pllab( "#gm#dAXIS1#u [mas/yr]", "#gm#dAXIS2#u [mas/yr]", str);
+/* reticulus */
+  pllsty(2);
+  xl[0] = -maxlim;
+  xl[1] = maxlim;
+  yl[0] = yl[1] = 0.0;
+  plline(2, xl, yl);
+  xl[0] = xl[1] = 0.0;
+  yl[0] = -maxlim;
+  yl[1] = maxlim;
+  plline(2, xl, yl);
+  pllsty(1);
+
+/*-- Free array of points */
+  plFree2dGrid(histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN); 
+  plFree2dGrid(histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN); 
+  free(clevel);
+  free(cutbin);
+  free(cutx);
+  free(cuty);
+  free(cutx_hsn);
+  free(cuty_hsn);
+
+  plend();
+
+  cplot_adprophisto2d(fgroup, hsn_thresh);	/* Recursive stuff */
+
+  return RETURN_OK;
+  }
+
 
 

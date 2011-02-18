@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/02/2011
+*	Last modified:		09/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 05/02/2011
+VERSION 09/02/2011
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -86,7 +86,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
 			wcsparal,wcsparalerr,
-			epoch,epochmin,epochmax, err2, dummy;
+			epoch,epochmin,epochmax, err2, colour, dummy;
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
@@ -224,14 +224,19 @@ N=0;
         if (!samp->nextsamp && samp->prevsamp)
           {
           memset(&msample, 0, sizeof(msample));
+/*-------- Photometry */
           for (p=0; p<npinstru; p++)
             {
             mag[p] = magerr[p] = magdisp[p] = magchi2[p] = magref[p] = 0.0;
             nmag[p] = 0;
             }
+          nm = 0;
+          colour = 0.0;
           for (samp2 = samp;
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
+            {
+            colour += samp2->colour;
             if (samp2->flux > 0.0 && (err2 = samp2->magerr*samp2->magerr)>0.0)
               {
               magerr[p] += 1.0 / err2;
@@ -241,6 +246,9 @@ N=0;
               magdisp[p] += (samp2->mag-magref[p]) * (samp2->mag - magref[p]);
               nmag[p]++;
               }
+            nm++;
+            }
+          msample.colour = nm? colour/nm : 0.0;
           for (p=0; p<npinstru; p++)
             {
             if ((nm=nmag[p]))
@@ -257,6 +265,7 @@ N=0;
               msample.mag[p] = msample.magerr[p] = msample.magdisp[p] = 99.0;
             msample.nmag[p] = nmag[p];
             }
+/*-------- Astrometry */
           nm = 0;
           for (d=0; d<naxis; d++)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]

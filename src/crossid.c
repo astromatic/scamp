@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		18/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@ INPUT	ptr to the group of fields,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/10/2004
+VERSION	18/02/2011
  ***/
 void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double tolerance)
@@ -308,18 +308,9 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
                 r2 += dx*dx;
                 }
               }
-/*---------- Finally select the closest source within the search disk */
+/*---------- Finally select the brightest source within the search disk */
             if (r2<r2min && (!samp2min || samp2->flux>samp2min->flux))
-              {
               samp2min = samp2;
-              }
-/*
-            if (r2<r2min)
-              {
-              r2min = r2;
-              samp2min = samp2;
-              }
-*/
             }
           if (samp2min)
             {
