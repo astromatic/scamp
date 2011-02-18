@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2011
+*	Last modified:		09/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -43,12 +43,14 @@
 
 /*-------------------------------- flags ------------------------------------*/
 
-#define		OBJ_CROWDED	0x0001
-#define		OBJ_MERGED	0x0002
-#define		OBJ_SATUR	0x0004
-#define		OBJ_TRUNC	0x0008
+#define		OBJ_CROWDED		0x0001
+#define		OBJ_MERGED		0x0002
+#define		OBJ_SATUR		0x0004
+#define		OBJ_TRUNC		0x0008
 
-#define		ASTROM_CLIPPED	0x0001
+#define		SCAMP_ASTRCLIPPED	0x0001
+#define		SCAMP_PHOTCLIPPED	0x0010
+#define		SCAMP_PHOTNOCOLOR	0x0020
 
 /*--------------------------------- typedefs --------------------------------*/
 

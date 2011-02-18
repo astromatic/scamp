@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2011
+*	Last modified:		07/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,6 +45,7 @@
 #include "fits/fitscat.h"
 #include "fitswcs.h"
 #include "prefs.h"
+#include "proper.h"
 #include "samples.h"
 #ifdef USE_THREADS
 #include "threads.h"
@@ -64,7 +65,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	18/02/2011
  ***/
 void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -129,68 +130,58 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
           }
         if (samp->flux <= 0.0 || (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
           continue;
+        xi = samp->colour;
 /*------ Explore the forward direction */
-        if (samp->nextsamp)
-	  {
-          samp2 = samp;
-          while ((samp2=samp2->nextsamp))
+        for (samp2=samp; samp2=samp2->nextsamp;)
+          {
+          if (samp2->flux <= 0.0 || (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+            continue;
+          field2 = samp2->set->field;
+          f2 = (field2==reffield ? nfield : field2->index);
+          for (d=0; d<naxis; d++)
             {
-            if (samp2->flux <= 0.0 || (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-              continue;
-            field2 = samp2->set->field;
-            f2 = (field2==reffield ? nfield : field2->index);
-            for (d=0; d<naxis; d++)
+            sig = samp2->wcsposerr[d];
+            sig = 1.0 /*sig*sig + sigma[d]*/;
+            if (sig>0.0)
               {
-              sig = samp2->wcsposerr[d];
-              sig = sig*sig + sigma[d];
-              if (sig>0.0)
-                {
-                wi = 1.0/sig;
-                xi = samp2->mag - samp->mag;
-                yi = samp2->projpos[d] - samp->projpos[d];
-                ss[d][f2] += wi;
-                sx[d][f2] += wi*xi;
-                sy[d][f2] += wi*yi;
-                sxx[d][f2] += wi*xi*xi;
-                sxy[d][f2] += wi*xi*yi;
-                }
+              wi = 1.0/sig;
+              yi = samp2->projpos[d] - samp->projpos[d];
+              ss[d][f2] += wi;
+              sx[d][f2] += wi*xi;
+              sy[d][f2] += wi*yi;
+              sxx[d][f2] += wi*xi*xi;
+              sxy[d][f2] += wi*xi*yi;
               }
             }
           }
 /*------ Explore the backward direction */
-        if (samp->prevsamp)
-	  {
-          samp2 = samp;
-          while ((samp2=samp2->prevsamp))
+        for (samp2=samp; samp2=samp2->prevsamp;)
+          {
+          if (samp2->flux <= 0.0 || (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+            continue;
+          field2 = samp2->set->field;
+          f2 = (field2==reffield ? nfield : field2->index);
+          for (d=0; d<naxis; d++)
             {
-            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
-              continue;
-            field2 = samp2->set->field;
-            f2 = (field2==reffield ? nfield : field2->index);
-            for (d=0; d<naxis; d++)
+            sig = samp2->wcsposerr[d];
+            sig = 1.0 /*sig*sig + sigma[d]*/;
+            if (sig>0.0)
               {
-              sig = samp2->wcsposerr[d];
-              sig = sig*sig + sigma[d];
-              if (sig>0.0)
-                {
-                wi = 1.0/sig;
-                xi = samp2->mag - samp->mag;
-                yi = samp2->projpos[d] - samp->projpos[d];
-                ss[d][f2] += wi;
-                sx[d][f2] += wi*xi;
-                sy[d][f2] += wi*yi;
-                sxx[d][f2] += wi*xi*xi;
-                sxy[d][f2] += wi*xi*yi;
-                }
+              wi = 1.0/sig;
+              yi = samp2->projpos[d] - samp->projpos[d];
+              ss[d][f2] += wi;
+              sx[d][f2] += wi*xi;
+              sy[d][f2] += wi*yi;
+              sxx[d][f2] += wi*xi*xi;
+              sxy[d][f2] += wi*xi*yi;
               }
             }
           }
         }
       }
-
-    for (f2=f1+1; f2<=nfield; f2++)
+    for (f2=0; f2<nfield; f2++)
       {
-      instru2 = f2<nfield? fgroup->field[f2]->photomlabel : ninstru;
+      instru2 = fgroup->field[f2]->photomlabel;
       for (d=0; d<naxis; d++)
         if (ss[d][f2] > 0.0)
           {
@@ -199,24 +190,11 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
             continue;
           a = (ss[d][f2]*sxy[d][f2] - sx[d][f2]*sy[d][f2]) / delta;
           b = (sxx[d][f2]*sy[d][f2] - sx[d][f2]*sxy[d][f2]) / delta;
-          if (f2==nfield)
-            {
-            fgroup->refcolshiftscale[d][f1] = a;
-            fgroup->refcolshiftzero[d][f1] = b;
-            }
-          else
-            {
-            fgroup->intcolshiftscale[d][f2*nfield+f1]
-		= fgroup->intcolshiftscale[d][f1*nfield+f2] = a;
-            fgroup->intcolshiftzero[d][f2*nfield+f1]
-		= -(fgroup->intcolshiftzero[d][f1*nfield+f2] = b);
-            fgroup->colshiftscale[d][instru2*ninstru+instru1]
-		= (fgroup->colshiftscale[d][instru1*ninstru+instru2] += a);
-            fgroup->colshiftzero[d][instru2*ninstru+instru1]
-		= -(fgroup->colshiftzero[d][instru1*ninstru+instru2] += b);
-            ncolshift[d][instru1*ninstru+instru2]
-		= ++ncolshift[d][instru2*ninstru+instru1];
-            }
+          fgroup->intcolshiftscale[d][f1*nfield+f2] = a;
+          fgroup->intcolshiftzero[d][f1*nfield+f2] = b;
+          fgroup->colshiftscale[d][instru1*ninstru+instru2] += a;
+          fgroup->colshiftzero[d][instru1*ninstru+instru2] += b;
+          ++ncolshift[d][instru1*ninstru+instru2];
           }
       }
     }
@@ -250,7 +228,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/02/2011
+VERSION	07/02/2011
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -356,7 +334,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             field2 = samp2->set->field;
             ff = f1*nfield + field2->index;
             dt = field2->epoch - epoch;
-            dmag = samp2->mag - samp1->mag;
+            dmag = samp2->colour;
             if (paralflag)
               {
 /*------------ Compute parallax factors for detection #n */

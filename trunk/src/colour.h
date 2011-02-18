@@ -1,13 +1,13 @@
 /*
-*				photsolve.h
+*				colour.h
 *
-* Include file for photsolve.c
+* Include file for colour.c.
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,33 +22,27 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		07/02/2011
+*	Last modified:		14/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
 
-#ifndef _SAMPLES_H_
-#include "samples.h"
-#endif
+#ifndef _COLOUR_H_
+#define _COLOUR_H_
 
-#ifndef _PHOTSOLVE_H_
-#define _PHOTSOLVE_H_
+/*--------------------------------- constants -------------------------------*/
+#define		PCA_NITER	200	/* Max nb of iter. in colour_findpc() */
+#define		PCA_CONVEPS	1e-6	/* colour_findpc() converg. criterion */
 
-/*----------------------------- Internal constants --------------------------*/
-#define	PHOTOM_MINMAGERR	0.001	/* Mag error floor for weighting */
+/*--------------------------------- typedefs --------------------------------*/
+
+
 /*--------------------------- structure definitions -------------------------*/
-/*---------------------------------- protos --------------------------------*/
-int		photclip_fgroup(fgroupstruct *fgroup, int instru,
-			double nsigma);
 
-extern void	avermags_fgroup(fgroupstruct *fgroup),
-		compmags_fgroup(fgroupstruct *fgroup),
-		photsolve_fgroups(fgroupstruct **fgroups, int nfgroup),
-		photstats_fgroup(fgroupstruct *fgroup, int instru,
-			double hsn_thresh);
 
+/*-------------------------------- protos -----------------------------------*/
+
+double	colour_findpc(double *covmat, double *vec, int nmat);
+
+void	colour_fgroup(fgroupstruct **fgroups, int ngroup);
 #endif
-
