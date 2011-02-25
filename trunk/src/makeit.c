@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2011
+*	Last modified:		19/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -487,9 +487,6 @@ void	makeit(void)
 	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
 	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
     {
-//    for (g=0; g<ngroup; g++)
-//      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
-
 /*-- Compute colour indices */
     NFPRINTF(OUTPUT, "Computing global color indices");
     colour_fgroup(fgroups, ngroup);
@@ -501,10 +498,15 @@ void	makeit(void)
       NFPRINTF(OUTPUT, str);
       astrcolshift_fgroup(fgroups[g], reffields[g]);
       }
+/*-- Re-do Cross-ID to recover possibly fast moving objects */
+    for (g=0; g<ngroup; g++)
+      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
     }
 
 /* Compute proper motions and other 2nd order corrections */
-  if (prefs.propmotion_flag)
+  if (prefs.propmotion_flag
+	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
+	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
     for (g=0; g<ngroup; g++)
       {
       sprintf(str, "Computing proper motions in group %d", g+1);

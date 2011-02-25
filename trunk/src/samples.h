@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/02/2011
+*	Last modified:		25/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -35,11 +35,13 @@
 
 /*--------------------------------- constants -------------------------------*/
 
-#define	LSAMPLE_DEFSIZE	1000		/* Sample stacksize at the beginning */
-#define MAXCONTEXT	10		/* Maximum number of contexts */
-#define MAX_FLUX	1e26		/* Maximum flux allowed */
-#define MIN_FLUXERR	1e-15		/* Minimum flux error estimate allowed*/
-#define MIN_POSERR	1e-6		/* Minimum pos. error estimate allowed*/
+#define	LSAMPLE_DEFSIZE	1000	/* Sample stacksize at the beginning */
+#define MAXCONTEXT	10	/* Maximum number of contexts */
+#define MAX_FLUX	1e26	/* Maximum flux allowed [ADU] */
+#define MIN_FLUXERR	1e-15	/* Minimum flux uncertainty allowed [ADU] */
+#define FLOOR_FLUXERR	1e-3	/* Floor of fractional flux uncertainties */
+#define MIN_POSERR	1e-6	/* Minimum position uncertainties [pix] */
+#define FLOOR_POSERR	1e-2	/* Floor of position uncertainties [pix] */
 
 /*-------------------------------- flags ------------------------------------*/
 

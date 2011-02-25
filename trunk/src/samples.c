@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2010
+*	Last modified:		25/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 31/01/2011
+VERSION 25/02/2011
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -412,6 +412,10 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
     if (ea<MIN_POSERR || eb<MIN_POSERR || ea>max || eb>max)
       continue;
+
+    ferr = sqrt(ferr*ferr+f*f*FLOOR_FLUXERR*FLOOR_FLUXERR);
+    ea = sqrt(ea*ea+FLOOR_POSERR*FLOOR_POSERR);
+    eb = sqrt(eb*eb+FLOOR_POSERR*FLOOR_POSERR);
 
 /*-- ... and check the integrity of the sample */
 /*-- Allocate memory for the first shipment */

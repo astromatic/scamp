@@ -1808,13 +1808,15 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
             }
           if (nmean>1)
             {
+            for (i=0; i<naxis; i++)
+              mean[i] /= (double)nmean;
             for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2 = prevsamp2)
               {
               flag = 0;
               for (i=0; i<naxis; i++)
                 {
-                dx2[i] = samp2->projpos[i] - mean[i]/nmean;
+                dx2[i] = samp2->projpos[i] - mean[i];
                 if (dx2[i]*dx2[i] > clip[i])
                   flag = 1;
                 }
