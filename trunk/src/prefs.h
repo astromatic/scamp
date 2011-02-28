@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		28/02/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -154,6 +154,7 @@ typedef struct
   double	magzero_out[MAXPHOTINSTRU];	/* Max nb of phot instruments*/
   int		nmagzero_out;			/* nb of params */
   double	photclip_nsig;			/* Photom. clipping threshold*/
+  double	photaccuracy;			/* Photom. uncertainty floor */
   double	magzero_interr[MAXPHOTINSTRU];	/* Internal field ZP error RMS*/
   int		nmagzero_interr;		/* nb of params */
   double	magzero_referr[MAXPHOTINSTRU];	/* Photom.field ZP error RMS */
@@ -180,6 +181,7 @@ typedef struct
   int           ngroup_deg;			/* nb of params */
   double	astrclip_nsig;			/* Astrom. clipping threshold*/
   double	astref_weight;			/* Ref.cat. relative weight */
+  double	astraccuracy;			/* AStrom. uncertainty floor */
 /* Parallaxes */
   int		parallax_flag;			/* Compute parallaxes? */
 /* Proper motions */
