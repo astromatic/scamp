@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2011
+*	Last modified:		15/04/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -123,6 +123,7 @@ pkeystruct key[] =
     {""}, 0, MAXCONTEXT, &prefs.ncontext_group},
   {"DISTORT_DEGREES", P_INTLIST, prefs.group_deg, 1,16,0.0,0.0,
     {""}, 0, MAXCONTEXT, &prefs.ngroup_deg},
+  {"ELLIPTICITY_MAX", P_FLOAT, &prefs.maxellip, 0,0, 0.0, 1.0},
   {"EXPOTIME_KEY", P_STRING, prefs.expotime_key},
   {"EXTINCT_KEY", P_STRING, prefs.extcoeff_key},
   {"FGROUP_RADIUS", P_FLOAT, &prefs.group_radius, 0,0, 0.0,180.0},
@@ -301,6 +302,7 @@ char *default_prefs[] =
 "SN_THRESHOLDS          10.0,100.0      # S/N thresholds (in sigmas) for all and",
 "                                       # high-SN sample",
 "FWHM_THRESHOLDS        0.0,100.0       # FWHM thresholds (in pixels) for sources",
+"*ELLIPTICITY_MAX        0.5             # Max. ellipticty for unsaturated sources",
 "*FLAGS_MASK             0x00f0          # Rejection mask on SEx FLAGS",
 "*WEIGHTFLAGS_MASK       0x00ff          # Rejection mask on SEx FLAGS_WEIGHT",
 "*IMAFLAGS_MASK          0x0             # Rejection mask on SEx IMAFLAGS_ISO",

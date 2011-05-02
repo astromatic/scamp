@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/02/2011
+*	Last modified:		15/04/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -88,6 +88,7 @@ typedef struct
   int		nsn_thresh;		/* nb of params */
   double	fwhm_thresh[2];		/* Minimum and maximum FWHM allowed */
   int		nfwhm_thresh;		/* nb of params */
+  double	maxellip;		/* Maximum ellipticity allowed */
   int		flags_mask;		/* Rejection mask on SEx FLAGS */
   int		wflags_mask;		/* Rej. mask on SEx FLAGS_WEIGHT */
   int		imaflags_mask;		/* Rejection mask on SEx IMAFLAG_ISO */

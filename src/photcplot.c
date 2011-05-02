@@ -527,13 +527,14 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 /****** cplot_photerrhistomag *************************************************
 PROTO	int cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
-PURPOSE	Plot a 2D histogram of photometric difference between star pairs versus magnitude.
+PURPOSE	Plot a 2D histogram of photometric difference between star pairs versus
+	magnitude.
 INPUT	Pointer to the field group,
 	reference field to the group,
 	S/N threshold for the high-S/N sample.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
-AUTHOR	E. Bertin (IAP) C. MARMO (IAP)
+AUTHOR	E. Bertin (IAP), C. MARMO (IAP)
 VERSION	31/01/2011
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
@@ -546,7 +547,6 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 		xoffset,xoffset_hsn,
 		yscale,yscale_hsn, yoffset,yoffset_hsn, boffset,bscale, dy,
 		maxwidth,margin, magmax;
-
    PLFLT	**histo, **histo_hsn, **histot,
 		*cuty,*cuty_hsn,
 		*clevel,*cutbin,
