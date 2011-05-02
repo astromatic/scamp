@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		28/02/2011
+#	Last modified:		15/04/2011
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.9.4, [bertin@iap.fr])
+AC_INIT(scamp, 1.9.5, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)

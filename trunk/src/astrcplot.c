@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2011
+*	Last modified:		02/05/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -769,7 +769,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/03/2007
+VERSION	02/05/2011
  ***/
 int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -777,7 +777,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
    fieldstruct	*field;
    setstruct	*set, *refset;
    samplestruct	*samp;
-   char		str[64];
+   char		str[80];
    PLFLT	*x,*y, *x2,*y2, *xt,*yt, *x2t,*y2t, psize;
    PLINT	lwid, lsize;
    double	dx,dy, xmin,xmax,ymin,ymax;
@@ -991,7 +991,7 @@ INPUT	Pointer to the field.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/12/2005
+VERSION	02/05/2011
  ***/
 int	cplot_distort(fieldstruct *field)
   {
@@ -1003,7 +1003,7 @@ int	cplot_distort(fieldstruct *field)
 		cscale, scalemin,scalemax, mscale,dscale;
    PLINT	lwid;
    char		*ctype[NAXIS],
-		str[64];
+		str[80];
    double	crpix[NAXIS], cdelt[NAXIS], raw[NAXIS],
 		xmin,ymin,xmax,ymax, xstep,ystep;
    int		naxisn[NAXIS],
@@ -1185,7 +1185,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	02/05/2011
  ***/
 int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -1199,7 +1199,7 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
    PLFLT	x[2], y[2],
 		scalel;
    char		*ctype[NAXIS],
-		str[64], dispunit[32];
+		str[80], dispunit[32];
    double	vecshift[CPLOT_ASTNSUBPLOTS*CPLOT_ASTNSUBPLOTS][NAXIS],
 		vecvar[CPLOT_ASTNSUBPLOTS*CPLOT_ASTNSUBPLOTS][NAXIS][NAXIS],
 		rawpos[NAXIS],vecpos[NAXIS],vecpos2[NAXIS],wcspos[NAXIS],
@@ -1500,7 +1500,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	02/05/2011
  ***/
 int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 			double hsn_thresh)
@@ -1514,7 +1514,7 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
    PLFLT	x[2], y[2],
 		scalel;
    char		*ctype[NAXIS],
-		str[64], dispunit[32];
+		str[80], dispunit[32];
    double	vecshift[CPLOT_ASTNSUBPLOTS*CPLOT_ASTNSUBPLOTS][NAXIS],
 		vecvar[CPLOT_ASTNSUBPLOTS*CPLOT_ASTNSUBPLOTS][NAXIS][NAXIS],
 		rawpos[NAXIS],vecpos[NAXIS],vecpos2[NAXIS],wcspos[NAXIS],
@@ -2308,7 +2308,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	02/05/2011
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2316,7 +2316,7 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
    wcsstruct	*wcs;
    setstruct	*set;
    samplestruct	*samp, *samp2;
-   char		str[64];
+   char		str[80];
    double	offset,offset_hsn, scale,scale_hsn, boffset,bscale,
 		cutxmax,cutxmax_hsn, cutymax,cutymax_hsn, cx,cy, dx,dy;
    PLFLT	**histo,**histo_hsn,
@@ -2818,7 +2818,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	02/05/2011
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -2826,7 +2826,7 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
    wcsstruct	*wcs;
    setstruct	*set;
    samplestruct	*samp, *samp2;
-   char		str[64];
+   char		str[80];
    double	offset,offset_hsn, scale,scale_hsn, boffset,bscale,
 		cutxmax,cutxmax_hsn, cutymax,cutymax_hsn, cx,cy, dx,dy;
    PLFLT	**histo,**histo_hsn,
@@ -4105,7 +4105,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	02/05/2011
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4113,7 +4113,7 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
    wcsstruct	*wcs;
    setstruct	*set;
    samplestruct	*samp, *samp2;
-   char		str[64];
+   char		str[80];
    double	offset,offset_hsn, scale,scale_hsn, boffset,bscale, err;
    PLFLT	**histo[2],**histo_hsn[2],
 		xl[5], yl[5],r[2],g[2],b[2],cpoint[2],zmax[2],zmax_hsn[2],
@@ -4309,7 +4309,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/02/2011
+VERSION	02/05/2011
  ***/
 int	cplot_astrepoch3d(fgroupstruct *fgroup)
   {
@@ -4529,7 +4529,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	02/05/2011
  ***/
 int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4537,7 +4537,7 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
    wcsstruct	*wcs;
    setstruct	*set;
    samplestruct	*samp, *samp2;
-   char		str[64];
+   char		str[80];
    double	offset,offset_hsn, scale,scale_hsn, boffset,bscale,
 		cutxmax,cutxmax_hsn, cutymax,cutymax_hsn, cx,cy, dx,dy;
    PLFLT	**histo,**histo_hsn,

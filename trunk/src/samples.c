@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/02/2011
+*	Last modified:		15/04/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 28/02/2011
+VERSION 15/04/2011
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -80,10 +80,10 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
    char			str[MAXCHAR];
    char			**kstr,
 			*buf,*head,*head0;
-   double		contextval[MAXCONTEXT], *cmin, *cmax, *dfluxrad,
-			dminrad,dmaxrad, dval;
-   float		*xm,*ym, *flux, *fluxerr, *erra,*errb, *fluxrad,
-			minrad,maxrad;
+   double		contextval[MAXCONTEXT], *cmin,*cmax, *dfluxrad, *delong,
+			dminrad,dmaxrad, dmaxelong, dval;
+   float		*xm,*ym, *flux, *fluxerr, *erra,*errb, *fluxrad, *elong,
+			minrad,maxrad, maxelong;
    double		*dxm, *dym, *derra,*derrb, *dflux,*dfluxerr,
 			x,y, ea,eb, f, ferr, xmax,ymax, max;
    unsigned int		*imaflags;
@@ -101,7 +101,10 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
   sxm = sym = NULL;
   minrad = (float)(dminrad = prefs.fwhm_thresh[0]/2.0);
   maxrad = (float)(dmaxrad = prefs.fwhm_thresh[1]/2.0);
- 
+  maxelong = (float)(prefs.maxellip < 1.0?
+        (prefs.maxellip + 1.0)/(1.0 - prefs.maxellip)
+        : 100.0);
+
 /* If a NULL pointer is provided, we allocate a new set */
   if (!set)
     {
@@ -266,6 +269,20 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     fluxrad = NULL;
     }
 
+/* Load optional SExtractor ELONGATION parameter */
+  if ((key = name_to_key(keytab, "ELONGATION")))
+    {
+    if (key->ttype == T_DOUBLE)
+      delong = (double *)key->ptr;
+    else
+      elong = (float *)key->ptr;
+    }
+  else
+    {
+    delong = NULL;
+    elong = NULL;
+    }
+
 /* Try to load the set of context keys */
   head0flag = (set->imatab && set->imatab->cat && set->imatab->cat->tab
 	&& (head0=set->imatab->cat->tab->headbuf));
@@ -360,16 +377,16 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       sexflags = *flags & (OBJ_CROWDED|OBJ_MERGED|OBJ_SATUR);
       if (sexflags & OBJ_SATUR)		/* A saturated object */
         set->nsaturated++;
-      else if ((fluxrad && *fluxrad < minrad)
-		|| (dfluxrad && *dfluxrad < dminrad)
-		|| (fluxrad && *fluxrad > maxrad)
-		|| (dfluxrad && *dfluxrad < dmaxrad))
+      else if ((fluxrad && (*fluxrad < minrad || *fluxrad > maxrad))
+	|| (dfluxrad && (*dfluxrad < dminrad || *dfluxrad > dmaxrad))
+	|| (elong && *elong > maxelong)
+	|| (delong && *delong > dmaxelong))
         continue;
       }
-    else if ((fluxrad && *fluxrad < minrad)
-		|| (dfluxrad && *dfluxrad < dminrad)
-		|| (fluxrad && *fluxrad > maxrad)
-		|| (dfluxrad && *dfluxrad < dmaxrad))
+    else if ((fluxrad && (*fluxrad < minrad || *fluxrad > maxrad))
+	|| (dfluxrad && (*dfluxrad < dminrad || *dfluxrad > dmaxrad))
+	|| (elong && *elong > maxelong)
+	|| (delong && *delong > dmaxelong))
         continue;
     if (wflags)
       {
