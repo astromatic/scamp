@@ -1,7 +1,7 @@
 /*
 *				cathead.h
 *
-* Merged catalogue headers.
+* Merged and full catalogue headers.
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/02/2011
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -34,13 +34,16 @@
 
 mergedsamplestruct	refmergedsample;
 keystruct		refmergedkey[] = {
+  {"INDEX_SOURCE", "Source index",
+	&refmergedsample.sourceindex, H_INT, T_LONG,
+	"%10d", "", "meta.number", ""},
   {"NPOS", "Number of overlapping positions",
 	&refmergedsample.npos, H_INT, T_LONG,
 	"%4d", "", "meta.number", ""},
-  {"X_WORLD", "Barycenter position along world x axis",
+  {"ALPHA_J2000", "Position along right ascension",
 	&refmergedsample.wcspos[0], H_FLOAT, T_DOUBLE,
 	"%13.9f", "deg", "pos.eq.ra;stat.mean", "deg"},
-  {"Y_WORLD", "Barycenter position along world y axis",
+  {"DELTA_J2000", "Position along declination",
 	&refmergedsample.wcspos[1], H_FLOAT, T_DOUBLE,
 	"%13.9f", "deg", "pos.eq.de;stat.mean", "deg"},
   {"ERRA_WORLD", "RMS position error along major world axis",
@@ -52,22 +55,22 @@ keystruct		refmergedkey[] = {
   {"ERRTHETA_WORLD", "Error ellipse pos. angle (CCW/world-x)",
 	&refmergedsample.wcspostheta, H_FLOAT, T_FLOAT,
 	"%10e", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
-  {"DISPX_WORLD", "RMS dispersion of pos along x world axis",
+  {"DISPALPHA_J2000", "RMS dispersion of pos along right ascension",
 	&refmergedsample.wcsposdisp[0], H_FLOAT, T_FLOAT,
 	"%10e", "deg", "stat.stdev;stat.max;pos.errorEllipse;meta.main", "deg"},
-  {"DISPY_WORLD", "RMS dispersion of pos along y world axis",
+  {"DISPDELTA_J2000", "RMS dispersion of pos along declination",
 	&refmergedsample.wcsposdisp[1], H_FLOAT, T_FLOAT,
 	"%10e", "deg", "stat.stdev;stat.min;pos.errorEllipse;meta.main", "deg"},
-  {"PMX_WORLD", "Proper motion along world x axis",
+  {"PMALPHA_J2000", "Proper motion along right ascension",
 	&refmergedsample.wcsprop[0], H_FLOAT, T_FLOAT,
 	"%10e", "mas/yr", "pos.pm;pos.eq.ra;stat.fit", "mas/yr"},
-  {"PMY_WORLD", "Proper motion along world y axis",
+  {"PMDELTA_J2000", "Proper motion along declination",
 	&refmergedsample.wcsprop[1], H_FLOAT, T_FLOAT,
 	"%10e", "mas/yr", "pos.pm;pos.eq.de;stat.fit", "mas/yr"},
-  {"PMXERR_WORLD", "P.motion uncertainty along world x axis",
+  {"PMALPHAERR_J2000", "P.motion uncertainty along right ascension",
 	&refmergedsample.wcsproperr[0], H_FLOAT, T_FLOAT,
 	"%10e", "mas/yr", "stat.error;pos.pm;pos.eq.ra;stat.fit", "mas/yr"},
-  {"PMYERR_WORLD", "P.motion uncertainty along world y axis",
+  {"PMDELTAERR_J2000", "P.motion uncertainty along declination",
 	&refmergedsample.wcsproperr[1], H_FLOAT, T_FLOAT,
 	"%10e", "mas/yr", "stat.error;pos.pm;pos.eq.de;stat.fit", "mas/yr"},
   {"PARALLAX_WORLD", "Trigonometric parallax",
@@ -109,6 +112,75 @@ keystruct		refmergedkey[] = {
 	"%3d", "", "meta.code.qual", ""},
   {"FLAGS_SCAMP", "Calibration flags",
 	&refmergedsample.scampflags, H_INT, T_SHORT,
+	"%3d", "", "meta.code.qual", ""},
+  {""},
+  };
+
+/* Full output catalog fields */
+
+fullsamplestruct	reffullsample;
+keystruct		reffullkey[] = {
+  {"INDEX_SOURCE", "Source index",
+	&reffullsample.sourceindex, H_INT, T_LONG,
+	"%10d", "", "meta.number", ""},
+   {"INDEX_FILE", "File index",
+	&reffullsample.fieldindex, H_INT, T_LONG,
+	"%7d", "", "meta.number", ""},
+   {"INDEX_EXTENSION", "Extension index",
+	&reffullsample.setindex, H_INT, T_SHORT,
+	"%5d", "", "meta.number", ""},
+   {"INDEX_ASTRINSTRU", "Astrometric instrument index",
+	&reffullsample.astrinstruindex, H_INT, T_SHORT,
+	"%5d", "", "meta.number", ""},
+   {"INDEX_PHOTINSTRU", "Photometric instrument index",
+	&reffullsample.photinstruindex, H_INT, T_SHORT,
+	"%5d", "", "meta.number", ""},
+   {"X_IMAGE", "Position along x image axis",
+	&reffullsample.rawpos[0], H_FLOAT, T_DOUBLE,
+	"%11.4f", "pixel", "pos.cartesian.x", "pix"},
+   {"Y_IMAGE", "Position along y image axis",
+	&reffullsample.rawpos[1], H_FLOAT, T_DOUBLE,
+	"%11.4f", "pixel", "pos.cartesian.y", "pix"},
+   {"ERRA_IMAGE", "RMS position error along major axis",
+	&reffullsample.rawposerr[0], H_FLOAT, T_FLOAT,
+	"%9.5f", "pixel", "stat.error;stat.max;pos.errorEllipse;meta.main",
+	"pix"},
+   {"ERRB_IMAGE", "RMS position error along minor axis",
+	&reffullsample.rawposerr[1], H_FLOAT, T_FLOAT,
+	"%9.5f", "pixel", "stat.error;stat.min;pos.errorEllipse;meta.main",
+	"pix"},
+   {"ERRTHETA_IMAGE", "Error ellipse pos. angle (CCW/world-x)",
+	&reffullsample.wcspostheta, H_FLOAT, T_FLOAT,
+	"%6.2f", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
+   {"ALPHA_J2000", "Position along right ascension",
+	&reffullsample.wcspos[0], H_FLOAT, T_DOUBLE,
+	"%13.9f", "deg", "pos.eq.ra;stat.mean", "deg"},
+   {"DELTA_J2000", "Position along declination",
+	&reffullsample.wcspos[1], H_FLOAT, T_DOUBLE,
+	"%13.9f", "deg", "pos.eq.de;stat.mean", "deg"},
+   {"ERRA_WORLD", "RMS position error along major world axis",
+	&reffullsample.wcsposerr[0], H_FLOAT, T_FLOAT,
+	"%10e", "deg", "stat.error;stat.max;pos.errorEllipse;meta.main", "deg"},
+   {"ERRB_WORLD", "RMS position error along minor world axis",
+	&reffullsample.wcsposerr[1], H_FLOAT, T_FLOAT,
+	"%10e", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
+   {"ERRTHETA_WORLD", "Error ellipse pos. angle (CCW/world-x)",
+	&reffullsample.wcspostheta, H_FLOAT, T_FLOAT,
+	"%10e", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
+  {"EPOCH", "Epoch",
+	&reffullsample.epoch, H_FLOAT, T_FLOAT,
+	"%15.10f", "yr", "time.epoch;stat.mean", "yr"},
+  {"MAG", "Magnitude in the current band",
+	&reffullsample.mag, H_FLOAT, T_FLOAT,
+	"%9.5f", "mag", "phot.mag", "mag"},
+  {"MAGERR", "RMS mag error estimate in the current band",
+	&reffullsample.magerr, H_FLOAT, T_FLOAT,
+	"%9.5f", "mag", "stat.error;phot.mag", "mag"},
+  {"FLAGS_EXTRACTION", "Extraction flags",
+	&reffullsample.sexflags, H_INT, T_SHORT,
+	"%3d", "", "meta.code.qual", ""},
+  {"FLAGS_SCAMP", "Calibration flags",
+	&reffullsample.scampflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},
   {""},
   };

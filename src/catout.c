@@ -1,7 +1,7 @@
 /*
 *				catout.c
 *
-* Produce and write merged catalogs.
+* Produce and write merged and full catalogs.
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/02/2011
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -52,14 +52,14 @@
 
 /****** writemergedcat_fgroup *************************************************
 PROTO	void writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
-PURPOSE	Save a SExtractor-like catalog containing merged detections calibrated
-	by SCAMP.
+PURPOSE	Save a SExtractor-like catalog containing merged detections as
+	calibrated by SCAMP.
 INPUT	File name,
 	pointer to the fgroup structure.
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 09/02/2011
+VERSION 21/07/2011
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -91,7 +91,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			*buf, *rfilename;
    long			dptr;
    int			nmag[MAXPHOTINSTRU],
-			d,f,i,k,n,p,s,nm, npinstru, naxis, N;
+			d,f,i,k,n,p,s,nm, npinstru, naxis, index;
 
   if (prefs.mergedcat_type == CAT_NONE)
     return;
@@ -212,7 +212,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     objtab->cat = cat;
     init_writeobj(cat, objtab, &buf);
     }
-N=0;
+
+  index=0;
   for (f=0; f<fgroup->nfield; f++)
     {
     field = fgroup->field[f];
@@ -224,6 +225,7 @@ N=0;
         if (!samp->nextsamp && samp->prevsamp)
           {
           memset(&msample, 0, sizeof(msample));
+          msample.sourceindex = ++index;
 /*-------- Photometry */
           for (p=0; p<npinstru; p++)
             {
@@ -293,32 +295,16 @@ N=0;
               wcsprop[d] += samp2->wcsprop[d];
               wcsproperr[d] += samp2->wcsproperr[d]*samp2->wcsproperr[d];
               }
-/*
-raw_to_wcs(fgroup->wcs, samp2->toto, samp2->toto);
-printf("%d %.7f %.7f %.5f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %d\n", N,
-samp2->wcspos[0],
-samp2->wcspos[1],
-samp2->set->field->epoch,
-(samp2->wcspos[0]-wcsposref[0])*cos(samp2->wcspos[0]*DEG)*DEG/MAS,
-(samp2->wcspos[1]-wcsposref[1])*DEG/MAS,
-samp2->wcsposerr[0]*DEG/MAS,
-samp2->wcsposerr[1]*DEG/MAS,
-samp2->wcsprop[0]*DEG/MAS,
-samp2->wcsprop[1]*DEG/MAS,
-samp2->wcsproperr[0]*DEG/MAS,
-samp2->wcsproperr[1]*DEG/MAS,
-samp2->wcspos[0]-
--(samp2->wcspos[0]-samp2->toto[0])*cos(samp2->wcspos[0]*DEG)*DEG/MAS,
--(samp2->wcspos[1]-samp2->toto[1])*DEG/MAS,
-samp2->flags);
-*/
+
             wcsparal += samp2->wcsparal;
             wcsparalerr += samp2->wcsparalerr*samp2->wcsparalerr;
+/*---------- Epochs */
             epoch += samp2->set->field->epoch;
             if (samp2->set->field->epoch < epochmin)
               epochmin = samp2->set->field->epoch;
             if (samp2->set->field->epoch > epochmax)
               epochmax = samp2->set->field->epoch;
+/*---------- Flags */
             msample.sexflags |= samp2->sexflags;
             msample.scampflags |= samp2->scampflags;
             nm++;
@@ -353,6 +339,7 @@ samp2->flags);
             msample.epochmax = epochmax;
             msample.npos = nm;
             }
+/*-------- Write to the catalog */
           if (prefs.mergedcat_type == CAT_ASCII_HEAD
 		|| prefs.mergedcat_type == CAT_ASCII
 		|| prefs.mergedcat_type == CAT_ASCII_SKYCAT)
@@ -361,7 +348,6 @@ samp2->flags);
             voprint_obj(ascfile, objtab);
           else
             write_obj(objtab, buf);
-N++;
           }
       }
     }
@@ -397,6 +383,251 @@ N++;
 
   return;
   }
+
+
+/****** writefullcat_fgroup **************************************************
+PROTO	void writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
+PURPOSE	Save a SExtractor-like catalog containing all individual detections as
+	calibrated by SCAMP.
+INPUT	File name,
+	pointer to the fgroup structure.
+OUTPUT  -.
+NOTES   Global preferences are used.
+AUTHOR  E. Bertin (IAP)
+VERSION 21/07/2011
+*/
+void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
+
+  {
+   static char  imtabtemplate[][80] = {
+"SIMPLE  =                    T / This is a FITS file",
+"BITPIX  =                    8 / ",
+"NAXIS   =                    2 / 2D data",
+"NAXIS1  =                    1 / Number of rows",
+"NAXIS2  =                    1 / Number of columns",
+"EXTEND  =                    T / This file may contain FITS extensions",
+"END                            "};
+   catstruct		*cat;
+   tabstruct		*asctab, *imtab, *objtab;
+   keystruct		*key, *objkeys;
+   fullsamplestruct	fsample;
+   fieldstruct		*field;
+   setstruct		*set;
+   samplestruct		*samp,*samp2;
+   FILE			*ascfile;
+   double		wcspos[NAXIS], wcsposerr[NAXIS],
+			mag, magerr,epoch;
+   char			str[80],
+			*buf, *rfilename;
+   long			dptr;
+   int			nmag[MAXPHOTINSTRU],
+			d,f,i,k,n,p,s,nm, npinstru, naxis, index;
+
+  if (prefs.fullcat_type == CAT_NONE)
+    return;
+
+  naxis = fgroup->naxis;
+
+/* LDAC Object header */
+  objtab = new_tab("LDAC_OBJECTS");
+/* Set key pointers */
+  QCALLOC(objkeys, keystruct, (sizeof(reffullkey) / sizeof(keystruct)));
+  dptr = (long)((char *)&fsample - (char *)&reffullsample);
+  for (k=0; reffullkey[k].name[0]; k++)
+    {
+    objkeys[k] = reffullkey[k];
+    key = objkeys+k;
+/*-- A trick to access the fields of the dynamic fullsample structure */
+    key->ptr = (void *)((char *)key->ptr + dptr);
+    key->nbytes = t_size[key->ttype]*(key->naxis? *key->naxisn : 1);
+    add_key(key,objtab, 0);
+    }
+/* Create a new output catalog */
+  if (prefs.fullcat_type == CAT_ASCII_HEAD
+	|| prefs.fullcat_type == CAT_ASCII
+	|| prefs.fullcat_type == CAT_ASCII_SKYCAT
+	|| prefs.fullcat_type == CAT_ASCII_VOTABLE)
+    {
+    cat = NULL;
+    if (prefs.fullcatpipe_flag)
+      ascfile = stdout;
+    else
+      if (!(ascfile = fopen(filename, "w+")))
+        error(EXIT_FAILURE,"*Error*: cannot open ", filename);
+    if (prefs.fullcat_type == CAT_ASCII_HEAD && (key = objtab->key))
+      for (i=0,n=1; i++<objtab->nkey; key=key->nextkey)
+        {
+        if (*key->unit)
+          fprintf(ascfile, "# %3d %-22.22s %-58.58s [%s]\n",
+                n, key->name,key->comment, key->unit);
+        else
+          fprintf(ascfile, "# %3d %-22.22s %-58.58s\n",
+                n, key->name,key->comment);
+        n += key->naxis? *key->naxisn : 1;
+        }
+    else if (prefs.fullcat_type == CAT_ASCII_SKYCAT && (key = objtab->key))
+      {
+      if (objtab->nkey<3)
+        error(EXIT_FAILURE,"The SkyCat format requires at least 4 parameters:",
+              " Id Ra Dec Mag");
+/*--- We add a tab between rows, as required by Skycat */
+      fprintf(ascfile, skycathead, 8.0);
+      for (i=1,key=key->nextkey; i++<objtab->nkey; key=key->nextkey)
+        {
+        if (i>4)
+          fprintf(ascfile, "\t%s", key->name);
+        sprintf(str, "\t%s", key->printf);
+        strcpy(key->printf, str);
+        }
+      fprintf(ascfile, "\n------------------\n");
+      }
+    else if (prefs.fullcat_type == CAT_ASCII_VOTABLE && objtab->key) 
+      {
+/*---- A short, "relative" version of the filename */
+      if (!(rfilename = strrchr(filename, '/')))
+        rfilename = filename;
+      else
+        rfilename++;
+      write_xml_header(ascfile);
+      fprintf(ascfile,
+	" <TABLE ID=\"Full_List\" name=\"%s/out\">\n", rfilename);
+      fprintf(ascfile,
+        "  <DESCRIPTION>Table of all detections by %s</DESCRIPTION>\n",
+	BANNER);
+      fprintf(ascfile,
+        "  <!-- Now comes the definition of each %s parameter -->\n", BANNER);
+      write_vo_fields(ascfile, objtab);
+      fprintf(ascfile, "   <DATA><TABLEDATA>\n");
+      }
+    }
+  else
+    {
+    cat = new_cat(1);
+    init_cat(cat);
+    strcpy(cat->filename, filename);
+    if (open_cat(cat, WRITE_ONLY) != RETURN_OK)
+      error(EXIT_FAILURE, "*Error*: cannot open for writing ", filename);
+
+/*-- Primary header */
+    save_tab(cat, cat->tab);
+
+/*-- We create a dummy table (only used through its header) */
+    QCALLOC(asctab, tabstruct, 1);
+    asctab->headnblock = 1 + (sizeof(imtabtemplate)-1)/FBSIZE;
+    QCALLOC(asctab->headbuf, char, asctab->headnblock*FBSIZE);
+    memcpy(asctab->headbuf, imtabtemplate, sizeof(imtabtemplate));
+    for (buf = asctab->headbuf, i=FBSIZE*asctab->headnblock; i--; buf++)
+      if (!*buf)
+        *buf = ' ';
+    write_wcs(asctab, fgroup->wcs);
+
+/*-- (dummy) LDAC Image header */
+    imtab = new_tab("LDAC_IMHEAD");
+    key = new_key("Field Header Card");
+    key->ptr = asctab->headbuf;
+    asctab->headbuf = NULL;
+    free_tab(asctab);
+    key->naxis = 2;
+    QMALLOC(key->naxisn, int, key->naxis);
+    key->naxisn[0] = 80;
+    key->naxisn[1] = 36;
+    key->htype = H_STRING;
+    key->ttype = T_STRING;
+    key->nobj = 1;
+    key->nbytes = 80*(fitsfind(key->ptr, "END     ")+1);
+    add_key(key, imtab, 0);
+    save_tab(cat, imtab);
+    free_tab(imtab);
+    objtab->cat = cat;
+    init_writeobj(cat, objtab, &buf);
+    }
+
+  index = 0;
+  for (f=0; f<fgroup->nfield; f++)
+    {
+    field = fgroup->field[f];
+    for (s=0; s<field->nset; s++)
+      {
+      set = field->set[s];
+      samp = set->sample;
+      for (n=set->nsample; n--; samp++)
+        if (!samp->nextsamp && samp->prevsamp)
+          {
+          ++index;
+          for (samp2 = samp;
+		samp2 && (p=samp2->set->field->photomlabel)>=0;
+                samp2=samp2->prevsamp)
+            {
+/*---------- Indices */
+            fsample.sourceindex = index;
+            fsample.fieldindex = samp2->set->field->fieldindex+1;
+            fsample.setindex = samp2->set->setindex+1;
+            fsample.astrinstruindex = samp2->set->field->astromlabel>=0?
+					samp2->set->field->astromlabel+1 : 0;
+            fsample.photinstruindex = p>=0? p+1 : 0;
+/*---------- Astrometry */
+            for (d=0; d<naxis; d++)
+              {
+              fsample.rawpos[d] = samp2->rawpos[d];
+              fsample.rawposerr[d] = samp2->rawposerr[d];
+              fsample.rawpostheta = 0.0;
+              fsample.wcspos[d] = samp2->wcspos[d];
+              fsample.wcsposerr[d] = samp2->wcsposerr[d];
+              fsample.wcspostheta = 0.0;
+              fsample.epoch = samp2->set->field->epoch;
+              }
+/*---------- Photometry */
+            fsample.mag = samp2->mag;
+            fsample.magerr = samp2->magerr;
+/*---------- Flags */
+            fsample.sexflags = samp2->sexflags;
+            fsample.scampflags = samp2->scampflags;
+/*-------- Write to the catalog */
+            if (prefs.fullcat_type == CAT_ASCII_HEAD
+		|| prefs.fullcat_type == CAT_ASCII
+		|| prefs.fullcat_type == CAT_ASCII_SKYCAT)
+              print_obj(ascfile, objtab);
+            else if (prefs.fullcat_type == CAT_ASCII_VOTABLE)
+              voprint_obj(ascfile, objtab);
+            else
+              write_obj(objtab, buf);
+            }
+          }
+      }
+    }
+
+  if (prefs.fullcat_type == CAT_ASCII_HEAD
+	|| prefs.fullcat_type == CAT_ASCII
+	|| prefs.fullcat_type == CAT_ASCII_SKYCAT)
+    {
+    if (prefs.fullcat_type == CAT_ASCII_SKYCAT)
+      fprintf(ascfile, skycattail);
+    if (!prefs.fullcatpipe_flag)
+      fclose(ascfile);
+    }
+  else if (prefs.fullcat_type == CAT_ASCII_VOTABLE)
+    {
+    fprintf(ascfile, "    </TABLEDATA></DATA>\n");
+    fprintf(ascfile, "  </TABLE>\n");
+/*-- Add configuration file meta-data */
+    write_xml_meta(ascfile, NULL);
+    fprintf(ascfile, "</RESOURCE>\n");
+    fprintf(ascfile, "</VOTABLE>\n");
+    }
+  else
+    end_writeobj(cat, objtab, buf);
+
+  objtab->key = NULL;
+  objtab->nkey = 0;
+  free_tab(objtab);
+  free(objkeys);
+
+  if (cat)
+    free_cat(&cat, 1);
+
+  return;
+  }
+
 
 /****** write_vo_fields *******************************************************
 PROTO	void	write_vo_fields(FILE *file, tabstruct *objtab)

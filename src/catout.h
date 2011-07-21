@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/02/2011
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -41,6 +41,7 @@ typedef enum {CAT_NONE, CAT_ASCII_HEAD, CAT_ASCII, CAT_ASCII_SKYCAT,
 /*--------------------------- structure definitions -------------------------*/
 typedef struct mergedsample
   {
+  int		sourceindex;		/* Object index */
   double	wcspos[NAXIS];		/* Mean World Coordinate positions */
   int		npos;			/* Number of available positions */
   float		wcsposerr[NAXIS];	/* Errors on mean WCS positions */
@@ -65,9 +66,30 @@ typedef struct mergedsample
   short		scampflags;		/* Merged SCAMP flags */
   }	mergedsamplestruct;
 
+typedef struct fullsample
+  {
+  int		sourceindex;		/* Source index */
+  int		fieldindex;		/* Field index */
+  short		setindex;		/* Set index */
+  short		astrinstruindex;	/* Astrometric instrument index */
+  short		photinstruindex;	/* Photometric instrument index */
+  double	rawpos[NAXIS];		/* Mean World Coordinate positions */
+  float		rawposerr[NAXIS];	/* Errors on mean pixel positions */
+  float		rawpostheta;		/* Pixel error position angle */
+  double	wcspos[NAXIS];		/* World Coordinate positions */
+  float		wcsposerr[NAXIS];	/* Errors on WCS positions */
+  float		wcspostheta;		/* WCS error position angle */
+  float		epoch;			/* Epoch for observations */
+  float		mag;			/* Magnitude */
+  float		magerr;			/* Mag. uncertainty (1-sigma) */
+  short		sexflags;		/* Merged SExtractor flags */
+  short		scampflags;		/* Merged SCAMP flags */
+  }	fullsamplestruct;
+
 /*-------------------------------- protos -----------------------------------*/
 
-void		writemergedcat_fgroup(char *filename, fgroupstruct *fgroup),
+void		writefullcat_fgroup(char *filename, fgroupstruct *fgroup),
+		writemergedcat_fgroup(char *filename, fgroupstruct *fgroup),
 		write_vo_fields(FILE *file, tabstruct *objtab);
 
 #endif

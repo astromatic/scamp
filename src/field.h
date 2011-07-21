@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-**	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+**	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,6 +59,7 @@ typedef enum {STABILITY_EXPOSURE, STABILITY_GROUP, STABILITY_INSTRUMENT,
 
 typedef struct field
   {
+  int		fieldindex;		/* field index */
 /* ---- file parameters */
   char		path[MAXCHAR];		/* catalog path */
   char		filename[MAXCHAR];	/* catalog filename */

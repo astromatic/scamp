@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/02/2011
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -143,7 +143,10 @@ void	makeit(void)
 
   nsample = 0;
   for (f=0; f<nfield; f++)
+    {
+    fields[f]->fieldindex = f;
     nsample += fields[f]->nsample;
+    }
   prefs.ndets = nsample;
 
   QPRINTF(OUTPUT, "\n----- %d detections loaded\n", nsample);
@@ -482,10 +485,14 @@ void	makeit(void)
 #endif
 
 /* Cross-ID one last time if necessary */
+#ifdef HAVE_PLPLOT
   if (prefs.propmotion_flag || prefs.mergedcat_type != CAT_NONE
 	|| cplot_check(CPLOT_ASTRCOLSHIFT1D)!=RETURN_ERROR
 	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
 	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
+#else
+  if (prefs.propmotion_flag || prefs.mergedcat_type != CAT_NONE)
+#endif
     {
 /*-- Compute colour indices */
     NFPRINTF(OUTPUT, "Computing global color indices");
@@ -504,9 +511,13 @@ void	makeit(void)
     }
 
 /* Compute proper motions and other 2nd order corrections */
+#ifdef HAVE_PLPLOT
   if (prefs.propmotion_flag
 	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
 	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
+#else
+  if (prefs.propmotion_flag)
+#endif
     for (g=0; g<ngroup; g++)
       {
       sprintf(str, "Computing proper motions in group %d", g+1);
@@ -565,6 +576,27 @@ void	makeit(void)
         strcpy(extension, pstr);
       sprintf(pstr, "_%d%s", g+1, extension);
       writemergedcat_fgroup(filename, fgroups[g]);
+      }
+    }
+
+/* Save full catalogs */
+  if (prefs.fullcat_type != CAT_NONE)
+    {
+    for (g=0; g<ngroup; g++)
+      {
+/*---- Write one catalog per field group */
+      sprintf(str, "Saving full catalog for group %d", g+1);
+      NFPRINTF(OUTPUT, str);
+      strcpy(filename, prefs.fullcat_name);
+      if (!(pstr = strrchr(filename, '.')))
+        {
+        pstr = filename+strlen(filename);
+        extension[0] = (char)'\0';
+        }
+      else
+        strcpy(extension, pstr);
+      sprintf(pstr, "_%d%s", g+1, extension);
+      writefullcat_fgroup(filename, fgroups[g]);
       }
     }
 

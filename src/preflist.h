@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		15/04/2011
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -127,8 +127,12 @@ pkeystruct key[] =
   {"EXPOTIME_KEY", P_STRING, prefs.expotime_key},
   {"EXTINCT_KEY", P_STRING, prefs.extcoeff_key},
   {"FGROUP_RADIUS", P_FLOAT, &prefs.group_radius, 0,0, 0.0,180.0},
-  {"FLAGS_MASK", P_INT, &prefs.flags_mask, 0,0xff, 0.0,0.0},
   {"FIXFOCALPLANE_NMIN", P_INT, &prefs.fixfocalplane_nmin, 0, 65535, 0.0, 0.0},
+  {"FLAGS_MASK", P_INT, &prefs.flags_mask, 0,0xff, 0.0,0.0},
+  {"FULLOUTCAT_NAME", P_STRING, prefs.fullcat_name},
+  {"FULLOUTCAT_TYPE", P_KEY, &prefs.fullcat_type, 0,0, 0.0,0.0,
+   {"NONE", "ASCII_HEAD", "ASCII", "ASCII_SKYCAT", "ASCII_VOTABLE",
+	"FITS_LDAC", ""}},
   {"FWHM_THRESHOLDS", P_FLOATLIST, prefs.fwhm_thresh, 0,0, 0.0,1e30,
     {""}, 2, 2, &prefs.nfwhm_thresh},
   {"HEADER_SUFFIX", P_STRING, prefs.head_suffix},
@@ -223,8 +227,13 @@ char *default_prefs[] =
 " ",
 "#--------------------------- Merged output catalogs ---------------------------",
 " ",
-"MERGEDOUTCAT_NAME      scamp.cat       # Merged output catalog filename",
 "MERGEDOUTCAT_TYPE      NONE            # NONE, ASCII_HEAD, ASCII, FITS_LDAC",
+"MERGEDOUTCAT_NAME      merged.cat      # Merged output catalog filename",
+" ",
+"#--------------------------- Full output catalogs ---------------------------",
+" ",
+"FULLOUTCAT_TYPE        NONE            # NONE, ASCII_HEAD, ASCII, FITS_LDAC",
+"FULLOUTCAT_NAME        full.cat        # Full output catalog filename",
 " ",
 "#----------------------------- Pattern matching -------------------------------",
 " ",
