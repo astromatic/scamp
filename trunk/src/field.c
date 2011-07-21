@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,7 +69,7 @@ OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used. The function is not reentrant because
 	of static variables (prefs structure members are updated).
 AUTHOR  E. Bertin (IAP)
-VERSION 27/04/2010
+VERSION 21/07/2011
 */
 fieldstruct	*load_field(char *filename)
   {
@@ -322,7 +322,7 @@ fieldstruct	*load_field(char *filename)
       nsample += set[n]->nsample;
       free_tab(set[n]->imatab);
       set[n]->imatab = NULL;
-      n++;
+      set[n]->setindex = n++;
       }
 
   field->nsample = nsample;

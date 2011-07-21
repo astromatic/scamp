@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/02/2011
+*	Last modified:		21/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -189,7 +189,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	05/02/2011
+VERSION	21/07/2011
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -994,6 +994,11 @@ int	write_xml_meta(FILE *file, char *msgerror)
     write_xmlconfigparam(file, "MergedOutCat_Name", "",
 		"meta.id;meta.file;meta.dataset", "%s");
     write_xmlconfigparam(file, "MergedOutCat_Type", "",
+		"meta.code;meta.dataset", "%s");
+/*-- Full output catalogs */
+    write_xmlconfigparam(file, "FullOutCat_Name", "",
+		"meta.id;meta.file;meta.dataset", "%s");
+    write_xmlconfigparam(file, "FullOutCat_Type", "",
 		"meta.code;meta.dataset", "%s");
 /*-- Pattern matching */
     write_xmlconfigparam(file, "Match", "",

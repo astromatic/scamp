@@ -86,6 +86,7 @@ typedef struct sample
 
 typedef struct set
   {
+  int		setindex;		/* Set index */
   struct sample	*sample;		/* Array of samples */
   int		nsample;		/* Number of samples in stack */
   int		nsamplemax;		/* Max number of samples in stack */

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2011
+*	Last modified:		09/06/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -335,7 +335,7 @@ INPUT	ptr to the group of fields,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/09/2003
+VERSION	09/06/2011
  ***/
 void	recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -396,7 +396,8 @@ void	recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
       update_wcsll(sets[s]->wcs, dwcspos[set->lng], dwcspos[set->lat]);
     }
 
-  free(offsetbuf);
+  for (d=0; d<naxis; d++)
+    free(offsetbuf[d]);
 
   return;
   }
