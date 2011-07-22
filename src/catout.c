@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		22/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 21/07/2011
+VERSION 22/07/2011
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -91,7 +91,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			*buf, *rfilename;
    long			dptr;
    int			nmag[MAXPHOTINSTRU],
-			d,f,i,k,n,p,s,nm, npinstru, naxis, index;
+			d,f,i,k,n,p,s,nall,nok, npinstru, naxis, index;
 
   if (prefs.mergedcat_type == CAT_NONE)
     return;
@@ -222,7 +222,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
       set = field->set[s];
       samp = set->sample;
       for (n=set->nsample; n--; samp++)
-        if (!samp->nextsamp && samp->prevsamp)
+        if (!samp->nextsamp)
           {
           memset(&msample, 0, sizeof(msample));
           msample.sourceindex = ++index;
@@ -232,12 +232,15 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             mag[p] = magerr[p] = magdisp[p] = magchi2[p] = magref[p] = 0.0;
             nmag[p] = 0;
             }
-          nm = 0;
+          nall = nok = 0;
           colour = 0.0;
           for (samp2 = samp;
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
             {
+            nall++;
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+              continue;
             colour += samp2->colour;
             if (samp2->flux > 0.0 && (err2 = samp2->magerr*samp2->magerr)>0.0)
               {
@@ -248,19 +251,19 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               magdisp[p] += (samp2->mag-magref[p]) * (samp2->mag - magref[p]);
               nmag[p]++;
               }
-            nm++;
+            nok++;
             }
-          msample.colour = nm? colour/nm : 0.0;
+          msample.colour = nok? colour/nok : 0.0;
           for (p=0; p<npinstru; p++)
             {
-            if ((nm=nmag[p]))
+            if ((nok=nmag[p]))
               {
               msample.mag[p] = mag[p] / magerr[p];
               msample.magerr[p] = sqrt(1.0 / magerr[p]);
-              msample.magdisp[p] = nm > 1?
+              msample.magdisp[p] = nok > 1?
 		sqrt(fabs(magdisp[p]
-		 - nm*(msample.mag[p] - magref[p])
-		 *(msample.mag[p] - magref[p]))/(nm-1.0))
+		 - nok*(msample.mag[p] - magref[p])
+		 *(msample.mag[p] - magref[p]))/(nok-1.0))
 		: 0.0;
               }
             else
@@ -268,7 +271,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             msample.nmag[p] = nmag[p];
             }
 /*-------- Astrometry */
-          nm = 0;
+          nok = 0;
           for (d=0; d<naxis; d++)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
 		= wcsprop[d] = wcsproperr[d] = 0.0;
@@ -280,6 +283,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
             {
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+              continue;
             for (d=0; d<naxis; d++)
               {
               err2 = samp2->wcsposerr[d]*samp2->wcsposerr[d];
@@ -288,7 +293,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
                 err2 += 1*MAS / DEG;
               wcsposerr[d] += 1.0 / err2;
               wcspos[d] += samp2->wcspos[d] / err2;
-              if (!nm)
+              if (!nok)
                 wcsposref[d] = samp2->wcspos[d];
               wcsposdisp[d] += (samp2->wcspos[d] - wcsposref[d])
 				* (samp2->wcspos[d] - wcsposref[d]);
@@ -307,21 +312,21 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 /*---------- Flags */
             msample.sexflags |= samp2->sexflags;
             msample.scampflags |= samp2->scampflags;
-            nm++;
+            nok++;
             }
-          if (nm)
+          if (nok)
             {
             for (d=0; d<naxis; d++)
               {
               msample.wcspos[d] = wcspos[d] / wcsposerr[d];
               msample.wcsposerr[d] = sqrt(1.0/wcsposerr[d]);
-              msample.wcsposdisp[d] = nm > 1?
+              msample.wcsposdisp[d] = nok > 1?
 		sqrt(fabs(wcsposdisp[d]
-		 - nm*(msample.wcspos[d] - wcsposref[d])
-			*(msample.wcspos[d] - wcsposref[d]))/(nm-1.0))
+		 - nok*(msample.wcspos[d] - wcsposref[d])
+			*(msample.wcspos[d] - wcsposref[d]))/(nok-1.0))
 		: 0.0;
-              msample.wcsprop[d] = (wcsprop[d]/nm) * DEG/MAS;
-              msample.wcsproperr[d] = sqrt(wcsproperr[d]/nm) * DEG/MAS;
+              msample.wcsprop[d] = (wcsprop[d]/nok) * DEG/MAS;
+              msample.wcsproperr[d] = sqrt(wcsproperr[d]/nok) * DEG/MAS;
               }
             if (msample.wcsposerr[0] < msample.wcsposerr[1])
               {
@@ -332,13 +337,14 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               }
             else
               msample.wcspostheta = 0.0;
-            msample.wcsparal = (wcsparal/nm) * DEG/MAS;
-            msample.wcsparalerr = sqrt(wcsparalerr/nm) * DEG/MAS;
-            msample.epoch = epoch / nm;
+            msample.wcsparal = (wcsparal/nok) * DEG/MAS;
+            msample.wcsparalerr = sqrt(wcsparalerr/nok) * DEG/MAS;
+            msample.epoch = epoch / nok;
             msample.epochmin = epochmin;
             msample.epochmax = epochmax;
-            msample.npos = nm;
             }
+          msample.npos_tot = nall;
+          msample.npos_ok = nok;
 /*-------- Write to the catalog */
           if (prefs.mergedcat_type == CAT_ASCII_HEAD
 		|| prefs.mergedcat_type == CAT_ASCII
@@ -394,7 +400,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 21/07/2011
+VERSION 22/07/2011
 */
 void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -551,7 +557,7 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
       set = field->set[s];
       samp = set->sample;
       for (n=set->nsample; n--; samp++)
-        if (!samp->nextsamp && samp->prevsamp)
+        if (!samp->nextsamp)
           {
           ++index;
           for (samp2 = samp;

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		22/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -189,7 +189,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	21/07/2011
+VERSION	22/07/2011
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -329,6 +329,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
     cp[nplot++] = pngindex;
     }
 #endif
+  fprintf(file, "   <FIELD name=\"Catalog_Number\" datatype=\"int\""
+	" ucd=\"meta.record;meta.table;meta.file\"/>\n");
   fprintf(file, "   <FIELD name=\"Catalog_Name\" datatype=\"char\""
 	" arraysize=\"*\" ucd=\"meta.id;meta.table;meta.file\"/>\n");
   fprintf(file, "   <FIELD name=\"Image_Ident\" datatype=\"char\""
@@ -428,11 +430,11 @@ int	write_xml_meta(FILE *file, char *msgerror)
     {
     field = fields_xml[f];
     fprintf(file, "    <TR>\n"
-	"     <TD>%s</TD><TD>%s</TD>\n"
+	"     <TD>%d</TD><TD>%s</TD><TD>%s</TD>\n"
 	"     <TD>%d</TD><TD>%d</TD><TD>%d</TD><TD>%d</TD><TD>%c</TD>\n"
 	"     <TD>%d</TD><TD>%d</TD><TD>A%d</TD><TD>P%d</TD><TD>%c</TD><TD>%c</TD>\n"
 	"     <TD>%.9f</TD><TD>%.10g",
-	field->rfilename, field->ident,
+	field->fieldindex+1, field->rfilename, field->ident,
 	field->nset,field->naxis,field->lng,field->lat,field->headflag?'T':'F',
 	field->nsample, field->fgroup->no,
 		field->astromlabel+1,field->photomlabel+1,
