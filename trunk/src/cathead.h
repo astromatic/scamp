@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		22/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -34,11 +34,14 @@
 
 mergedsamplestruct	refmergedsample;
 keystruct		refmergedkey[] = {
-  {"INDEX_SOURCE", "Source index",
+  {"SOURCE_NUMBER", "Source index",
 	&refmergedsample.sourceindex, H_INT, T_LONG,
 	"%10d", "", "meta.number", ""},
-  {"NPOS", "Number of overlapping positions",
-	&refmergedsample.npos, H_INT, T_LONG,
+  {"NPOS_TOTAL", "Total number of overlapping detections",
+	&refmergedsample.npos_tot, H_INT, T_LONG,
+	"%4d", "", "meta.number", ""},
+  {"NPOS_OK", "Number of unsaturated, uncropped overlapping detections",
+	&refmergedsample.npos_ok, H_INT, T_LONG,
 	"%4d", "", "meta.number", ""},
   {"ALPHA_J2000", "Position along right ascension",
 	&refmergedsample.wcspos[0], H_FLOAT, T_DOUBLE,
@@ -77,7 +80,7 @@ keystruct		refmergedkey[] = {
 	&refmergedsample.wcsparal, H_FLOAT, T_FLOAT,
 	"%10e", "mas", "pos.parallax.trig;stat.fit", "mas"},
   {"PARALLAXERR_WORLD", "Trignonometric parallax uncertainty",
-	&refmergedsample.wcsproperr, H_FLOAT, T_FLOAT,
+	&refmergedsample.wcsparalerr, H_FLOAT, T_FLOAT,
 	"%10e", "mas", "stat.error;pos.parallax.trig;stat.fit", "mas"},
   {"EPOCH", "Mean epoch",
 	&refmergedsample.epoch, H_FLOAT, T_FLOAT,
@@ -120,19 +123,19 @@ keystruct		refmergedkey[] = {
 
 fullsamplestruct	reffullsample;
 keystruct		reffullkey[] = {
-  {"INDEX_SOURCE", "Source index",
+  {"SOURCE_NUMBER", "Source index",
 	&reffullsample.sourceindex, H_INT, T_LONG,
 	"%10d", "", "meta.number", ""},
-   {"INDEX_FILE", "File index",
+   {"CATALOG_NUMBER", "File index",
 	&reffullsample.fieldindex, H_INT, T_LONG,
 	"%7d", "", "meta.number", ""},
-   {"INDEX_EXTENSION", "Extension index",
+   {"EXTENSION", "Extension index",
 	&reffullsample.setindex, H_INT, T_SHORT,
 	"%5d", "", "meta.number", ""},
-   {"INDEX_ASTRINSTRU", "Astrometric instrument index",
+   {"ASTR_INSTRUM", "Astrometric instrument index",
 	&reffullsample.astrinstruindex, H_INT, T_SHORT,
 	"%5d", "", "meta.number", ""},
-   {"INDEX_PHOTINSTRU", "Photometric instrument index",
+   {"PHOT_INSTRUM", "Photometric instrument index",
 	&reffullsample.photinstruindex, H_INT, T_SHORT,
 	"%5d", "", "meta.number", ""},
    {"X_IMAGE", "Position along x image axis",

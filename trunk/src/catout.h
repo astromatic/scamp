@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		22/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -43,7 +43,8 @@ typedef struct mergedsample
   {
   int		sourceindex;		/* Object index */
   double	wcspos[NAXIS];		/* Mean World Coordinate positions */
-  int		npos;			/* Number of available positions */
+  int		npos_tot;		/* Total number of available positions*/
+  int		npos_ok;		/* Number of available positions OK */
   float		wcsposerr[NAXIS];	/* Errors on mean WCS positions */
   float		wcspostheta;		/* WCS error position angle */
   float		wcsposdisp[NAXIS];	/* Dispersion on mean WCS positions */
