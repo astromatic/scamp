@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2011
+*	Last modified:		23/07/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1438,8 +1438,6 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp)
 	  {
-          if ((samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-            continue;
           for (i=0; i<naxis; i++)
             mean[i] = mean_hsn[i] = 0.0;
           nmean = nmean_hsn = 0;
@@ -1757,7 +1755,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	23/07/2011
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
@@ -1791,8 +1789,7 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
       nsamp = set->nsample;
       samp = set->sample;
       for (n=nsamp; n--; samp++)
-        if (!samp->nextsamp && samp->prevsamp
-		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+        if (!samp->nextsamp && samp->prevsamp)
           {
           for (i=0; i<naxis; i++)
             mean[i] = 0.0;
