@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		17/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -34,6 +34,8 @@
 #define _PROPER_H_
 
 /*--------------------------------- constants -------------------------------*/
+
+#define	PROPER_MAXNBAD	2	/* Maximum number of bad measurements */
 
 /*--------------------------------- typedefs --------------------------------*/
 

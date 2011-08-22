@@ -512,11 +512,11 @@ void	makeit(void)
 
 /* Compute proper motions and other 2nd order corrections */
 #ifdef HAVE_PLPLOT
-  if (prefs.propmotion_flag
+  if (prefs.propmotion_flag || prefs.parallax_flag
 	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
 	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
 #else
-  if (prefs.propmotion_flag)
+  if (prefs.propmotion_flag || prefs.parallax_flag)
 #endif
     for (g=0; g<ngroup; g++)
       {

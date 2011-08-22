@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/02/2011
+*	Last modified:		17/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -51,6 +51,7 @@
 #define		SCAMP_ASTRCLIPPED	0x0001
 #define		SCAMP_PHOTCLIPPED	0x0010
 #define		SCAMP_PHOTNOCOLOR	0x0020
+#define		SCAMP_BADPROPER		0x0040
 
 /*--------------------------------- typedefs --------------------------------*/
 
