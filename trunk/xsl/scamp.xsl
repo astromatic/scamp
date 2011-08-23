@@ -34,7 +34,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		05/02/2011
+#	Last modified:		27/07/2011
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -257,6 +257,7 @@
 <!-- ********************** XSL template for Fields ********************** -->
   <xsl:template name="Fields">
    <xsl:variable name="asplotflag" select="count(PARAM[@name='AllSkyPlot'])"/>
+   <xsl:variable name="number" select="count(FIELD[@name='Catalog_Number']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="name" select="count(FIELD[@name='Catalog_Name']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="ident" select="count(FIELD[@name='Image_Ident']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="next" select="count(FIELD[@name='NExtensions']/preceding-sibling::FIELD)+1"/>
@@ -311,6 +312,7 @@
  </TR>
 -->
      <TR>
+      <TH>#</TH>
       <TH>Filename</TH>
       <TH>Identifier</TH>
       <TH>Next</TH>
@@ -338,6 +340,9 @@
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
        <tr>
+        <td align="center">
+         <el><xsl:value-of select="TD[$number]"/></el>
+        </td>
         <td >
          <el><xsl:value-of select="TD[$name]"/></el>
         </td>
