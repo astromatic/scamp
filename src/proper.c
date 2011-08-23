@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/08/2011
+*	Last modified:		23/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@
 /*-------------------------------- protos -----------------------------------*/
 static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
 				wcsstruct *wcsec, double *alpha,double *beta,
-				double wis);
+				double wis, double *chi2);
 
 /****** astrcolshift_fgroup ***************************************************
 PROTO	void astrcolshift_fgroup(fgroupstruct *fgroup)
@@ -231,7 +231,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	22/08/2011
+VERSION	23/08/2011
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -241,12 +241,12 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
    wcsstruct	*wcs, *wcsec;
    char		*wcsectype[NAXIS];
    double	alpha[25], beta[5],
+		*chi2,
 		coord[NAXIS], coorderr[NAXIS],
 		wis, paral,paralerr;
-   float	*chi2;
    int		d,f,s,n, naxis, nfield, nsamp, lng,lat, celflag,
 		propflag, paralflag, ncoeff,ncoeffp1,
-		ngood,nbad;
+		nfree,nbad, bad;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
@@ -263,7 +263,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   ncoeffp1 = ncoeff+1;
 
 /* Allocate memory to handle temporary chi2's */
-  QMALLOC(chi2, float, nfield);
+  QMALLOC(chi2, double, nfield);
 
 /* Set up a WCS structure to handle ecliptic coordinates */
   if (paralflag)
@@ -307,9 +307,9 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         if (samp->nextsamp)
           continue;
         wis = wcs_scale(wcs, samp->projpos);
-        for (nbad=0; nbad<PROPER_MAXNBAD; nbad++)
+        for (nbad=0; nbad<=PROPER_MAXNBAD; nbad++)
           {
-          ngood = 0;
+          nfree = bad = 0;
           for (samp2=samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2 = samp2->prevsamp)
             {
@@ -317,19 +317,18 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 		|| (samp2->scampflags & SCAMP_BADPROPER))
               continue;
             if (nbad)
+/*------------ Switch detection to "good" state */
               samp2->scampflags |= SCAMP_BADPROPER;
-/*---------- Initialize matrices */
-            memset(alpha, 0, ncoeff*ncoeff*sizeof(double));
-            memset(beta, 0, ncoeff*sizeof(double));
-
-            ngood = astrprop_fillmat(fgroup, samp, wcsec, alpha, beta, wis);
-            clapack_dposv(CblasRowMajor, CblasUpper, ncoeff, 1, alpha, ncoeff,
-			beta, ncoeff);
+            nfree = astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis,
+			&chi2[bad++]);
             clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
+            if (nbad)
+/*------------ Revert detection to "good" state */
+              samp2->scampflags ^= SCAMP_BADPROPER;
             }
 
 /*-------- Exit if less than 3 "good" detections remaining next iteration */
-          if (ngood<nbad+1+3)
+          if (nfree<(nbad+1+3)*2)
             break;
           }
 
@@ -384,35 +383,35 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   }
 
 
-/****** astrprop_fillmat *****************************************************
+/****** astrprop_solve *****************************************************
 PROTO	int astrprop_fillmat(samplestruct *samp, double *alpha, double *beta,
-		double wis)
+		double wis, double *chi2)
 PURPOSE	Fill system alpha and beta matrices for solving proper motion equations.
 INPUT	Ptr to the field group,
 	ptr to last sample in matching detection chain,
 	ptr to the ecliptic WCS structure (or NULL if parallax is turned off),
 	ptr to alpha normal equation matrix,
 	ptr to beta vector,
-	projected pixel scale.
+	projected pixel scale,
+	ptr to output chi2 value (or chi2 if not needed).
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	22/08/2011
+VERSION	23/08/2011
  ***/
-static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
+static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
-			double wis)
+			double wis, double *chi2)
   {
    fieldstruct	*field, *field1,*field2;
    samplestruct	*samp1,*samp2;
    wcsstruct	*wcs;
    double 	mpos[NAXIS], mposw[NAXIS],  projpos[NAXIS],
-		ecpos[NAXIS], pfac[NAXIS],
+		ecpos[NAXIS], pfac[NAXIS],a[25],b[5],
 		**csscale, **cszero,
-		sig, wi,yi, dt, bec,cbec,lec;
+		sig, wi,yi, sy2, dt, bec,cbec,lec, dval;
 
-   int		ngood[NAXIS],
-		d, f1,ff, naxis, nfield, ncoeff,ncoeffp1, lng,lat,
+   int		d,j,k, f1,ff, naxis, nfield, ncoeff,nfree, ncoeffp1, lng,lat,
 		colcorflag,paralflag,meanflag;
 
   nfield = fgroup->nfield;
@@ -427,6 +426,11 @@ static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
   meanflag = 1;	/* Always set for the 1st detection in chain */
   ncoeff = paralflag? 5 : 4;
   ncoeffp1 = ncoeff+1;
+/* Initialize matrices and accumulators */
+  memset(alpha, 0, ncoeff*ncoeff*sizeof(double));
+  memset(beta, 0, ncoeff*sizeof(double));
+  sy2 = 0.0;
+  nfree = -ncoeff;
 
   field = samp->set->field;
 
@@ -441,10 +445,7 @@ static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
     if (meanflag)
       {
       for (d=0; d<naxis; d++)
-        {
-        ngood[d] = 0;
         mpos[d] = mposw[d] = 0.0;
-        }
 
 /*---- First pass through overlapping detections to compute averages*/
       for (samp2=samp; samp2 && samp2->set->field->astromlabel>=0;
@@ -460,10 +461,7 @@ static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
 /*-------- Simplistic treatment of position uncertainties */
           sig = samp2->wcsposerr[d];
           if (sig>0.0)
-            {
             wi = wis/(sig*sig);
-            ngood[d]++;
-            }
           else
             wi = 0.0;
 /*-------- DCR correction */
@@ -497,16 +495,28 @@ static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
       }
 
     dt = field1->epoch - field->epoch;
+
+/* Fill the normal equation matrix */
+/* Basis functions are              */
+/* X0_i = t_i - t_ref * is_lng(d_i) */
+/* X1_i = t_i - t_ref * is_lat(d_i) */
+/* X2_i = is_lng(d_i)               */
+/* X3_i = is_lat(d_i)               */
+/* X4_i = dproj_d_i(sin(l_i-l_sun)/cos(b_i),cos(l_i-l_sun)*sin(b_i)), */
+/* where d_i is the axis index (lng or lat) of measurement i          */
+
     for (d=0; d<naxis; d++)
       {
       if (mposw[d]<=0.0)
         continue;
+      nfree++;
       sig = samp1->wcsposerr[d];
       wi = sig>0.0? wis/(sig*sig) : 0.0;
       alpha[d*ncoeffp1] += wi*dt*dt;
       alpha[(d+2)*ncoeffp1] += wi;
       alpha[2*ncoeff+ncoeffp1*d] = (alpha[d*ncoeffp1+2] += wi*dt);
       yi = samp1->projpos[d] - mpos[d] / mposw[d];
+      sy2 += wi*yi*yi;
       beta[d] += wi*yi*dt;
       beta[d+2] += wi*yi;
       if (paralflag)
@@ -519,6 +529,25 @@ static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
       }
     }
 
-  return ngood[0]<ngood[1]? ngood[0]:ngood[1];
+/* Make a copy of beta before it is overwritten */
+  memcpy(b,beta,ncoeff*sizeof(double));
+  memcpy(a,alpha,ncoeff*ncoeff*sizeof(double));
+  clapack_dposv(CblasRowMajor, CblasUpper, ncoeff, 1, alpha, ncoeff,
+		beta, ncoeff);
+
+  if (chi2)
+    {
+/*-- Compute chi2 */
+    dval = 0.0;
+    for (k=0; k<ncoeff; k++)
+      {
+      for (j=0; j<ncoeff; j++)
+        dval += a[k*ncoeff+j]*beta[j]*beta[k];
+      dval -= 2.0*beta[k]*b[k];
+      }
+    *chi2 = dval + sy2;
+    }
+
+  return nfree;
   }
 

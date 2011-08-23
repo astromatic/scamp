@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/08/2011
+*	Last modified:		23/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -35,7 +35,7 @@
 
 /*--------------------------------- constants -------------------------------*/
 
-#define	PROPER_MAXNBAD	2	/* Maximum number of bad measurements */
+#define	PROPER_MAXNBAD	0	/* Maximum number of bad measurements */
 
 /*--------------------------------- typedefs --------------------------------*/
 
