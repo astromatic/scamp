@@ -283,7 +283,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 		samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
             {
-            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+            if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)
+		|| (samp2->scampflags & SCAMP_BADPROPER))
               continue;
             for (d=0; d<naxis; d++)
               {
