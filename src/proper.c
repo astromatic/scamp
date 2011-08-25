@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/08/2011
+*	Last modified:		25/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -231,22 +231,21 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/08/2011
+VERSION	25/08/2011
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
    fieldstruct	*field;
    setstruct	*set;
-   samplestruct	*samp,*samp2;
+   samplestruct	*samp,*samp2, *sampchi2, *samppropmod;
    wcsstruct	*wcs, *wcsec;
    char		*wcsectype[NAXIS];
    double	alpha[25], beta[5],
-		*chi2,
 		coord[NAXIS], coorderr[NAXIS],
-		wis, paral,paralerr;
+		wis, paral,paralerr, chi2,chi2min, propmod,propmodmin;
    int		d,f,s,n, naxis, nfield, nsamp, lng,lat, celflag,
 		propflag, paralflag, ncoeff,ncoeffp1,
-		nfree,nbad, bad;
+		nfree,nbad, bad, nfreechi2;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
@@ -261,9 +260,6 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   paral = paralerr = 0.0;
   ncoeff = paralflag? 5 : 4;
   ncoeffp1 = ncoeff+1;
-
-/* Allocate memory to handle temporary chi2's */
-  QMALLOC(chi2, double, nfield);
 
 /* Set up a WCS structure to handle ecliptic coordinates */
   if (paralflag)
@@ -307,31 +303,64 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         if (samp->nextsamp)
           continue;
         wis = wcs_scale(wcs, samp->projpos);
-        for (nbad=0; nbad<=PROPER_MAXNBAD; nbad++)
+        nfree = astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis, &chi2min);
+        sampchi2 = NULL;
+        for (nbad=1; nbad<=PROPER_MAXNBAD; nbad++)
           {
-          nfree = bad = 0;
+/*-------- Exit if chi2 is OK or if less than 2 degrees of freedom remain */
+          if (chi2min<nfree*PROPER_MAXCHI2 || nfree<2)
+            break;
+          sampchi2 = samppropmod = NULL;
+          nfreechi2 = 0;
           for (samp2=samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2 = samp2->prevsamp)
             {
             if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
 		|| (samp2->scampflags & SCAMP_BADPROPER))
               continue;
-            if (nbad)
-/*------------ Switch detection to "good" state */
-              samp2->scampflags |= SCAMP_BADPROPER;
-            nfree = astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis,
-			&chi2[bad++]);
-            clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
-            if (nbad)
-/*------------ Revert detection to "good" state */
-              samp2->scampflags ^= SCAMP_BADPROPER;
+/*---------- Switch detection to "good" state */
+            samp2->scampflags |= SCAMP_BADPROPER;
+            nfree = astrprop_solve(fgroup,samp, wcsec,alpha,beta, wis, &chi2);
+            if (chi2<chi2min)
+              {
+              chi2min = chi2;
+              sampchi2 = samp2;
+              nfreechi2 = nfree;
+              }
+            propmod = sqrt(beta[0]*beta[0]+beta[2]*beta[2]);
+            if (propmod<propmodmin)
+              {
+              propmodmin = propmod;
+              samppropmod = samp2;
+              }
+/*---------- Revert detection to "good" state */
+            samp2->scampflags ^= SCAMP_BADPROPER;
             }
-
-/*-------- Exit if less than 3 "good" detections remaining next iteration */
-          if (nfree<(nbad+1+3)*2)
-            break;
+          if (sampchi2)
+            {
+            if (nfreechi2<=0 && samppropmod)
+              samppropmod->scampflags |= SCAMP_BADPROPER;
+            else
+              sampchi2->scampflags |= SCAMP_BADPROPER;
+            }
           }
 
+        if (nfree<0)
+          {
+/*-------- Not enough "good" detections to derive a solution */
+          for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
+		samp2 = samp2->prevsamp)
+            {
+            for (d=0; d<naxis; d++)
+              samp2->wcsprop[d] = samp2->wcsproperr[d] = 0.0;
+            samp2->wcsparal = samp2->wcsparalerr = 0.0;
+            }
+          continue;
+          }
+
+        if (sampchi2)
+          astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis, &chi2);
+        clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
         for (d=0; d<naxis; d++)
           {
           coord[d] = samp->projpos[d] + beta[d];
@@ -342,42 +371,30 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           paral = beta[4];
           paralerr = sqrt(alpha[24]);
           }
-        if (propflag)
+/*------ Project shifted coordinates onto the sky... */
+        raw_to_wcs(wcs, coord, coord);
+/*------ ... and recover the proper motion vector in celestial coords */
+        for (d=0; d<naxis; d++)
+          coord[d] -= samp->wcspos[d];
+        if (celflag)
+          coord[lng] *= cos(samp->wcspos[lat]*DEG);
+        for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
+		samp2 = samp2->prevsamp)
           {
-/*-------- Project shifted coordinates onto the sky... */
-          raw_to_wcs(wcs, coord, coord);
-/*-------- ... and recover the proper motion vector in celestial coords */
           for (d=0; d<naxis; d++)
-            coord[d] -= samp->wcspos[d];
-          if (celflag)
-            coord[lng] *= cos(samp->wcspos[lat]*DEG);
-          for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2 = samp2->prevsamp)
             {
-            for (d=0; d<naxis; d++)
-              {
-              samp2->wcsprop[d] = coord[d];
-              samp2->wcsproperr[d] = fabs(coorderr[d]);
-              }
-            samp2->wcsparal = paral;
-            samp2->wcsparalerr = paralerr;
+            samp2->wcsprop[d] = coord[d];
+            samp2->wcsproperr[d] = fabs(coorderr[d]);
             }
+          samp2->wcsparal = paral;
+          samp2->wcsparalerr = paralerr;
           }
-        else
-          for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2 = samp2->prevsamp)
-            {
-            for (d=0; d<naxis; d++)
-              samp2->wcsprop[d] = samp2->wcsproperr[d] = 0.0;
-            samp2->wcsparal = samp2->wcsparalerr = 0.0;
-            }
         }
       }
     }
 
   if (wcsec)
     end_wcs(wcsec);
-  free(chi2);
 
   return;
   }
@@ -397,7 +414,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/08/2011
+VERSION	25/08/2011
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -527,6 +544,13 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
         beta[4] += wi*yi*pfac[d];
         }
       }
+    }
+
+  if (nfree<0)
+    {
+    if (chi2)
+      *chi2 = 0.0;
+    return nfree;
     }
 
 /* Make a copy of beta before it is overwritten */
