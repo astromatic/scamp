@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/06/2011
+*	Last modified:		26/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@ INPUT	ptr to the group of fields,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	26/08/2011
  ***/
 void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double tolerance)
@@ -65,7 +65,7 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
    wcsstruct	*wcs;
    setstruct	**pset1,**pset2, **pset,
 		*set1,*set2, *set;
-   samplestruct	*samp1,*samp2,*samp2b,*samp2min;
+   samplestruct	*samp1,*presamp1, *samp2,*samp2b,*samp2min;
    double	projmin2[NAXIS], projmax2[NAXIS],
 		*proj1,
 		lng1,lat1, latmin1,latmax1, lngmin2,lngmax2,latmin2,latmax2,
@@ -171,34 +171,64 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
             nsamp2b = ++nsamp2;
             for (; nsamp2-- && samp2->projpos[yaxis]<latmax1; samp2++)
               {
-              if (samp2->prevsamp || samp2->nextsamp)
+              if ((samp2->prevsamp && samp2->prevsamp->set->field!=field1)
+			|| samp2->nextsamp)
                 continue;
               if (lat!=lng)
-	        {
+                {
                 dlng = lng1 - samp2->projpos[lng];
                 dlat = lat1 - samp2->projpos[lat];
                 r2 = dlng*dlng + dlat*dlat;
                 }
               else
-	        {
+                {
                 r2 = 0.0;
                 for (i=0; i<naxis; i++)
                   {
                   dx = proj1[i] - samp2->projpos[i];
                   r2 += dx*dx;
                   }
-		}
+                }
 /*------------ Finally select the closest source within the search disk */
               if (r2<r2min)
                 {
                 r2min = r2;
                 samp2min = samp2;
                 }
-	      }
+              }
             if (samp2min)
-	      {
-              samp1->nextsamp = samp2min;
-              samp2min->prevsamp = samp1;
+              {
+              if ((presamp1=samp2min->prevsamp))
+                {
+/*-------------- Check if it is a better match than the previous one */
+                if (lat!=lng)
+                  {
+                  dlng = presamp1->projpos[lng] - samp2min->projpos[lng];
+                  dlat = presamp1->projpos[lat] - samp2min->projpos[lat];
+                  r2 = dlng*dlng + dlat*dlat;
+                  }
+                else
+                  {
+                  r2 = 0.0;
+                  for (i=0; i<naxis; i++)
+                    {
+                    dx = presamp1->projpos[i] - samp2min->projpos[i];
+                    r2 += dx*dx;
+                    }
+                  }
+                if (r2<r2min)
+/*-------------- unlink from previous match if this is a better match */
+                  {
+                  presamp1->nextsamp = NULL;
+                  samp1->nextsamp = samp2min;
+                  samp2min->prevsamp = samp1;
+                  }
+                }
+              else
+                {
+                samp1->nextsamp = samp2min;
+                samp2min->prevsamp = samp1;
+                }
 /*------------ Link fields too */
 /*
               for (ffield=field2; (fieldn=ffield->nextfield); ffield=fieldn)
