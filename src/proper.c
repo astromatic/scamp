@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/08/2011
+*	Last modified:		26/08/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -57,7 +57,7 @@
 #endif
 
 /*-------------------------------- protos -----------------------------------*/
-static int	astrprop_fillmat(fgroupstruct *fgroup, samplestruct *samp,
+static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 				wcsstruct *wcsec, double *alpha,double *beta,
 				double wis, double *chi2);
 
@@ -401,7 +401,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 
 
 /****** astrprop_solve *****************************************************
-PROTO	int astrprop_fillmat(samplestruct *samp, double *alpha, double *beta,
+PROTO	int astrprop_solve(samplestruct *samp, double *alpha, double *beta,
 		double wis, double *chi2)
 PURPOSE	Fill system alpha and beta matrices for solving proper motion equations.
 INPUT	Ptr to the field group,
