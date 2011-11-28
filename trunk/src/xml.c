@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/07/2011
+*	Last modified:		28/11/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -189,7 +189,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	22/07/2011
+VERSION	28/11/2011
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -815,8 +815,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.number;meta.dataset\"/>\n");
   fprintf(file, "   <FIELD name=\"NKeys\" datatype=\"int\""
 	" ucd=\"meta.number\"/>\n");
-  fprintf(file, "   <FIELD name=\"Keys\" datatype=\"*\""
-	" ucd=\"meta.note\"/>\n");
+  fprintf(file, "   <FIELD name=\"Keys\" datatype=\"char\""
+	" arraysize=\"*\" ucd=\"meta.note\"/>\n");
 
 /* Check-plots */
 #ifdef HAVE_PLPLOT
@@ -911,8 +911,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"phot.mag;phot.calib;arith.zp\" unit=\"mag\"/>\n");
   fprintf(file, "   <FIELD name=\"NKeys\" datatype=\"int\""
 	" ucd=\"meta.number\"/>\n");
-  fprintf(file, "   <FIELD name=\"Keys\" datatype=\"*\""
-	" ucd=\"meta.note\"/>\n");
+  fprintf(file, "   <FIELD name=\"Keys\" datatype=\"char\""
+	" arraysize=\"*\" ucd=\"meta.note\"/>\n");
   fprintf(file, "   <DATA><TABLEDATA>\n");
   for (i=0; i<prefs.nphotinstrustr; i++)
     {
