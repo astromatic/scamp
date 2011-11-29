@@ -182,11 +182,11 @@ AC_ARG_WITH(fftw-incdir,
     )
 
 # Provide a special option for CDSClient
-AC_ARG_WITH(cdsclient_exec,
-	[AC_HELP_STRING([--with-cdsclient_exec=<aclient executable>],
-	[Provide an alternative default path to the aclient executable])],
-    cdsclient_exec="$withval",
-    cdsclient_exec=""
+AC_ARG_WITH(cdsclient,
+	[AC_HELP_STRING([--with-cdsclient=<aclient execution path>],
+	[Provide an alternative default to the aclient execution path])],
+    cdsclient_path="$withval",
+    cdsclient_path=""
     )
 
 # Provide a special option for the default XSLT URL
@@ -278,7 +278,7 @@ fi
 ACX_CDSCLIENT($cdsclient_path,[use_cdsclient=yes],[use_cdsclient=no])
 AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient_path", [CDSclient execution path])
 if test "$use_cdsclient" = "no"; then
-  AC_MSG_ERROR(["$cdsclient_path" not found. exiting.]
+  AC_MSG_ERROR([$cdsclient_path/aclient_cgi not found. exiting.]
 ["aclient_cgi" from the CDSclient package is required to use SCAMP:]
 [1. Install the CDSclient package: http://cdsweb.u-strasbg.fr/doc/cdsclient.html]
 [2. Use the --with-cdsclient=<aclient_path> configure option if aclient_cgi is
