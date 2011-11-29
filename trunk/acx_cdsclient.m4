@@ -7,7 +7,7 @@ dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
 dnl	This file part of:	AstrOmatic software
 dnl
-dnl	Copyright:		(C) 2003-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+dnl	Copyright:		(C) 2003-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 dnl
 dnl	License:		GNU General Public License
 dnl
@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		10/10/2010
+dnl	Last modified:		29/11/2011
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -37,8 +37,12 @@ dnl is a list of commands to run it if it is not found.
 AC_DEFUN([ACX_CDSCLIENT], [
 AC_REQUIRE([AC_CANONICAL_HOST])
 
-# We only need to check the availability of the "aclient" executable
-AC_CHECK_PROG(acx_cdsclient_ok, $1, [yes], [no])
+# We only need to check the availability of the "aclient_cgi" executable
+if test x$1 = x; then
+  AC_CHECK_PROG(acx_cdsclient_ok, [aclient_cgi], [yes], [no])
+else
+  AC_CHECK_PROG(acx_cdsclient_ok, [aclient_cgi], [yes], [no], $1)
+fi
 
 # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$acx_cdsclient_ok" = xyes; then
