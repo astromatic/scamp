@@ -769,7 +769,7 @@ with_atlas
 with_atlas_incdir
 with_fftw
 with_fftw_incdir
-with_cdsclient_exec
+with_cdsclient
 with_xsl_url
 enable_threads
 enable_prof
@@ -1447,9 +1447,9 @@ Optional Packages:
   --with-fftw-incdir=<FFTW include dir>
                           Provide an alternative path to the FFTW include
                           directory
-  --with-cdsclient_exec=<aclient executable>
-                          Provide an alternative default path to the aclient
-                          executable
+  --with-cdsclient=<aclient execution path>
+                          Provide an alternative default to the aclient
+                          execution path
   --with-xsl_url=<default URL for XSLT filter>
                           Provide an alternative default URL of the XSLT
                           filter
@@ -13353,11 +13353,11 @@ fi
 
 # Provide a special option for CDSClient
 
-# Check whether --with-cdsclient_exec was given.
-if test "${with_cdsclient_exec+set}" = set; then :
-  withval=$with_cdsclient_exec; cdsclient_exec="$withval"
+# Check whether --with-cdsclient was given.
+if test "${with_cdsclient+set}" = set; then :
+  withval=$with_cdsclient; cdsclient_path="$withval"
 else
-  cdsclient_exec=""
+  cdsclient_path=""
 
 fi
 
@@ -15542,7 +15542,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 if test "$use_cdsclient" = "no"; then
-  as_fn_error $? "\"$cdsclient_path\" not found. exiting.
+  as_fn_error $? "$cdsclient_path/aclient_cgi not found. exiting.
 \"aclient_cgi\" from the CDSclient package is required to use SCAMP:
 1. Install the CDSclient package: http://cdsweb.u-strasbg.fr/doc/cdsclient.html
 2. Use the --with-cdsclient=<aclient_path> configure option if aclient_cgi is
