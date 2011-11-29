@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT(scamp, 1.10.6, [bertin@iap.fr])
+AC_INIT(scamp, 1.10.7, [bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -186,7 +186,7 @@ AC_ARG_WITH(cdsclient_exec,
 	[AC_HELP_STRING([--with-cdsclient_exec=<aclient executable>],
 	[Provide an alternative default path to the aclient executable])],
     cdsclient_exec="$withval",
-    cdsclient_exec="aclient_cgi"
+    cdsclient_exec=""
     )
 
 # Provide a special option for the default XSLT URL
@@ -275,14 +275,14 @@ else
 fi
 
 ################# handle the CDSclient package (CDS queries) #################
-ACX_CDSCLIENT($cdsclient_exec,[use_cdsclient=yes],[use_cdsclient=no])
-AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient_exec", [CDSclient executable])
+ACX_CDSCLIENT($cdsclient_path,[use_cdsclient=yes],[use_cdsclient=no])
+AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient_path", [CDSclient execution path])
 if test "$use_cdsclient" = "no"; then
-  AC_MSG_ERROR(["$cdsclient_exec" not found. exiting.]
-["aclient" from the CDSclient package is required to use SCAMP:]
+  AC_MSG_ERROR(["$cdsclient_path" not found. exiting.]
+["aclient_cgi" from the CDSclient package is required to use SCAMP:]
 [1. Install the CDSclient package: http://cdsweb.u-strasbg.fr/doc/cdsclient.html]
-[2. Use the --with-cdsclient_exec=<aclient_exec> configure option if aclient is
-   not in your PATH.])
+[2. Use the --with-cdsclient=<aclient_path> configure option if aclient_cgi is
+   not in your execution PATH.])
 fi
 
 ################# handle the PLPlot library (graphic plots) ##################

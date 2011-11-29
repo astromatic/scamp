@@ -6,7 +6,7 @@
 /* CLAPACK header filename. */
 #undef ATLAS_LAPACK_H
 
-/* CDSclient executable */
+/* CDSclient execution path */
 #undef CDSCLIENT
 
 /* Archive creation date */
