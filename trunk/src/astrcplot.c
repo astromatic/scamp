@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/05/2011
+*	Last modified:		29/11/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -64,7 +64,7 @@ INPUT	Pointer to the array of field groups,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/07/2004
+VERSION	29/11/2011
  ***/
 int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
   {
@@ -101,7 +101,7 @@ int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
   plfont(2);
   plschr(0.0, 0.3);
   plwid(0);
-  plcol(7);
+  plcol0(7);
   mark[0] = 500;
   space[0] = 500;
   for (wcspos[0] = -180.0; wcspos[0]<=180.0; wcspos[0]+=14.999)
@@ -152,7 +152,7 @@ int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
     {
     field = fgroups[g]->field;
     nfield = fgroups[g]->nfield;
-    plcol(15);
+    plcol0(15);
     for (f=0; f<nfield; f++)
       {
       set = field[f]->set;
@@ -186,7 +186,7 @@ int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
       x[i] = rawpos2[0];
       y[i] = rawpos2[1];
       }
-    plcol(3);
+    plcol0(3);
     plline(37, x,y);
     }
 
@@ -769,7 +769,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -828,7 +828,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     psize = 1.0;
 
   plfont(2);
-  plcol(15);
+  plcol0(15);
   plschr(0.0, 0.67);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   plwid(lwid);
@@ -865,9 +865,9 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     }
   plssym(0.0, psize);
   plwid(lsize);
-  plcol(3);
+  plcol0(3);
   plpoin((PLINT)npoint, x,y, 11);
-  plcol(1);
+  plcol0(1);
   plpoin((PLINT)(nsamp-npoint), x2,y2, 0);
   free(x);
   free(y);
@@ -902,12 +902,12 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
             *(yt++) = (PLFLT)samp->projpos[lat];
             }
         plwid(lsize);
-        plcol(8);
+        plcol0(8);
         if (lsize)
           plpoin((PLINT)(xt-x), x,y, 17);
         else
           plpoin((PLINT)(xt-x), x,y, 1);
-        plcol(4);
+        plcol0(4);
         plpoin((PLINT)(x+nsamp-x2t), x2t,y2t, 2);
         free(x);
         free(y);
@@ -915,7 +915,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
       plwid(2*lwid);
       if (field->cplot_colour==15)
         {
-        plcol(15);
+        plcol0(15);
         cplot_drawbounds(set->wcs, wcs);
         }
       }
@@ -928,7 +928,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     if (field->cplot_colour!=15)
       {
       plwid(3*lwid);
-      plcol(field->cplot_colour);
+      plcol0(field->cplot_colour);
       for (s=0; s<field->nset; s++)
         {
         set = field->set[s];
@@ -937,7 +937,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
       }
     }
 
-  plcol(7);
+  plcol0(7);
   plwid(lwid);
   cplot_drawcoordgrid(wcs, xmin, xmax, ymin, ymax);
   plflush();
@@ -991,7 +991,7 @@ INPUT	Pointer to the field.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_distort(fieldstruct *field)
   {
@@ -1039,16 +1039,16 @@ int	cplot_distort(fieldstruct *field)
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   plwid(lwid);
   plfont(2);
-  plcol(15);
+  plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uInstrument A%d: distortion map", field->astromlabel+1);
   pllab("","", str);
   plwid(0);
-  plcol(7);
+  plcol0(7);
   cplot_drawloccoordgrid(wcs, xmin, xmax, ymin, ymax);
 
   pllsty(1);
-  plcol(15);
+  plcol0(15);
   plscmap1n(256);
 
   scalemin = BIG;
@@ -1118,7 +1118,7 @@ int	cplot_distort(fieldstruct *field)
 
     wcsptr[0] = set->wcs;
     wcsptr[1] = wcs;
-    plshades(scale, CPLOT_NDISTGRID, CPLOT_NDISTGRID, NULL,
+    plshades((const PLFLT **)scale, CPLOT_NDISTGRID, CPLOT_NDISTGRID, NULL,
 	     xstep/2.0+0.5, set->wcs->naxisn[lng]-xstep/2.0+0.5,
              ystep/2.0+0.5, set->wcs->naxisn[lat]-ystep/2.0+0.5,
 	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, distort_map, wcsptr);
@@ -1126,7 +1126,7 @@ int	cplot_distort(fieldstruct *field)
     plwid(0);
     cplot_drawfgrids(set->wcs, wcs);
 */
-    plcol(7);
+    plcol0(7);
     plwid(lwid);
     cplot_drawbounds(set->wcs, wcs);
     }
@@ -1140,10 +1140,10 @@ int	cplot_distort(fieldstruct *field)
 
   plvpor(0.91,0.935,0.115,0.885);
   plwind(0.0,1.0,scalemin*DEG/ARCSEC,scalemax*DEG/ARCSEC);
-  plshades(scale, 2, CPLOT_NSHADES, NULL, 0.0, 1.0,
+  plshades((const PLFLT **)scale, 2, CPLOT_NSHADES, NULL, 0.0, 1.0,
 	   scalemin*DEG/ARCSEC,scalemax*DEG/ARCSEC, clevel,
 	   CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
-  plcol(15);
+  plcol0(15);
   plschr(0.0, 0.5);
   plbox("bc", 0.0, 0, "bnstv", 0.0, 0);
   sprintf(str, "%s", mscale < 0.09*ARCSEC/DEG?
@@ -1185,7 +1185,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -1318,19 +1318,19 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   plwid(lwid);
   plfont(2);
-  plcol(15);
+  plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uInstrument A%d: map of astrometric systematics (internal)", 
 	field0->astromlabel+1);
   pllab("","", str);
   plwid(0);
-  plcol(7);
+  plcol0(7);
   cplot_drawloccoordgrid(wcs0, xmin, xmax, ymin, ymax);
   y[0] = y[1] = 3.0;
   x[0] = 7.0;
   x[1] = x[0] + scalel;
   pllsty(1);
-  plcol(15);
+  plcol0(15);
   plwid(lwid*3);
   plline(2,x,y);
   plwid(lwid);
@@ -1347,7 +1347,7 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   for (s=0; s<nset; s++)
     {
     set0 = field0->set[s];
-    plcol(7);
+    plcol0(7);
     cplot_drawbounds(set0->wcs, wcs0);
     lng = set0->lng;
     lat = set0->lat;
@@ -1469,9 +1469,9 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
           y[0] = vecpos[lat];
           y[1] = vecpos2[lat] + minscale*(vecpos2[lat] - vecpos[lat]);
           plwid(lwid*2);
-          plcol(3);
+          plcol0(3);
           plline(2, x,y);
-          plcol(15);
+          plcol0(15);
           plpoin(1,x,y,1);
           plwid(lwid);
           }
@@ -1500,7 +1500,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 			double hsn_thresh)
@@ -1632,20 +1632,20 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   plwid(lwid);
   plfont(2);
-  plcol(15);
+  plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   plschr(0.0, 0.8);
   sprintf(str, "#uInstrument A%d: map of astrometric systematics (reference)",
 	field0->astromlabel+1);
   pllab("","", str);
   plwid(0);
-  plcol(7);
+  plcol0(7);
   cplot_drawloccoordgrid(wcs0, xmin, xmax, ymin, ymax);
   y[0] = y[1] = 3.0;
   x[0] = 7.0;
   x[1] = x[0] + scalel;
   pllsty(1);
-  plcol(15);
+  plcol0(15);
   plwid(lwid*3);
   plline(2,x,y);
   plwid(lwid);
@@ -1662,7 +1662,7 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   for (s=0; s<nset; s++)
     {
     set0 = field0->set[s];
-    plcol(7);
+    plcol0(7);
     cplot_drawbounds(set0->wcs, wcs0);
     lng = set0->lng;
     lat = set0->lat;
@@ -1773,9 +1773,9 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
           y[0] = vecpos[lat];
           y[1] = vecpos2[lat] + minscale*(vecpos2[lat] - vecpos[lat]);
           plwid(lwid*2);
-          plcol(1);
+          plcol0(1);
           plline(2, x,y);
-          plcol(15);
+          plcol0(15);
           plpoin(1,x,y,1);
           plwid(lwid);
           }
@@ -1802,7 +1802,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrstats_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/06/2005
+VERSION	29/11/2011
  ***/
 int	cplot_chi2(fgroupstruct *fgroup)
   {
@@ -1847,7 +1847,7 @@ int	cplot_chi2(fgroupstruct *fgroup)
 
 /*-- Now plot! */
 /* Internal chi2/d.o.f. first */
-  plcol(15);
+  plcol0(15);
   plschr(0.0,0.5);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   plwid(lwid);
@@ -1908,7 +1908,7 @@ INPUT	Pointer to the array of field groups,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrstats_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	11/03/2006
+VERSION	29/11/2011
  ***/
 int	cplot_shear(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -1985,7 +1985,7 @@ int	cplot_shear(fgroupstruct **fgroups, int ngroup, int instru)
 
 /*-- Now plot! */
 /* Internal chi2/d.o.f. first */
-  plcol(15);
+  plcol0(15);
   plschr(0.0,0.5);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
   plwid(lwid);
@@ -2046,7 +2046,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	29/11/2011
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2231,13 +2231,13 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
         r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
         r[1] = 0.2; g[1] = 0.3; b[1] = 0.2;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plshades(histo[d3], CPLOT_ADERR1DNX, CPLOT_ADERR1DNY, NULL,
+        plshades((const PLFLT **)histo[d3], CPLOT_ADERR1DNX, CPLOT_ADERR1DNY, NULL,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
         }
       else
         {
-        plcol(1);
+        plcol0(1);
         plptex((fgroup->projposmin[d2] - margin + fgroup->projposmax[d2])/2.0,
 		maxlim/2.0, 1.0, 0.0, 0.5, "No overlapping detections!");
         }
@@ -2246,7 +2246,8 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plimage(histo_hsn[d3], CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
+        plimage((const PLFLT **)histo_hsn[d3],
+		CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim);
@@ -2256,13 +2257,13 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
       plscolbg(255,255,255);	/* Force the background colour to white */
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /* 1D histograms */
-      plcol(3);
+      plcol0(3);
       plwid(2*lwid);
       plline(CPLOT_NADERRHISTBIN, cuty[d3], cutbin);
-      plcol(7);
+      plcol0(7);
       plline(CPLOT_NADERRHISTBIN, cuty_hsn[d3], cutbin);
       plwid(lwid);
-      plcol(15);
+      plcol0(15);
       plwid(lwid);
       xl[0] = fgroup->projposmin[d2] - margin;
       xl[1] = fgroup->projposmax[d2];
@@ -2308,7 +2309,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2473,13 +2474,13 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
     r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
     r[1] = 0.2; g[1] = 0.3; b[1] = 0.2;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    plshades(histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
+    plshades((const PLFLT **)histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
 	clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
     }
   else
     {
-    plcol(1);
+    plcol0(1);
     plptex(0.0, maxlim/2.0, 1.0, 0.0, 0.5, "No overlapping detections!");
     }
 
@@ -2488,7 +2489,7 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
     r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
     r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    plimage(histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
+    plimage((const PLFLT **)histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn,
 	-maxlim, maxlim, -maxlim, maxlim);
@@ -2498,7 +2499,7 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   plscol0(15, 0,0,0);		/* Force the foreground colour to black */
   plschr(0.0,0.5);
 /* Pixel footprint */
-  plcol(15);
+  plcol0(15);
   pllsty(3);
   xl[0] = xl[1] = xl[4] = pixscale[0]/2.0;
   yl[0] = yl[3] = yl[4] = pixscale[1]/2.0;
@@ -2507,15 +2508,15 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   plline(5, xl, yl);
   pllsty(1);
 /* 1D histograms */
-  plcol(3);
+  plcol0(3);
   plwid(2*lwid);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx);
   plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
-  plcol(7);
+  plcol0(7);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx_hsn);
   plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
   plwid(lwid);
-  plcol(15);
+  plcol0(15);
   plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
   sprintf(str, "Group ##%d: 2D internal astrometric errors", fgroup->no);
   pllab( "#gDAXIS1 [\"]", "#gDAXIS2 [\"]", str);
@@ -2560,7 +2561,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	29/11/2011
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2739,13 +2740,14 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
         r[0] = 1.0; g[0] = 0.98; b[0] = 0.98;
         r[1] = 0.6; g[1] = 0.1; b[1] = 0.1;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plshades(histo[d3], CPLOT_ADERR1DNX, CPLOT_ADERR1DNY, NULL,
+        plshades((const PLFLT **)histo[d3],
+		CPLOT_ADERR1DNX, CPLOT_ADERR1DNY, NULL,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
         }
       else
         {
-        plcol(1);
+        plcol0(1);
         plptex((fgroup->projposmin[d2] - margin + fgroup->projposmax[d2])/2.0,
 		maxlim/2.0, 1.0, 0.0, 0.5, "No match with a reference!");
         }
@@ -2754,7 +2756,8 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plimage(histo_hsn[d3], CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
+        plimage((const PLFLT **)histo_hsn[d3],
+		CPLOT_ADERR1DNX_HSN, CPLOT_ADERR1DNY_HSN,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim);
@@ -2764,13 +2767,13 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
       sprintf(xlabel, "AXIS%d [pixels]", d2+1);
       sprintf(ylabel, "#gDAXIS%d [\"]", d+1);
 /*---- 1D histograms */
-      plcol(1);
+      plcol0(1);
       plwid(2*lwid);
       plline(CPLOT_NREFERRHISTBIN, cuty[d3], cutbin);
-      plcol(7);
+      plcol0(7);
       plline(CPLOT_NREFERRHISTBIN, cuty_hsn[d3], cutbin);
       plwid(lwid);
-      plcol(15);
+      plcol0(15);
       plwid(lwid);
       xl[0] = fgroup->projposmin[d2] - margin;
       xl[1] = fgroup->projposmax[d2];
@@ -2818,7 +2821,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -2978,13 +2981,13 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     r[0] = 1.0; g[0] = 0.98; b[0] = 0.98;
     r[1] = 0.6; g[1] = 0.1; b[1] = 0.1;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    plshades(histo, CPLOT_REFERR2DN, CPLOT_REFERR2DN, NULL,
+    plshades((const PLFLT **)histo, CPLOT_REFERR2DN, CPLOT_REFERR2DN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
 	clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
     }
   else
     {
-    plcol(1);
+    plcol0(1);
     plptex(0.0, maxlim/2.0, 1.0, 0.0, 0.5, "No match with a reference!");
     }
   if (zmax_hsn>=1.0)
@@ -2992,7 +2995,7 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
     r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    plimage(histo_hsn, CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
+    plimage((const PLFLT **)histo_hsn, CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn,
 	-maxlim, maxlim, -maxlim, maxlim);
@@ -3001,7 +3004,7 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
   plscol0(15, 0,0,0);		/* Force the foreground colour to black */
   plschr(0.0,0.5);
 /* Pixel footprint */
-  plcol(15);
+  plcol0(15);
   pllsty(3);
   xl[0] = xl[1] = xl[4] = pixscale[0]/2.0;
   yl[0] = yl[3] = yl[4] = pixscale[1]/2.0;
@@ -3010,15 +3013,15 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
   plline(5, xl, yl);
   pllsty(1);
 /* 1D histograms */
-  plcol(1);
+  plcol0(1);
   plwid(2*lwid);
   plline(CPLOT_NREFERRHISTBIN, cutbin, cutx);
   plline(CPLOT_NREFERRHISTBIN, cuty, cutbin);
-  plcol(7);
+  plcol0(7);
   plline(CPLOT_NREFERRHISTBIN, cutbin, cutx_hsn);
   plline(CPLOT_NREFERRHISTBIN, cuty_hsn, cutbin);
   plwid(lwid);
-  plcol(15);
+  plcol0(15);
   plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
   sprintf(str, "Group ##%d: 2D reference astrometric errors", fgroup->no);
   pllab( "#gDAXIS1 [\"]", "#gDAXIS2 [\"]", str);
@@ -3065,7 +3068,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	29/11/2011
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3324,14 +3327,14 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
         r[1] = 0.3; g[1] = 0.4; b[1] = 0.3;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plshades(histo[d3], CPLOT_PIXERR1DNX, CPLOT_PIXERR1DNY, NULL,
-		0.5, maxwidth, -maxlim, maxlim,
+        plshades((const PLFLT **)histo[d3], CPLOT_PIXERR1DNX, CPLOT_PIXERR1DNY,
+		NULL, 0.5, maxwidth, -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
 */
         }
       else
         {
-        plcol(1);
+        plcol0(1);
         plptex(-margin/2.0, maxlim/2.0, 1.0, 0.0, 0.5,
 		"No overlapping detections!");
         }
@@ -3340,7 +3343,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plimage(histo_hsn[d3], CPLOT_PIXERR1DNX_HSN, CPLOT_PIXERR1DNY_HSN,
+        plimage((const PLFLT **)histo_hsn[d3],
+		CPLOT_PIXERR1DNX_HSN, CPLOT_PIXERR1DNY_HSN,
 		0.5, maxwidth, -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
 		0.5, maxwidth, -maxlim, maxlim);
@@ -3350,26 +3354,26 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
       plscolbg(255,255,255);	/* Force the background colour to white */
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /* 1D histograms */
-      plcol(3);
+      plcol0(3);
       plwid(2*lwid);
       plline(CPLOT_NPIXERRHISTBIN, cuty[d3], cutbin);
-      plcol(7);
+      plcol0(7);
       plline(CPLOT_NPIXERRHISTBIN, cuty_hsn[d3], cutbin);
       if (zmax[d3]>=1.0)
         {
-        plcol(15);
+        plcol0(15);
         for (i=0; i<CPLOT_PIXERR1DNX+1; i++)
           if (weight[d3][i]>0.0)
             line[d3][i] /= weight[d3][i];
         plwid(6*lwid);
-        plcol(15);
+        plcol0(15);
         plline(CPLOT_PIXERR1DNX+1, cutx, line[d3]);
         plwid(3*lwid);
-        plcol(3);
+        plcol0(3);
         plline(CPLOT_PIXERR1DNX+1, cutx, line[d3]);
         }
       plwid(lwid);
-      plcol(15);
+      plcol0(15);
       plwid(lwid);
       xl[0] = 0.5 - margin;
       xl[1] = maxwidth;
@@ -3424,7 +3428,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	29/11/2011
  ***/
 int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3666,14 +3670,15 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
         r[1] = 0.3; g[1] = 0.4; b[1] = 0.3;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plshades(histo[d3], CPLOT_SUBPIXERR1DNX, CPLOT_SUBPIXERR1DNY, NULL,
+        plshades((const PLFLT **)histo[d3],
+		CPLOT_SUBPIXERR1DNX, CPLOT_SUBPIXERR1DNY, NULL,
 		-0.5, 0.5, -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
 */
         }
       else
         {
-        plcol(1);
+        plcol0(1);
         plptex(-margin/2.0, maxlim/2.0, 1.0, 0.0, 0.5,
 		"No overlapping detections!");
         }
@@ -3682,7 +3687,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plimage(histo_hsn[d3], CPLOT_SUBPIXERR1DNX_HSN,
+        plimage((const PLFLT **)histo_hsn[d3], CPLOT_SUBPIXERR1DNX_HSN,
 		CPLOT_SUBPIXERR1DNY_HSN,
 		-0.5, 0.5, -maxlim, maxlim,
 		0.5, zmax_hsn[d3],
@@ -3693,27 +3698,27 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
       plscolbg(255,255,255);	/* Force the background colour to white */
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /* 1D histograms */
-      plcol(3);
+      plcol0(3);
       plwid(2*lwid);
       plline(CPLOT_NSUBPIXERRHISTBIN, cuty[d3], cutbin);
-      plcol(7);
+      plcol0(7);
       plline(CPLOT_NSUBPIXERRHISTBIN, cuty_hsn[d3], cutbin);
       if (zmax[d3]>=1.0)
         {
-        plcol(15);
+        plcol0(15);
         for (i=0; i<CPLOT_SUBPIXERR1DNX; i++)
           if (weight[d3][i]>0.0)
             line[d3][i] /= weight[d3][i];
         line[d3][CPLOT_SUBPIXERR1DNX] = line[d3][0];
         plwid(6*lwid);
-        plcol(15);
+        plcol0(15);
         plline(CPLOT_SUBPIXERR1DNX+1, cutx, line[d3]);
         plwid(3*lwid);
-        plcol(3);
+        plcol0(3);
         plline(CPLOT_SUBPIXERR1DNX+1, cutx, line[d3]);
         }
       plwid(lwid);
-      plcol(15);
+      plcol0(15);
       plwid(lwid);
       xl[0] = -0.5 - margin;
       xl[1] = 0.5;
@@ -3764,7 +3769,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	29/11/2011
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4004,13 +4009,14 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
           r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
           r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
           plscmap1l(1, 2, cpoint, r, g, b, NULL);
-          plshades(histo[d], CPLOT_ASTRCOLSHIFT1DNX, CPLOT_ASTRCOLSHIFT1DNY,
+          plshades((const PLFLT **)histo[d],
+		CPLOT_ASTRCOLSHIFT1DNX, CPLOT_ASTRCOLSHIFT1DNY,
 		NULL, dmagmin, dmagmax, -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
           }
         else
           {
-          plcol(1);
+          plcol0(1);
           plptex((PLFLT)mdmag, maxlim/2.0, 1.0, 0.0, 0.5,
 		"No overlapping detections!");
           }
@@ -4019,8 +4025,8 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
           r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
           r[1] = 0.7; g[1] = 0.7; b[1] = 0.7;
           plscmap1l(1, 2, cpoint, r, g, b, NULL);
-          plimage(histo_hsn[d], CPLOT_ASTRCOLSHIFT1DNX_HSN,
-		CPLOT_ASTRCOLSHIFT1DNY_HSN,
+          plimage((const PLFLT **)histo_hsn[d],
+		CPLOT_ASTRCOLSHIFT1DNX_HSN, CPLOT_ASTRCOLSHIFT1DNY_HSN,
 		dmagmin, dmagmax, -maxlim, maxlim, 0.5, zmax_hsn[d],
 		dmagmin, dmagmax, -maxlim, maxlim);
           }
@@ -4029,13 +4035,13 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
         plscolbg(255,255,255);	/* Force the background colour to white */
         plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /*------ 1D histograms */
-        plcol(13);
+        plcol0(13);
         plwid(2*lwid);
         plline(CPLOT_NADERRHISTBIN, cuty[d], cutbin);
-        plcol(7);
+        plcol0(7);
         plline(CPLOT_NADERRHISTBIN, cuty_hsn[d], cutbin);
         plwid(lwid);
-        plcol(15);
+        plcol0(15);
         plwid(lwid);
         xl[0] = dmagmin;
         xl[1] = dmagmax;
@@ -4105,7 +4111,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4242,13 +4248,13 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
       r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
       r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
-      plshades(histo[d], CPLOT_REFPROPN, CPLOT_REFPROPN, NULL,
+      plshades((const PLFLT **)histo[d], CPLOT_REFPROPN, CPLOT_REFPROPN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
 	clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
       }
     else
       {
-      plcol(1);
+      plcol0(1);
       plptex(0.0, maxlim/2.0, 1.0, 0.0, 0.5, "No match with a reference!");
       }
     if (zmax_hsn[d]>=1.0)
@@ -4256,14 +4262,15 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
       r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
       r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
-      plimage(histo_hsn[d], CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
+      plimage((const PLFLT **)histo_hsn[d],
+	CPLOT_REFERR2DN_HSN, CPLOT_REFERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn[d],
 	-maxlim, maxlim, -maxlim, maxlim);
       }
     plscolbg(255,255,255);	/* Force the background colour to white */
     plscol0(15, 0,0,0);		/* Force the foreground colour to black */
-    plcol(15);
+    plcol0(15);
     plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
     pllab(d?"#gm#d#gd#u(ref) [mas/yr]":"#gm#d#ga#u(ref) [mas/yr]",
 	d?"#gm#d#gd#u(SCAMP) [mas/yr]":"#gm#d#ga#u(SCAMP) [mas/yr]", "");
@@ -4309,7 +4316,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_astrepoch3d(fgroupstruct *fgroup)
   {
@@ -4529,7 +4536,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	02/05/2011
+VERSION	29/11/2011
  ***/
 int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4691,13 +4698,13 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
     r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
     r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    plshades(histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
+    plshades((const PLFLT **)histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
 	clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
     }
   else
     {
-    plcol(1);
+    plcol0(1);
     plptex(0.0, maxlim/2.0, 1.0, 0.0, 0.5, "No overlapping detections!");
     }
 
@@ -4706,7 +4713,7 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
     r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
     r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
-    plimage(histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
+    plimage((const PLFLT **)histo_hsn, CPLOT_ADERR2DN_HSN, CPLOT_ADERR2DN_HSN,
 	-maxlim,maxlim, -maxlim, maxlim,
 	0.5, zmax_hsn,
 	-maxlim, maxlim, -maxlim, maxlim);
@@ -4716,7 +4723,7 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   plscol0(15, 0,0,0);		/* Force the foreground colour to black */
   plschr(0.0,0.5);
 /* Pixel footprint */
-  plcol(15);
+  plcol0(15);
   pllsty(3);
   xl[0] = xl[1] = xl[4] = pixscale[0]/2.0;
   yl[0] = yl[3] = yl[4] = pixscale[1]/2.0;
@@ -4725,15 +4732,15 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   plline(5, xl, yl);
   pllsty(1);
 /* 1D histograms */
-  plcol(13);
+  plcol0(13);
   plwid(2*lwid);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx);
   plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
-  plcol(7);
+  plcol0(7);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx_hsn);
   plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
   plwid(lwid);
-  plcol(15);
+  plcol0(15);
   plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
   sprintf(str, "Group ##%d: 2D proper motions", fgroup->no);
   pllab( "#gm#dAXIS1#u [mas/yr]", "#gm#dAXIS2#u [mas/yr]", str);

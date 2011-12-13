@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		13/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -50,11 +50,19 @@
 #include "prefs.h"
 #include "astrefcat.h"
 #include "samples.h"
+#include "wcs/wcs.h"
+
 #ifdef USE_THREADS
 #include "threads.h"
 #endif
-#include "wcs/wcs.h"
+
+#ifdef HAVE_ATLAS
 #include ATLAS_LAPACK_H
+#endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
+#endif
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
@@ -1142,7 +1150,7 @@ INPUT	ptr to the set to be matched,
 OUTPUT	Confidence level of the solution (in units of sigma).
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	20/03/2007
+VERSION	13/12/2011
  ***/
 void	match_refine(setstruct *set, setstruct *refset, double matchresol,
 			double *angle, double *scale,
@@ -1298,10 +1306,17 @@ void	match_refine(setstruct *set, setstruct *refset, double matchresol,
   alpha[7] = alpha[5];
 
 /* Solve the system */
+#if defined(HAVE_LAPACKE)
+  if (LAPACKE_dpotrf(LAPACK_COL_MAJOR, 'U', 3, alpha, 3) == 0)
+    {
+    LAPACKE_dpotrs(LAPACK_COL_MAJOR, 'U', 3, 1, alpha, 3, blng, 3);
+    LAPACKE_dpotrs(LAPACK_COL_MAJOR, 'U', 3, 1, alpha, 3, blat, 3);
+#else
   if (clapack_dpotrf(CblasRowMajor, CblasUpper, 3, alpha, 3) == 0)
     {
     clapack_dpotrs(CblasRowMajor, CblasUpper, 3, 1, alpha, 3, blng, 3);
     clapack_dpotrs(CblasRowMajor, CblasUpper, 3, 1, alpha, 3, blat, 3);
+#endif
     a11 = blng[0] + 1.0;
     a12 = blng[1];
     a21 = blat[0];

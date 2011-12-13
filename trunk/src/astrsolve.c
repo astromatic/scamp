@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/07/2011
+*	Last modified:		13/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -47,11 +47,19 @@
 #include "fitswcs.h"
 #include "prefs.h"
 #include "samples.h"
+#include "wcs/poly.h"
+
 #ifdef USE_THREADS
 #include "threads.h"
 #endif
-#include "wcs/poly.h"
+
+#ifdef HAVE_ATLAS
 #include ATLAS_LAPACK_H
+#endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
+#endif
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
@@ -93,7 +101,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/08/2010
+VERSION	13/12/2011
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -473,9 +481,22 @@ for (g=0; g<ncoefftot; g++)
   */
 /* Solve! */
   NFPRINTF(OUTPUT, "Solving the global astrometry matrix...");
+/*
+size_t iii, nnn,sss=0;
+nnn=(size_t)ncoefftot*ncoefftot;
+for (iii=0; iii<nnn; iii++)
+  if (fabs(alpha[iii])>1e-15)
+    sss++;
+printf("\n\n %g \n\n", (double)sss/nnn);
+*/
   if (ncoefftot)
+#if defined(HAVE_LAPACKE)
+    LAPACKE_dposv(LAPACK_COL_MAJOR, 'L',
+		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
+#else
     clapack_dposv(CblasRowMajor, CblasUpper,
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
+#endif
 
 /* Fill the astrom structures with the derived parameters */
   for (g=0; g<nfgroup; g++)

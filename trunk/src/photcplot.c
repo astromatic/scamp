@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/02/2011
+*	Last modified:		29/11/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -130,7 +130,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/07/2008
+VERSION	29/11/2011
  ***/
 int	cplot_photzp(fgroupstruct *fgroup)
   {
@@ -194,7 +194,7 @@ int	cplot_photzp(fgroupstruct *fgroup)
 /*-- Now plot! */
     firstflag = 1;
     yl[0] = yl[1] = 0.0;
-    plcol(15);
+    plcol0(15);
     plschr(0.0,0.5);
     lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
     plwid(lwid);
@@ -216,9 +216,9 @@ int	cplot_photzp(fgroupstruct *fgroup)
       if (fields[f]->photomlabel == instru)
         {
         if (fields[f]->photomflag==1)
- 	  plcol(9);
+ 	  plcol0(9);
         else
- 	  plcol(8);
+ 	  plcol0(8);
         plpoin((PLINT)1, x+n,y+n, 5);
         plptex(x[n],y[n], 0.0, -1.0, -0.1, fields[f]->rfilename);
         n++;
@@ -226,7 +226,7 @@ int	cplot_photzp(fgroupstruct *fgroup)
     xl[0] = 0.0;
     xl[1] = npointmax+1.0;
     pllsty(2);
-    plcol(15);
+    plcol0(15);
     plline(2, xl, yl);
     pllsty(1);
     firstflag = 0;
@@ -254,7 +254,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	29/11/2011
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -457,13 +457,14 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
         r[0] = 0.98; g[0] = 0.98; b[0] = 1.0;
         r[1] = 0.3; g[1] = 0.3; b[1] = 0.4;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-        plshades(histo[d], CPLOT_PHOTERRNX, CPLOT_PHOTERRNY, NULL,
+        plshades((const PLFLT **)histo[d],
+		CPLOT_PHOTERRNX, CPLOT_PHOTERRNY, NULL,
 		fgroup->projposmin[d], fgroup->projposmax[d], -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
         }
       else
         {
-        plcol(1);
+        plcol0(1);
         plptex((fgroup->projposmin[d] - margin + fgroup->projposmax[d])/2.0,
 		maxlim/2.0, 1.0, 0.0, 0.5, "No overlapping detections!");
         }
@@ -472,20 +473,21 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
         r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
         r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
-       plimage(histo_hsn[d], CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
+       plimage((const PLFLT **)histo_hsn[d],
+		CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
 		fgroup->projposmin[d], fgroup->projposmax[d], -maxlim, maxlim,
 		0.5, zmax_hsn[d],
 		fgroup->projposmin[d], fgroup->projposmax[d], -maxlim, maxlim);
         }
       plscolbg(255,255,255);	/* Force the background colour to white */
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
-      plcol(9);
+      plcol0(9);
       plwid(2*lwid);
       plline(CPLOT_NADERRHISTBIN, cuty[d], cutbin);
-      plcol(7);
+      plcol0(7);
       plline(CPLOT_NADERRHISTBIN, cuty_hsn[d], cutbin);
       plwid(lwid);
-      plcol(15);
+      plcol0(15);
       xl[0] = fgroup->projposmin[d] - margin;
       xl[1] = fgroup->projposmax[d];
       pllsty(2);
@@ -535,7 +537,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP), C. MARMO (IAP)
-VERSION	31/01/2011
+VERSION	29/11/2011
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -744,13 +746,13 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
       r[0] = 0.98; g[0] = 0.98; b[0] = 1.0;
       r[1] = 0.3; g[1] = 0.3; b[1] = 0.4;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
-      plshades(histo, CPLOT_PHOTERRNX, CPLOT_PHOTERRNY, NULL,
+      plshades((const PLFLT **)histo, CPLOT_PHOTERRNX, CPLOT_PHOTERRNY, NULL,
 		xoffset, magmax, -maxlim, maxlim,
 		clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
       }
     else
       {
-      plcol(1);
+      plcol0(1);
       plptex((xoffset - margin + magmax)/2.0,
 		maxlim/2.0, 1.0, 0.0, 0.5, "No overlapping detections!");
       }
@@ -759,20 +761,21 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
       r[0] = 0.0; g[0] = 0.0; b[0] = 0.0;
       r[1] = 0.8; g[1] = 0.8; b[1] = 0.8;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
-     plimage(histo_hsn, CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
+     plimage((const PLFLT **)histo_hsn,
+		CPLOT_PHOTERRNX_HSN, CPLOT_PHOTERRNY_HSN,
 		xoffset, magmax, -maxlim, maxlim,
 		0.5, zmax_hsn,
 		xoffset, magmax, -maxlim, maxlim);
       }
     plscolbg(255,255,255);	/* Force the background colour to white */
     plscol0(15, 0,0,0);	/* Force the foreground colour to black */
-    plcol(9);
+    plcol0(9);
     plwid(2*lwid);
     plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
-    plcol(7);
+    plcol0(7);
     plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
     plwid(lwid);
-    plcol(15);
+    plcol0(15);
     xl[0] = xoffset - margin;
     xl[1] = magmax;
     pllsty(2);
@@ -809,7 +812,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/02/2011
+VERSION	29/11/2011
  ***/
 int	cplot_photzp3d(fgroupstruct *fgroup)
   {

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/08/2011
+*	Last modified:		13/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -47,10 +47,18 @@
 #include "prefs.h"
 #include "proper.h"
 #include "samples.h"
+
 #ifdef USE_THREADS
 #include "threads.h"
 #endif
+
+#ifdef HAVE_ATLAS
 #include ATLAS_LAPACK_H
+#endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
+#endif
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
@@ -231,7 +239,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/08/2011
+VERSION	13/12/2011
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -360,7 +368,11 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 
         if (sampchi2)
           astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis, &chi2);
+#if defined(HAVE_LAPACKE)
+        LAPACKE_dpotri(LAPACK_COL_MAJOR, 'L',ncoeff, alpha, ncoeff);
+#else
         clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
+#endif
         for (d=0; d<naxis; d++)
           {
           coord[d] = samp->projpos[d] + beta[d];
@@ -414,7 +426,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/08/2011
+VERSION	12/12/2011
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -556,8 +568,11 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 /* Make a copy of beta before it is overwritten */
   memcpy(b,beta,ncoeff*sizeof(double));
   memcpy(a,alpha,ncoeff*ncoeff*sizeof(double));
-  clapack_dposv(CblasRowMajor, CblasUpper, ncoeff, 1, alpha, ncoeff,
-		beta, ncoeff);
+#if defined(HAVE_LAPACKE)
+  LAPACKE_dposv(LAPACK_ROW_MAJOR, 'U', ncoeff, 1, alpha, ncoeff, beta, ncoeff);
+#else
+  clapack_dposv(CblasRowMajor,CblasUpper,ncoeff,1, alpha,ncoeff,beta,ncoeff);
+#endif
 
   if (chi2)
     {
