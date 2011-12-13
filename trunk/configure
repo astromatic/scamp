@@ -13509,11 +13509,11 @@ OLIBS="$LIBS"
 LIBS=""
 if test x$acx_lapacke_ok = xyes; then
   if icc -V 2>&1 | grep -i "Intel(R) 64" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/intel64"
+    mkl_root="$MKLROOT/lib/intel64"
     mkl_cflags="-DMKL_ILP64"
     mkl_lapacke_lib="mkl_intel_ilp64"
   elif icc -V 2>&1 | grep -i "Intel(R)" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/ia32"
+    mkl_root="$MKLROOT/lib/ia32"
     mkl_cflags=""
     mkl_lapacke_lib="mkl_intel"
   else
@@ -13587,7 +13587,7 @@ $as_echo "#define HAVE_LAPACKE_MP 1" >>confdefs.h
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
-for dir in $mkl_root/lib; do
+for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_lapacke_lib library with -L$dir" >&5
@@ -13790,7 +13790,7 @@ fi
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
-for dir in $mkl_root/lib; do
+for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_lapacke_lib library with -L$dir" >&5
@@ -13852,6 +13852,7 @@ fi
           MKL_LAPACKE_ERROR="INTEL MKL serial LAPACKe library files not found at usual locations!"
         fi
       fi
+    else
       unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
 
 
@@ -14172,11 +14173,11 @@ OLIBS="$LIBS"
 LIBS=""
 if test x$acx_fftw_ok = xyes; then
   if icc -V 2>&1 | grep -i "Intel(R) 64" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/intel64"
+    mkl_root="$MKLROOT/lib/intel64"
     mkl_cflags="-DMKL_ILP64"
     mkl_fftw_lib="mkl_intel_ilp64"
   elif icc -V 2>&1 | grep -i "Intel(R)" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/ia32"
+    mkl_root="$MKLROOT/lib/ia32"
     mkl_cflags=""
     mkl_fftw_lib="mkl_intel"
   else
@@ -14255,7 +14256,7 @@ $as_echo "#define HAVE_FFTW_MP 1" >>confdefs.h
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
-for dir in $mkl_root/lib; do
+for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_fftw_lib library with -L$dir" >&5
@@ -14463,7 +14464,7 @@ fi
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
-for dir in $mkl_root/lib; do
+for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_fftw_lib library with -L$dir" >&5

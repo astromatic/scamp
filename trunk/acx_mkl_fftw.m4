@@ -128,11 +128,11 @@ LIBS=""
 if test x$acx_fftw_ok = xyes; then
 dnl Try to find INTEL architecture (Intel 64 or ia32)
   if icc -V 2>&1 | grep -i "Intel(R) 64" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/intel64"
+    mkl_root="$MKLROOT/lib/intel64"
     mkl_cflags="-DMKL_ILP64"
     mkl_fftw_lib="mkl_intel_ilp64"
   elif icc -V 2>&1 | grep -i "Intel(R)" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/ia32"
+    mkl_root="$MKLROOT/lib/ia32"
     mkl_cflags=""
     mkl_fftw_lib="mkl_intel"
   else
@@ -159,7 +159,7 @@ dnl Check if the function is in the library
       else
         unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
         acx_fftw_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root/lib, $mkl_fftw_lib,
+        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root, $mkl_fftw_lib,
 		$mkl_func,, [acx_fftw_ok=no],
 		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
         if test x$acx_fftw_ok = xyes; then
@@ -197,7 +197,7 @@ dnl Check if the function is in the library
       else
         unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
         acx_fftw_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root/lib, $mkl_fftw_lib,
+        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root, $mkl_fftw_lib,
 		$mkl_func,, [acx_fftw_ok=no],
 		[-lmkl_sequential -lmkl_core])
         if test x$acx_fftw_ok = xno; then
