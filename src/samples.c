@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		15/04/2011
+*	Last modified:		30/11/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 15/04/2011
+VERSION 30/11/2011
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -95,8 +95,8 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
   head = head0 = NULL;	/* to avoid gcc -Wall warnings */
   cmin = cmax = NULL;	/* to avoid gcc -Wall warnings */
-  dxm = dym = derra = derrb = dflux = dfluxerr = dfluxrad = NULL;
-  xm = ym = erra = errb = flux = fluxerr = fluxrad = NULL;
+  dxm = dym = derra = derrb = dflux = dfluxerr = dfluxrad = delong = NULL;
+  xm = ym = erra = errb = flux = fluxerr = fluxrad = elong = NULL;
   lxm = lym = NULL;
   sxm = sym = NULL;
   minrad = (float)(dminrad = prefs.fwhm_thresh[0]/2.0);

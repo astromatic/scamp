@@ -6,7 +6,7 @@
 /* CLAPACK header filename. */
 #undef ATLAS_LAPACK_H
 
-/* CDSclient execution path */
+/* CDSclient executable */
 #undef CDSCLIENT
 
 /* Archive creation date */
@@ -54,12 +54,18 @@
 /* Define if you have the FFTW double precision libraries and header files. */
 #undef HAVE_FFTW
 
+/* Define to 1 if you have the <fftw3_mkl.h> header file. */
+#undef HAVE_FFTW3_MKL_H
+
 /* Define if you have the FFTW single precision libraries and header files. */
 #undef HAVE_FFTWF
 
 /* Define if you have the FFTW single precision multithreaded libraries and
    header files. */
 #undef HAVE_FFTWF_MP
+
+/* Define to 1 if you have the <fftw/fftw3_mkl.h> header file. */
+#undef HAVE_FFTW_FFTW3_MKL_H
 
 /* Define if you have the FFTW double precision multithreaded libraries and
    header files. */
@@ -79,6 +85,12 @@
 
 /* Second isnan check */
 #undef HAVE_ISNAN2
+
+/* Define if you have the LAPACKe libraries. */
+#undef HAVE_LAPACKE
+
+/* Define if you have the parallel LAPACKe libraries. */
+#undef HAVE_LAPACKE_MP
 
 /* Define to 1 if you have the `cblas' library (-lcblas). */
 #undef HAVE_LIBCBLAS
@@ -112,6 +124,9 @@
 
 /* Define to 1 if you have the `mkdir' function. */
 #undef HAVE_MKDIR
+
+/* Define to 1 if you have the <mkl_lapacke.h> header file. */
+#undef HAVE_MKL_LAPACKE_H
 
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
@@ -171,6 +186,9 @@
 /* Define to 1 if the system has the type `unsigned long long int'. */
 #undef HAVE_UNSIGNED_LONG_LONG_INT
 
+/* LAPACKe header filename. */
+#undef LAPACKE_H
+
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
@@ -209,9 +227,6 @@
 /* Define to the necessary symbol if this constant uses a non-standard name on
    your system. */
 #undef PTHREAD_CREATE_JOINABLE
-
-/* Define as the return type of signal handlers (`int' or `void'). */
-#undef RETSIGTYPE
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

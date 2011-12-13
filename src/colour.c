@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/02/2011
+*	Last modified:		12/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -48,10 +48,10 @@
 #include "photsolve.h"
 #include "prefs.h"
 #include "samples.h"
+
 #ifdef USE_THREADS
 #include "threads.h"
 #endif
-#include ATLAS_LAPACK_H
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS

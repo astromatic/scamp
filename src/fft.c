@@ -37,7 +37,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifndef FFTW3_H
 #include FFTW_H
+#endif
 
 #include "define.h"
 #include "globals.h"

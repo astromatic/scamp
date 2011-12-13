@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2011
+*	Last modified:		13/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -46,8 +46,14 @@
 #include "prefs.h"
 #include "samples.h"
 #include "wcs/poly.h"
-#include ATLAS_LAPACK_H
 
+#ifdef HAVE_ATLAS
+#include ATLAS_LAPACK_H
+#endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
+#endif
 
 /****** photsolve_fgroups ****************************************************
 PROTO	void photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
@@ -58,7 +64,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	13/12/2011
  ***/
 void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -314,8 +320,13 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 
 /*---- Solve! */
       NFPRINTF(OUTPUT, "Solving the global photometry matrix...");
+#if defined(HAVE_LAPACKE)
+      LAPACKE_dposv(LAPACK_COL_MAJOR, 'L',
+		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
+#else
       clapack_dposv(CblasRowMajor, CblasUpper,
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
+#endif
       }
 
 /*-- Update the field structures with the derived parameters */

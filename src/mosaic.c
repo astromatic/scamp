@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		12/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -49,9 +49,17 @@
 #include "prefs.h"
 #include "astrefcat.h"
 #include "samples.h"
-#include ATLAS_LAPACK_H
+
 #ifdef USE_THREADS
 #include "threads.h"
+#endif
+
+#ifdef HAVE_ATLAS
+#include ATLAS_LAPACK_H
+#endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
 #endif
 
 /*------------------- global variables for multithreading -------------------*/
@@ -179,14 +187,19 @@ OUTPUT	-.
 NOTES	Uses the global preferences. All input fields must have a
 	locate_field() up to date.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/01/2006
+VERSION	13/12/2011
  ***/
 void	adjust_set(fieldstruct **fields, int nfield, int s)
   {
+#if defined(HAVE_LAPACKE)
+   lapack_int	ipiv[NAXIS];
+#else
+   int		ipiv[NAXIS];
+#endif
    double	x[(NAXIS+1)*NAXIS], cd[NAXIS*NAXIS],
 		rawpos[NAXIS], redpos[NAXIS],
 		*medstack;
-   int		ipiv[NAXIS], *naxisn,
+   int		*naxisn,
 		d,e,f,i, naxis, noksets;
 
 
@@ -232,7 +245,11 @@ void	adjust_set(fieldstruct **fields, int nfield, int s)
   for (f=0; f<nfield; f++)
     memcpy(fields[f]->set[s]->wcs->cd, cd,naxis*naxis*sizeof(double));
 /* Derive the CRPIXs */
+#if defined(HAVE_LAPACKE)
+  LAPACKE_dgesv(LAPACK_ROW_MAJOR, naxis, 1, cd, naxis, ipiv, x, 1);
+#else
   clapack_dgesv(CblasRowMajor, naxis, 1, cd, naxis, ipiv, x, naxis);
+#endif
   for (f=0; f<nfield; f++)
     for (d=0; d<naxis; d++)
       fields[f]->set[s]->wcs->crpix[d] = 0.5 - x[d];
