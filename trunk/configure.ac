@@ -45,6 +45,7 @@ AC_SUBST(DATE2, "$date2")
 AC_SUBST(DATE3, "$date3")
 
 # Include macros
+sinclude(acx_search_libdir.m4)
 sinclude(acx_atlas.m4)
 sinclude(acx_cdsclient.m4)
 sinclude(acx_fftw.m4)
@@ -150,7 +151,7 @@ AC_ARG_WITH(mkl-libdir,
     )
 AC_ARG_WITH(mkl-incdir,
         [AS_HELP_STRING([--with-mkl-incdir=<MKL include dir>],
-	[Alternative directory for the MKL include directory])],
+	[Alternative directory for MKL include files])],
     fftw_incdir=$withval
     lapacke_incdir=$withval,
     fftw_incdir=""
@@ -166,7 +167,7 @@ AC_ARG_WITH(atlas-libdir,
     )
 AC_ARG_WITH(atlas-incdir,
         [AS_HELP_STRING([--with-atlas-incdir=<ATLAS include dir>],
-	[Alternative directory for the ATLAS include directory])],
+	[Alternative directory for ATLAS include files])],
     atlas_incdir=$withval,
     atlas_incdir=""
     )
@@ -180,7 +181,7 @@ AC_ARG_WITH(fftw-libdir,
     )
 AC_ARG_WITH(fftw-incdir,
         [AS_HELP_STRING([--with-fftw-incdir=<FFTW include dir>],
-	[Alternative directory for the FFTW include directory])],
+	[Alternative directory for FFTW include files])],
     fftw_incdir=$withval,
     fftw_incdir=""
     )
@@ -216,7 +217,7 @@ AC_ARG_WITH(plplot-libdir,
     )
 AC_ARG_WITH(plplot-incdir,
         [AS_HELP_STRING([--with-plplot-incdir=<PLPlot include dir>],
-	[Alternative directory for the PLPlot include directory])],
+	[Alternative directory for PLPlot include files])],
     plplot_incdir=$withval,
     plplot_incdir=""
     )
@@ -284,7 +285,7 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
 ############ handle the INTEL MKL library (linear algebra+FFT) ###########
 if test "$use_mkl" = "yes"; then
-  ACX_MKL_LAPACKE($mkl_libdir,$mkl_incdir,$use_pthreads,
+  ACX_MKL_LAPACKE($mkl_lapacke_libdir,$mkl_lapacke_incdir,$use_pthreads,
 	[use_mkl_lapacke=yes],[use_mkl_lapacke=no])
   if test "$use_mkl_lapacke" = "yes"; then
     LIBS="$MKL_LAPACKE_LIBS $LIBS"
@@ -295,7 +296,7 @@ if test "$use_mkl" = "yes"; then
   else
     AC_MSG_ERROR([$MKL_LAPACKE_ERROR Exiting.])
   fi
-  ACX_MKL_FFTW($mkl_libdir,$mkl_incdir,$use_pthreads,yes,
+  ACX_MKL_FFTW($mkl_fftw_libdir,$mkl_fftw_incdir,$use_pthreads,yes,
 	[use_mkl_fftw=yes],[use_mkl_fftw=no])
   if test "$use_mkl_fftw" = "yes"; then
 #    LIBS="$FFTW_LIBS $LIBS"

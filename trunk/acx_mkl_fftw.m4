@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		12/12/2011
+dnl	Last modified:		13/12/2011
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -159,14 +159,24 @@ dnl Check if the function is in the library
       else
         unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
         acx_fftw_ok=yes
-        AC_CHECK_LIB($mkl_fftw_lib, $mkl_func,, [acx_fftw_ok=no],
-		[-L$mkl_root/lib -lmkl_intel_thread -lmkl_core -openmp -lpthread])
+        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root/lib, $mkl_fftw_lib,
+		$mkl_func,, [acx_fftw_ok=no],
+		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
         if test x$acx_fftw_ok = xyes; then
-          MKL_FFTW_LIBS="-L$mkl_root/lib -l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp"
           AC_DEFINE(HAVE_FFTW_MP,1, [Define if you have the parallel FFTW libraries.])
         else
           MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"
         fi
+      fi
+    else
+      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
+      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $1/lib $1, $mkl_fftw_lib,
+		$mkl_func,, [acx_fftw_ok=no],
+		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
+      if test x$acx_fftw_ok = xyes; then
+        AC_DEFINE(HAVE_FFTW_MP,1, [Define if you have the parallel FFTW libraries.])
+      else
+          MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
       fi
     fi
   else
@@ -187,13 +197,20 @@ dnl Check if the function is in the library
       else
         unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
         acx_fftw_ok=yes
-        AC_CHECK_LIB($mkl_fftw_lib, $mkl_func, [acx_fftw_ok=no],
-		[-L$mkl_root/lib -lmkl_sequential -lmkl_core])
-        if test x$acx_fftw_ok = xyes; then
-          MKL_FFTW_LIBS="-L$mkl_root/lib -l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
-        else
+        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root/lib, $mkl_fftw_lib,
+		$mkl_func,, [acx_fftw_ok=no],
+		[-lmkl_sequential -lmkl_core])
+        if test x$acx_fftw_ok = xno; then
           MKL_FFTW_ERROR="INTEL MKL serial FFTW library files not found at usual locations!"
         fi
+      fi
+    else
+      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
+      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $1/lib $1, $mkl_fftw_lib,
+		$mkl_func,, [acx_fftw_ok=no],
+		[-lmkl_sequential -lmkl_core])
+      if test x$acx_fftw_ok = xno; then
+        MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
       fi
     fi
   fi
