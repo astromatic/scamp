@@ -66,10 +66,11 @@ host_triplet = @host@
 subdir = src/fits
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acx_atlas.m4 \
-	$(top_srcdir)/acx_cdsclient.m4 $(top_srcdir)/acx_fftw.m4 \
-	$(top_srcdir)/acx_mkl_fftw.m4 $(top_srcdir)/acx_mkl_lapacke.m4 \
-	$(top_srcdir)/acx_plplot.m4 $(top_srcdir)/acx_prog_cc_optim.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/acx_search_libdir.m4 \
+	$(top_srcdir)/acx_atlas.m4 $(top_srcdir)/acx_cdsclient.m4 \
+	$(top_srcdir)/acx_fftw.m4 $(top_srcdir)/acx_mkl_fftw.m4 \
+	$(top_srcdir)/acx_mkl_lapacke.m4 $(top_srcdir)/acx_plplot.m4 \
+	$(top_srcdir)/acx_prog_cc_optim.m4 \
 	$(top_srcdir)/acx_pthread.m4 \
 	$(top_srcdir)/acx_urbi_resolve_dir.m4 \
 	$(top_srcdir)/configure.ac
@@ -267,9 +268,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/fits/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu src/fits/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign src/fits/Makefile
+	  $(AUTOMAKE) --gnu src/fits/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

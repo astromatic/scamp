@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		12/12/2011
+dnl	Last modified:		13/12/2011
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -113,6 +113,7 @@ dnl --------------------
 dnl Search library files
 dnl --------------------
 
+OLDFLAGS="$LDFLAGS"
 OLIBS="$LIBS"
 LIBS=""
 if test x$acx_lapacke_ok = xyes; then
@@ -144,14 +145,24 @@ dnl Check the parallel version of the MKL:
       else
         unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
         acx_lapacke_ok=yes
-        AC_CHECK_LIB($mkl_lapacke_lib, [LAPACKE_dpotrf],, [acx_lapacke_ok=no],
-		[-L$mkl_root/lib -lmkl_intel_thread -lmkl_core -openmp -lpthread])
+        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root/lib, $mkl_lapacke_lib,
+			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
+			[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
         if test x$acx_lapacke_ok = xyes; then
-          MKL_LAPACKE_LIBS="-L$mkl_root/lib -l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp"
           AC_DEFINE(HAVE_LAPACKE_MP,1, [Define if you have the parallel LAPACKe libraries.])
         else
           MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
         fi
+      fi
+    else
+      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
+      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $1/lib $1, $mkl_lapacke_lib,
+			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
+			[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
+      if test x$acx_lapacke_ok = xyes; then
+        AC_DEFINE(HAVE_LAPACKE_MP,1, [Define if you have the parallel LAPACKe libraries.])
+      else
+        MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"
       fi
     fi
   else
@@ -165,18 +176,25 @@ dnl Check the serial version of the MKL:
       else
         unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
         acx_lapacke_ok=yes
-        AC_CHECK_LIB($mkl_lapacke_lib, [LAPACKE_dpotrf],, [acx_lapacke_ok=no],
-		[-L$mkl_root/lib -lmkl_sequential -lmkl_core])
-        if test x$acx_lapacke_ok = xyes; then
-          MKL_LAPACKE_LIBS="-L$mkl_root/lib -l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
-        else
+        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root/lib, $mkl_lapacke_lib,
+			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
+			[-lmkl_sequential -lmkl_core])
+        if test x$acx_lapacke_ok = xno; then
           MKL_LAPACKE_ERROR="INTEL MKL serial LAPACKe library files not found at usual locations!"
         fi
+      fi
+      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
+      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $1/lib $1, $mkl_lapacke_lib,
+			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
+			[-lmkl_sequential -lmkl_core])
+      if test x$acx_lapacke_ok = xno; then
+          MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
       fi
     fi
   fi
 fi
 
+LDFLAGS="$OLDFLAGS"
 LIBS="$OLIBS"
 if test x$acx_lapacke_ok = xyes; then
   AC_DEFINE(HAVE_LAPACKE,1, [Define if you have the LAPACKe libraries.])
