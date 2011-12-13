@@ -121,11 +121,11 @@ dnl --------------------
 dnl Try to find INTEL architecture (Intel 64 or ia32)
 dnl --------------------
   if icc -V 2>&1 | grep -i "Intel(R) 64" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/intel64"
+    mkl_root="$MKLROOT/lib/intel64"
     mkl_cflags="-DMKL_ILP64"
     mkl_lapacke_lib="mkl_intel_ilp64"
   elif icc -V 2>&1 | grep -i "Intel(R)" > /dev/null 2>&1; then
-    mkl_root="$MKLROOT/ia32"
+    mkl_root="$MKLROOT/lib/ia32"
     mkl_cflags=""
     mkl_lapacke_lib="mkl_intel"
   else
@@ -145,7 +145,7 @@ dnl Check the parallel version of the MKL:
       else
         unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
         acx_lapacke_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root/lib, $mkl_lapacke_lib,
+        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root, $mkl_lapacke_lib,
 			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
 			[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
         if test x$acx_lapacke_ok = xyes; then
@@ -176,13 +176,14 @@ dnl Check the serial version of the MKL:
       else
         unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
         acx_lapacke_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root/lib, $mkl_lapacke_lib,
+        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root, $mkl_lapacke_lib,
 			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
 			[-lmkl_sequential -lmkl_core])
         if test x$acx_lapacke_ok = xno; then
           MKL_LAPACKE_ERROR="INTEL MKL serial LAPACKe library files not found at usual locations!"
         fi
       fi
+    else
       unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
       ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $1/lib $1, $mkl_lapacke_lib,
 			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
