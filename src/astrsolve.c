@@ -101,7 +101,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/12/2011
+VERSION	16/12/2011
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -292,7 +292,7 @@ field->index2 = -1;
 
   QCALLOC(nconst, int, ncoefftot);
 
-  QCALLOC(alpha, double, ncoefftot*ncoefftot);
+  QCALLOC(alpha, double, (size_t)ncoefftot*(size_t)ncoefftot);
   QCALLOC(beta, double, ncoefftot);
 
 #ifdef USE_THREADS
@@ -907,7 +907,7 @@ static void add_alphamat(double *alpha, int naxis, int ncoefftot,
       cio = ci2;
       cvo = cv2;
       for (q=ncoeff2; q--;)
-        alpha[*ci*ncoefftot+*(cio++)] += weight**(cvo++)**cv;
+        alpha[*ci*(size_t)ncoefftot+*(cio++)] += weight**(cvo++)**cv;
       }
 
   return;
@@ -1303,21 +1303,21 @@ INPUT	Ptr to the alpha matrix,
 OUTPUT	-.
 NOTES	Matrices are not reallocated.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/07/2004
+VERSION	16/12/2011
  ***/
 void	shrink_mat(double *alpha, double *beta, int ncoefftot,
 		int index, int nmiss)
   {
    double	*a,*a2, *b,*b2;
-   int		i,l, nelem;
+   size_t	i,l, nelem;
 
   if (nmiss >= ncoefftot)
     return;
 
 /* First, remove lines */
-  a = alpha + index*ncoefftot;
-  a2 = a + nmiss*ncoefftot;
-  nelem = (ncoefftot-nmiss-index)*ncoefftot;
+  a = alpha + index*(size_t)ncoefftot;
+  a2 = a + nmiss*(size_t)ncoefftot;
+  nelem = (ncoefftot-nmiss-index)*(size_t)ncoefftot;
   for (i=nelem; i--; )
     *(a++) = *(a2++);
 

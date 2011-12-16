@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/12/2011
+*	Last modified:		16/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -64,7 +64,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/12/2011
+VERSION	16/12/2011
  ***/
 void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -154,7 +154,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
       if (offlag)
         ncoefftot += fields[f0]->nset-1;
 
-      QCALLOC(alpha, double, ncoefftot*ncoefftot);
+      QCALLOC(alpha, double, (size_t)ncoefftot*ncoefftot);
       QCALLOC(beta, double, ncoefftot);
       coeffval = coeffval2 = coeffconst = coeffconst2 = (double *)NULL;
       coeffindex = coeffindex2 = (int *)NULL;  /* To avoid gcc -Wall warnings*/
@@ -283,21 +283,21 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 /*------------------ Fill the matrices */
                     if (field2 != field3)
                       {
-                      alpha[*cio+ncoefftot**cio] += weight;
-                      alpha[*cioa+ncoefftot**cioa] += weight;
-                      alpha[*cio+ncoefftot**cioa] -= weight;
-                      alpha[*cioa+ncoefftot**cio] -= weight;
+                      alpha[*cio+(size_t)ncoefftot**cio] += weight;
+                      alpha[*cioa+(size_t)ncoefftot**cioa] += weight;
+                      alpha[*cio+(size_t)ncoefftot**cioa] -= weight;
+                      alpha[*cioa+(size_t)ncoefftot**cio] -= weight;
                       beta[*cio] += weight*(*ccoa - *cco);
                       beta[*cioa] += weight*(*cco - *ccoa);
                       if (field3->photomflag)
                         {
-                        alpha[*cio+ncoefftot**cio] += weightref;
+                        alpha[*cio+(size_t)ncoefftot**cio] += weightref;
                         beta[*cio] += weightref*(*ccoa+*cvoa - *cco);
                         }
                       }
                     if (field2->photomflag)
                       {
-                      alpha[*cioa+ncoefftot**cioa] += weightref;
+                      alpha[*cioa+(size_t)ncoefftot**cioa] += weightref;
                       beta[*cioa] += weightref*(*cco+*cvo - *ccoa);
                       }
                     cioa++;
