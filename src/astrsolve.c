@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/12/2011
+*	Last modified:		20/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,6 +59,7 @@
 
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
+//#define MATSTORAGE_PACKED 1
 #endif
 
 /*------------------- global variables for multithreading -------------------*/
@@ -101,7 +102,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	16/12/2011
+VERSION	19/12/2011
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -292,7 +293,11 @@ field->index2 = -1;
 
   QCALLOC(nconst, int, ncoefftot);
 
-  QCALLOC(alpha, double, (size_t)ncoefftot*(size_t)ncoefftot);
+#ifdef MATSTORAGE_PACKED
+  QCALLOC(alpha, double, ((size_t)(ncoefftot+1)*ncoefftot)/2);
+#else
+  QCALLOC(alpha, double, (size_t)ncoefftot*ncoefftot);
+#endif
   QCALLOC(beta, double, ncoefftot);
 
 #ifdef USE_THREADS
@@ -468,35 +473,25 @@ field->index2 = -1;
         }
       }
     }
-  /*
-for (i=0; i<ncoefftot; i++)
-{
-for (g=0; g<ncoefftot; g++)
- {
- if (alpha[i*ncoefftot+g] != alpha[g*ncoefftot+i])
- alpha[i*ncoefftot+g] = alpha[g*ncoefftot+i];
- }
-}
- printf("\n\n %d \n", ncoefftot);
-  */
+
 /* Solve! */
   NFPRINTF(OUTPUT, "Solving the global astrometry matrix...");
-/*
-size_t iii, nnn,sss=0;
-nnn=(size_t)ncoefftot*ncoefftot;
-for (iii=0; iii<nnn; iii++)
-  if (fabs(alpha[iii])>1e-15)
-    sss++;
-printf("\n\n %g \n\n", (double)sss/nnn);
-*/
+
   if (ncoefftot)
+    {
 #if defined(HAVE_LAPACKE)
-    LAPACKE_dposv(LAPACK_COL_MAJOR, 'L',
-		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
+  #ifdef MATSTORAGE_PACKED
+    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, beta, ncoefftot) !=0)
+  #else
+    if (LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
+		beta, ncoefftot) !=0)
+  #endif
 #else
-    clapack_dposv(CblasRowMajor, CblasUpper,
-		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
+    if (clapack_dposv(CblasRowMajor, CblasUpper,
+		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot) != 0)
 #endif
+      warning("Not a positive definite matrix", " in astrometry solver");
+    }    
 
 /* Fill the astrom structures with the derived parameters */
   for (g=0; g<nfgroup; g++)
@@ -766,7 +761,8 @@ weight = sqrt(weight);
 		cio,cvo,ncoeff, cio,cvo,ncoeff);
             add_alphamat(alpha,naxis,ncoefftot,weight,
 		cio,cvo,ncoeff, cio2,cvo2,ncoeff2);
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
+            if (*cioa>=*cio)
+              add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio,cvo,ncoeff, cioa,cvoa,ncoeff);
             add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio,cvo,ncoeff, cioa2,cvoa2,ncoeff2);
@@ -783,13 +779,18 @@ weight = sqrt(weight);
               QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
               }
 #endif
+/*
             add_alphamat(alpha,naxis,ncoefftot,weight,
 		cio2,cvo2,ncoeff2, cio,cvo,ncoeff);
+*/
             add_alphamat(alpha,naxis,ncoefftot,weight,
 		cio2,cvo2,ncoeff2, cio2,cvo2,ncoeff2);
+/*
             add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio2,cvo2,ncoeff2,  cioa,cvoa,ncoeff);
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
+*/
+            if (*cioa2>=*cio2)
+              add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio2,cvo2,ncoeff2,  cioa2,cvoa2,ncoeff2);
             add_betamat(beta,naxis,weight, cio2,cvo2,cco2,ncoeff2);
             add_betamat(beta,naxis,-weight, cio2,cvo2,ccoa2,ncoeff2);
@@ -809,7 +810,8 @@ weight = sqrt(weight);
 		cioa,cvoa,ncoeff, cioa,cvoa,ncoeff);
             add_alphamat(alpha,naxis,ncoefftot,weight,
 		cioa,cvoa,ncoeff, cioa2,cvoa2,ncoeff2);
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
+            if (*cio>=*cioa)
+              add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cioa,cvoa,ncoeff, cio,cvo,ncoeff);
             add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cioa,cvoa,ncoeff, cio2,cvo2,ncoeff2);
@@ -826,15 +828,20 @@ weight = sqrt(weight);
               QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
               }
 #endif
+/*
             add_alphamat(alpha,naxis,ncoefftot,weight,
 		cioa2,cvoa2,ncoeff2, cioa,cvoa,ncoeff);
+*/
             add_alphamat(alpha,naxis,ncoefftot,weight,
 		cioa2,cvoa2,ncoeff2, cioa2,cvoa2,ncoeff2);
             add_betamat(beta,naxis,weight, cioa2,cvoa2,ccoa2,ncoeff2);
 /*---------- Then, the crossed contributions */
+/*
             add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cioa2,cvoa2,ncoeff2, cio,cvo,ncoeff);
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
+*/
+            if (*cio2>=*cioa2)
+              add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cioa2,cvoa2,ncoeff2, cio2,cvo2,ncoeff2);
             add_betamat(beta,naxis,-weight, cioa2,cvoa2,cco2,ncoeff2);
 #ifdef USE_THREADS
@@ -888,15 +895,17 @@ INPUT	ptr to the alpha matrix,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/12/2003
+VERSION	20/12/2011
  ***/
 static void add_alphamat(double *alpha, int naxis, int ncoefftot,
 		double weight, int *ci, double *cv, int ncoeff,
 		int *ci2, double *cv2, int ncoeff2)
   {
-   double	*cvo;
+   double	*cvo,
+		weight2;
+   size_t	rowp;
    int		*cio,
-		d, p, q;
+		d, p, q, lim;
 
   if (*ci < 0 || *ci2 < 0)
     return;
@@ -906,8 +915,15 @@ static void add_alphamat(double *alpha, int naxis, int ncoefftot,
       {
       cio = ci2;
       cvo = cv2;
-      for (q=ncoeff2; q--;)
-        alpha[*ci*(size_t)ncoefftot+*(cio++)] += weight**(cvo++)**cv;
+      weight2 = weight**cv;
+#ifdef MATSTORAGE_PACKED
+      rowp = ((size_t)(2*ncoefftot-*ci-1)**ci)/2;
+#else
+      rowp = (size_t)ncoefftot**ci;
+#endif
+      for (q=ncoeff2; q--; cio++,cvo++)
+        if (*cio>=*ci)
+          alpha[rowp+(size_t)*cio] += weight2**cvo;
       }
 
   return;
@@ -1303,7 +1319,7 @@ INPUT	Ptr to the alpha matrix,
 OUTPUT	-.
 NOTES	Matrices are not reallocated.
 AUTHOR	E. Bertin (IAP)
-VERSION	16/12/2011
+VERSION	19/12/2012
  ***/
 void	shrink_mat(double *alpha, double *beta, int ncoefftot,
 		int index, int nmiss)
@@ -1314,6 +1330,23 @@ void	shrink_mat(double *alpha, double *beta, int ncoefftot,
   if (nmiss >= ncoefftot)
     return;
 
+#ifdef MATSTORAGE_PACKED
+/* First, remove lines */
+  a = alpha + ((size_t)(2*ncoefftot-index-1)*index)/2;
+  a2 = alpha + ((size_t)(2*ncoefftot-index-nmiss-1)*(index+nmiss))/2;
+  nelem = ((size_t)(ncoefftot-1)*(ncoefftot))/2;
+  for (i=nelem; i--; )
+    *(a++) = *(a2++);
+
+/* Remove columns */
+  a = alpha + index;
+  a2 = a + nmiss;
+  nelem = ncoefftot-nmiss-1;
+  for (l=index; l--; a2+=nmiss, nelem--)
+    for (i=nelem; i--;)
+      *(a++) = *(a2++);
+
+#else
 /* First, remove lines */
   a = alpha + index*(size_t)ncoefftot;
   a2 = a + nmiss*(size_t)ncoefftot;
@@ -1325,11 +1358,13 @@ void	shrink_mat(double *alpha, double *beta, int ncoefftot,
   a = alpha + index;
   a2 = a + nmiss;
   nelem = (ncoefftot-nmiss);
-  for (l=ncoefftot-nmiss-1; l--; a2+=nmiss)
+  for (l=nelem-1; l--; a2+=nmiss)
     for (i=nelem; i--;)
       *(a++) = *(a2++);
   for (i=nelem-index; i--;)
     *(a++) = *(a2++);
+#endif
+
 
 /* The beta matrix */
   b = beta+index;

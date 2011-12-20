@@ -57,8 +57,7 @@ if test x$2 = x; then
     if test x$acx_lapacke_ok = xyes; then
       AC_DEFINE(LAPACKE_H, "mkl_lapacke.h", [LAPACKe header filename.])
     else
-      AC_CHECK_HEADERS(
-		[$MKLROOT/include/mkl_lapacke.h], [acx_lapacke_ok=yes])
+      AC_CHECK_HEADERS([$MKLROOT/include/mkl_lapacke.h], [acx_lapacke_ok=yes])
       if test x$acx_lapacke_ok = xyes; then
         AC_DEFINE_UNQUOTED(LAPACKE_H, "$MKLROOT/include/mkl_lapacke.h",
 		[LAPACKe header filename.])

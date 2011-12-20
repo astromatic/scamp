@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		13/12/2011
+#	Last modified:		17/12/2011
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[1.11.0],[bertin@iap.fr])
+AC_INIT([scamp],[1.11.1],[bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -353,7 +353,7 @@ AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient", [CDSclient executable])
 AC_MSG_CHECKING([PLPlot configure options])
 if test "$use_plplot" = "yes"; then
   AC_MSG_RESULT([yes])
-  ACX_PLPLOT($plplot_dir,$plplot_incdir,,[use_plplot=no])
+  ACX_PLPLOT($plplot_libdir,$plplot_incdir,,[use_plplot=no])
   if test "$use_plplot" = "yes"; then
     [AM_CPPFLAGS="$AM_CPPFLAGS $PLPLOT_CFLAGS"]
     [LIBS="$PLPLOT_LIBS $LIBS"]

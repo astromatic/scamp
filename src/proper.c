@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/12/2011
+*	Last modified:		19/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -239,7 +239,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/12/2011
+VERSION	19/12/2011
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -313,6 +313,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         wis = wcs_scale(wcs, samp->projpos);
         nfree = astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis, &chi2min);
         sampchi2 = NULL;
+        propmodmin = BIG;
         for (nbad=1; nbad<=PROPER_MAXNBAD; nbad++)
           {
 /*-------- Exit if chi2 is OK or if less than 2 degrees of freedom remain */
@@ -326,7 +327,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
 		|| (samp2->scampflags & SCAMP_BADPROPER))
               continue;
-/*---------- Switch detection to "good" state */
+/*---------- Switch detection to "bad" state */
             samp2->scampflags |= SCAMP_BADPROPER;
             nfree = astrprop_solve(fgroup,samp, wcsec,alpha,beta, wis, &chi2);
             if (chi2<chi2min)
