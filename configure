@@ -3964,7 +3964,7 @@ fi
 
 if test "$use_autoflag" = "yes"; then
   CFLAGS=""
-  LDFLAGS =""
+  LDFLAGS=""
 
   msg="for C compiler optimization flags"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking $msg" >&5

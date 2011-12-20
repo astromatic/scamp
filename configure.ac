@@ -99,7 +99,7 @@ AC_LANG(C)
 AC_SEARCH_LIBS([strerror],[cposix])
 if test "$use_autoflag" = "yes"; then
   CFLAGS=""
-  LDFLAGS =""
+  LDFLAGS=""
   ACX_PROG_CC_OPTIM
 fi
 LT_INIT
