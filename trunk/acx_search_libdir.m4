@@ -37,11 +37,6 @@ dnl @synopsis ACX_SEARCH_LIBDIR(VAR, LIBDIRS, LIBRARY, FUNCTION,
 dnl			ACTION-IF-FOUND, ACTION-IF-NOT-FOUND,
 dnl			EXTRA_LIBRARIES)
 dnl
-dnl Currently this macro knows about GCC, Solaris C compiler,
-dnl Digital Unix C compiler, C for AIX Compiler, HP-UX C compiler,
-dnl IRIX C compiler, NEC SX-5 (Super-UX 10) C compiler, and Cray J90
-dnl (Unicos 10.0.0.8) C compiler.
-dnl
 dnl This macro is a modification of AX_EXT_HAVE_LIB by Duncan Simpson
 dnl <dps@simpson.demon.co.uk>
 
@@ -77,6 +72,7 @@ if test x$libdir_found = xyes; then
   $1="$new_libs"
   $5
 else
+  $1=""
   $6
 fi
 ])
