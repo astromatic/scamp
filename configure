@@ -635,9 +635,12 @@ FFTW_LIBS
 FFTW_WARN
 MKL_FFTW_ERROR
 MKL_FFTW_LIBS
+MKL_FFTW_INC
+MKL_FFTW_CFLAGS
 MKL_FFTW_WARN
 MKL_LAPACKE_ERROR
 MKL_LAPACKE_LIBS
+MKL_LAPACKE_INC
 MKL_LAPACKE_CFLAGS
 MKL_LAPACKE_WARN
 USE_THREADS_FALSE
@@ -2826,6 +2829,10 @@ DATE3="$date3"
 
 
 # Include macros
+
+
+
+
 
 
 
@@ -12794,7 +12801,7 @@ urbi_resolve_dir ()
   while true
   do
     eval ac_URBI_RESOLVE_DIR_PREPARE_res="$ac_URBI_RESOLVE_DIR_PREPARE_dir"
-    if test x"$ac_URBI_RESOLVE_DIR_PREPARE_dir" == x"$ac_URBI_RESOLVE_DIR_PREPARE_res"; then
+    if test x"$ac_URBI_RESOLVE_DIR_PREPARE_dir" = x"$ac_URBI_RESOLVE_DIR_PREPARE_res"; then
       break
     fi
     ac_URBI_RESOLVE_DIR_PREPARE_dir=$ac_URBI_RESOLVE_DIR_PREPARE_res
@@ -13331,180 +13338,252 @@ if test "$use_mkl" = "yes"; then
 acx_lapacke_ok=no
 if test x$mkl_lapacke_incdir = x; then
   if test x$mkl_lapacke_libdir = x; then
-    for ac_header in mkl_lapacke.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "mkl_lapacke.h" "ac_cv_header_mkl_lapacke_h" "$ac_includes_default"
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  hdr=`echo mkl_lapacke.h | $as_tr_sh`
+  incdir_found="no"
+  MKL_LAPACKE_INC=""
+  if test xyes=xyes; then
+    ac_fn_c_check_header_mongrel "$LINENO" "mkl_lapacke.h" "ac_cv_header_mkl_lapacke_h" "$ac_includes_default"
 if test "x$ac_cv_header_mkl_lapacke_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_MKL_LAPACKE_H 1
-_ACEOF
- acx_lapacke_ok=yes
+  incdir_found="yes"
 fi
 
-done
 
-    if test x$acx_lapacke_ok = xyes; then
+  fi
+  for incdir in "$MKLROOT/include"; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mkl_lapacke.h with -I$incdir" >&5
+$as_echo_n "checking for mkl_lapacke.h with -I$incdir... " >&6; }
+if eval \${incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <mkl_lapacke.h>
+int
+main ()
+{
 
-$as_echo "#define LAPACKE_H \"mkl_lapacke.h\"" >>confdefs.h
-
-    else
-      for ac_header in $MKLROOT/include/mkl_lapacke.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+  ;
+  return 0;
+}
 _ACEOF
- acx_lapacke_ok=yes
+if ac_fn_c_try_compile "$LINENO"; then :
+  incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"
+else
+  incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"
 fi
-
-done
-
-      if test x$acx_lapacke_ok = xyes; then
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	CFLAGS=$incdir_have_hdr_save_cflags
+fi
+eval ac_res=\$incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        MKL_LAPACKE_INC="${incdir}"
+        hdr=`echo mkl_lapacke.h | $as_tr_cpp`
 
 cat >>confdefs.h <<_ACEOF
-#define LAPACKE_H "$MKLROOT/include/mkl_lapacke.h"
+#define HAVE_${hdr} 1
 _ACEOF
 
-      else
-        MKL_LAPACKE_ERROR="INTEL MKL LAPacke include files not found!"
       fi
     fi
-  else
-    for ac_header in $mkl_lapacke_libdir/include/mkl_lapacke.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_lapacke_ok=yes
-fi
+  done
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-done
-
-    if test x$acx_lapacke_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define LAPACKE_H "$mkl_lapacke_libdir/include/mkl_lapacke.h"
-_ACEOF
-
-    else
-      for ac_header in $mkl_lapacke_libdir/../include/mkl_lapacke.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_lapacke_ok=yes
-fi
-
-done
-
-      if test x$acx_lapacke_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define LAPACKE_H "$mkl_lapacke_libdir/../include/mkl_lapacke.h"
-_ACEOF
-
-      else
-        for ac_header in $mkl_lapacke_libdir/../../include/mkl_lapacke.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_lapacke_ok=yes
-fi
-
-done
-
-        if test x$acx_lapacke_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define LAPACKE_H "$mkl_lapacke_libdir/../../include/mkl_lapacke.h"
-_ACEOF
-
-        else
-          for ac_header in mkl_lapacke.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "mkl_lapacke.h" "ac_cv_header_mkl_lapacke_h" "$ac_includes_default"
-if test "x$ac_cv_header_mkl_lapacke_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_MKL_LAPACKE_H 1
-_ACEOF
- acx_lapacke_ok=yes
-fi
-
-done
-
-          if test x$acx_lapacke_ok = xyes; then
+if test x$incdir_found = xyes; then :
+  acx_lapacke_ok=yes
 
 cat >>confdefs.h <<_ACEOF
 #define LAPACKE_H "mkl_lapacke.h"
 _ACEOF
 
-          else
-            MKL_LAPACKE_ERROR="INTEL MKL LAPacke include files not found!"
-          fi
-        fi
-      fi
-    fi
-  fi
-else
-  for ac_header in $mkl_lapacke_incdir/include/mkl_lapacke.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_lapacke_ok=yes
+else :
+  MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found!"
 fi
-
-done
-
-  if test x$acx_lapacke_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define LAPACKE_H "$mkl_lapacke_incdir/include/mkl_lapacke.h"
-_ACEOF
 
   else
-    for ac_header in $mkl_lapacke_incdir/mkl_lapacke.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_lapacke_ok=yes
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  hdr=`echo mkl_lapacke.h | $as_tr_sh`
+  incdir_found="no"
+  MKL_LAPACKE_INC=""
+  if test xno=xyes; then
+    ac_fn_c_check_header_mongrel "$LINENO" "mkl_lapacke.h" "ac_cv_header_mkl_lapacke_h" "$ac_includes_default"
+if test "x$ac_cv_header_mkl_lapacke_h" = xyes; then :
+  incdir_found="yes"
 fi
 
-done
 
-    if test x$acx_lapacke_ok = xyes; then
+  fi
+  for incdir in $mkl_lapacke_libdir/include $mkl_lapacke_libdir/../include $mkl_lapacke_libdir/../../include; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mkl_lapacke.h with -I$incdir" >&5
+$as_echo_n "checking for mkl_lapacke.h with -I$incdir... " >&6; }
+if eval \${incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <mkl_lapacke.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"
+else
+  incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	CFLAGS=$incdir_have_hdr_save_cflags
+fi
+eval ac_res=\$incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        MKL_LAPACKE_INC="${incdir}"
+        hdr=`echo mkl_lapacke.h | $as_tr_cpp`
 
 cat >>confdefs.h <<_ACEOF
-#define LAPACKE_H "$mkl_lapacke_incdir/mkl_lapacke.h"
+#define HAVE_${hdr} 1
 _ACEOF
 
-    else
-      MKL_LAPACKE_ERROR="INTEL MKL LAPacke include files not found in $mkl_lapacke_incdir!"
+      fi
     fi
+  done
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test x$incdir_found = xyes; then :
+  acx_lapacke_ok=yes
+
+cat >>confdefs.h <<_ACEOF
+#define LAPACKE_H "mkl_lapacke.h"
+_ACEOF
+
+else :
+  MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found!"
+fi
+
   fi
+else
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  hdr=`echo mkl_lapacke.h | $as_tr_sh`
+  incdir_found="no"
+  MKL_LAPACKE_INC=""
+  if test xno=xyes; then
+    ac_fn_c_check_header_mongrel "$LINENO" "mkl_lapacke.h" "ac_cv_header_mkl_lapacke_h" "$ac_includes_default"
+if test "x$ac_cv_header_mkl_lapacke_h" = xyes; then :
+  incdir_found="yes"
 fi
 
 
-OLDFLAGS="$LDFLAGS"
+  fi
+  for incdir in $mkl_lapacke_incdir/include $mkl_lapacke_incdir ; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mkl_lapacke.h with -I$incdir" >&5
+$as_echo_n "checking for mkl_lapacke.h with -I$incdir... " >&6; }
+if eval \${incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <mkl_lapacke.h>
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"
+else
+  incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	CFLAGS=$incdir_have_hdr_save_cflags
+fi
+eval ac_res=\$incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        MKL_LAPACKE_INC="${incdir}"
+        hdr=`echo mkl_lapacke.h | $as_tr_cpp`
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_${hdr} 1
+_ACEOF
+
+      fi
+    fi
+  done
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test x$incdir_found = xyes; then :
+  acx_lapacke_ok=yes
+
+cat >>confdefs.h <<_ACEOF
+#define LAPACKE_H "mkl_lapacke.h"
+_ACEOF
+
+else :
+  MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found in $mkl_lapacke_incdir!"
+fi
+
+fi
+
+
 OLIBS="$LIBS"
 LIBS=""
 if test x$acx_lapacke_ok = xyes; then
@@ -13523,8 +13602,15 @@ if test x$acx_lapacke_ok = xyes; then
   fi
   if test x$use_pthreads = xyes; then
     if test x$mkl_lapacke_libdir = x; then
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-      as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_lapacke_lib''_LAPACKE_dpotrf" | $as_tr_sh`
+
+
+
+libdir_ldflags=${LDFLAGS}
+old_libs=$LIBS
+libdir_found="no"
+MKL_LAPACKE_LIBS=""
+if test xyes=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_lapacke_lib''_LAPACKE_dpotrf" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib" >&5
 $as_echo_n "checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib... " >&6; }
 if eval \${$as_ac_Lib+:} false; then :
@@ -13563,30 +13649,11 @@ eval ac_res=\$$as_ac_Lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_LIB$mkl_lapacke_lib" | $as_tr_cpp` 1
-_ACEOF
-
-  LIBS="-l$mkl_lapacke_lib $LIBS"
-
-else
-  acx_lapacke_ok=no
+  libdir_found="yes"
+	MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
 fi
 
-      if test x$acx_lapacke_ok = xyes; then
-        MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp"
-
-$as_echo "#define HAVE_LAPACKE_MP 1" >>confdefs.h
-
-      else
-        unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-        acx_lapacke_ok=yes
-
-
-
-libdir_ldflags=${LDFLAGS}
-old_libs=$LIBS
-libdir_found="no"
+fi
 for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -13631,37 +13698,75 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
+      MKL_LAPACKE_LIBS="-L${dir} -l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_LAPACKE_LIBS="$new_libs"
-
-else
-  MKL_LAPACKE_LIBS=""
-  acx_lapacke_ok=no
-fi
-
-        if test x$acx_lapacke_ok = xyes; then
+if test x$libdir_found = xyes; then :
 
 $as_echo "#define HAVE_LAPACKE_MP 1" >>confdefs.h
 
-        else
-          MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
-        fi
-      fi
+else :
+  acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
+fi
+
     else
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
 
 
 
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
+MKL_LAPACKE_LIBS=""
+if test xno=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_lapacke_lib''_LAPACKE_dpotrf" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib" >&5
+$as_echo_n "checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char LAPACKE_dpotrf ();
+int
+main ()
+{
+return LAPACKE_dpotrf ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  libdir_found="yes"
+	MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
+fi
+
+fi
 for dir in $mkl_lapacke_libdir/lib $mkl_lapacke_libdir; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -13706,33 +13811,34 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
+      MKL_LAPACKE_LIBS="-L${dir} -l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_LAPACKE_LIBS="$new_libs"
-
-else
-  MKL_LAPACKE_LIBS=""
-  acx_lapacke_ok=no
-fi
-
-      if test x$acx_lapacke_ok = xyes; then
+if test x$libdir_found = xyes; then :
 
 $as_echo "#define HAVE_LAPACKE_MP 1" >>confdefs.h
 
-      else
-        MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"
-      fi
+else :
+  acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"
+fi
+
     fi
   else
     if test x$mkl_lapacke_libdir = x; then
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-      as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_lapacke_lib''_LAPACKE_dpotrf" | $as_tr_sh`
+
+
+
+libdir_ldflags=${LDFLAGS}
+old_libs=$LIBS
+libdir_found="no"
+MKL_LAPACKE_LIBS=""
+if test xyes=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_lapacke_lib''_LAPACKE_dpotrf" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib" >&5
 $as_echo_n "checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib... " >&6; }
 if eval \${$as_ac_Lib+:} false; then :
@@ -13771,27 +13877,11 @@ eval ac_res=\$$as_ac_Lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_LIB$mkl_lapacke_lib" | $as_tr_cpp` 1
-_ACEOF
-
-  LIBS="-l$mkl_lapacke_lib $LIBS"
-
-else
-  acx_lapacke_ok=no
+  libdir_found="yes"
+	MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
 fi
 
-      if test x$acx_lapacke_ok = xyes; then
-        MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
-      else
-        unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-        acx_lapacke_ok=yes
-
-
-
-libdir_ldflags=${LDFLAGS}
-old_libs=$LIBS
-libdir_found="no"
+fi
 for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -13836,33 +13926,74 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
+      MKL_LAPACKE_LIBS="-L${dir} -l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_LAPACKE_LIBS="$new_libs"
+if test x$libdir_found = xyes; then :
 
-else
-  MKL_LAPACKE_LIBS=""
+else :
   acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
 fi
 
-        if test x$acx_lapacke_ok = xno; then
-          MKL_LAPACKE_ERROR="INTEL MKL serial LAPACKe library files not found at usual locations!"
-        fi
-      fi
     else
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
+      unset ac_cv_lib_"$mkl_lapacke_lib"_"$mkl_func"
 
 
 
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
+MKL_LAPACKE_LIBS=""
+if test xno=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_lapacke_lib''_LAPACKE_dpotrf" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib" >&5
+$as_echo_n "checking for LAPACKE_dpotrf in -l$mkl_lapacke_lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$mkl_lapacke_lib -lmkl_sequential -lmkl_core $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char LAPACKE_dpotrf ();
+int
+main ()
+{
+return LAPACKE_dpotrf ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  libdir_found="yes"
+	MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
+fi
+
+fi
 for dir in $mkl_lapacke_libdir/lib $mkl_lapacke_libdir; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -13907,35 +14038,31 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_lapacke_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
+      MKL_LAPACKE_LIBS="-L${dir} -l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_LAPACKE_LIBS="$new_libs"
+if test x$libdir_found = xyes; then :
 
-else
-  MKL_LAPACKE_LIBS=""
+else :
   acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"
 fi
 
-      if test x$acx_lapacke_ok = xno; then
-          MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
-      fi
     fi
   fi
 fi
 
-LDFLAGS="$OLDFLAGS"
 LIBS="$OLIBS"
 if test x$acx_lapacke_ok = xyes; then
 
 $as_echo "#define HAVE_LAPACKE 1" >>confdefs.h
 
   MKL_LAPACKE_CFLAGS=$mkl_cflags
+
 
 
   use_mkl_lapacke=yes
@@ -13959,217 +14086,252 @@ $as_echo "$as_me: WARNING: $MKL_LAPACKE_WARN" >&2;}
 
 
 acx_fftw_ok=no
+MKL_FFTW_INC=""
 if test x$mkl_fftw_incdir = x; then
   if test x$mkl_fftw_libdir = x; then
-    for ac_header in fftw3_mkl.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "fftw3_mkl.h" "ac_cv_header_fftw3_mkl_h" "$ac_includes_default"
-if test "x$ac_cv_header_fftw3_mkl_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FFTW3_MKL_H 1
-_ACEOF
- acx_fftw_ok=yes
-fi
 
-done
 
-    if test x$acx_fftw_ok = xyes; then
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-$as_echo "#define FFTW_H \"fftw3_mkl.h\"" >>confdefs.h
-
-    else
-      for ac_header in fftw/fftw3_mkl.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "fftw/fftw3_mkl.h" "ac_cv_header_fftw_fftw3_mkl_h" "$ac_includes_default"
+  hdr=`echo fftw/fftw3_mkl.h | $as_tr_sh`
+  incdir_found="no"
+  MKL_FFTW_INC=""
+  if test xyes=xyes; then
+    ac_fn_c_check_header_mongrel "$LINENO" "fftw/fftw3_mkl.h" "ac_cv_header_fftw_fftw3_mkl_h" "$ac_includes_default"
 if test "x$ac_cv_header_fftw_fftw3_mkl_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FFTW_FFTW3_MKL_H 1
-_ACEOF
- acx_fftw_ok=yes
+  incdir_found="yes"
 fi
 
-done
 
-      if test x$acx_fftw_ok = xyes; then
+  fi
+  for incdir in "$MKLROOT/include"; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw/fftw3_mkl.h with -I$incdir" >&5
+$as_echo_n "checking for fftw/fftw3_mkl.h with -I$incdir... " >&6; }
+if eval \${incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <fftw/fftw3_mkl.h>
+int
+main ()
+{
 
-$as_echo "#define FFTW_H \"fftw/fftw3_mkl.h\"" >>confdefs.h
-
-      else
-        for ac_header in $MKLROOT/include/fftw/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+  ;
+  return 0;
+}
 _ACEOF
- acx_fftw_ok=yes
+if ac_fn_c_try_compile "$LINENO"; then :
+  incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"
+else
+  incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"
 fi
-
-done
-
-        if test x$acx_fftw_ok = xyes; then
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	CFLAGS=$incdir_have_hdr_save_cflags
+fi
+eval ac_res=\$incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        MKL_FFTW_INC="${incdir}"
+        hdr=`echo fftw/fftw3_mkl.h | $as_tr_cpp`
 
 cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$MKLROOT/include/fftw/fftw3_mkl.h"
+#define HAVE_${hdr} 1
 _ACEOF
 
-        else
-          MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"
-        fi
       fi
     fi
+  done
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test x$incdir_found = xyes; then :
+  acx_fftw_ok=yes
+
+cat >>confdefs.h <<_ACEOF
+#define FFTW_H "fftw/fftw3_mkl.h"
+_ACEOF
+
+else :
+  MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"
+fi
+
   else
-    for ac_header in $mkl_fftw_libdir/include/fftw/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_fftw_ok=yes
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  hdr=`echo fftw/fftw3_mkl.h | $as_tr_sh`
+  incdir_found="no"
+  MKL_FFTW_INC=""
+  if test xno=xyes; then
+    ac_fn_c_check_header_mongrel "$LINENO" "fftw/fftw3_mkl.h" "ac_cv_header_fftw_fftw3_mkl_h" "$ac_includes_default"
+if test "x$ac_cv_header_fftw_fftw3_mkl_h" = xyes; then :
+  incdir_found="yes"
 fi
 
-done
 
-    if test x$acx_fftw_ok = xyes; then
+  fi
+  for incdir in $mkl_fftw_libdir/include $mkl_fftw_libdir/../include $mkl_fftw_libdir/../../include; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw/fftw3_mkl.h with -I$incdir" >&5
+$as_echo_n "checking for fftw/fftw3_mkl.h with -I$incdir... " >&6; }
+if eval \${incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <fftw/fftw3_mkl.h>
+int
+main ()
+{
 
-cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$mkl_fftw_libdir/include/fftw/fftw3_mkl.h"
+  ;
+  return 0;
+}
 _ACEOF
-
-    else
-      for ac_header in $mkl_fftw_libdir/../include/fftw/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_fftw_ok=yes
+if ac_fn_c_try_compile "$LINENO"; then :
+  incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"
+else
+  incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"
 fi
-
-done
-
-      if test x$acx_fftw_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$mkl_fftw_libdir/../include/fftw/fftw3_mkl.h"
-_ACEOF
-
-      else
-        for ac_header in $mkl_fftw_libdir/../../include/fftw/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_fftw_ok=yes
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	CFLAGS=$incdir_have_hdr_save_cflags
 fi
-
-done
-
-        if test x$acx_ffw_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$mkl_fftw_libdir/../../include/fftw/fftw3_mkl.h"
-_ACEOF
-
-        else
-          for ac_header in fftw3_mkl.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "fftw3_mkl.h" "ac_cv_header_fftw3_mkl_h" "$ac_includes_default"
-if test "x$ac_cv_header_fftw3_mkl_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FFTW3_MKL_H 1
-_ACEOF
- acx_fftw_ok=yes
-fi
-
-done
-
-          if test x$acx_fftw_ok = xyes; then
+eval ac_res=\$incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        MKL_FFTW_INC="${incdir}"
+        hdr=`echo fftw/fftw3_mkl.h | $as_tr_cpp`
 
 cat >>confdefs.h <<_ACEOF
-#define FFTW_H "fftw3_mkl.h"
+#define HAVE_${hdr} 1
 _ACEOF
 
-          else
-            MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"
-          fi
-        fi
       fi
     fi
+  done
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test x$incdir_found = xyes; then :
+  acx_fftw_ok=yes
+
+cat >>confdefs.h <<_ACEOF
+#define FFTW_H "fftw/fftw3_mkl.h"
+_ACEOF
+
+else :
+  MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"
+fi
+
   fi
 else
-  for ac_header in $mkl_fftw_incdir/include/fftw/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_fftw_ok=yes
+
+
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+  hdr=`echo fftw/fftw3_mkl.h | $as_tr_sh`
+  incdir_found="no"
+  MKL_FFTW_INC=""
+  if test xno=xyes; then
+    ac_fn_c_check_header_mongrel "$LINENO" "fftw/fftw3_mkl.h" "ac_cv_header_fftw_fftw3_mkl_h" "$ac_includes_default"
+if test "x$ac_cv_header_fftw_fftw3_mkl_h" = xyes; then :
+  incdir_found="yes"
 fi
 
-done
 
-  if test x$acx_fftw_ok = xyes; then
+  fi
+  for incdir in $mkl_fftw_incdir/include $mkl_fftw_incdir $mkl_fftw_incdir/..; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for fftw/fftw3_mkl.h with -I$incdir" >&5
+$as_echo_n "checking for fftw/fftw3_mkl.h with -I$incdir... " >&6; }
+if eval \${incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <fftw/fftw3_mkl.h>
+int
+main ()
+{
 
-cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$mkl_fftw_incdir/include/fftw/fftw3_mkl.h"
+  ;
+  return 0;
+}
 _ACEOF
-
-  else
-    for ac_header in $mkl_fftw_incdir/fftw/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_fftw_ok=yes
+if ac_fn_c_try_compile "$LINENO"; then :
+  incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"
+else
+  incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"
 fi
-
-done
-
-    if test x$acx_fftw_ok = xyes; then
-
-cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$mkl_fftw_incdir/fftw/fftw3_mkl.h"
-_ACEOF
-
-    else
-      for ac_header in $mkl_fftw_incdir/fftw3_mkl.h
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
- acx_fftw_ok=yes
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+	CFLAGS=$incdir_have_hdr_save_cflags
 fi
-
-done
-
-      if test x$acx_fftw_ok = xyes; then
+eval ac_res=\$incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        MKL_FFTW_INC="${incdir}"
+        hdr=`echo fftw/fftw3_mkl.h | $as_tr_cpp`
 
 cat >>confdefs.h <<_ACEOF
-#define FFTW_H "$mkl_fftw_incdir/fftw3_mkl.h"
+#define HAVE_${hdr} 1
 _ACEOF
 
-      else
-        MKL_FFTW_ERROR="INTEL MKL FFTW include files not found in $mkl_fftw_incdir!"
       fi
     fi
-  fi
+  done
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test x$incdir_found = xyes; then :
+  acx_fftw_ok=yes
+
+cat >>confdefs.h <<_ACEOF
+#define FFTW_H "fftw/fftw3_mkl.h"
+_ACEOF
+
+else :
+  MKL_FFTW_ERROR="INTEL MKL FFTW include files not found in $mkl_fftw_incdir!"
+fi
+
 fi
 
 
@@ -14196,8 +14358,15 @@ if test x$acx_fftw_ok = xyes; then
       mkl_func=fftw_init_threads
     fi
     if test x$mkl_fftw_libdir = x; then
-      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-      as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_fftw_lib''_$mkl_func" | $as_tr_sh`
+
+
+
+libdir_ldflags=${LDFLAGS}
+old_libs=$LIBS
+libdir_found="no"
+MKL_FFTW_LIBS=""
+if test xyes=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_fftw_lib''_$mkl_func" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_func in -l$mkl_fftw_lib" >&5
 $as_echo_n "checking for $mkl_func in -l$mkl_fftw_lib... " >&6; }
 if eval \${$as_ac_Lib+:} false; then :
@@ -14236,30 +14405,11 @@ eval ac_res=\$$as_ac_Lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_LIB$mkl_fftw_lib" | $as_tr_cpp` 1
-_ACEOF
-
-  LIBS="-l$mkl_fftw_lib $LIBS"
-
-else
-  acx_fftw_ok=no
+  libdir_found="yes"
+	MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
 fi
 
-      if test x$acx_fftw_ok = xyes; then
-        MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp"
-
-$as_echo "#define HAVE_FFTW_MP 1" >>confdefs.h
-
-      else
-        unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-        acx_fftw_ok=yes
-
-
-
-libdir_ldflags=${LDFLAGS}
-old_libs=$LIBS
-libdir_found="no"
+fi
 for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -14304,37 +14454,75 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
+      MKL_FFTW_LIBS="-L${dir} -l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_FFTW_LIBS="$new_libs"
-
-else
-  MKL_FFTW_LIBS=""
-  acx_fftw_ok=no
-fi
-
-        if test x$acx_fftw_ok = xyes; then
+if test x$libdir_found = xyes; then :
 
 $as_echo "#define HAVE_FFTW_MP 1" >>confdefs.h
 
-        else
-          MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"
-        fi
-      fi
+else :
+  acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"
+fi
+
     else
-      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
 
 
 
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
+MKL_FFTW_LIBS=""
+if test xno=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_fftw_lib''_$mkl_func" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_func in -l$mkl_fftw_lib" >&5
+$as_echo_n "checking for $mkl_func in -l$mkl_fftw_lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char $mkl_func ();
+int
+main ()
+{
+return $mkl_func ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  libdir_found="yes"
+	MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
+fi
+
+fi
 for dir in $mkl_fftw_libdir/lib $mkl_fftw_libdir; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -14379,28 +14567,22 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
+      MKL_FFTW_LIBS="-L${dir} -l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp -lpthread"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_FFTW_LIBS="$new_libs"
-
-else
-  MKL_FFTW_LIBS=""
-  acx_fftw_ok=no
-fi
-
-      if test x$acx_fftw_ok = xyes; then
+if test x$libdir_found = xyes; then :
 
 $as_echo "#define HAVE_FFTW_MP 1" >>confdefs.h
 
-      else
-          MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
-      fi
+else :
+  acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
+fi
+
     fi
   else
     if test xyes = xyes; then
@@ -14409,8 +14591,15 @@ $as_echo "#define HAVE_FFTW_MP 1" >>confdefs.h
       mkl_func=fftw_execute
     fi
     if test x$mkl_fftw_libdir = x; then
-      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-      as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_fftw_lib''_$mkl_func" | $as_tr_sh`
+
+
+
+libdir_ldflags=${LDFLAGS}
+old_libs=$LIBS
+libdir_found="no"
+MKL_FFTW_LIBS=""
+if test xyes=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_fftw_lib''_$mkl_func" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_func in -l$mkl_fftw_lib" >&5
 $as_echo_n "checking for $mkl_func in -l$mkl_fftw_lib... " >&6; }
 if eval \${$as_ac_Lib+:} false; then :
@@ -14449,27 +14638,11 @@ eval ac_res=\$$as_ac_Lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_LIB$mkl_fftw_lib" | $as_tr_cpp` 1
-_ACEOF
-
-  LIBS="-l$mkl_fftw_lib $LIBS"
-
-else
-  acx_fftw_ok=no
+  libdir_found="yes"
+	MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
 fi
 
-      if test x$acx_fftw_ok = xyes; then
-        MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
-      else
-        unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-        acx_fftw_ok=yes
-
-
-
-libdir_ldflags=${LDFLAGS}
-old_libs=$LIBS
-libdir_found="no"
+fi
 for dir in $mkl_root; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -14514,25 +14687,20 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
+      MKL_FFTW_LIBS="-L${dir} -l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_FFTW_LIBS="$new_libs"
+if test x$libdir_found = xyes; then :
 
-else
-  MKL_FFTW_LIBS=""
+else :
   acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"
 fi
 
-        if test x$acx_fftw_ok = xno; then
-          MKL_FFTW_ERROR="INTEL MKL serial FFTW library files not found at usual locations!"
-        fi
-      fi
     else
       unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
 
@@ -14541,6 +14709,52 @@ fi
 libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
+MKL_FFTW_LIBS=""
+if test xno=xyes; then
+  as_ac_Lib=`$as_echo "ac_cv_lib_$mkl_fftw_lib''_$mkl_func" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $mkl_func in -l$mkl_fftw_lib" >&5
+$as_echo_n "checking for $mkl_func in -l$mkl_fftw_lib... " >&6; }
+if eval \${$as_ac_Lib+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-l$mkl_fftw_lib -lmkl_sequential -lmkl_core $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char $mkl_func ();
+int
+main ()
+{
+return $mkl_func ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  eval "$as_ac_Lib=yes"
+else
+  eval "$as_ac_Lib=no"
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+eval ac_res=\$$as_ac_Lib
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Lib"\" = x"yes"; then :
+  libdir_found="yes"
+	MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
+fi
+
+fi
 for dir in $mkl_fftw_libdir/lib $mkl_fftw_libdir; do
   if test $libdir_found = no; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
@@ -14585,24 +14799,20 @@ eval ac_res=\$libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
     if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$mkl_fftw_lib'}' = "xyes"`; then
-      new_libs="-L${dir} -l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
+      MKL_FFTW_LIBS="-L${dir} -l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
       libdir_found="yes"
     fi
   fi
 done
 LDFLAGS="$libdir_ldflags"
 LIBS="$old_libs"
-if test x$libdir_found = xyes; then
-  MKL_FFTW_LIBS="$new_libs"
+if test x$libdir_found = xyes; then :
 
-else
-  MKL_FFTW_LIBS=""
+else :
   acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
 fi
 
-      if test x$acx_fftw_ok = xno; then
-        MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
-      fi
     fi
   fi
 fi
@@ -14612,7 +14822,8 @@ if test x$acx_fftw_ok = xyes; then
 
 $as_echo "#define HAVE_FFTW 1" >>confdefs.h
 
-  MKL_LAPACKE_CFLAGS=$mkl_cflags
+  MKL_FFTW_CFLAGS=$mkl_cflags
+
 
 
   use_mkl_fftw=yes

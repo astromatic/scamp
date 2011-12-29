@@ -54,18 +54,12 @@
 /* Define if you have the FFTW double precision libraries and header files. */
 #undef HAVE_FFTW
 
-/* Define to 1 if you have the <fftw3_mkl.h> header file. */
-#undef HAVE_FFTW3_MKL_H
-
 /* Define if you have the FFTW single precision libraries and header files. */
 #undef HAVE_FFTWF
 
 /* Define if you have the FFTW single precision multithreaded libraries and
    header files. */
 #undef HAVE_FFTWF_MP
-
-/* Define to 1 if you have the <fftw/fftw3_mkl.h> header file. */
-#undef HAVE_FFTW_FFTW3_MKL_H
 
 /* Define if you have the FFTW double precision multithreaded libraries and
    header files. */
@@ -124,9 +118,6 @@
 
 /* Define to 1 if you have the `mkdir' function. */
 #undef HAVE_MKDIR
-
-/* Define to 1 if you have the <mkl_lapacke.h> header file. */
-#undef HAVE_MKL_LAPACKE_H
 
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP

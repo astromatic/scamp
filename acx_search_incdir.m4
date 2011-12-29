@@ -1,6 +1,6 @@
-dnl                             acx_search_libdir.m4
+dnl                             acx_search_incdir.m4
 dnl
-dnl Search a library in a list of directories
+dnl Search an include file in a list of directories
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -33,51 +33,47 @@ dnl     Last modified:          29/12/2011
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
-dnl @synopsis ACX_SEARCH_LIBDIR(VAR, EMPTYFLAG, LIBDIRS, LIBRARY, FUNCTION,
-dnl			ACTION-IF-FOUND, ACTION-IF-NOT-FOUND,
-dnl			EXTRA_LIBRARIES)
+dnl @synopsis ACX_SEARCH_INCDIR(VAR, EMPTYFLAG, INCDIRS, INCLUDE,
+dnl			ACTION-IF-FOUND, ACTION-IF-NOT-FOUND)
 dnl
 dnl This macro is a modification of AX_EXT_HAVE_LIB by Duncan Simpson
 dnl <dps@simpson.demon.co.uk>
 
-AC_DEFUN([ACX_SEARCH_LIBDIR], [
+AC_DEFUN([ACX_SEARCH_INCDIR], [
 AC_REQUIRE([AC_CANONICAL_HOST])
-
-libdir_ldflags=${LDFLAGS}
-old_libs=$LIBS
-libdir_found="no"
-$1=""
-if test x$2=xyes; then
-  AC_CHECK_LIB($4,$5,
-	[libdir_found="yes"
-	$1="-l$4 $8"],
-	[],$8)
-fi
-for dir in $3; do
-  if test $libdir_found = no; then
-    libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
-    AC_CACHE_CHECK([for $4 library with -L$dir],
-	[libdir_cv${libdir_haslib_cvdir}_haslib_$4],
-	[libdir_save_LIBS=$LIBS
-	libdir_save_ldflags=${LDFLAGS}
-	LIBS="-l$4 $8"
-	LDFLAGS="-L$dir ${libdir_save_ldflags}"
-	AC_TRY_LINK_FUNC([$5],
-		[eval "libdir_cv${libdir_haslib_cvdir}_haslib_$4"="yes"],
-		[eval "libdir_cv${libdir_haslib_cvdir}_haslib_$4"="no"])
-	LIBS=$libdir_save_LIBS
-	LDFLAGS=$libdir_save_ldflags])
-    if eval `echo 'test x${'libdir_cv${libdir_haslib_cvdir}_haslib_$4'}' = "xyes"`; then
-      $1="-L${dir} -l$4 $8"
-      libdir_found="yes"
-    fi
+AC_LANG_PUSH(C)
+  hdr=`echo $4 | $as_tr_sh`
+  incdir_found="no"
+  $1=""
+  if test x$2=xyes; then
+    AC_CHECK_HEADER($4,[incdir_found="yes"])
   fi
-done
-LDFLAGS="$libdir_ldflags"
-LIBS="$old_libs"
-if test x$libdir_found = xyes; then :
-  $6
+  for incdir in $3; do
+    if test "x${incdir_found}" = "xno"; then
+      incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
+      AC_CACHE_CHECK([for $4 with -I$incdir],
+	[incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}],
+	[incdir_have_hdr_save_cflags=${CFLAGS}
+	CFLAGS="${CFLAGS} -I${incdir}"
+	AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM([#include <$4>])],
+	[incdir_found="yes"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="yes"],
+	[incdir_found="no"; eval "incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}"="no"])
+	CFLAGS=$incdir_have_hdr_save_cflags])
+      if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
+        incdir_found="yes";
+        $1="${incdir}"
+        hdr=`echo $4 | $as_tr_cpp`
+        AC_DEFINE_UNQUOTED(HAVE_${hdr}, 1,
+		[Define this if you have the $1 header])
+      fi
+    fi
+  done
+AC_LANG_POP
+if test x$incdir_found = xyes; then :
+  $5
 else :
-  $7
+  $6
 fi
 ])
+
