@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/12/2011
+*	Last modified:		29/12/2011
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -427,7 +427,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/12/2011
+VERSION	29/12/2011
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -570,7 +570,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   memcpy(b,beta,ncoeff*sizeof(double));
   memcpy(a,alpha,ncoeff*ncoeff*sizeof(double));
 #if defined(HAVE_LAPACKE)
-  LAPACKE_dposv(LAPACK_ROW_MAJOR, 'U', ncoeff, 1, alpha, ncoeff, beta, ncoeff);
+  LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoeff, 1, alpha, ncoeff, beta, ncoeff);
 #else
   clapack_dposv(CblasRowMajor,CblasUpper,ncoeff,1, alpha,ncoeff,beta,ncoeff);
 #endif
