@@ -51,16 +51,17 @@ dnl Search include files
 dnl --------------------
 
 acx_lapacke_ok=no
+MKL_LAPACKE_INCLUDES=""
 if test x$2 = x; then
   if test x$1 = x; then
-    ACX_SEARCH_INCDIR(MKL_LAPACKE_INC, yes, "$MKLROOT/include",
+    ACX_SEARCH_INCDIR(MKL_LAPACKE_INCLUDES, yes, "$MKLROOT/include",
 	[mkl_lapacke.h],
 	[acx_lapacke_ok=yes
 		AC_DEFINE_UNQUOTED(LAPACKE_H, "mkl_lapacke.h",
 			[LAPACKe header filename.])],
 	[MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found!"])
   else
-    ACX_SEARCH_INCDIR(MKL_LAPACKE_INC, no,
+    ACX_SEARCH_INCDIR(MKL_LAPACKE_INCLUDES, no,
 	[$1/include $1/../include $1/../../include],
 	[mkl_lapacke.h],
 	[acx_lapacke_ok=yes
@@ -69,7 +70,7 @@ if test x$2 = x; then
 	[MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found!"])
   fi
 else
-  ACX_SEARCH_INCDIR(MKL_LAPACKE_INC, no, [$2/include $2 ],
+  ACX_SEARCH_INCDIR(MKL_LAPACKE_INCLUDES, no, [$2/include $2 ],
 	[mkl_lapacke.h],
 	[acx_lapacke_ok=yes
 		AC_DEFINE_UNQUOTED(LAPACKE_H, "mkl_lapacke.h",
@@ -142,7 +143,7 @@ LIBS="$OLIBS"
 if test x$acx_lapacke_ok = xyes; then
   AC_DEFINE(HAVE_LAPACKE,1, [Define if you have the LAPACKe libraries.])
   AC_SUBST(MKL_LAPACKE_CFLAGS, $mkl_cflags)
-  AC_SUBST(MKL_LAPACKE_INC)
+  AC_SUBST(MKL_LAPACKE_INCLUDES)
   AC_SUBST(MKL_LAPACKE_LIBS)
   $4
 else

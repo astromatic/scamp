@@ -50,17 +50,17 @@ dnl Search include files
 dnl --------------------
 
 acx_fftw_ok=no
-MKL_FFTW_INC=""
+MKL_FFTW_INCLUDES=""
 if test x$2 = x; then
   if test x$1 = x; then
-    ACX_SEARCH_INCDIR(MKL_FFTW_INC, yes, "$MKLROOT/include",
+    ACX_SEARCH_INCDIR(MKL_FFTW_INCLUDES, yes, "$MKLROOT/include",
 	[fftw/fftw3_mkl.h],
 	[acx_fftw_ok=yes
 		AC_DEFINE_UNQUOTED(FFTW_H, "fftw/fftw3_mkl.h",
 			[FFTW header filename.])],
 	[MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"])
   else
-    ACX_SEARCH_INCDIR(MKL_FFTW_INC, no,
+    ACX_SEARCH_INCDIR(MKL_FFTW_INCLUDES, no,
 	[$1/include $1/../include $1/../../include],
 	[fftw/fftw3_mkl.h],
 	[acx_fftw_ok=yes
@@ -70,7 +70,7 @@ if test x$2 = x; then
 	[MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"])
   fi
 else
-  ACX_SEARCH_INCDIR(MKL_FFTW_INC, no, [$2/include $2 $2/..],
+  ACX_SEARCH_INCDIR(MKL_FFTW_INCLUDES, no, [$2/include $2 $2/..],
 	[fftw/fftw3_mkl.h],
 	[acx_fftw_ok=yes
 		AC_DEFINE_UNQUOTED(FFTW_H, "fftw/fftw3_mkl.h",
@@ -155,7 +155,7 @@ LIBS="$OLIBS"
 if test x$acx_fftw_ok = xyes; then
   AC_DEFINE(HAVE_FFTW,1, [Define if you have the FFTW libraries.])
   AC_SUBST(MKL_FFTW_CFLAGS, $mkl_cflags)
-  AC_SUBST(MKL_FFTW_INC)
+  AC_SUBST(MKL_FFTW_INCLUDES)
   AC_SUBST(MKL_FFTW_LIBS)
   $5
 else
