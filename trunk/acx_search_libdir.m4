@@ -47,14 +47,14 @@ libdir_ldflags=${LDFLAGS}
 old_libs=$LIBS
 libdir_found="no"
 $1=""
-if test x$2=xyes; then
+if test x$2 = xyes; then
   AC_CHECK_LIB($4,$5,
 	[libdir_found="yes"
 	$1="-l$4 $8"],
 	[],$8)
 fi
 for dir in $3; do
-  if test $libdir_found = no; then
+  if test $libdir_found = no && test -d ${dir}; then
     libdir_haslib_cvdir=`echo $dir | $as_tr_sh`
     AC_CACHE_CHECK([for $4 library with -L$dir],
 	[libdir_cv${libdir_haslib_cvdir}_haslib_$4],

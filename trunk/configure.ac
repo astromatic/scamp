@@ -286,22 +286,22 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
 ############ handle the INTEL MKL library (linear algebra+FFT) ###########
 if test "$use_mkl" = "yes"; then
-  ACX_MKL_LAPACKE($mkl_lapacke_libdir,$mkl_lapacke_incdir,$use_pthreads,
+  ACX_MKL_LAPACKE($mkl_lapacke_libdir,$lapacke_incdir,$use_pthreads,
 	[use_mkl_lapacke=yes],[use_mkl_lapacke=no])
   if test "$use_mkl_lapacke" = "yes"; then
     LIBS="$MKL_LAPACKE_LIBS $LIBS"
-   [AM_CFLAGS="$AM_CFLAGS $MKL_LAPACKE_CFLAGS"]
+   [AM_CFLAGS="$AM_CFLAGS $MKL_LAPACKE_CFLAGS $MKL_LAPACKE_INCLUDES"]
     if test "$MKL_LAPACKE_WARN" != ""; then
       AC_MSG_WARN([$MKL_LAPACKE_WARN])
     fi
   else
     AC_MSG_ERROR([$MKL_LAPACKE_ERROR Exiting.])
   fi
-  ACX_MKL_FFTW($mkl_fftw_libdir,$mkl_fftw_incdir,$use_pthreads,yes,
+  ACX_MKL_FFTW($mkl_fftw_libdir,$fftw_incdir,$use_pthreads,yes,
 	[use_mkl_fftw=yes],[use_mkl_fftw=no])
   if test "$use_mkl_fftw" = "yes"; then
 #    LIBS="$FFTW_LIBS $LIBS"
-#   [AM_CFLAGS="$AM_CFLAGS $MKL_FFTW_CFLAGS"]
+#   [AM_CFLAGS="$AM_CFLAGS $MKL_FFTW_CFLAGS MKL_FFTW_INCLUDES"]
     if test "$MKL_FFTW_WARN" != ""; then
       AC_MSG_WARN([$MKL_FFTW_WARN])
     fi

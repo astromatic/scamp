@@ -45,11 +45,11 @@ AC_LANG_PUSH(C)
   hdr=`echo $4 | $as_tr_sh`
   incdir_found="no"
   $1=""
-  if test x$2=xyes; then
+  if test x$2 = xyes; then
     AC_CHECK_HEADER($4,[incdir_found="yes"])
   fi
   for incdir in $3; do
-    if test "x${incdir_found}" = "xno"; then
+    if test "x${incdir_found}" = "xno" && test -d ${incdir}; then
       incdir_hashdr_cvdir=`echo $incdir | $as_tr_sh`
       AC_CACHE_CHECK([for $4 with -I$incdir],
 	[incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}],
@@ -62,7 +62,7 @@ AC_LANG_PUSH(C)
 	CFLAGS=$incdir_have_hdr_save_cflags])
       if eval `echo 'test x${'incdir_cv${incdir_hashdr_cvdir}_hashdr_${hdr}'}' = "xyes"`; then
         incdir_found="yes";
-        $1="${incdir}"
+        $1="-I${incdir}"
         hdr=`echo $4 | $as_tr_cpp`
         AC_DEFINE_UNQUOTED(HAVE_${hdr}, 1,
 		[Define this if you have the $1 header])
