@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		13/12/2011
+dnl	Last modified:		29/12/2011
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -53,66 +53,34 @@ dnl --------------------
 acx_lapacke_ok=no
 if test x$2 = x; then
   if test x$1 = x; then
-    AC_CHECK_HEADERS([mkl_lapacke.h],[acx_lapacke_ok=yes])
-    if test x$acx_lapacke_ok = xyes; then
-      AC_DEFINE(LAPACKE_H, "mkl_lapacke.h", [LAPACKe header filename.])
-    else
-      AC_CHECK_HEADERS([$MKLROOT/include/mkl_lapacke.h], [acx_lapacke_ok=yes])
-      if test x$acx_lapacke_ok = xyes; then
-        AC_DEFINE_UNQUOTED(LAPACKE_H, "$MKLROOT/include/mkl_lapacke.h",
-		[LAPACKe header filename.])
-      else
-        MKL_LAPACKE_ERROR="INTEL MKL LAPacke include files not found!"
-      fi
-    fi
+    ACX_SEARCH_INCDIR(MKL_LAPACKE_INC, yes, "$MKLROOT/include",
+	[mkl_lapacke.h],
+	[acx_lapacke_ok=yes
+		AC_DEFINE_UNQUOTED(LAPACKE_H, "mkl_lapacke.h",
+			[LAPACKe header filename.])],
+	[MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found!"])
   else
-    AC_CHECK_HEADERS([$1/include/mkl_lapacke.h], [acx_lapacke_ok=yes])
-    if test x$acx_lapacke_ok = xyes; then
-      AC_DEFINE_UNQUOTED(LAPACKE_H, "$1/include/mkl_lapacke.h",
-		[LAPACKe header filename.])
-    else
-      AC_CHECK_HEADERS([$1/../include/mkl_lapacke.h], [acx_lapacke_ok=yes])
-      if test x$acx_lapacke_ok = xyes; then
-        AC_DEFINE_UNQUOTED(LAPACKE_H, "$1/../include/mkl_lapacke.h",
-		[LAPACKe header filename.])
-      else
-        AC_CHECK_HEADERS([$1/../../include/mkl_lapacke.h], [acx_lapacke_ok=yes])
-        if test x$acx_lapacke_ok = xyes; then
-          AC_DEFINE_UNQUOTED(LAPACKE_H, "$1/../../include/mkl_lapacke.h",
-		[LAPACKe header filename.])
-        else
-          AC_CHECK_HEADERS([mkl_lapacke.h],[acx_lapacke_ok=yes])
-          if test x$acx_lapacke_ok = xyes; then
-            AC_DEFINE_UNQUOTED(LAPACKE_H, "mkl_lapacke.h",
-		[LAPACKe header filename.])
-          else
-            MKL_LAPACKE_ERROR="INTEL MKL LAPacke include files not found!"
-          fi
-        fi
-      fi
-    fi
+    ACX_SEARCH_INCDIR(MKL_LAPACKE_INC, no,
+	[$1/include $1/../include $1/../../include],
+	[mkl_lapacke.h],
+	[acx_lapacke_ok=yes
+	      AC_DEFINE_UNQUOTED(LAPACKE_H, "mkl_lapacke.h",
+			[LAPACKe header filename.])],
+	[MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found!"])
   fi
 else
-  AC_CHECK_HEADERS([$2/include/mkl_lapacke.h], [acx_lapacke_ok=yes])
-  if test x$acx_lapacke_ok = xyes; then
-    AC_DEFINE_UNQUOTED(LAPACKE_H, "$2/include/mkl_lapacke.h",
-	[LAPACKe header filename.])
-  else
-    AC_CHECK_HEADERS([$2/mkl_lapacke.h], [acx_lapacke_ok=yes])
-    if test x$acx_lapacke_ok = xyes; then
-      AC_DEFINE_UNQUOTED(LAPACKE_H, "$2/mkl_lapacke.h",
-	[LAPACKe header filename.])
-    else
-      MKL_LAPACKE_ERROR="INTEL MKL LAPacke include files not found in $2!"
-    fi
-  fi
+  ACX_SEARCH_INCDIR(MKL_LAPACKE_INC, no, [$2/include $2 ],
+	[mkl_lapacke.h],
+	[acx_lapacke_ok=yes
+		AC_DEFINE_UNQUOTED(LAPACKE_H, "mkl_lapacke.h",
+			[LAPACKe header filename.])],
+	[MKL_LAPACKE_ERROR="INTEL MKL LAPACKe include files not found in $2!"])
 fi
 
 dnl --------------------
 dnl Search library files
 dnl --------------------
 
-OLDFLAGS="$LDFLAGS"
 OLIBS="$LIBS"
 LIBS=""
 if test x$acx_lapacke_ok = xyes; then
@@ -135,70 +103,46 @@ dnl --------------------
   if test x$3 = xyes; then
 dnl Check the parallel version of the MKL:
     if test x$1 = x; then
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-      AC_CHECK_LIB($mkl_lapacke_lib, [LAPACKE_dpotrf],, [acx_lapacke_ok=no],
-		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
-      if test x$acx_lapacke_ok = xyes; then
-        MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_intel_thread -lmkl_core -openmp"
-        AC_DEFINE(HAVE_LAPACKE_MP,1, [Define if you have the parallel LAPACKe libraries.])
-      else
-        unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-        acx_lapacke_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root, $mkl_lapacke_lib,
-			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
-			[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
-        if test x$acx_lapacke_ok = xyes; then
-          AC_DEFINE(HAVE_LAPACKE_MP,1, [Define if you have the parallel LAPACKe libraries.])
-        else
-          MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
-        fi
-      fi
+      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, yes, $mkl_root, $mkl_lapacke_lib,
+	[LAPACKE_dpotrf],
+	[AC_DEFINE(HAVE_LAPACKE_MP,1,
+		[Define if you have the parallel LAPACKe libraries.])],
+	[acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"],
+	[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
     else
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $1/lib $1, $mkl_lapacke_lib,
-			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
-			[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
-      if test x$acx_lapacke_ok = xyes; then
-        AC_DEFINE(HAVE_LAPACKE_MP,1, [Define if you have the parallel LAPACKe libraries.])
-      else
-        MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"
-      fi
+      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, no, $1/lib $1, $mkl_lapacke_lib,
+	[LAPACKE_dpotrf],
+	AC_DEFINE(HAVE_LAPACKE_MP,1,
+		[Define if you have the parallel LAPACKe libraries.]),
+	[acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"],
+	[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
     fi
   else
 dnl Check the serial version of the MKL:
     if test x$1 = x; then
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-      AC_CHECK_LIB($mkl_lapacke_lib, [LAPACKE_dpotrf],, [acx_lapacke_ok=no],
-		[-lmkl_sequential -lmkl_core])
-      if test x$acx_lapacke_ok = xyes; then
-        MKL_LAPACKE_LIBS="-l$mkl_lapacke_lib -lmkl_sequential -lmkl_core"
-      else
-        unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-        acx_lapacke_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $mkl_root, $mkl_lapacke_lib,
-			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
-			[-lmkl_sequential -lmkl_core])
-        if test x$acx_lapacke_ok = xno; then
-          MKL_LAPACKE_ERROR="INTEL MKL serial LAPACKe library files not found at usual locations!"
-        fi
-      fi
+      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, yes, $mkl_root, $mkl_lapacke_lib,
+	[LAPACKE_dpotrf],[],
+	[acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"],
+	[-lmkl_sequential -lmkl_core])
     else
-      unset ac_cv_lib_"$mkl_lapacke_lib"_LAPACKE_dpotrf
-      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, $1/lib $1, $mkl_lapacke_lib,
-			[LAPACKE_dpotrf],,[acx_lapacke_ok=no],
-			[-lmkl_sequential -lmkl_core])
-      if test x$acx_lapacke_ok = xno; then
-          MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at usual locations!"
-      fi
+      unset ac_cv_lib_"$mkl_lapacke_lib"_"$mkl_func"
+      ACX_SEARCH_LIBDIR(MKL_LAPACKE_LIBS, no, $1/lib $1, $mkl_lapacke_lib,
+	[LAPACKE_dpotrf],[],
+	[acx_lapacke_ok=no
+		MKL_LAPACKE_ERROR="INTEL MKL parallel LAPACKe library files not found at the provided location!"],
+	[-lmkl_sequential -lmkl_core])
     fi
   fi
 fi
 
-LDFLAGS="$OLDFLAGS"
 LIBS="$OLIBS"
 if test x$acx_lapacke_ok = xyes; then
   AC_DEFINE(HAVE_LAPACKE,1, [Define if you have the LAPACKe libraries.])
   AC_SUBST(MKL_LAPACKE_CFLAGS, $mkl_cflags)
+  AC_SUBST(MKL_LAPACKE_INC)
   AC_SUBST(MKL_LAPACKE_LIBS)
   $4
 else

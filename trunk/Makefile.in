@@ -71,11 +71,11 @@ DIST_COMMON = README $(am__configure_deps) $(dist_pkgdata_DATA) \
 	autoconf/install-sh autoconf/ltmain.sh autoconf/missing \
 	autoconf/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acx_search_libdir.m4 \
-	$(top_srcdir)/acx_atlas.m4 $(top_srcdir)/acx_cdsclient.m4 \
-	$(top_srcdir)/acx_fftw.m4 $(top_srcdir)/acx_mkl_fftw.m4 \
-	$(top_srcdir)/acx_mkl_lapacke.m4 $(top_srcdir)/acx_plplot.m4 \
-	$(top_srcdir)/acx_prog_cc_optim.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/acx_search_incdir.m4 \
+	$(top_srcdir)/acx_search_libdir.m4 $(top_srcdir)/acx_atlas.m4 \
+	$(top_srcdir)/acx_cdsclient.m4 $(top_srcdir)/acx_fftw.m4 \
+	$(top_srcdir)/acx_mkl_fftw.m4 $(top_srcdir)/acx_mkl_lapacke.m4 \
+	$(top_srcdir)/acx_plplot.m4 $(top_srcdir)/acx_prog_cc_optim.m4 \
 	$(top_srcdir)/acx_pthread.m4 \
 	$(top_srcdir)/acx_urbi_resolve_dir.m4 \
 	$(top_srcdir)/configure.ac
@@ -220,11 +220,14 @@ LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
+MKL_FFTW_CFLAGS = @MKL_FFTW_CFLAGS@
 MKL_FFTW_ERROR = @MKL_FFTW_ERROR@
+MKL_FFTW_INC = @MKL_FFTW_INC@
 MKL_FFTW_LIBS = @MKL_FFTW_LIBS@
 MKL_FFTW_WARN = @MKL_FFTW_WARN@
 MKL_LAPACKE_CFLAGS = @MKL_LAPACKE_CFLAGS@
 MKL_LAPACKE_ERROR = @MKL_LAPACKE_ERROR@
+MKL_LAPACKE_INC = @MKL_LAPACKE_INC@
 MKL_LAPACKE_LIBS = @MKL_LAPACKE_LIBS@
 MKL_LAPACKE_WARN = @MKL_LAPACKE_WARN@
 NM = @NM@

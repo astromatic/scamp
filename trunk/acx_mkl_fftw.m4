@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		13/12/2011
+dnl	Last modified:		29/12/2011
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -50,73 +50,32 @@ dnl Search include files
 dnl --------------------
 
 acx_fftw_ok=no
+MKL_FFTW_INC=""
 if test x$2 = x; then
   if test x$1 = x; then
-    AC_CHECK_HEADERS([fftw3_mkl.h],[acx_fftw_ok=yes])
-    if test x$acx_fftw_ok = xyes; then
-      AC_DEFINE(FFTW_H, "fftw3_mkl.h", [FFTW header filename.])
-    else
-      AC_CHECK_HEADERS([fftw/fftw3_mkl.h],[acx_fftw_ok=yes])
-      if test x$acx_fftw_ok = xyes; then
-        AC_DEFINE(FFTW_H, "fftw/fftw3_mkl.h", [FFTW header filename.])
-      else
-        AC_CHECK_HEADERS(
-		[$MKLROOT/include/fftw/fftw3_mkl.h], [acx_fftw_ok=yes])
-        if test x$acx_fftw_ok = xyes; then
-          AC_DEFINE_UNQUOTED(FFTW_H, "$MKLROOT/include/fftw/fftw3_mkl.h",
-		[FFTW header filename.])
-        else
-          MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"
-        fi
-      fi
-    fi
+    ACX_SEARCH_INCDIR(MKL_FFTW_INC, yes, "$MKLROOT/include",
+	[fftw/fftw3_mkl.h],
+	[acx_fftw_ok=yes
+		AC_DEFINE_UNQUOTED(FFTW_H, "fftw/fftw3_mkl.h",
+			[FFTW header filename.])],
+	[MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"])
   else
-    AC_CHECK_HEADERS([$1/include/fftw/fftw3_mkl.h], [acx_fftw_ok=yes])
-    if test x$acx_fftw_ok = xyes; then
-      AC_DEFINE_UNQUOTED(FFTW_H, "$1/include/fftw/fftw3_mkl.h",
-		[FFTW header filename.])
-    else
-      AC_CHECK_HEADERS([$1/../include/fftw/fftw3_mkl.h], [acx_fftw_ok=yes])
-      if test x$acx_fftw_ok = xyes; then
-        AC_DEFINE_UNQUOTED(FFTW_H, "$1/../include/fftw/fftw3_mkl.h",
-		[FFTW header filename.])
-      else
-        AC_CHECK_HEADERS([$1/../../include/fftw/fftw3_mkl.h],
-		[acx_fftw_ok=yes])
-        if test x$acx_ffw_ok = xyes; then
-          AC_DEFINE_UNQUOTED(FFTW_H, "$1/../../include/fftw/fftw3_mkl.h",
-		[FFTW header filename.])
-        else
-          AC_CHECK_HEADERS([fftw3_mkl.h],[acx_fftw_ok=yes])
-          if test x$acx_fftw_ok = xyes; then
-            AC_DEFINE_UNQUOTED(FFTW_H, "fftw3_mkl.h",
-		[FFTW header filename.])
-          else
-            MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"
-          fi
-        fi
-      fi
-    fi
+    ACX_SEARCH_INCDIR(MKL_FFTW_INC, no,
+	[$1/include $1/../include $1/../../include],
+	[fftw/fftw3_mkl.h],
+	[acx_fftw_ok=yes
+	      AC_DEFINE_UNQUOTED(FFTW_H, "fftw/fftw3_mkl.h",
+			[FFTW header filename.])],
+
+	[MKL_FFTW_ERROR="INTEL MKL FFTW include files not found!"])
   fi
 else
-  AC_CHECK_HEADERS([$2/include/fftw/fftw3_mkl.h], [acx_fftw_ok=yes])
-  if test x$acx_fftw_ok = xyes; then
-    AC_DEFINE_UNQUOTED(FFTW_H, "$2/include/fftw/fftw3_mkl.h",
-	[FFTW header filename.])
-  else
-    AC_CHECK_HEADERS([$2/fftw/fftw3_mkl.h], [acx_fftw_ok=yes])
-    if test x$acx_fftw_ok = xyes; then
-      AC_DEFINE_UNQUOTED(FFTW_H, "$2/fftw/fftw3_mkl.h",
-	[FFTW header filename.])
-    else
-      AC_CHECK_HEADERS([$2/fftw3_mkl.h], [acx_fftw_ok=yes])
-      if test x$acx_fftw_ok = xyes; then
-        AC_DEFINE_UNQUOTED(FFTW_H, "$2/fftw3_mkl.h", [FFTW header filename.])
-      else
-        MKL_FFTW_ERROR="INTEL MKL FFTW include files not found in $2!"
-      fi
-    fi
-  fi
+  ACX_SEARCH_INCDIR(MKL_FFTW_INC, no, [$2/include $2 $2/..],
+	[fftw/fftw3_mkl.h],
+	[acx_fftw_ok=yes
+		AC_DEFINE_UNQUOTED(FFTW_H, "fftw/fftw3_mkl.h",
+			[FFTW header filename.])],
+	[MKL_FFTW_ERROR="INTEL MKL FFTW include files not found in $2!"])
 fi
 
 dnl --------------------
@@ -150,34 +109,21 @@ dnl Set precision
     fi
 dnl Check if the function is in the library
     if test x$1 = x; then
-      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-      AC_CHECK_LIB($mkl_fftw_lib, $mkl_func,, [acx_fftw_ok=no],
-		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
-      if test x$acx_fftw_ok = xyes; then
-        MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_intel_thread -lmkl_core -openmp"
-        AC_DEFINE(HAVE_FFTW_MP,1, [Define if you have the parallel FFTW libraries.])
-      else
-        unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-        acx_fftw_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root, $mkl_fftw_lib,
-		$mkl_func,, [acx_fftw_ok=no],
-		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
-        if test x$acx_fftw_ok = xyes; then
-          AC_DEFINE(HAVE_FFTW_MP,1, [Define if you have the parallel FFTW libraries.])
-        else
-          MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"
-        fi
-      fi
+      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, yes, $mkl_root, $mkl_fftw_lib,
+	$mkl_func,
+	[AC_DEFINE(HAVE_FFTW_MP,1,
+		[Define if you have the parallel FFTW libraries.])],
+	[acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"],
+	[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
     else
-      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $1/lib $1, $mkl_fftw_lib,
-		$mkl_func,, [acx_fftw_ok=no],
-		[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
-      if test x$acx_fftw_ok = xyes; then
-        AC_DEFINE(HAVE_FFTW_MP,1, [Define if you have the parallel FFTW libraries.])
-      else
-          MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
-      fi
+      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, no, $1/lib $1, $mkl_fftw_lib,
+	$mkl_func,
+	AC_DEFINE(HAVE_FFTW_MP,1,
+		[Define if you have the parallel FFTW libraries.]),
+	[acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"],
+	[-lmkl_intel_thread -lmkl_core -openmp -lpthread])
     fi
   else
 dnl Check the serial version of the MKL:
@@ -189,29 +135,18 @@ dnl Set precision
     fi
 dnl Check if the function is in the library
     if test x$1 = x; then
-      unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-      AC_CHECK_LIB($mkl_fftw_lib, $mkl_func,, [acx_fftw_ok=no],
-		[-lmkl_sequential -lmkl_core])
-      if test x$acx_fftw_ok = xyes; then
-        MKL_FFTW_LIBS="-l$mkl_fftw_lib -lmkl_sequential -lmkl_core"
-      else
-        unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-        acx_fftw_ok=yes
-        ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $mkl_root, $mkl_fftw_lib,
-		$mkl_func,, [acx_fftw_ok=no],
-		[-lmkl_sequential -lmkl_core])
-        if test x$acx_fftw_ok = xno; then
-          MKL_FFTW_ERROR="INTEL MKL serial FFTW library files not found at usual locations!"
-        fi
-      fi
+      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, yes, $mkl_root, $mkl_fftw_lib,
+	$mkl_func,[],
+	[acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at usual locations!"],
+	[-lmkl_sequential -lmkl_core])
     else
       unset ac_cv_lib_"$mkl_fftw_lib"_"$mkl_func"
-      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, $1/lib $1, $mkl_fftw_lib,
-		$mkl_func,, [acx_fftw_ok=no],
-		[-lmkl_sequential -lmkl_core])
-      if test x$acx_fftw_ok = xno; then
-        MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"
-      fi
+      ACX_SEARCH_LIBDIR(MKL_FFTW_LIBS, no, $1/lib $1, $mkl_fftw_lib,
+	$mkl_func,[],
+	[acx_fftw_ok=no
+		MKL_FFTW_ERROR="INTEL MKL parallel FFTW library files not found at the provided location!"],
+	[-lmkl_sequential -lmkl_core])
     fi
   fi
 fi
@@ -219,7 +154,8 @@ fi
 LIBS="$OLIBS"
 if test x$acx_fftw_ok = xyes; then
   AC_DEFINE(HAVE_FFTW,1, [Define if you have the FFTW libraries.])
-  AC_SUBST(MKL_LAPACKE_CFLAGS, $mkl_cflags)
+  AC_SUBST(MKL_FFTW_CFLAGS, $mkl_cflags)
+  AC_SUBST(MKL_FFTW_INC)
   AC_SUBST(MKL_FFTW_LIBS)
   $5
 else

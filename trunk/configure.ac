@@ -45,6 +45,7 @@ AC_SUBST(DATE2, "$date2")
 AC_SUBST(DATE3, "$date3")
 
 # Include macros
+sinclude(acx_search_incdir.m4)
 sinclude(acx_search_libdir.m4)
 sinclude(acx_atlas.m4)
 sinclude(acx_cdsclient.m4)

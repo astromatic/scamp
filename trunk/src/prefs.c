@@ -443,7 +443,7 @@ void	useprefs(void)
 		"NTHREADS defaulted to 2");
       }
     }
-#ifndef HAVE_ATLAS_MP
+#if defined(HAVE_ATLAS) && !defined(HAVE_ATLAS_MP)
    if (prefs.nthreads>1)
      warning("This executable has been compiled using a version of the ATLAS "
 	"library without support for multithreading. ",
