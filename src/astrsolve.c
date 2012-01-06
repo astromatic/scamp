@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/12/2011
+*	Last modified:		05/01/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@
 
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
-//#define MATSTORAGE_PACKED 1
+#define MATSTORAGE_PACKED 1
 #endif
 
 /*------------------- global variables for multithreading -------------------*/
@@ -1319,49 +1319,51 @@ INPUT	Ptr to the alpha matrix,
 OUTPUT	-.
 NOTES	Matrices are not reallocated.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/12/2012
+VERSION	05/01/2012
  ***/
 void	shrink_mat(double *alpha, double *beta, int ncoefftot,
 		int index, int nmiss)
   {
    double	*a,*a2, *b,*b2;
-   size_t	i,l, nelem;
+   size_t	i,l, nelem, nelem2;
 
   if (nmiss >= ncoefftot)
     return;
 
 #ifdef MATSTORAGE_PACKED
 /* First, remove lines */
-  a = alpha + ((size_t)(2*ncoefftot-index-1)*index)/2;
-  a2 = alpha + ((size_t)(2*ncoefftot-index-nmiss-1)*(index+nmiss))/2;
-  nelem = ((size_t)(ncoefftot-1)*(ncoefftot))/2;
+  a = alpha + ((size_t)(2*ncoefftot-index+1)*index)/2;
+  l = ((size_t)(2*ncoefftot-index-nmiss+1)*(index+nmiss))/2;
+  a2 = alpha + l;
+  nelem = ((size_t)(ncoefftot+1)*ncoefftot)/2-l;
   for (i=nelem; i--; )
     *(a++) = *(a2++);
-
 /* Remove columns */
   a = alpha + index;
   a2 = a + nmiss;
-  nelem = ncoefftot-nmiss-1;
-  for (l=index; l--; a2+=nmiss, nelem--)
-    for (i=nelem; i--;)
+  nelem2 = ncoefftot-nmiss-1;
+  for (l=index; l--; a2+=nmiss, nelem2--)
+    for (i=nelem2; i--;)
       *(a++) = *(a2++);
+  for (i=nelem; i--;)
+    *(a++) = *(a2++);
 
 #else
 /* First, remove lines */
   a = alpha + index*(size_t)ncoefftot;
   a2 = a + nmiss*(size_t)ncoefftot;
   nelem = (ncoefftot-nmiss-index)*(size_t)ncoefftot;
-  for (i=nelem; i--; )
+  for (i=nelem; i--;)
     *(a++) = *(a2++);
 
 /* Remove columns */
   a = alpha + index;
   a2 = a + nmiss;
-  nelem = (ncoefftot-nmiss);
-  for (l=nelem-1; l--; a2+=nmiss)
-    for (i=nelem; i--;)
+  nelem2 = (ncoefftot-nmiss);
+  for (l=nelem2-1; l--; a2+=nmiss)
+    for (i=nelem2; i--;)
       *(a++) = *(a2++);
-  for (i=nelem-index; i--;)
+  for (i=nelem2-index; i--;)
     *(a++) = *(a2++);
 #endif
 
