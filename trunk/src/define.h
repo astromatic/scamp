@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/01/2012
+*	Last modified:		06/01/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -111,25 +111,46 @@
 
 #define	QCALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)calloc((size_t)(nel),sizeof(typ)))) \
-		  error(EXIT_FAILURE, "Not enough memory for ", \
-			#ptr " (" #nel " elements) !");;}
+		   { \
+		   sprintf(gstr, #ptr " (" #nel "=%lld elements) " \
+			"at line %d in module " __FILE__ " !", \
+			(size_t)(nel)*sizeof(typ), __LINE__); \
+		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
+                   }; \
+                 }
 
 #define	QMALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)malloc((size_t)(nel)*sizeof(typ)))) \
-		  error(EXIT_FAILURE, "Not enough memory for ", \
-			#ptr " (" #nel " elements) !");;}
+		   { \
+		   sprintf(gstr, #ptr " (" #nel "=%lld elements) " \
+			"at line %d in module " __FILE__ " !", \
+			(size_t)(nel)*sizeof(typ), __LINE__); \
+		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
+                   }; \
+                 }
 
 #define	QREALLOC(ptr, typ, nel) \
-		{if (!(ptr = (typ *)realloc(ptr, (size_t)(nel)*sizeof(typ)))) \
-		   error(EXIT_FAILURE, "Not enough memory for ", \
-			#ptr " (" #nel " elements) !");;}
+		{if (!(ptr = (typ *)realloc(ptr, (size_t)(nel)*sizeof(typ))))\
+		   { \
+		   sprintf(gstr, #ptr " (" #nel "=%lld elements) " \
+			"at line %d in module " __FILE__ " !", \
+			(size_t)(nel)*sizeof(typ), __LINE__); \
+		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
+                   }; \
+                 }
 
 #define QMEMCPY(ptrin, ptrout, typ, nel) \
 		{if (ptrin) \
                   {if (!(ptrout = (typ *)malloc((size_t)(nel)*sizeof(typ)))) \
-                    error(EXIT_FAILURE, "Not enough memory for ", \
-                        #ptrout " (" #nel " elements) !"); \
-                   memcpy(ptrout, ptrin, (size_t)(nel)*sizeof(typ));};;}
+		     { \
+		     sprintf(gstr, #ptrout " (" #nel "=%lld elements) " \
+			"at line %d in module " __FILE__ " !", \
+			(size_t)(nel)*sizeof(typ), __LINE__); \
+		     error(EXIT_FAILURE,"Could not allocate memory for ",gstr);\
+                     }; \
+                   memcpy(ptrout, ptrin, (size_t)(nel)*sizeof(typ)); \
+                   }; \
+                 }
 
 #define QPOPEN(file, cmdline, flag) \
 		{if (!(file=popen(cmdline, flag))) \

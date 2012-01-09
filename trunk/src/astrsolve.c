@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/01/2012
+*	Last modified:		09/01/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1319,7 +1319,7 @@ INPUT	Ptr to the alpha matrix,
 OUTPUT	-.
 NOTES	Matrices are not reallocated.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/01/2012
+VERSION	09/01/2012
  ***/
 void	shrink_mat(double *alpha, double *beta, int ncoefftot,
 		int index, int nmiss)
@@ -1339,15 +1339,14 @@ void	shrink_mat(double *alpha, double *beta, int ncoefftot,
   for (i=nelem; i--; )
     *(a++) = *(a2++);
 /* Remove columns */
-  a = alpha + index;
-  a2 = a + nmiss;
+  a2 = a = alpha + index;
   nelem2 = ncoefftot-nmiss-1;
-  for (l=index; l--; a2+=nmiss, nelem2--)
-    for (i=nelem2; i--;)
+  for (l=index; l--; nelem2--)
+    for (i=nelem2, a2+=nmiss; i--;)
       *(a++) = *(a2++);
-  for (i=nelem; i--;)
-    *(a++) = *(a2++);
-
+  if (index)
+    for (i=nelem; i--;)
+      *(a++) = *(a2++);
 #else
 /* First, remove lines */
   a = alpha + index*(size_t)ncoefftot;
