@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/01/2012
+*	Last modified:		27/03/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1812,7 +1812,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/07/2011
+VERSION	27/03/2012
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
@@ -1820,21 +1820,28 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
    fieldstruct	**fields,
 		*field;
    setstruct	*set;
-   samplestruct	*samp,*samp2, *prevsamp2;
-   double	dx2[NAXIS],clip[NAXIS],mean[NAXIS],
-		ksig2;
-   int		i,f,n,s, naxis,nfield,nsamp, flag, nmean, nclip;
+   samplestruct	*samp,*sampr,*samp2, *prevsamp2;
+   double	clipi[NAXIS],clipr[NAXIS], meani[NAXIS],meanr[NAXIS],
+		dx,dr2, ksig2;
+   int		i,f,n,s, naxis,nfield,nsamp, flag, nmeani,nmeanr, nclipi,nclipr;
 
   naxis = fgroup->naxis;
 
   ksig2 = nsigma;
   ksig2 *= ksig2;
   for (i=0; i<naxis; i++)
-    clip[i] = fgroup->sig_interr[i] > 0.0 ?
+    {
+    clipi[i] = fgroup->sig_interr[i] > 0.0 ?
 			ksig2*fgroup->sig_interr[i]*fgroup->sig_interr[i]
 			/(fgroup->meanwcsscale[i]*fgroup->meanwcsscale[i])
 			: BIG;
-  nclip = 0;
+    clipr[i] = fgroup->sig_referr[i] > 0.0 ?
+			ksig2*fgroup->sig_referr[i]*fgroup->sig_referr[i]
+			/(fgroup->meanwcsscale[i]*fgroup->meanwcsscale[i])
+			: BIG;
+    }
+
+  nclipi = nclipr = 0;
   nfield = fgroup->nfield;
   fields = fgroup->field;
   for (f=0; f<nfield; f++)
@@ -1849,33 +1856,38 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
         if (!samp->nextsamp && samp->prevsamp)
           {
           for (i=0; i<naxis; i++)
-            mean[i] = 0.0;
-          nmean = 0;
+            meani[i] = meanr[i] = 0.0;
+          nmeani = nmeanr = 0;
           for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
             {
             if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
               continue;
             for (i=0; i<naxis; i++)
-              mean[i] += samp2->projpos[i];
-            nmean++;
+              meani[i] += samp2->projpos[i];
+            nmeani++;
             }
-          if (nmean>1)
+          sampr = samp2;
+          if (nmeani>1)
             {
             for (i=0; i<naxis; i++)
-              mean[i] /= (double)nmean;
+              meani[i] /= (double)nmeani;
             for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2 = prevsamp2)
               {
               flag = 0;
+              dr2 = 0.0;
               for (i=0; i<naxis; i++)
                 {
-                dx2[i] = samp2->projpos[i] - mean[i];
-                if (dx2[i]*dx2[i] > clip[i])
+                dx = samp2->projpos[i] - meani[i];
+                if ((dr2 += dx*dx) > clipi[i])
+                  {
                   flag = 1;
+                  break;
+                  }
                 }
               prevsamp2 = samp2->prevsamp;
-              if (flag)
+              if ((flag))
                 {
 /*-------------- Remove (unlink) outlier */
                 if (samp2->nextsamp)
@@ -1883,15 +1895,42 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
                 if (samp2->prevsamp)
                   samp2->prevsamp->nextsamp = samp2->nextsamp;
                 samp2->prevsamp = samp2->nextsamp = NULL;
-                nclip++;
+                nclipi++;
                 }
+              else
+                {
+                for (i=0; i<naxis; i++)
+                  meanr[i] += samp2->projpos[i];
+                nmeanr++;
+                }
+              }
+            }
+          if ((sampr) && (sampr->nextsamp))
+            {
+            flag = 0;
+            dr2 = 0.0;
+            for (i=0; i<naxis; i++)
+              {
+              dx = sampr->projpos[i] - meanr[i]/nmeanr;
+              if ((dr2 += dx*dx) > clipr[i])
+                {
+                flag = 1;
+                break;
+                }
+              }
+            if ((flag))
+              {
+/*------------ Remove (unlink) outlier */
+              sampr->nextsamp->prevsamp = NULL;
+              sampr->nextsamp = NULL;
+              nclipr++;
               }
             }
           }
       }
     }
 
-  return nclip;
+  return nclipr+nclipi;
   }
 
 
