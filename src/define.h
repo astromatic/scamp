@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		06/01/2012
+*	Last modified:		27/03/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -30,7 +30,7 @@
 #ifndef HAVE_CONFIG_H
 #define         VERSION         "1.x"
 #define         DATE            "2005-12-16"
-#define		THREADS_NMAX	16              /* max. number of threads */
+#define		THREADS_NMAX	1024              /* max. number of threads */
 #endif
 
 /*------------------------ what, who, when and where ------------------------*/
