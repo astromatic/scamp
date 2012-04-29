@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		20/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -71,7 +71,8 @@ pkeystruct key[] =
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
     "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3",
-     "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "NOMAD-1", "PPMX", ""}},
+    "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "SDSS-R8", "NOMAD-1",
+    "PPMX", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
@@ -93,13 +94,13 @@ pkeystruct key[] =
     {""}, 0, MAXCHECK, &prefs.ncheck_name},
   {"CHECKIMAGE_TYPE", P_KEYLIST, prefs.check_type, 0,0, 0.0,0.0,
     {"NONE", "AS_PAIR", "AS_REFPAIR", "AS_XCORR","LL_PAIR", "LL_REFPAIR",
-	"LL_XCORR", ""},
+     "LL_XCORR", ""},
     0, MAXCHECK, &prefs.ncheck_type},
   {"CHECKPLOT_ANTIALIAS", P_BOOL, &prefs.cplot_antialiasflag},
   {"CHECKPLOT_CKEY", P_STRING, prefs.cplot_colourkey},
   {"CHECKPLOT_DEV", P_KEYLIST, prefs.cplot_device, 0,0, 0.0,0.0,
-    {"NULL", "XWIN", "TK", "PLMETA", "PS", "PSC", "XFIG", "PNG", "JPEG", "PSTEX", "AQT", "PDF", "SVG",
-	""},
+    {"NULL", "XWIN", "TK", "PLMETA", "PS", "PSC", "XFIG", "PNG", "JPEG",
+     "PSTEX", "AQT", "PDF", "SVG", ""},
     0, MAXCHECK, &prefs.ncplot_device},
   {"CHECKPLOT_NAME", P_STRINGLIST, prefs.cplot_name, 0,0,0.0,0.0,
     {""}, 0, MAXCHECK, &prefs.ncplot_name},
@@ -108,10 +109,10 @@ pkeystruct key[] =
    {"CHECKPLOT_TYPE", P_KEYLIST, prefs.cplot_type, 0,0, 0.0,0.0,
     {"NONE", "SKY_ALL", "FGROUPS", "PHOTOM", "ASTR_INTERROR1D",
      "ASTR_REFERROR1D", "ASTR_PIXERROR1D", "ASTR_SUBPIXERROR1D", "DISTORTION",
-	"SHEAR_VS_AIRMASS", "PHOT_ERROR", "PHOT_ERRORVSMAG", "PHOT_ZPCORR", "ASTR_CHI2",
-	"ASTR_INTERROR2D", "ASTR_REFERROR2D", "PHOT_ZPCORR3D",
-	"ASTR_COLSHIFT1D" , "ASTR_REFPROPER", "ASTR_INTSYSMAP",
-	"ASTR_REFSYSMAP", "ASTR_OBSDATE3D", "ASTR_INTPROPER2D", ""},
+     "SHEAR_VS_AIRMASS", "PHOT_ERROR", "PHOT_ERRORVSMAG", "PHOT_ZPCORR",
+     "ASTR_CHI2", "ASTR_INTERROR2D", "ASTR_REFERROR2D", "PHOT_ZPCORR3D",
+     "ASTR_COLSHIFT1D" , "ASTR_REFPROPER", "ASTR_INTSYSMAP",
+     "ASTR_REFSYSMAP", "ASTR_OBSDATE3D", "ASTR_INTPROPER2D", ""},
     0, MAXCHECK, &prefs.ncplot_type},
   {"COMPUTE_PARALLAXES", P_BOOL, &prefs.parallax_flag},
   {"COMPUTE_PROPERMOTIONS", P_BOOL, &prefs.propmotion_flag},
@@ -163,12 +164,15 @@ pkeystruct key[] =
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
   {"PHOTFLUXERR_KEY", P_STRING, prefs.photfluxerr_key},
   {"PHOTINSTRU_KEY", P_STRINGLIST, prefs.photinstru_key, 0,0, 0.0,0.0,
-   {""}, 0, 35, &prefs.nphotinstru_key},
+   {""}, 0, 32, &prefs.nphotinstru_key},
   {"PHOTOMFLAG_KEY", P_STRING, prefs.photomflag_key},
   {"PIXSCALE_MAXERR", P_FLOAT, &prefs.pixscale_maxerr, 0,0, 1.0,2.0},
   {"POSANGLE_MAXERR", P_FLOAT, &prefs.posangle_maxerr, 0,0, 0.0,180.0},
   {"POSITION_MAXERR", P_FLOATLIST, prefs.position_maxerr, 0,0, 0.0,10800.0,
     {""}, 0, NAXIS, &prefs.nposition_maxerr},
+  {"PROJECTION_TYPE", P_KEYLIST, prefs.projection_type, 0,0, 0.0,0.0,
+    {"SAME", "TPV", "TAN", ""},
+    0, MAXFILE, &prefs.nprojection_type},
   {"REFOUT_CATPATH", P_STRING, prefs.outref_path},
   {"REF_SERVER", P_STRINGLIST, prefs.ref_server, 0,0, 0.0,0.0,
    {""}, 0, MAX_SERVER, &prefs.nref_server},
@@ -181,7 +185,7 @@ pkeystruct key[] =
   {"SOLVE_PHOTOM", P_BOOL, &prefs.solvphotom_flag},
   {"STABILITY_TYPE", P_KEYLIST, prefs.stability_type, 0,0, 0.0,0.0,
     {"EXPOSURE", "GROUP", "INSTRUMENT", "ALL",""},
-    0, MAXFILE, &prefs.nstability_type},
+    0, MAXASTRINSTRU, &prefs.nstability_type},
   {"VERBOSE_TYPE", P_KEY, &prefs.verbose_type, 0,0, 0.0,0.0,
    {"QUIET","NORMAL","LOG", "FULL",""}},
   {"XML_NAME", P_STRING, prefs.xml_name},
@@ -256,6 +260,7 @@ char *default_prefs[] =
 "#---------------------------- Astrometric solution ----------------------------",
 " ",
 "SOLVE_ASTROM           Y               # Compute astrometric solution (Y/N) ?",
+"PROJECTION_TYPE        SAME            # SAME, TPV or TAN",	
 "ASTRINSTRU_KEY         FILTER,QRUNID   # FITS keyword(s) defining the astrom",
 "STABILITY_TYPE         INSTRUMENT      # EXPOSURE, GROUP, INSTRUMENT or FILE",
 "CENTROID_KEYS          XWIN_IMAGE,YWIN_IMAGE # Cat. parameters for centroiding",

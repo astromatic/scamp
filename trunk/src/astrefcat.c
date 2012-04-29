@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/01/2011
+*	Last modified:		20/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -86,6 +86,7 @@ astrefstruct	astrefcat[] =
   {"SDSS-R5", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
   {"SDSS-R6", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
   {"SDSS-R7", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
+  {"SDSS-R8", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
   {"NOMAD-1.0", 6, 2, {"B", "V", "R", "J", "H", "Ks",""},
 			{"B", "V", "R", "J", "H", "K",""}},
   {"PPMX", 7, 3, {"B", "V", "R", "Rf", "J", "H", "Ks",""},
@@ -113,7 +114,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 31/01/2011
+VERSION 20/04/2012
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -510,6 +511,25 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		wcspos[lng], wcspos[lat],
 		maxradius*DEG/ARCMIN);
       break;
+    case ASTREFCAT_SDSSR8:
+      if (maglimflag)
+        sprintf(cmdline, "%s %s%s sdss8 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		wcspos[lng], wcspos[lat],
+		maxradius*DEG/ARCMIN,
+		cdsbandname,
+		prefs.astref_maglim[0],
+		prefs.astref_maglim[1]);
+      else
+        sprintf(cmdline, "%s %s%s sdss8 -c %f12 %+f12 -r %16g -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		wcspos[lng], wcspos[lat],
+		maxradius*DEG/ARCMIN);
+      break;
     case ASTREFCAT_NOMAD1:
       if (maglimflag)
         sprintf(cmdline, "%s %s%s nomad1 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
@@ -864,6 +884,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         case ASTREFCAT_SDSSR5:
         case ASTREFCAT_SDSSR6:
         case ASTREFCAT_SDSSR7:
+        case ASTREFCAT_SDSSR8:
           sscanf(str, "%*24c %*2c %10s%10s %lf %lf %*f %lf %d %*s %lf`%lf "
 			"%lf`%lf %lf`%lf %lf`%lf %lf`%lf ; %lf",
 		salpha, sdelta,

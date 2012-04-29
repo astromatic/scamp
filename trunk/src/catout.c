@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/07/2011
+*	Last modified:		24/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 22/07/2011
+VERSION 24/04/2012
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -85,7 +85,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			magref[MAXPHOTINSTRU],
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
-			wcsparal,wcsparalerr,
+			wcsparal,wcsparalerr, wcschi2,
 			epoch,epochmin,epochmax, err2, colour, dummy;
    char			str[80],
 			*buf, *rfilename;
@@ -275,7 +275,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
           for (d=0; d<naxis; d++)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
 		= wcsprop[d] = wcsproperr[d] = 0.0;
-          wcsparal = wcsparalerr = 0.0;
+          wcsparal = wcsparalerr = wcschi2 = 0.0;
           epoch = 0.0;
           epochmin = BIG;
           epochmax = -BIG;
@@ -304,6 +304,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
             wcsparal += samp2->wcsparal;
             wcsparalerr += samp2->wcsparalerr*samp2->wcsparalerr;
+            wcschi2 += samp2->wcschi2;
 /*---------- Epochs */
             epoch += samp2->set->field->epoch;
             if (samp2->set->field->epoch < epochmin)
@@ -340,6 +341,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
               msample.wcspostheta = 0.0;
             msample.wcsparal = (wcsparal/nok) * DEG/MAS;
             msample.wcsparalerr = sqrt(wcsparalerr/nok) * DEG/MAS;
+            msample.wcschi2 = wcschi2/nok;
             msample.epoch = epoch / nok;
             msample.epochmin = epochmin;
             msample.epochmax = epochmax;

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		28/02/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -148,7 +148,7 @@ typedef struct
   char		photfluxerr_key[72];		/* Name of phot. flux err. key*/
   char		photfluxerr_rkey[72];		/* Reduced phot. flux err. key*/
   int		photfluxerr_num;		/* Phot.flux err. aperture # */
-  char		*(photinstru_key[72]);		/* Photom instrument keywords*/
+  char		*(photinstru_key[35]);		/* Photom instrument keywords */
   int		nphotinstru_key;		/* nb of params */
   char		**photinstrustr;		/* Photom instrument labels */
   int		nphotinstrustr;			/* nb of params */
@@ -167,12 +167,14 @@ typedef struct
   int		nmagzero_referr;		/* nb of params */
 
 /* Astrometric solution */
+  projenum	projection_type[MAXFILE];	/* Celestial projection type */
+  int           nprojection_type;		/* nb of params */
   int		solvastrom_flag;		/* Compute astrometric sol.? */
   char          *(centroid_key[NAXIS]);		/* Names of centroid measur. */
   int           ncentroid_key;			/* nb of params */
   char          *(centroiderr_key[(NAXIS*(NAXIS+1))/2]);/* err ellipse names */
   int           ncentroiderr_key;		/* nb of params */
-  char		*(astrinstru_key[72]);		/* Astrom instrument keywords*/
+  char		*(astrinstru_key[35]);		/* Astrom instrument keywords */
   int		nastrinstru_key;		/* nb of params */
   char		**astrinstrustr;		/* Astrom instrument labels */
   int		nastrinstrustr;			/* nb of params */

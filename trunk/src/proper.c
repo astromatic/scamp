@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/12/2011
+*	Last modified:		29/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -239,13 +239,13 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/12/2011
+VERSION	29/04/2012
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
    fieldstruct	*field;
    setstruct	*set;
-   samplestruct	*samp,*samp2, *sampchi2, *samppropmod;
+   samplestruct	*samp,*samp2, *sampmin, *samppropmod;
    wcsstruct	*wcs, *wcsec;
    char		*wcsectype[NAXIS];
    double	alpha[25], beta[5],
@@ -253,7 +253,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 		wis, paral,paralerr, chi2,chi2min, propmod,propmodmin;
    int		d,f,s,n, naxis, nfield, nsamp, lng,lat, celflag,
 		propflag, paralflag, ncoeff,ncoeffp1,
-		nfree,nbad, bad, nfreechi2;
+		nfree,nbad, bad, nfreemin;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
@@ -311,16 +311,15 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         if (samp->nextsamp)
           continue;
         wis = wcs_scale(wcs, samp->projpos);
-        nfree = astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis, &chi2min);
-        sampchi2 = NULL;
+        nfreemin = astrprop_solve(fgroup,samp,wcsec, alpha,beta, wis, &chi2min);
+        sampmin = NULL;
         propmodmin = BIG;
-        for (nbad=1; nbad<=PROPER_MAXNBAD; nbad++)
+        for (nbad=0; nbad<PROPER_MAXNBAD; nbad++)
           {
 /*-------- Exit if chi2 is OK or if less than 2 degrees of freedom remain */
-          if (chi2min<nfree*PROPER_MAXCHI2 || nfree<2)
+          if (chi2min<nfreemin*PROPER_MAXCHI2 || nfreemin<2)
             break;
-          sampchi2 = samppropmod = NULL;
-          nfreechi2 = 0;
+          sampmin = samppropmod = NULL;
           for (samp2=samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2 = samp2->prevsamp)
             {
@@ -330,11 +329,11 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 /*---------- Switch detection to "bad" state */
             samp2->scampflags |= SCAMP_BADPROPER;
             nfree = astrprop_solve(fgroup,samp, wcsec,alpha,beta, wis, &chi2);
-            if (chi2<chi2min)
+            if (chi2*nfreemin<chi2min*nfree)
               {
               chi2min = chi2;
-              sampchi2 = samp2;
-              nfreechi2 = nfree;
+              sampmin = samp2;
+              nfreemin = nfree;
               }
             propmod = sqrt(beta[0]*beta[0]+beta[2]*beta[2]);
             if (propmod<propmodmin)
@@ -345,16 +344,16 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 /*---------- Revert detection to "good" state */
             samp2->scampflags ^= SCAMP_BADPROPER;
             }
-          if (sampchi2)
+          if (sampmin)
             {
-            if (nfreechi2<=0 && samppropmod)
+            if (nfreemin<=0 && samppropmod)
               samppropmod->scampflags |= SCAMP_BADPROPER;
             else
-              sampchi2->scampflags |= SCAMP_BADPROPER;
+              sampmin->scampflags |= SCAMP_BADPROPER;
             }
           }
 
-        if (nfree<0)
+        if (nfreemin<0)
           {
 /*-------- Not enough "good" detections to derive a solution */
           for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
@@ -363,12 +362,13 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             for (d=0; d<naxis; d++)
               samp2->wcsprop[d] = samp2->wcsproperr[d] = 0.0;
             samp2->wcsparal = samp2->wcsparalerr = 0.0;
+            samp2->wcschi2 = 0.0;
             }
           continue;
           }
 
-        if (sampchi2)
-          astrprop_solve(fgroup, samp, wcsec, alpha, beta, wis, &chi2);
+        if (sampmin)
+          nfreemin = astrprop_solve(fgroup,samp,wcsec,alpha,beta,wis, &chi2min);
 #if defined(HAVE_LAPACKE)
         LAPACKE_dpotri(LAPACK_COL_MAJOR, 'L',ncoeff, alpha, ncoeff);
 #else
@@ -401,6 +401,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             }
           samp2->wcsparal = paral;
           samp2->wcsparalerr = paralerr;
+          samp2->wcschi2 = nfreemin? chi2min / nfreemin : 0.0;
           }
         }
       }
