@@ -144,6 +144,7 @@ if test x$acx_lapacke_ok = xyes; then
   AC_DEFINE(HAVE_LAPACKE,1, [Define if you have the LAPACKe libraries.])
   AC_SUBST(MKL_LAPACKE_CFLAGS, $mkl_cflags)
   AC_SUBST(MKL_LAPACKE_INCLUDES)
+MKL_LAPACKE_LIBS="-mkl"
   AC_SUBST(MKL_LAPACKE_LIBS)
   $4
 else

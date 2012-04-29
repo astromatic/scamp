@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/07/2011
+*	Last modified:		24/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -52,6 +52,7 @@ typedef struct mergedsample
   float		wcsproperr[NAXIS];	/* Proper motion vector errors in WCS */
   float		wcsparal;		/* Parallax in mas */
   float		wcsparalerr;		/* Parallax error mas */
+  float		wcschi2;		/* P. motion/parallax fit Chi2/d.o.f.*/
   float		epochmin;		/* Min epoch for observations */
   float		epoch;			/* Mean epoch for observations */
   float		epochmax;		/* Max epoch for observations */

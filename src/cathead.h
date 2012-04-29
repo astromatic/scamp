@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/07/2011
+*	Last modified:		29/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -82,6 +82,9 @@ keystruct		refmergedkey[] = {
   {"PARALLAXERR_WORLD", "Trignonometric parallax uncertainty",
 	&refmergedsample.wcsparalerr, H_FLOAT, T_FLOAT,
 	"%10e", "mas", "stat.error;pos.parallax.trig;stat.fit", "mas"},
+  {"CHI2_ASTROM", "Astrometric chi2/d.o.f.",
+	&refmergedsample.wcschi2, H_FLOAT, T_FLOAT,
+	"%10e", "", "stat.fit.chi2;pos.pm;pos.parallax.trig;", ""},
   {"EPOCH", "Mean epoch",
 	&refmergedsample.epoch, H_FLOAT, T_FLOAT,
 	"%15.10f", "yr", "time.epoch;stat.mean", "yr"},

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-**	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+**	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		12/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,6 +56,7 @@ typedef enum {MOSAIC_UNCHANGED, MOSAIC_SAMECRVAL, MOSAIC_SHAREPROJAXIS,
 	      MOSAIC_FIXFOCALPLANE, MOSAIC_LOOSE} mosaicenum;
 typedef enum {STABILITY_EXPOSURE, STABILITY_GROUP, STABILITY_INSTRUMENT,
 		STABILITY_ALL}	stabilityenum;
+typedef enum {PROJECTION_SAME, PROJECTION_TPV, PROJECTION_TAN}	projenum;
 
 typedef struct field
   {
@@ -83,6 +84,7 @@ typedef struct field
   float		match_dlng, match_dlat;	/* Positional corrections */
   float		match_asig, match_sig;	/* Contrasts for angle/scale and pos */
 /* ---- astrometric parameters */
+  projenum	projection_type;	/* Celestial projection type */
   double	epoch;			/* Epoch of observations */
   double	meanwcspos[NAXIS];	/* Mean pixel coordinate */
   double	meanwcsscale[NAXIS];	/* Mean pixel scale */
@@ -122,7 +124,7 @@ extern fieldstruct	*inherit_field(char *filename, fieldstruct *reffield,
 			*init_field(fieldstruct **infield,
 				fieldstruct **inwfield, int ninput,
 				char *filename),
-			*load_field(char *filename);
+			*load_field(char *filename, int fieldindex);
 
 extern double		dhmedian(double *ra, int n);
 

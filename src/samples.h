@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/08/2011
+*	Last modified:		24/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -74,6 +74,7 @@ typedef struct sample
   float		wcsproperr[NAXIS];	/* P. motion vector errors in the WCS */
   float		wcsparal;		/* Trigonometric parallax */
   float		wcsparalerr;		/* Trigonometric parallax error */
+  float		wcschi2;		/* P. motion/parallax fit Chi2/d.o.f.*/
   float		weight;			/* Relative weight in solutions */
   float		flux;			/* Flux */
   float		fluxerr;		/* Flux uncertainty (1-sigma) */

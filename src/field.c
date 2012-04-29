@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2011
+*	Last modified:		12/04/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,9 +69,9 @@ OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used. The function is not reentrant because
 	of static variables (prefs structure members are updated).
 AUTHOR  E. Bertin (IAP)
-VERSION 21/07/2011
+VERSION 12/04/2012
 */
-fieldstruct	*load_field(char *filename)
+fieldstruct	*load_field(char *filename, int fieldindex)
   {
    wcsstruct	*wcs;
    catstruct	*cat;
@@ -81,9 +81,9 @@ fieldstruct	*load_field(char *filename)
    setstruct	**set;
    h_type	htype;
    t_type	ttype;
-   char		str[MAXCHAR], label[72],
+   char		str[MAXCHAR], label[72], keystr[16],
 		*rfilename, *pstr, *astrombuf, *photombuf, *pspath;
-   int		i, j, n, s, nsample, line;
+   int		d, i, j, n, s, nsample, line;
    
 /* A short, "relative" version of the filename */
   if (!(rfilename = strrchr(filename, '/')))
@@ -99,6 +99,8 @@ fieldstruct	*load_field(char *filename)
     error(EXIT_FAILURE, "*Error*: No such catalog: ", filename);
   QCALLOC(field, fieldstruct, 1);
   QMALLOC(field->set, setstruct *, MAXSET);
+  field->fieldindex = fieldindex;
+
   strcpy (field->filename, filename);
   field->rfilename = rfilename;
 
@@ -172,7 +174,7 @@ fieldstruct	*load_field(char *filename)
       {
       fitspick(cat->tab->headbuf+line*80, str,(void *)label,
 	       &htype,&ttype, str);
-      fitswrite(photombuf, prefs.astrinstru_key[s], label, htype, ttype);
+      fitswrite(photombuf, prefs.photinstru_key[s], label, htype, ttype);
       }
     }
   n = 0;
@@ -259,6 +261,7 @@ fieldstruct	*load_field(char *filename)
 /* mosaic and stability types to the present field */
   field->mosaic_type = prefs.mosaic_type[field->astromlabel]; 
   field->stability_type = prefs.stability_type[field->astromlabel]; 
+  field->projection_type = prefs.projection_type[field->fieldindex];
 
 /* Compare the dummy photometric FITS header to the ones previously stored */
   for (j=0; j<prefs.nphotinstrustr; j++)
@@ -281,6 +284,19 @@ fieldstruct	*load_field(char *filename)
 /* For every header the catalog contains */
   for (i=0; i<field->nset; i++)
     {
+/*-- Set CTYPEs */
+    if (field->projection_type != PROJECTION_SAME)
+      for (d=0; d<NAXIS; d++)
+        {
+        sprintf(keystr, "CTYPE%1d  ", d+1);
+        if (fitsread(set[i]->imatab->headbuf, keystr, str, H_STRING,T_STRING)
+			== RETURN_OK
+		&& (pstr=strrchr(str, '-')))
+          {
+          sprintf(pstr+1, field->projection_type==PROJECTION_TPV? "TPV":"TAN");
+          fitswrite(set[i]->imatab->headbuf, keystr, str, H_STRING,T_STRING);
+          }
+        }
 /*-- Manage WCS info */
     wcs = set[i]->wcs = read_wcs(set[i]->imatab);
     set[i]->lng = wcs->lng;
@@ -553,7 +569,7 @@ INPUT   Pointer to the thread number.
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/09/2004
+VERSION 12/04/2012
  ***/
 void    *pthread_load_field(void *arg)
   {
@@ -576,7 +592,7 @@ void    *pthread_load_field(void *arg)
       findex = pthread_findex++;
       QPTHREAD_MUTEX_UNLOCK(&readmutex);
 /*---- Load catalogs */
-      pthread_fields[findex] = load_field(prefs.file_name[findex]);
+      pthread_fields[findex] = load_field(prefs.file_name[findex], findex);
 /*---- Compute basic field astrometric features (center, field size,...) */
       locate_field(pthread_fields[findex]);
       }
