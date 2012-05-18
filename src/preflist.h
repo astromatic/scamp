@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/04/2012
+*	Last modified:		18/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -130,6 +130,7 @@ pkeystruct key[] =
   {"FGROUP_RADIUS", P_FLOAT, &prefs.group_radius, 0,0, 0.0,180.0},
   {"FIXFOCALPLANE_NMIN", P_INT, &prefs.fixfocalplane_nmin, 0, 65535, 0.0, 0.0},
   {"FLAGS_MASK", P_INT, &prefs.flags_mask, 0,0xff, 0.0,0.0},
+  {"FOCDISTORT_DEGREE", P_INT, &prefs.focal_deg, 1,16,0.0,0.0},
   {"FULLOUTCAT_NAME", P_STRING, prefs.fullcat_name},
   {"FULLOUTCAT_TYPE", P_KEY, &prefs.fullcat_type, 0,0, 0.0,0.0,
    {"NONE", "ASCII_HEAD", "ASCII", "ASCII_SKYCAT", "ASCII_VOTABLE",
@@ -269,6 +270,7 @@ char *default_prefs[] =
 "DISTORT_KEYS           XWIN_IMAGE,YWIN_IMAGE # Cat. parameters or FITS keywords",
 "DISTORT_GROUPS         1,1             # Polynom group for each context key",
 "DISTORT_DEGREES        3               # Polynom degree for each group",
+"*FOCDISTORT_DEGREE      1               # Polynom degree for focal plane coords",
 "*ASTREF_WEIGHT          1.0             # Relative weight of ref.astrom.cat.",
 "*ASTR_ACCURACY          1e-2            # Astrometric uncertainty floor (pix.)",
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
