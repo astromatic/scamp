@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/02/2011
+*	Last modified:		17/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,10 +59,11 @@ extern void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup),
 		astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh),
 		astrweight_fgroups(fgroupstruct **fgroups, int nfgroup),
-		mat_to_wcs(polystruct *poly, double *mat, setstruct *set),
+		mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
+				setstruct *set),
 		reproj_fgroup(fgroupstruct *fgroup,fieldstruct *field),
 		shrink_mat(double *alpha, double *beta, int ncoefftot,
-			int index, int nmiss);
+				int index, int nmiss);
 
 #endif
 

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/02/2012
+*	Last modified:		17/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -187,6 +187,7 @@ typedef struct
   int           ncontext_group;			/* nb of params */
   int           group_deg[MAXCONTEXT];		/* Degree for each group */
   int           ngroup_deg;			/* nb of params */
+  int		focal_deg;			/* Focal coords polynom degree*/ 
   double	astrclip_nsig;			/* Astrom. clipping threshold*/
   double	astref_weight;			/* Ref.cat. relative weight */
   double	astraccuracy;			/* AStrom. uncertainty floor */

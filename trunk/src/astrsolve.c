@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/03/2012
+*	Last modified:		18/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -102,7 +102,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/12/2011
+VERSION	17/05/2012
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -143,7 +143,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 /* Linear field-dependent polynomial */
   for (d=0; d<naxis; d++)
     group2[d] = 1;
-  groupdeg2 = 1;
+  groupdeg2 = prefs.focal_deg;
   poly2 = poly_init(group2, naxis, &groupdeg2, 1);
 
 /* Use a different index for each instrument */
@@ -504,7 +504,7 @@ field->index2 = -1;
       for (s=0; s<field->nset; s++)
         {
         set = field->set[s];
-        mat_to_wcs(poly, beta, set);
+        mat_to_wcs(poly, poly2, beta, set);
         }
       }
    }
@@ -972,7 +972,7 @@ INPUT   Pointer to the thread number.
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 12/01/2005
+VERSION 18/05/2012
  ***/
 void    *pthread_fillastromatrix_thread(void *arg)
   {
@@ -987,7 +987,7 @@ void    *pthread_fillastromatrix_thread(void *arg)
   naxis = pthread_fgroups[0]->naxis;
   for (d=0; d<naxis; d++)
     group2[d] = 1;
-  groupdeg2 = 1;
+  groupdeg2 = prefs.focal_deg;
   poly = poly_init(prefs.context_group, prefs.ncontext_name,
 			prefs.group_deg, prefs.ngroup_deg);
   poly2 = poly_init(group2, naxis, &groupdeg2, 1);
@@ -1139,18 +1139,21 @@ void	pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
 
 
 /****** mat_to_wcs *********************************************************
-PROTO	void mat_to_wcs(polystruct *poly, double *mat, setstruct *set)
+PROTO	void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
+		setstruct *set)
 PURPOSE	Fill a WCS structure according to the matrix solution.
-INPUT	ptr to the polynom structure,
+INPUT	ptr to the instrument-dependent polynom structure,
+	ptr to the exposure-dependent polynom structure,
 	ptr to the solution vector,
 	ptr to the WCS structure to be modified.
 OUTPUT	-.
 NOTES	Unfortunately the present WCS description of distortions is valid
 	in 2D only.
 AUTHOR	E. Bertin (IAP)
-VERSION	15/12/2005
+VERSION	18/05/2012
  ***/
-void mat_to_wcs(polystruct *poly, double *mat, setstruct *set)
+void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
+		setstruct *set)
   {
   static const int pvindex[8][8] =	{{0,1,4,7,12,17,24,31},
 					{2,5,8,13,18,25,32,0},
@@ -1167,21 +1170,19 @@ void mat_to_wcs(polystruct *poly, double *mat, setstruct *set)
 		*context, *cscale,*czero, *projp, *mat1, *mat2,
 		dval, det;
    int		*powers, *powerst,
-		c,cx,cy, d, e,ex,ey, p,s, lng,lat, naxis,ncoeff,ncontext, ival;
+		c,cx,cy, d, e,ex,ey, p,s, lng,lat, naxis, ncoeff,ncoeff2,
+		ncontext, ival;
 
   wcs = set->wcs;
   naxis = wcs->naxis;
   lng = wcs->lng;
   lat = wcs->lat;
   ncoeff = set->ncoeff/naxis;
+  ncoeff2 = poly2->ncoeff;
   ncontext = poly->ndim;
   cscale = set->contextscale;
   czero = set->contextoffset;
   projp = wcs->projp;
-  mat1 = mat + set->index;	/* Start of the PV section in the solution */
-
-/* Compute the array of exponents of polynom terms */
-  powers = poly_powers(poly);
 
 /* Precompute FITS or average parameters */
   QMALLOC(context, double, ncontext);
@@ -1222,7 +1223,9 @@ void mat_to_wcs(polystruct *poly, double *mat, setstruct *set)
     for (d=0; d<naxis; d++)
       if (!wcs->nprojp)
         projp[1+100*d] += 1.0;	/* Default to the linear term */
-    powerst = powers;
+/*-- Compute the array of exponents of polynom terms */
+    powerst = powers = poly_powers(poly);
+    mat1 = mat + set->index;	/* Instrument-dependent section in solution */
     for (p=0; p<ncoeff; p++)
       {
       dval = 1.0;
@@ -1247,25 +1250,40 @@ void mat_to_wcs(polystruct *poly, double *mat, setstruct *set)
           ival = pvindex[ex][ey];
           projp[ival+100*d] += dval**mat1;
           }
-	}
       }
+    free(powers);
+    }
 
   free(context);
-  free(powers);
 
 /* Now take care of the field-dependent parameters */
   if (set->index2>=0)
     {
-    mat2 = mat + set->index2;	/* Field-dependent section in the solution */
-    projp[0+100*lng] += mat2[0+lng*(naxis+1)];
-    projp[1+100*lng] += mat2[1+lat+lng*(naxis+1)];
-    projp[2+100*lng] += mat2[1+lng+lat*(naxis+1)];
-    projp[0+100*lat] += mat2[1+lng+lng*(naxis+1)];
-    projp[1+100*lat] += mat2[1+lat+lat*(naxis+1)];
-    projp[2+100*lat] += mat2[0+lat*(naxis+1)];
+/*-- Compute the array of exponents of polynom terms */
+    powerst = powers = poly_powers(poly2);
+    mat2 = mat + set->index2;	/* Field-dependent section in solution */
+    for (p=0; p<ncoeff2; p++)
+      {
+      dval = 1.0;
+      ex = *(powerst++);
+      ey = *(powerst++);
+      for (d=0; d<naxis; d++, mat2++)
+/*------ Correct only celestial coordinates */
+        if (d==lng)
+          {
+          ival = pvindex[ey][ex];
+          projp[ival+100*d] += *mat2;
+          }
+        else if (d==lat)
+          {
+          ival = pvindex[ex][ey];
+          projp[ival+100*d] += *mat2;
+          }
+      }
+    free(powers);
     }
 
-  if (ncoeff <= naxis+1)
+  if (ncoeff <= naxis+1 && poly2->degree[0]<2)
 /* linear case: ditch the PV parameters and use only the CD/CRPIX parameters */
     {
     cd[lng*naxis + lng] = projp[1+100*lng]*wcs->cd[lng*naxis + lng]
