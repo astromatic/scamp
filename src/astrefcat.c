@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/04/2012
+*	Last modified:		19/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -114,7 +114,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 20/04/2012
+VERSION 19/05/2012
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -884,8 +884,25 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         case ASTREFCAT_SDSSR5:
         case ASTREFCAT_SDSSR6:
         case ASTREFCAT_SDSSR7:
-        case ASTREFCAT_SDSSR8:
           sscanf(str, "%*24c %*2c %10s%10s %lf %lf %*f %lf %d %*s %lf`%lf "
+			"%lf`%lf %lf`%lf %lf`%lf %lf`%lf ; %lf",
+		salpha, sdelta,
+		&poserr[lng], &poserr[lat],
+		&epoch, &nobs,
+		&mag[0],&magerr[0],&mag[1],&magerr[1],&mag[2],&magerr[2],
+		&mag[3],&magerr[3],&mag[4],&magerr[4],&dist);
+/*-------- Avoid missing or poor observations */
+          if (nobs<2 || nobs>3)
+            continue;
+          alpha = atof(salpha);
+          delta = atof(sdelta);
+          poserr[lng] *= ARCSEC/DEG;
+          poserr[lat] *= ARCSEC/DEG;
+          dist *= ARCMIN/DEG;
+          break;
+
+        case ASTREFCAT_SDSSR8:
+          sscanf(str, "%*24c %*2c %10s%10s %lf %lf %lf %d %*s %lf`%lf "
 			"%lf`%lf %lf`%lf %lf`%lf %lf`%lf ; %lf",
 		salpha, sdelta,
 		&poserr[lng], &poserr[lat],
