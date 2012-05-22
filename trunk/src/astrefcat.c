@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/05/2012
+*	Last modified:		22/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -114,7 +114,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 19/05/2012
+VERSION 22/05/2012
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -129,7 +129,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		smag[MAX_BAND][32],smagerr[MAX_BAND][32],sproperr[NAXIS][32],
 		sflag[4],
 		*bandname, *cdsbandname, *catname,
-		flag1,flag2;
+		flag1,flag2, smode;
    double	poserr[NAXIS],prop[NAXIS],properr[NAXIS],
 		mag[MAX_BAND],magerr[MAX_BAND], epoch,epocha,epochd,
 		alpha,delta, dist, temp;
@@ -748,9 +748,13 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             if (str[i] == '|')
               str[i] = ' ';
           sscanf(str, "%lf %lf %lf %lf %*f %*s %s %s %*s %*s %s %s %*s %*s "
-		"%s %s",
+		"%s %s %*s %*s %*s %*s %*s %s",
 		&alpha, &delta, &poserr[lng], &poserr[lat],
-		smag[0],  smagerr[0], smag[1], smagerr[1], smag[2],smagerr[2]);
+		smag[0],  smagerr[0], smag[1], smagerr[1], smag[2],smagerr[2],
+		sflag);
+/*-------- Avoid contaminated observations */
+          if (sflag[0]!='0' || sflag[1]!='0' || sflag[2]!='0')
+            continue;
           for (b=0; b<nband; b++)
             if (*smag[b] == '-' || *smagerr[b] == '-')
               mag[b] = magerr[b] = 99.0;
@@ -884,15 +888,15 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         case ASTREFCAT_SDSSR5:
         case ASTREFCAT_SDSSR6:
         case ASTREFCAT_SDSSR7:
-          sscanf(str, "%*24c %*2c %10s%10s %lf %lf %*f %lf %d %*s %lf`%lf "
+          sscanf(str, "%1c%*23c %*2c %10s%10s %lf %lf %*f %lf %d %*s %lf`%lf "
 			"%lf`%lf %lf`%lf %lf`%lf %lf`%lf ; %lf",
-		salpha, sdelta,
+		&smode, salpha, sdelta,
 		&poserr[lng], &poserr[lat],
 		&epoch, &nobs,
 		&mag[0],&magerr[0],&mag[1],&magerr[1],&mag[2],&magerr[2],
 		&mag[3],&magerr[3],&mag[4],&magerr[4],&dist);
-/*-------- Avoid missing or poor observations */
-          if (nobs<2 || nobs>3)
+/*-------- Avoid missing or poor observations, and secondary detections */
+          if (nobs<2 || nobs>3 || smode=='2')
             continue;
           alpha = atof(salpha);
           delta = atof(sdelta);
@@ -902,15 +906,15 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           break;
 
         case ASTREFCAT_SDSSR8:
-          sscanf(str, "%*24c %*2c %10s%10s %lf %lf %lf %d %*s %lf`%lf "
+          sscanf(str, "%1c%*23c %*2c %10s%10s %lf %lf %lf %d %*s %lf`%lf "
 			"%lf`%lf %lf`%lf %lf`%lf %lf`%lf ; %lf",
-		salpha, sdelta,
+		&smode,salpha, sdelta,
 		&poserr[lng], &poserr[lat],
 		&epoch, &nobs,
 		&mag[0],&magerr[0],&mag[1],&magerr[1],&mag[2],&magerr[2],
 		&mag[3],&magerr[3],&mag[4],&magerr[4],&dist);
-/*-------- Avoid missing or poor observations */
-          if (nobs<2 || nobs>3)
+/*-------- Avoid missing or poor observations, and secondary detections */
+          if (nobs<2 || nobs>3 || smode=='2')
             continue;
           alpha = atof(salpha);
           delta = atof(sdelta);
