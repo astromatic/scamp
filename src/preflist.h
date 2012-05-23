@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/05/2012
+*	Last modified:		23/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -215,10 +215,9 @@ char *default_prefs[] =
 "*REF_PORT               80              # Ports to connect to catalog servers",
 "*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
 "ASTREF_CATALOG         USNO-B1         # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
-"                                       # GSC-1.3,GSC-2.2,GSC-2.3,",
-"                                       # UCAC-1,UCAC-2,UCAC-3",
-"                                       # NOMAD-1, PPMX, 2MASS, DENIS-3,",
-"                                       # SDSS-R3,SDSS-R5,SDSS-R6 or SDSS-R7",
+"                                       # GSC-1.3,GSC-2.2,GSC-2.3, UCAC-1,UCAC-2,",
+"                                       # UCAC-3, NOMAD-1, PPMX, 2MASS, DENIS-3,",
+"                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,SDSS-R8",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
 "ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",
