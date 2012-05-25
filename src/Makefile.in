@@ -24,7 +24,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -39,7 +39,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		07/02/2011
+#	Last modified:		25/05/2012
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -82,25 +82,26 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__scamp_SOURCES_DIST = astrefcat.c astrsolve.c catout.c check.c \
-	colour.c astrcplot.c cplot.c photcplot.c crossid.c fft.c \
-	fgroup.c field.c fitswcs.c header.c main.c makeit.c match.c \
-	misc.c mosaic.c photsolve.c prefs.c proper.c samples.c \
-	threads.c xml.c astrefcat.h astrsolve.h cathead.h catout.h \
-	check.h colour.h cplot.h crossid.h define.h fft.h fgroup.h \
-	field.h fitswcs.h globals.h header.h key.h match.h misc.h \
-	mosaic.h photsolve.h preflist.h prefs.h proper.h samples.h \
-	threads.h types.h wcscelsys.h xml.h
+am__scamp_SOURCES_DIST = astrefcat.c astrsolve.c astrstats.c catout.c \
+	check.c colour.c astrcplot.c cplot.c photcplot.c crossid.c \
+	fft.c fgroup.c field.c fitswcs.c header.c main.c makeit.c \
+	match.c misc.c mosaic.c photsolve.c prefs.c proper.c samples.c \
+	threads.c xml.c astrefcat.h astrsolve.h astrstats.h cathead.h \
+	catout.h check.h colour.h cplot.h crossid.h define.h fft.h \
+	fgroup.h field.h fitswcs.h globals.h header.h key.h match.h \
+	misc.h mosaic.h photsolve.h preflist.h prefs.h proper.h \
+	samples.h threads.h types.h wcscelsys.h xml.h
 @USE_PLPLOT_TRUE@am__objects_1 = astrcplot.$(OBJEXT) cplot.$(OBJEXT) \
 @USE_PLPLOT_TRUE@	photcplot.$(OBJEXT)
 am_scamp_OBJECTS = astrefcat.$(OBJEXT) astrsolve.$(OBJEXT) \
-	catout.$(OBJEXT) check.$(OBJEXT) colour.$(OBJEXT) \
-	$(am__objects_1) crossid.$(OBJEXT) fft.$(OBJEXT) \
-	fgroup.$(OBJEXT) field.$(OBJEXT) fitswcs.$(OBJEXT) \
-	header.$(OBJEXT) main.$(OBJEXT) makeit.$(OBJEXT) \
-	match.$(OBJEXT) misc.$(OBJEXT) mosaic.$(OBJEXT) \
-	photsolve.$(OBJEXT) prefs.$(OBJEXT) proper.$(OBJEXT) \
-	samples.$(OBJEXT) threads.$(OBJEXT) xml.$(OBJEXT)
+	astrstats.$(OBJEXT) catout.$(OBJEXT) check.$(OBJEXT) \
+	colour.$(OBJEXT) $(am__objects_1) crossid.$(OBJEXT) \
+	fft.$(OBJEXT) fgroup.$(OBJEXT) field.$(OBJEXT) \
+	fitswcs.$(OBJEXT) header.$(OBJEXT) main.$(OBJEXT) \
+	makeit.$(OBJEXT) match.$(OBJEXT) misc.$(OBJEXT) \
+	mosaic.$(OBJEXT) photsolve.$(OBJEXT) prefs.$(OBJEXT) \
+	proper.$(OBJEXT) samples.$(OBJEXT) threads.$(OBJEXT) \
+	xml.$(OBJEXT)
 scamp_OBJECTS = $(am_scamp_OBJECTS)
 scamp_DEPENDENCIES = $(top_builddir)/src/fits/libfits.a \
 	$(top_builddir)/src/wcs/libwcs_c.a
@@ -306,15 +307,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = fits wcs
 @USE_PLPLOT_TRUE@CPLOTSOURCE = astrcplot.c cplot.c photcplot.c
-scamp_SOURCES = astrefcat.c astrsolve.c catout.c check.c colour.c \
-		  $(CPLOTSOURCE) crossid.c fft.c fgroup.c field.c fitswcs.c \
-		  header.c main.c makeit.c match.c misc.c mosaic.c \
+scamp_SOURCES = astrefcat.c astrsolve.c astrstats.c catout.c check.c \
+		  colour.c $(CPLOTSOURCE) crossid.c fft.c fgroup.c field.c \
+		  fitswcs.c header.c main.c makeit.c match.c misc.c mosaic.c \
 		  photsolve.c prefs.c proper.c samples.c threads.c xml.c \
-		  astrefcat.h astrsolve.h cathead.h catout.h check.h colour.h \
-		  cplot.h crossid.h define.h fft.h fgroup.h field.h fitswcs.h \
-		  globals.h header.h key.h match.h misc.h mosaic.h \
-		  photsolve.h preflist.h prefs.h proper.h samples.h threads.h \
-		  types.h wcscelsys.h xml.h
+		  astrefcat.h astrsolve.h astrstats.h cathead.h catout.h \
+		  check.h colour.h cplot.h crossid.h define.h fft.h fgroup.h \
+		  field.h fitswcs.h globals.h header.h key.h match.h misc.h \
+		  mosaic.h photsolve.h preflist.h prefs.h proper.h samples.h \
+		  threads.h types.h wcscelsys.h xml.h
 
 scamp_LDADD = $(top_builddir)/src/fits/libfits.a \
 		  $(top_builddir)/src/wcs/libwcs_c.a
@@ -410,6 +411,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/astrcplot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/astrefcat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/astrsolve.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/astrstats.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/catout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/check.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/colour.Po@am__quote@

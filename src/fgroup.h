@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		25/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -93,6 +93,10 @@ typedef struct fgroup
   double	*sig_refmagerr_hsn;	/* RMS mag error with respect to refs*/
   double	*chi2_refmag_hsn;	/* Chi2/d.o.f. for ref. mag errors */
   int		*nrefmagmatch_hsn;	/* Number of matches with mag refs */
+/* Maps */
+  int		map_nmesh[NAXIS];	/* Meshes per axis for maps */
+  int		map_step[NAXIS];	/* Mesh step per axis for maps */
+  double	*sig_interr_map[NAXIS];	/* Map of Internal RMS measurements*/
   }	fgroupstruct;
 
 /*------------------------------- functions ---------------------------------*/

@@ -1,13 +1,13 @@
 /*
-*				astrsolve.h
+*				astrstats.h
 *
-* Include file astrsolve.c.
+* Include file for astrstats.c.
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -34,32 +34,17 @@
 #include "fgroup.h"
 #endif
 
-#ifndef _POLY_H_
-#include "wcs/poly.h"
-#endif
-
-#ifndef _SAMPLES_H_
-#include "samples.h"
-#endif
-
-#ifndef _SOLVE_H_
-#define _SOLVE_H_
+#ifndef _ASTRSTAT_H_
+#define _ASTRSTAT_H_
 
 /*----------------------------- Internal constants --------------------------*/
-
-#define	ASTREF_WEIGHTFACTOR	1.0	/* Fudge factor applied to ref.weights*/
-
 /*--------------------------- structure definitions -------------------------*/
 /*---------------------------------- protos --------------------------------*/
-extern int	compute_jacobian(samplestruct *sample, double *dprojdred);
+extern int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
+				double nsigma);
 
-extern void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup),
-		astrweight_fgroups(fgroupstruct **fgroups, int nfgroup),
-		mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
-				setstruct *set),
-		reproj_fgroup(fgroupstruct *fgroup,fieldstruct *field),
-		shrink_mat(double *alpha, double *beta, int ncoefftot,
-				int index, int nmiss);
+extern void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
+				double hsn_thresh);
 
 #endif
 
