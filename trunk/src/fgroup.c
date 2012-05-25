@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		25/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -358,7 +358,7 @@ INPUT   -.
 OUTPUT  Pointer to an allocated field group.
 NOTES   -.
 AUTHOR  E. Bertin (IAP)
-VERSION 10/09/2004
+VERSION 25/05/2012
 */
 fgroupstruct	*new_fgroup(void)
   {
@@ -389,52 +389,35 @@ INPUT   Field group pointer.
 OUTPUT  -.
 NOTES   -.
 AUTHOR  E. Bertin (IAP)
-VERSION 30/01/2006
+VERSION 25/05/2012
 */
 void	end_fgroup(fgroupstruct *fgroup)
   {
    int	i;
 
-  if (fgroup->field)
-    free(fgroup->field);
-  if (fgroup->sig_intmagerr)
-    free(fgroup->sig_intmagerr);
-  if (fgroup->chi2_intmag)
-    free(fgroup->chi2_intmag);
-  if (fgroup->nintmagmatch)
-    free(fgroup->nintmagmatch);
-  if (fgroup->sig_intmagerr_hsn)
-    free(fgroup->sig_intmagerr_hsn);
-  if (fgroup->chi2_intmag_hsn)
-    free(fgroup->chi2_intmag_hsn);
-  if (fgroup->nintmagmatch_hsn)
-    free(fgroup->nintmagmatch_hsn);
-  if (fgroup->sig_refmagerr)
-    free(fgroup->sig_refmagerr);
-  if (fgroup->chi2_refmag)
-    free(fgroup->chi2_refmag);
-  if (fgroup->nrefmagmatch)
-    free(fgroup->nrefmagmatch);
-  if (fgroup->sig_refmagerr_hsn)
-    free(fgroup->sig_refmagerr_hsn);
-  if (fgroup->chi2_refmag_hsn)
-    free(fgroup->chi2_refmag_hsn);
-  if (fgroup->nrefmagmatch_hsn)
-    free(fgroup->nrefmagmatch_hsn);
+  free(fgroup->field);
+  free(fgroup->sig_intmagerr);
+  free(fgroup->chi2_intmag);
+  free(fgroup->nintmagmatch);
+  free(fgroup->sig_intmagerr_hsn);
+  free(fgroup->chi2_intmag_hsn);
+  free(fgroup->nintmagmatch_hsn);
+  free(fgroup->sig_refmagerr);
+  free(fgroup->chi2_refmag);
+  free(fgroup->nrefmagmatch);
+  free(fgroup->sig_refmagerr_hsn);
+  free(fgroup->chi2_refmag_hsn);
+  free(fgroup->nrefmagmatch_hsn);
   for (i=0; i<NAXIS; i++)
     {
-    if (fgroup->intcolshiftscale[i])
-      free(fgroup->intcolshiftscale[i]);
-    if (fgroup->intcolshiftzero[i])
-      free(fgroup->intcolshiftzero[i]);
-    if (fgroup->colshiftscale[i])
-      free(fgroup->colshiftscale[i]);
-    if (fgroup->colshiftzero[i])
-      free(fgroup->colshiftzero[i]);
-    if (fgroup->refcolshiftscale[i])
-      free(fgroup->refcolshiftscale[i]);
-    if (fgroup->refcolshiftzero[i])
-      free(fgroup->refcolshiftzero[i]);
+    free(fgroup->intcolshiftscale[i]);
+    free(fgroup->intcolshiftzero[i]);
+    free(fgroup->colshiftscale[i]);
+    free(fgroup->colshiftzero[i]);
+    free(fgroup->refcolshiftscale[i]);
+    free(fgroup->refcolshiftzero[i]);
+/*-- Maps */
+    free(fgroup->sig_interr_map[i]);
     }
   if (fgroup->wcs)
     end_wcs(fgroup->wcs);

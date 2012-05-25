@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/05/2012
+*	Last modified:		25/05/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -210,6 +210,7 @@ typedef struct
   int		cplot_res[2];			/* X,Y check-plot resolution */
   int		ncplot_res;			/* nb of params */
   int		cplot_antialiasflag;		/* Anti-aliasing on/off */
+  int		stats_maxmeshsize;		/* Max mesh size for stats */
 /* Check-images */
   checkenum	check_type[MAXCHECK];		/* check-image types */
   int		ncheck_type;			/* nb of params */

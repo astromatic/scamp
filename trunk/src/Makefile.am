@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		07/02/2011
+#	Last modified:		25/05/2012
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -33,15 +33,15 @@ CPLOTSOURCE	= astrcplot.c cplot.c photcplot.c
 endif
 
 bin_PROGRAMS	= scamp
-scamp_SOURCES	= astrefcat.c astrsolve.c catout.c check.c colour.c \
-		  $(CPLOTSOURCE) crossid.c fft.c fgroup.c field.c fitswcs.c \
-		  header.c main.c makeit.c match.c misc.c mosaic.c \
+scamp_SOURCES	= astrefcat.c astrsolve.c astrstats.c catout.c check.c \
+		  colour.c $(CPLOTSOURCE) crossid.c fft.c fgroup.c field.c \
+		  fitswcs.c header.c main.c makeit.c match.c misc.c mosaic.c \
 		  photsolve.c prefs.c proper.c samples.c threads.c xml.c \
-		  astrefcat.h astrsolve.h cathead.h catout.h check.h colour.h \
-		  cplot.h crossid.h define.h fft.h fgroup.h field.h fitswcs.h \
-		  globals.h header.h key.h match.h misc.h mosaic.h \
-		  photsolve.h preflist.h prefs.h proper.h samples.h threads.h \
-		  types.h wcscelsys.h xml.h
+		  astrefcat.h astrsolve.h astrstats.h cathead.h catout.h \
+		  check.h colour.h cplot.h crossid.h define.h fft.h fgroup.h \
+		  field.h fitswcs.h globals.h header.h key.h match.h misc.h \
+		  mosaic.h photsolve.h preflist.h prefs.h proper.h samples.h \
+		  threads.h types.h wcscelsys.h xml.h
 scamp_LDADD	= $(top_builddir)/src/fits/libfits.a \
 		  $(top_builddir)/src/wcs/libwcs_c.a
 DATE=`date +"%Y-%m-%d"`
