@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/04/2012
+*	Last modified:		17/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -362,7 +362,7 @@ INPUT   Pointer to field structure.
 OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 07/02/2005
+VERSION 17/06/2012
 */
 void	locate_field(fieldstruct *field)
   {
@@ -370,7 +370,8 @@ void	locate_field(fieldstruct *field)
    wcsstruct		*wcs;
    double		*scale[NAXIS],*scalet[NAXIS],
 			*wcsmean,
-			cosalpha,sinalpha, sindelta, dist, maxradius, airmass;
+			cosalpha,sinalpha, sindelta, dist, maxradius, airmass,
+			expotime;
    int			i, s, lat,lng, nset, naxis;
 
 /* Some initializations */
@@ -429,8 +430,8 @@ void	locate_field(fieldstruct *field)
     field->meanwcsscale[i] = dhmedian(scale[i], nset);
     }
 
-/* Compute the radius of the field and mean airmass */
-  airmass = maxradius = 0.0;
+/* Compute the radius of the field, mean exposure time and mean airmass */
+  airmass = expotime = maxradius = 0.0;
   pset = field->set;
   set=*(pset++);
   for (s=nset; s--; set=*(pset++))
@@ -440,10 +441,12 @@ void	locate_field(fieldstruct *field)
     if (dist>maxradius)
       maxradius = dist;
     airmass += set->airmass;
+    expotime += set->expotime;
     }
 
   field->maxradius = maxradius;
   field->airmass = airmass / nset;
+  field->expotime = expotime / nset;
 
 /* Free memory */
   for (i=0; i<naxis; i++)

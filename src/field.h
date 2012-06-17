@@ -108,6 +108,7 @@ typedef struct field
   int		photomlink;		/* True if linked to a photom field*/
   double	dmagzero;		/* Magnitude zero-point correction */
   double	airmass;		/* Average field airmass */
+  double	expotime;		/* Average exposure time */
   int		index;			/* CONTEXT index */  
   int		index2;			/* field-dependent index */  
 /* ---- checkplot parameters */
