@@ -34,7 +34,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		25/03/2011
+#	Last modified:		17/06/2011
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -269,6 +269,7 @@
    <xsl:variable name="photinstru" select="count(FIELD[@name='Phot_Instrum']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="epoch" select="count(FIELD[@name='Observation_Date']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="coord" select="count(FIELD[@name='Field_Coordinates']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="expotime" select="count(FIELD[@name='Exposure_Time']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="airmass" select="count(FIELD[@name='AirMass']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="radius" select="count(FIELD[@name='Max_Radius']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="pixscale" select="count(FIELD[@name='Pixel_Scale']/preceding-sibling::FIELD)+1"/>
@@ -278,7 +279,10 @@
    <xsl:variable name="dx" select="count(FIELD[@name='DX']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="dy" select="count(FIELD[@name='DY']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="xycont" select="count(FIELD[@name='XY_Contrast']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="chi2int" select="count(FIELD[@name='Chi2_Internal']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="chi2inthi" select="count(FIELD[@name='Chi2_Internal_HighSN']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="chi2ref" select="count(FIELD[@name='Chi2_Reference']/preceding-sibling::FIELD)+1"/>
+   <xsl:variable name="chi2refhi" select="count(FIELD[@name='Chi2_Reference_HighSN']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="shear" select="count(FIELD[@name='Shear']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="sposangle" select="count(FIELD[@name='Shear_PosAngle']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="zpcorr" select="count(FIELD[@name='ZeroPoint_Corr']/preceding-sibling::FIELD)+1"/>
@@ -314,7 +318,7 @@
 -->
      <TR>
       <TH>#</TH>
-      <TH>Filename</TH>
+      <TH align="top-center">Filename</TH>
       <TH>Identifier</TH>
       <TH>Next</TH>
       <TH>Ndet</TH>
@@ -323,21 +327,23 @@
       <TH>A</TH>
       <TH>P</TH>
       <TH>Date</TH>
-      <TH>Air mass</TH>
-      <TH>alpha</TH>
-      <TH>delta</TH>
+      <TH>Exposure Time</TH>
+      <TH>Air Mass</TH>
+      <TH>Right Ascension</TH>
+      <TH>Declination</TH>
       <TH>Radius</TH>
       <TH>Pixel scale</TH>
       <TH>&Delta;Pixel Scale</TH>
       <TH>&Delta;Position Angle</TH>
       <TH>A/S contrast</TH>
-      <TH>&Delta;X</TH>
-      <TH>&Delta;Y</TH>
-      <TH>X/Y contrast</TH>
-      <TH>&chi;<sup>2</sup> <i>w.r.t.</i> Reference Astrometric Catalog</TH>
-      <TH>Shear</TH>
-      <TH>Shear Position Angle</TH>
-      <TH>MagZP.corr</TH>
+      <TH>&Delta;<i>X</i></TH>
+      <TH>&Delta;<i>Y</i></TH>
+      <TH><i>X</i>/<i>Y</i> contrast</TH>
+      <TH><i>&chi;</i><sup>2</sup> <sub>int</sub></TH>
+      <TH><i>&chi;</i><sup>2</sup> <sub>int</sub><BR/><elm>High S/N</elm></TH>
+      <TH><i>&chi;</i><sup>2</sup> <sub>ref</sub></TH>
+      <TH><i>&chi;</i><sup>2</sup> <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Mag &Delta;ZP</TH>
      </TR>
      <xsl:for-each select="DATA/TABLEDATA">
       <xsl:for-each select="TR">
@@ -388,8 +394,12 @@
         <td align="right">
          <el><xsl:value-of select="TD[$epoch]"/></el>
         </td>
+<!-- Exposure time -->
+        <td align="right">
+         <el><xsl:value-of select="TD[$expotime]"/></el>
+        </td>
 <!-- Airmass -->
-        <td align="center">
+        <td align="right">
          <el><xsl:value-of select="TD[$airmass]"/></el>
         </td>
 <!-- Alpha -->
@@ -470,17 +480,21 @@
           </xsl:otherwise>
          </xsl:choose>
         </td>
-<!-- Chi2 --> 
+<!-- Chi2 int --> 
         <td align="right">
-         <el><xsl:value-of select="format-number(TD[$chi2ref], '######0.0')"/></el>
+         <el><xsl:value-of select="format-number(TD[$chi2int], '######0.00')"/></el>
         </td>
-<!-- Shear --> 
+<!-- Chi2 int High S/N --> 
         <td align="right">
-         <el><xsl:value-of select="format-number(TD[$shear], '##0.00000')"/></el>
+         <el><xsl:value-of select="format-number(TD[$chi2inthi], '######0.00')"/></el>
         </td>
-<!-- Shear Position Angle--> 
+<!-- Chi2 ref --> 
         <td align="right">
-         <el><xsl:value-of select="format-number(TD[$sposangle], '##0.0')"/>&deg;</el>
+         <el><xsl:value-of select="format-number(TD[$chi2ref], '######0.00')"/></el>
+        </td>
+<!-- Chi2 ref High S/N --> 
+        <td align="right">
+         <el><xsl:value-of select="format-number(TD[$chi2refhi], '######0.00')"/></el>
         </td>
 <!-- Zero-Point correction --> 
         <td align="right">
@@ -578,63 +592,63 @@
       </xsl:if>      
       <TH>Index</TH>
       <TH>Nfields</TH>
-      <TH>Alpha</TH>
-      <TH>Delta</TH>
+      <TH>Right Ascension</TH>
+      <TH>Declination</TH>
       <TH>Pixel Scale</TH>
       <TH>Maximum Radius</TH>
-      <TH>Reference Astrometric Catalog</TH>
-      <TH>Reference Astrometric Band</TH>
+      <TH>Astrom. Ref. Catalog</TH>
+      <TH>Astrom. Ref. Band</TH>
       <xsl:if test="$chi2plotflag &gt; 0">
        <TH>&chi;<sup>2</sup> Plot</TH>
       </xsl:if>      
-      <TH>Internal Astrometric Sigma</TH>
-      <TH>Internal Astrometric Correlation</TH>
-      <TH>Internal &chi;<sup>2</sup></TH>
-      <TH>Detections for internal statistics</TH>
-      <TH>High S/N Internal Astrometric Sigma</TH>
-      <TH>High S/N Internal Astrometric Correlation</TH>
-      <TH>High S/N Internal &chi;<sup>2</sup></TH>
-      <TH>High S/N Detections for Internal statistics</TH>
+      <TH>Astrom. <i>σ</i> <sub>int</sub></TH>
+      <TH>Astrom. <i>ρ</i> <sub>int</sub></TH>
+      <TH>Astrom. <i>&chi;</i><sup>2</sup> <sub>int</sub></TH>
+      <TH>Astrom. <i>N</i> <sub>int</sub></TH>
+      <TH>Astrom. <i>σ</i> <sub>int</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>ρ</i> <sub>int</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>&chi;</i><sup>2</sup> <sub>int</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>N</i> <sub>int</sub><BR/> <elm>High S/N</elm></TH>
       <xsl:if test="$ad1dplotflag &gt; 0">
-       <TH>1-D Internal Error Plot</TH>
+       <TH>Astrom. 1-D Int. Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$ad2dplotflag &gt; 0">
-       <TH>2-D Internal Error Plot</TH>
+       <TH>Astrom. 2-D Int. Error Plot</TH>
       </xsl:if>      
-      <TH>Offset from Reference Catalog</TH>
-      <TH>Sigma <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>Correlation <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>&chi;<sup>2</sup> <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>Detections for statistics <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>High S/N Offset from Reference Catalog</TH>
-      <TH>High S/N Sigma <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>High S/N Correlation <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>High S/N &chi;<sup>2</sup> <i>w.r.t.</i> Astrometric Ref Catalog</TH>
-      <TH>High S/N Detections for statistics <i>w.r.t.</i> Astrometric Ref Catalog</TH>
+      <TH>Astrom. &Delta;RA <sub>ref</sub>, &Delta;DEC <sub>ref</sub></TH>
+      <TH>Astrom. <i>σ</i> <sub>ref</sub></TH>
+      <TH>Astrom. <i>ρ</i> <sub>ref</sub></TH>
+      <TH>Astrom. <i>&chi;</i><sup>2</sup> <sub>ref</sub></TH>
+      <TH>Astrom. <i>N</i> <sub>ref</sub></TH>
+      <TH>Astrom. &Delta;RA <sub>ref</sub>, &Delta;DEC <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>σ</i> <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>ρ</i> <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>&chi;</i><sup>2</sup> <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Astrom. <i>N</i> <sub>ref</sub><BR/> <elm>High S/N</elm></TH>
       <xsl:if test="$r1dplotflag &gt; 0">
-       <TH>1-D External Error Plot</TH>
+       <TH>Astrom. 1-D Ref. Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$r2dplotflag &gt; 0">
-       <TH>2-D External Error Plot</TH>
+       <TH>Astrom. 2-D Ref. Error Plot</TH>
       </xsl:if>      
-      <TH>Instrument Name</TH>
-      <TH>Internal Photometric Sigma</TH>
-      <TH>Internal &chi;<sup>2</sup></TH>
-      <TH>Detections for internal statistics</TH>
-      <TH>High S/N Internal Photometric Sigma</TH>
-      <TH>High S/N Internal &chi;<sup>2</sup></TH>
-      <TH>High S/N Detections for internal statistics</TH>
-      <TH>Sigma <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH>&chi;<sup>2</sup> <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH>Detections for statistics <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH>High S/N Sigma <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH>High S/N &chi;<sup>2</sup> <i>w.r.t.</i> Photometric Ref Catalog</TH>
-      <TH>High S/N Detections for statistics <i>w.r.t.</i> Photometric Ref Catalog</TH>
+      <TH>Photom. Instruments</TH>
+      <TH>Photom. <i>σ</i> <sub>int</sub></TH>
+      <TH>Photom. <i>&chi;</i><sup>2</sup> <sub>int</sub></TH>
+      <TH>Photom. <i>N</i> <sub>int</sub></TH>
+      <TH>Photom. <i>σ</i> <sub>int</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Photom. <i>&chi;</i><sup>2</sup> <sub>int</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Photom. <i>N</i> <sub>int</sub><BR/> <elm>High S/N</elm></TH>
+      <TH>Photom. <i>σ</i> <sub>ref</sub></TH>
+      <TH>Photom. <i>&chi;</i><sup>2</sup> <sub>ref</sub></TH>
+      <TH>Photom. <i>N</i> <sub>ref</sub></TH>
+      <TH>Photom. <i>σ</i> <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Photom. <i>&chi;</i><sup>2</sup> <sub>ref</sub><BR/><elm>High S/N</elm></TH>
+      <TH>Photom. <i>N</i> <sub>ref</sub><BR/> <elm>High S/N</elm></TH>
       <xsl:if test="$pherplotflag &gt; 0">
-       <TH>Internal Photometric Error Plot</TH>
+       <TH>Photom. Internal Error Plot</TH>
       </xsl:if>      
       <xsl:if test="$phermagplotflag &gt; 0">
-       <TH>Internal Photometric Error vs. Magnitude Plot</TH>
+       <TH>Photom. Internal Error vs. Magnitude Plot</TH>
       </xsl:if>      
       <xsl:if test="$ZPplotflag &gt; 0">
        <TH>Zero Point Differences Plot</TH>

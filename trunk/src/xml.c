@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/03/2012
+*	Last modified:		17/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -189,7 +189,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	25/03/2012
+VERSION	17/06/2012
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -359,6 +359,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.code;phot\"/>\n");
   fprintf(file, "   <FIELD name=\"Observation_Date\" datatype=\"double\""
 	" ucd=\"time.epoch;obs.field\" unit=\"yr\"/>\n");
+  fprintf(file, "   <FIELD name=\"Exposure_Time\" datatype=\"float\""
+	" ucd=\"time.duration;obs.exposure\"/>\n");
   fprintf(file, "   <FIELD name=\"AirMass\" datatype=\"float\""
 	" ucd=\"obs.airMass\"/>\n");
   fprintf(file, "   <FIELD name=\"Field_Coordinates\" datatype=\"double\""
@@ -435,13 +437,14 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	"     <TD>%d</TD><TD>%s</TD><TD>%s</TD>\n"
 	"     <TD>%d</TD><TD>%d</TD><TD>%d</TD><TD>%d</TD><TD>%c</TD>\n"
 	"     <TD>%d</TD><TD>%d</TD><TD>A%d</TD><TD>P%d</TD><TD>%c</TD><TD>%c</TD>\n"
-	"     <TD>%.9f</TD><TD>%.2f</TD><TD>%.10g",
+	"     <TD>%.9f</TD><TD>%.3f</TD><TD>%.2f</TD><TD>%.10g",
 	field->fieldindex+1, field->rfilename, field->ident,
 	field->nset,field->naxis,field->lng,field->lat,field->headflag?'T':'F',
 	field->nsample, field->fgroup->no,
 		field->astromlabel+1,field->photomlabel+1,
 		field->photomflag==1? 'T':'F',field->photomflag==1? 'T':'F',
 	field->epoch,
+	field->expotime,
 	field->airmass,
 	field->meanwcspos[0]);
     for (d=1; d<field->naxis; d++)
