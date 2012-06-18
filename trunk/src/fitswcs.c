@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		15/06/2012
+*	Last modified:		18/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -328,7 +328,7 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	22/07/2011
+VERSION	18/06/2012
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
@@ -439,6 +439,8 @@ wcsstruct	*read_wcs(tabstruct *tab)
 /*-- Coordinate reference frame */
 /*-- Search for an observation date expressed in Julian days */
     FITSREADF(buf, "MJD-OBS ", date, -1.0);
+    if (date<0.0)
+      FITSREADF(buf, "MJDSTART", date, -1.0);
 /*-- Precession date (defined from Ephemerides du Bureau des Longitudes) */
 /*-- in Julian years from 2000.0 */
     if (date>0.0)
