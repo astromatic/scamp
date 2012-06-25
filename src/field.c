@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/06/2012
+*	Last modified:		25/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -622,7 +622,7 @@ INPUT   Pointer to field structure pointers,
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/10/2006
+VERSION 25/06/2012
  ***/
 void    pthread_load_fields(fieldstruct **fields, int nfield)
   {
@@ -630,8 +630,10 @@ void    pthread_load_fields(fieldstruct **fields, int nfield)
    int				*proc,
 				p;
 
-/* Number of active threads */
+/* Number of active threads (must be limited on manycore systems) */
   nproc = prefs.nthreads;
+  if (nproc>MAXNTHREADS_LOAD)
+    nproc = MAXNTHREADS_LOAD;
   pthread_fields = fields;
   pthread_nfield = nfield;
   QCALLOC(pthread_fviewflag, int, nfield);

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/04/2012
+*	Last modified:		25/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -48,8 +48,8 @@
 
 /*----------------------------- Internal constants --------------------------*/
 
-#define		MAXSET		1024		/* Max. number of sets/field */
-
+#define		MAXSET			1024	/* Max. number of sets/field */
+#define		MAXNTHREADS_LOAD	4	/* Max. number of load threads*/
 /*--------------------------------- typedefs --------------------------------*/
 
 typedef enum {MOSAIC_UNCHANGED, MOSAIC_SAMECRVAL, MOSAIC_SHAREPROJAXIS,

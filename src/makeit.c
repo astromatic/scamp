@@ -248,19 +248,6 @@ void	makeit(void)
     crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
     }
 
-#ifdef HAVE_PLPLOT
-/* Plot field and source positions */
-  NFPRINTF(OUTPUT, "Generating group plots...");
-  for (g=0; g<ngroup; g++)
-    cplot_fgroup(fgroups[g], reffields[g]);
-  for (g=0; g<ngroup; g++)
-    cplot_astrepoch3d(fgroups[g]);
-/* Plot photometric relations */
-  cplot_photom(fgroups, ngroup, reffields);
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_shear(fgroups, ngroup, i);
-#endif
-
 
   if (prefs.solvastrom_flag)
     {
@@ -351,6 +338,18 @@ void	makeit(void)
     }
 
 #ifdef HAVE_PLPLOT
+
+/* Plot field and source positions */
+  NFPRINTF(OUTPUT, "Generating group plots...");
+  for (g=0; g<ngroup; g++)
+    cplot_fgroup(fgroups[g], reffields[g]);
+  for (g=0; g<ngroup; g++)
+    cplot_astrepoch3d(fgroups[g]);
+/* Plot photometric relations */
+  cplot_photom(fgroups, ngroup, reffields);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_shear(fgroups, ngroup, i);
+
 /* Plot astrometric errors in alpha and delta */
   NFPRINTF(OUTPUT, "Generating astrometric plots...");
   for (g=0; g<ngroup; g++)
