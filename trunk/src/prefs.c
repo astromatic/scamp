@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/04/2012
+*	Last modified:		25/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -31,6 +31,9 @@
 #endif
 
 #include	<ctype.h>
+#ifdef HAVE_MALLOPT
+ #include	<malloc.h>
+#endif
 #include	<math.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -457,6 +460,34 @@ void	useprefs(void)
     warning("NTHREADS != 1 ignored: ",
 	"this build of " BANNER " is single-threaded");
     }
+#endif
+
+/* Override INTEL CPU detection routine to help performance on 3rd-party CPUs */
+#if defined(__INTEL_COMPILER) && defined (USE_CPUREDISPATCH)
+  __get_cpuid(1, &eax, &ebx, &ecx, &edx);
+  if (ecx&bit_AVX)
+    __intel_cpu_indicator = 0x20000;
+  else if (ecx&bit_SSE4_2)
+    __intel_cpu_indicator = 0x8000;
+  else if (ecx&bit_SSE4_1)
+    __intel_cpu_indicator = 0x2000;
+  else if (ecx&bit_SSSE3)
+    __intel_cpu_indicator = 0x1000;
+  else if (ecx&bit_SSE3)
+    __intel_cpu_indicator = 0x0800;
+  else if (edx&bit_SSE2)
+    __intel_cpu_indicator = 0x0200;
+  else if (edx&bit_SSE)
+    __intel_cpu_indicator = 0x0080;
+  else if (edx&bit_MMX)
+    __intel_cpu_indicator = 0x0008;
+  else
+    __intel_cpu_indicator = 0x0001;
+#endif
+
+/* Deactivate virtual memory mapping */
+#ifdef HAVE_MALLOPT
+  mallopt(M_MMAP_MAX, 0);
 #endif
 
 /*---------------------------- Measurement arrays --------------------------*/
