@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		25/06/2012
+#	Last modified:		05/07/2012
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[1.15.2],[bertin@iap.fr])
+AC_INIT([scamp],[1.16.0],[bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -50,8 +50,7 @@ sinclude(acx_search_libdir.m4)
 sinclude(acx_atlas.m4)
 sinclude(acx_cdsclient.m4)
 sinclude(acx_fftw.m4)
-sinclude(acx_mkl_fftw.m4)
-sinclude(acx_mkl_lapacke.m4)
+sinclude(acx_mkl.m4)
 sinclude(acx_plplot.m4)
 sinclude(acx_prog_cc_optim.m4)
 sinclude(acx_pthread.m4)
@@ -140,24 +139,6 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 datadir2=$(URBI_RESOLVE_DIR([$datadir]))
-
-# Provide special options for the INTEL MKL
-AC_ARG_WITH(mkl-libdir,
-        [AS_HELP_STRING([--with-mkl-libdir=<MKL library path>],
-	[Alternative directory for the MKL library])],
-    mkl_fftw_libdir=$withval
-    mkl_lapacke_libdir=$withval,
-    mkl_fftw_libdir=""
-    mkl_lapacke_libdir=""
-    )
-AC_ARG_WITH(mkl-incdir,
-        [AS_HELP_STRING([--with-mkl-incdir=<MKL include dir>],
-	[Alternative directory for MKL include files])],
-    fftw_incdir=$withval
-    lapacke_incdir=$withval,
-    fftw_incdir=""
-    lapacke_incdir=""
-    )
 
 # Provide special options for ATLAS
 AC_ARG_WITH(atlas-libdir,
@@ -284,30 +265,14 @@ if test "$use_pthreads" = "yes"; then
 fi
 AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
-############ handle the INTEL MKL library (linear algebra+FFT) ###########
+############ handle the INTEL MKL library (FFTW + LAPACKe) ###########
 if test "$use_mkl" = "yes"; then
-  ACX_MKL_LAPACKE($mkl_lapacke_libdir,$lapacke_incdir,$use_pthreads,
-	[use_mkl_lapacke=yes],[use_mkl_lapacke=no])
-  if test "$use_mkl_lapacke" = "yes"; then
-    LIBS="$MKL_LAPACKE_LIBS $LIBS"
-   [AM_CFLAGS="$AM_CFLAGS $MKL_LAPACKE_CFLAGS $MKL_LAPACKE_INCLUDES"]
-    if test "$MKL_LAPACKE_WARN" != ""; then
-      AC_MSG_WARN([$MKL_LAPACKE_WARN])
-    fi
-  else
-    AC_MSG_ERROR([$MKL_LAPACKE_ERROR Exiting.])
+  ACX_MKL()
+  if test "$MKL_WARN" != ""; then
+      AC_MSG_WARN([$MKL_WARN])
   fi
-  ACX_MKL_FFTW($mkl_fftw_libdir,$fftw_incdir,$use_pthreads,yes,
-	[use_mkl_fftw=yes],[use_mkl_fftw=no])
-  if test "$use_mkl_fftw" = "yes"; then
-#    LIBS="$FFTW_LIBS $LIBS"
-#   [AM_CFLAGS="$AM_CFLAGS $MKL_FFTW_CFLAGS MKL_FFTW_INCLUDES"]
-    if test "$MKL_FFTW_WARN" != ""; then
-      AC_MSG_WARN([$MKL_FFTW_WARN])
-    fi
-  else
-    AC_MSG_ERROR([$MKL_FFTW_ERROR Exiting.])
-  fi
+  AM_CFLAGS="$AM_CFLAGS $MKL_CFLAGS "
+  LIBS="$MKL_LIBS $LIBS"
 else
 ################ handle the FFTW library (Fourier transforms) ################
   ACX_FFTW($fftw_libdir,$fftw_incdir,$use_pthreads,yes,
@@ -379,7 +344,12 @@ fi
 
 # "Best" linking option
 if test "$use_best" = "yes"; then
-  AM_LDFLAGS="-shared-libgcc -static-libtool-libs -avoid-version $AM_LDFLAGS"
+  if test "$use_icc" = "yes"; then
+    AM_LDFLAGS="-static-intel -openmp-link static -shared-libgcc \
+	-static-libtool-libs -avoid-version $AM_LDFLAGS"
+  else
+    AM_LDFLAGS="-shared-libgcc -static-libtool-libs -avoid-version $AM_LDFLAGS"
+  fi
 fi
 
 AC_SUBST(AM_CFLAGS)

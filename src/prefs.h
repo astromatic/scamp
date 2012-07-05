@@ -190,7 +190,9 @@ typedef struct
   int		focal_deg;			/* Focal coords polynom degree*/ 
   double	astrclip_nsig;			/* Astrom. clipping threshold*/
   double	astref_weight;			/* Ref.cat. relative weight */
-  double	astraccuracy;			/* AStrom. uncertainty floor */
+  accuracyenum	astraccuracy_type;		/* Astrom. uncer. input type */
+  char		astraccuracy_key[72];	/* Fits keyword for astrom. uncer. */
+  double	astraccuracy;			/* Astrom. uncertainty floor */
 /* Parallaxes */
   int		parallax_flag;			/* Compute parallaxes? */
 /* Proper motions */

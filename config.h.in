@@ -83,9 +83,6 @@
 /* Define if you have the LAPACKe libraries. */
 #undef HAVE_LAPACKE
 
-/* Define if you have the parallel LAPACKe libraries. */
-#undef HAVE_LAPACKE_MP
-
 /* Define to 1 if you have the `cblas' library (-lcblas). */
 #undef HAVE_LIBCBLAS
 

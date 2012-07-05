@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		30/11/2011
+*	Last modified:		02/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 30/11/2011
+VERSION 29/06/2012
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -75,6 +75,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
    tabstruct		*keytab;
    keystruct		*key;
    samplestruct		*sample;
+   wcsstruct		*wcs;
    t_type		contexttyp[MAXCONTEXT];
    void			*context[MAXCONTEXT];
    char			str[MAXCHAR];
@@ -324,6 +325,9 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 /* Read photometric parameters */
   if (headflag)
     {
+    if (fitsread(head, prefs.astraccuracy_key, &set->astraccuracy,
+	H_FLOAT, T_DOUBLE) != RETURN_OK)
+      set->astraccuracy = prefs.astraccuracy;
     if (fitsread(head, prefs.airmass_key, &set->airmass,
 	 H_FLOAT, T_DOUBLE) != RETURN_OK)
       set->airmass = 1.0;
@@ -431,8 +435,6 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       continue;
 
     ferr = sqrt(ferr*ferr+f*f*prefs.photaccuracy*prefs.photaccuracy);
-    ea = sqrt(ea*ea+prefs.astraccuracy*prefs.astraccuracy);
-    eb = sqrt(eb*eb+prefs.astraccuracy*prefs.astraccuracy);
 
 /*-- ... and check the integrity of the sample */
 /*-- Allocate memory for the first shipment */
@@ -1078,9 +1080,9 @@ PROTO   void locate_set(setstruct *set)
 PURPOSE Find set center coordinates and radius
 INPUT   set structure pointer.
 OUTPUT  -.
-NOTES   -.
-AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-VERSION 01/01/2004
+NOTES   Global preferences are used.
+AUTHOR  E. Bertin (IAP)
+VERSION 02/07/2012
 */
 void	locate_set(setstruct *set)
 
@@ -1088,11 +1090,12 @@ void	locate_set(setstruct *set)
    wcsstruct	*wcs;
    samplestruct	*samp;
    double	pixpos[NAXIS], wcspos[NAXIS],
-		wcsscale;
+		dwcsscale, dwcsastacc2;
+   float	wcsastacc2[NAXIS], wcsscale[NAXIS],wcsscale2[NAXIS];
    int		i,e, naxis, lng,lat;
 
   wcs = set->wcs;
-  wcsscale = 0.0;	/* to avoid gcc -Wall warnings */
+  dwcsscale = 0.0;	/* to avoid gcc -Wall warnings */
   lng = set->lng = wcs->lng;
   lat = set->lat = wcs->lat;
   naxis = set->naxis = wcs->naxis;
@@ -1104,12 +1107,15 @@ void	locate_set(setstruct *set)
 
 /* Find center pixel scale */
   if (lat != lng)
-    wcsscale = sqrt(wcs_scale(wcs, pixpos));
+    dwcsscale = sqrt(wcs_scale(wcs, pixpos));
   for (i=0; i<naxis; i++)
+    {
     if (lat==lng || (i!=lng && i!=lat))
-      set->wcsscale[i] = fabs(wcs->cd[i*(naxis+1)]);
+      wcsscale[i] = (set->wcsscale[i] = fabs(wcs->cd[i*(naxis+1)]));
     else
-      set->wcsscale[i] = wcsscale;
+      wcsscale[i] = (set->wcsscale[i] = dwcsscale);
+    wcsscale2[i] = wcsscale[i]*wcsscale[i];
+    }
 
 /* Find set "radius" */
   for (i=0; i<naxis; i++)
@@ -1117,11 +1123,47 @@ void	locate_set(setstruct *set)
   raw_to_wcs(wcs, pixpos, wcspos);
   set->radius = wcs_dist(wcs, set->wcspos, wcspos);
 
-/* Update sample positional errors (very crude but good enough) */
-  samp = set->sample;
-  for (e=set->nsample; e--; samp++)
-    for (i=0; i<naxis; i++)
-      samp->wcsposerr[i] = samp->rawposerr[i]*set->wcsscale[i];
+  if (set->astraccuracy > 0,0)
+    {
+/*-- Update astrometric accuracy floor */
+    if (prefs.astraccuracy_type==ASTACC_SIGMA_PIXEL)
+/*---- accuracy floor in pixels */
+      for (i=0; i<naxis; i++)
+        wcsastacc2[i] = set->astraccuracy*set->astraccuracy*wcsscale2[i];
+    else if (prefs.astraccuracy_type==ASTACC_SIGMA_ARCSEC)
+/*---- accuracy floor in arcsec */
+      for (i=0; i<naxis; i++)
+        wcsastacc2[i] = set->astraccuracy*set->astraccuracy;
+    else
+/*---- Atmospheric turbulence scaled from seeing (e.g. Han & Gatewood 1995) */
+      {
+/*---- 2/3 factor because integ of (dx2+dy2)^1/6 ~ ((w^2+h^2)^(1/2)/3)^(1/3) */
+      dwcsastacc2 = SIGMA_ATMOS * set->astraccuracy
+		* pow(set->radius*2.0/3.0*DEG/(10.0*ARCMIN), 1/3.0)
+		/ sqrt(set->expotime) * ARCSEC/DEG;
+      dwcsastacc2 *= dwcsastacc2;
+      for (i=0; i<naxis; i++)
+        wcsastacc2[i] = dwcsastacc2;
+      if (prefs.astraccuracy_type == ASTACC_SEEING_PIXEL)
+        for (i=0; i<naxis; i++)
+          wcsastacc2[i] *= wcsscale2[i];
+      }
+
+/*-- Update sample positional errors */
+    samp = set->sample;
+    for (e=set->nsample; e--; samp++)
+      for (i=0; i<naxis; i++)
+        samp->wcsposerr[i] = sqrtf(wcsastacc2[i]
+		+ samp->rawposerr[i]*samp->rawposerr[i]*wcsscale2[i]);
+    }
+  else
+    {
+/*-- Update sample positional errors */
+    samp = set->sample;
+    for (e=set->nsample; e--; samp++)
+      for (i=0; i<naxis; i++)
+        samp->wcsposerr[i] = samp->rawposerr[i]*wcsscale[i];
+    }
 
   return;
   }

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		01/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -73,7 +73,7 @@ extern double		findcrosspeak(float *histo,
 				double matchresol, double *angle,double *scale),
 			match_setll(setstruct *set, setstruct *refset,
 				double matchresol, double *dlng, double *dlat),
-			mean_rawposvar(setstruct *set);
+			mean_wcsposvar(setstruct *set);
 
 extern void		compute_rawpos(wcsstruct *wcs, samplestruct *refsample,
 				int nrefsample),
