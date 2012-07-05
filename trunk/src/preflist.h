@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/05/2012
+*	Last modified:		29/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -66,6 +66,9 @@ pkeystruct key[] =
   {"AHEADER_SUFFIX", P_STRING, prefs.ahead_suffix},
   {"AIRMASS_KEY", P_STRING, prefs.airmass_key},
   {"ASTR_ACCURACY", P_FLOAT, &prefs.astraccuracy,0,0, 0.0, 1e6},
+  {"ASTRACCURACY_KEY", P_STRING, prefs.astraccuracy_key},
+  {"ASTRACCURACY_TYPE", P_KEY, &prefs.astraccuracy_type, 0,0, 0.0,0.0,
+    "SIGMA-PIXEL", "SIGMA-ARCSEC", "SEEING-PIXEL", "SEEING-ARCSEC", ""},
   {"ASTRCLIP_NSIGMA", P_FLOAT, &prefs.astrclip_nsig, 0,0, 0.0,1e31},
   {"ASTREF_BAND", P_STRING, prefs.astref_bandname},
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
@@ -271,7 +274,10 @@ char *default_prefs[] =
 "DISTORT_DEGREES        3               # Polynom degree for each group",
 "*FOCDISTORT_DEGREE      1               # Polynom degree for focal plane coords",
 "*ASTREF_WEIGHT          1.0             # Relative weight of ref.astrom.cat.",
-"*ASTR_ACCURACY          1e-2            # Astrometric uncertainty floor (pix.)",
+"*ASTRACCURACY_TYPE      SIGMA-PIXEL     # SIGMA-PIXEL, SIGMA-ARCSEC,",
+"*                                       # SEEING-PIXEL or SEEING-ARCSEC",
+"*ASTRACCURACY_KEY       ASTRACCU        # FITS keyword for ASTR_ACCURACY param.",
+"*ASTR_ACCURACY          0.01            # Astrom. uncertainty floor parameter",
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
 "*COMPUTE_PARALLAXES     N               # Compute trigonom. parallaxes (Y/N)?",
 "*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",

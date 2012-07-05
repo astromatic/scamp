@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/04/2012
+*	Last modified:		29/06/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -40,6 +40,8 @@
 #define MAX_FLUX	1e26	/* Maximum flux allowed [ADU] */
 #define MIN_FLUXERR	1e-15	/* Minimum flux uncertainty allowed [ADU] */
 #define MIN_POSERR	1e-6	/* Minimum position uncertainties [pix] */
+#define	SIGMA_ATMOS	0.038	/* Han & Gatewood's 1995 sig_a / sqrt(2) ... */
+				/* ... for seeing=1",d=10',T=1s [arcsec] */
 
 /*-------------------------------- flags ------------------------------------*/
 
@@ -55,6 +57,8 @@
 
 /*--------------------------------- typedefs --------------------------------*/
 
+typedef	enum {ASTACC_SIGMA_PIXEL, ASTACC_SIGMA_ARCSEC,
+		ASTACC_SEEING_PIXEL, ASTACC_SEEING_ARCSEC}	accuracyenum;
 typedef enum {UNION_RAW, UNION_PROJ, UNION_WCS}	unionmodenum;
 
 /*--------------------------- structure definitions -------------------------*/
@@ -104,7 +108,7 @@ typedef struct set
 /* ---- astrometric parameters */
   double	wcspos[NAXIS];		/* Central pixel coordinate */
   double	wcsscale[NAXIS];	/* Central pixel scale */
-  double	radius;			/* Approximate radius of set (deg)*/
+  double	radius;			/* Approximate radius of set [deg] */
   double	projposmin[NAXIS];	/* Minimum projected position in set */
   double	projposmax[NAXIS];	/* Maximum projected position in set */
   int		naxis;			/* Number of axes */
@@ -118,9 +122,10 @@ typedef struct set
   int		index;			/* Set index for CONTEXTs */
   int		index2;			/* Set index for field-dependent prm */
   double	weightfac;		/* Weight factor for astrom. refs */
+  double	astraccuracy;		/* Astrometric accuracy floor [deg] */
 /* ---- photometric parameters */
   double	airmass;		/* Air mass */
-  double	expotime;		/* Exposure time */
+  double	expotime;		/* Exposure time [s] */
   double	extcoeff;		/* Extinction coefficient */
   double	magzero;		/* Magnitude zero-point */
   double	dmagzero;		/* Computed magnitude z.-p. offset*/

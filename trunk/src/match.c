@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/12/2011
+*	Last modified:		01/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -93,7 +93,7 @@ INPUT	ptr to the field to be matched,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	16/02/2010
+VERSION	01/07/2012
  ***/
 void	match_field(fieldstruct *field, fieldstruct *reffield)
   {
@@ -145,10 +145,8 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
         area = MATCH_CONFPROB * set->wcs->naxisn[lng]*set->wcs->naxisn[lat]
 		*set->wcsscale[lng]*set->wcsscale[lat] / (set->nsample+1.0);
         compute_rawpos(set->wcs, refset2->sample, refset2->nsample);
-        refcrossec = -2.0*PI*mean_rawposvar(refset2)
-		*set->wcsscale[lng]*set->wcsscale[lat]*log(MATCH_CONFPROB);
-        crossec = -2.0*PI*mean_rawposvar(set)
-		*set->wcsscale[lng]*set->wcsscale[lat]*log(MATCH_CONFPROB);
+        refcrossec = -2.0*PI*mean_wcsposvar(refset2)*log(MATCH_CONFPROB);
+        crossec = -2.0*PI*mean_wcsposvar(set)*log(MATCH_CONFPROB);
 /*------ Choose the smallest of them all */
         if (refarea < area)
           area = refarea;
@@ -241,12 +239,8 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       area = MATCH_CONFPROB * PI*fieldset->radius*fieldset->radius
 		/ (fieldset->nsample+1.0);
       compute_rawpos(fieldset->wcs, refset2->sample, refset2->nsample);
-      refcrossec = -2.0*PI*mean_rawposvar(refset2)
-		*fieldset->wcsscale[lng]*fieldset->wcsscale[lat]
-		*log(MATCH_CONFPROB);
-      crossec = -2.0*PI*mean_rawposvar(fieldset)
-		*fieldset->wcsscale[lng]*fieldset->wcsscale[lat]
-		*log(MATCH_CONFPROB);
+      refcrossec = -2.0*PI*mean_wcsposvar(refset2)*log(MATCH_CONFPROB);
+      crossec = -2.0*PI*mean_wcsposvar(fieldset)*log(MATCH_CONFPROB);
 /*---- Choose the smallest of them all */
       if (refarea < area)
         area = refarea;
@@ -429,7 +423,7 @@ NOTES	The output angle is expressed CCW in projected coordinates (not
 	pixel coordinates) for homogeneity reasons.
 	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/02/2007
+VERSION	01/07/2012
  ***/
 double	match_setas(setstruct *set, setstruct *refset, int nmax,
 			double matchresol, double *angle, double *scale)
@@ -441,7 +435,8 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
    double	lopass[NAXIS],hipass[NAXIS],
 		thetafac,thetazero, rhofac,rhozero, dx,dy,dr2, theta,rho,
 		theta2,rho2, rhosig,thetasig, sig,sig2, flux, dr2max,dr2mid,
-		dr2mid2, flip;
+		dr2mid2, flip, dxinvscale,dyinvscale,
+		dxerrj,derrj2,dxerrk,dyerrk;
    float	*histo, *histo2, *rhisto;
    int		csize[NAXIS],
 		i,j,k,n, nrefsample,nsample,npair, lng,lat,
@@ -490,6 +485,8 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
   else
     nrefsample = refset->nsample;
   wcs = set->wcs;
+  dxinvscale = 1.0 / set->wcsscale[lng];
+  dyinvscale = 1.0 / set->wcsscale[lat];
 
 /* Compute projected positions of the reference stars for the current set */
 #ifndef USE_THREADS
@@ -508,6 +505,11 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
   npair = nrefsample*(nrefsample-1)/2;
   n = 0;
   for (j=0; j<nrefsample; j++)
+    {
+    dxerrj = refsample[j].wcsposerr[lng]*dxinvscale;
+    derrj2 = refsample[j].wcsposerr[lat]*dyinvscale;
+    derrj2 *= derrj2;
+    derrj2 += dxerrj*dxerrj;
     for (k=j+1; k<nrefsample; k++)
       {
 #ifdef USE_THREADS
@@ -527,10 +529,9 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
 	{
         theta = (dx!=0.0? (atan(dy/dx)-thetazero) : 0.0)*thetafac;
         rho=(0.5*log(dr2)-rhozero)*rhofac;
-        sig = sqrt((refsample[j].rawposerr[lng]*refsample[j].rawposerr[lng]
-		+refsample[k].rawposerr[lng]*refsample[k].rawposerr[lng]
-		+refsample[j].rawposerr[lat]*refsample[j].rawposerr[lat]
-		+refsample[k].rawposerr[lat]*refsample[k].rawposerr[lat])/dr2);
+        dxerrk = refsample[k].wcsposerr[lng]*dxinvscale;
+        dyerrk = refsample[k].wcsposerr[lat]*dyinvscale;
+        sig = sqrt((derrj2 + dxerrk*dxerrk + dyerrk*dyerrk) / dr2);
         thetasig = sig*thetafac;
         rhosig = sig*rhofac;
 /*------ Take magnitudes into account */
@@ -554,6 +555,7 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
 		thetasig,rhosig);
         }
       }
+    }
 
 /* Check-image for angle-scale pair histogram of the reference catalog */
   if ((checknum=check_check(CHECK_ASREFPAIR))>=0)
@@ -573,6 +575,11 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
   npair = nsample*(nsample-1)/2;
   n = 0;
   for (j=0; j<nsample; j++)
+    {
+    dxerrj = sample[j].wcsposerr[lng]*dxinvscale;
+    derrj2 = sample[j].wcsposerr[lat]*dyinvscale;
+    derrj2 *= derrj2;
+    derrj2 += dxerrj*dxerrj;
     for (k=j+1; k<nsample; k++)
       {
 #ifdef USE_THREADS
@@ -592,10 +599,9 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
         {
         theta = (dx!=0.0? (atan(dy/dx)-thetazero) : 0.0)*thetafac;
         rho=(0.5*log(dr2)-rhozero)*rhofac;
-        sig = sqrt((sample[j].rawposerr[lng]*sample[j].rawposerr[lng]
-		+sample[k].rawposerr[lng]*sample[k].rawposerr[lng]
-		+sample[j].rawposerr[lat]*sample[j].rawposerr[lat]
-		+sample[k].rawposerr[lat]*sample[k].rawposerr[lat])/dr2);
+        dxerrk = sample[k].wcsposerr[lng]*dxinvscale;
+        dyerrk = sample[k].wcsposerr[lat]*dyinvscale;
+        sig = sqrt((derrj2 + dxerrk*dxerrk + dyerrk*dyerrk)/dr2);
         thetasig = sig*thetafac;
         rhosig = (sig+0.0002)*rhofac;
         flux = sample[j].flux*sample[k].flux;
@@ -617,6 +623,7 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
         putgauss(histo, csize[0], csize[1], theta,rho, flux, thetasig,rhosig);
         }
       }
+    }
 
 /* Check-image for angle-scale pair histogram of the reference catalog */
   if ((checknum=check_check(CHECK_ASPAIR))>=0)
@@ -696,7 +703,7 @@ INPUT	ptr to the set to be matched,
 OUTPUT	Confidence level of the solution (in units of sigma).
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/02/2007
+VERSION	01/07/2012
  ***/
 double	match_setll(setstruct *set, setstruct *refset,
 			double matchresol, double *dlng, double *dlat)
@@ -706,7 +713,8 @@ double	match_setll(setstruct *set, setstruct *refset,
    char		str[MAXCHAR],
 		*rfilename;
    double	lopass[NAXIS], hipass[NAXIS], rawpos[NAXIS], wcspos[NAXIS],
-		xfac,xzero, yfac,yzero, x,y, xsig,ysig, sig, flux, poserr;
+		xfac,xerrfac,xzero, yfac,yerrfac,yzero, x,y, xsig,ysig, sig,
+		flux, poserr;
    float	*histo, *rhisto;
    int		csize[NAXIS],
 		i,k,n, nrefsample, nsample, lng,lat,
@@ -738,12 +746,14 @@ double	match_setll(setstruct *set, setstruct *refset,
     poserr = 0.0;
 /* We allow for a better precision by wrapping */
   xfac = LL_WRAPPING*(double)csize[0] / (set->wcs->naxisn[lng]+2*poserr);
+  xerrfac = xfac / set->wcsscale[lng];
   xzero = poserr*xfac;
   poserr = refset->radius/set->wcsscale[lat] - set->wcs->naxisn[lat]/2.0;
   if (poserr<=0.0)
     poserr = 0.0;
 /* We allow for a better precision by wrapping */
   yfac = LL_WRAPPING*(double)csize[1] / (set->wcs->naxisn[lat]+2*poserr);
+  yerrfac = yfac / set->wcsscale[lat];
   yzero = poserr*yfac;
   refsample = refset->sample;
 /* Keep only the brightest sources if too many samples in reference set */
@@ -779,8 +789,8 @@ double	match_setll(setstruct *set, setstruct *refset,
       }
     x = refsample[i].rawpos[lng]*xfac+xzero;
     y = refsample[i].rawpos[lat]*yfac+yzero;
-    xsig = refsample[i].rawposerr[lng]*xfac;
-    ysig = refsample[i].rawposerr[lat]*yfac;
+    xsig = refsample[i].wcsposerr[lng]*xerrfac;
+    ysig = refsample[i].wcsposerr[lat]*yerrfac;
 /*-- Take magnitudes into account */
     flux = -0.4*LL_FLUXEXP*refsample[i].mag;
     if (xsig>GAUSS_MAXSIG)
@@ -826,8 +836,8 @@ double	match_setll(setstruct *set, setstruct *refset,
       }
     x = sample[i].rawpos[lng]*xfac+xzero;
     y = sample[i].rawpos[lat]*yfac+yzero;
-    xsig = sample[i].rawposerr[lng]*xfac;
-    ysig = sample[i].rawposerr[lat]*yfac;
+    xsig = sample[i].wcsposerr[lng]*xerrfac;
+    ysig = sample[i].wcsposerr[lat]*yerrfac;
 /*-- Take magnitudes into account */
     flux = sample[i].flux>0.0? pow(sample[i].flux, LL_FLUXEXP): 0.0;
     putgauss(histo, csize[0], csize[1], x,y, flux, xsig,ysig);
@@ -846,8 +856,8 @@ double	match_setll(setstruct *set, setstruct *refset,
   fastcorr(histo, rhisto, cnaxis, csize, lopass, hipass);
 
   sig = findcrosspeak(histo, csize[0], csize[1],
-		prefs.position_maxerr[0]/set->wcsscale[lng]*xfac,
-		prefs.position_maxerr[1]/set->wcsscale[lat]*yfac,
+		prefs.position_maxerr[0]*xerrfac,
+		prefs.position_maxerr[1]*yerrfac,
 		1.0/lopass[0], 1.0/lopass[1],
 		&x, &y);
 
@@ -1150,7 +1160,7 @@ INPUT	ptr to the set to be matched,
 OUTPUT	Confidence level of the solution (in units of sigma).
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/12/2011
+VERSION	01/07/2012
  ***/
 void	match_refine(setstruct *set, setstruct *refset, double matchresol,
 			double *angle, double *scale,
@@ -1372,16 +1382,16 @@ void	match_refine(setstruct *set, setstruct *refset, double matchresol,
   }
 
 
-/****** mean_rawposvar *******************************************************
-PROTO	double mean_rawposvar(setstruct *set)
-PURPOSE	Compute the mean variance in position of a set of sources.
+/****** mean_wcsposvar *******************************************************
+PROTO	double mean_wcsposvar(setstruct *set)
+PURPOSE	Compute the mean variance in position (in deg2) of a set of sources.
 INPUT	ptr to the input set.
 OUTPUT	variance in position, or 0.0 if the input set is empty of sources.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	16/03/2006
+VERSION	01/07/2012
  ***/
-double	mean_rawposvar(setstruct *set)
+double	mean_wcsposvar(setstruct *set)
   {
    samplestruct	*sample;
    double	poserr2;
@@ -1392,7 +1402,7 @@ double	mean_rawposvar(setstruct *set)
   sample = set->sample;
   poserr2 = 0.0;
   for (i=set->nsample; i--; sample++)
-    poserr2 += sample->rawposerr[lng]*sample->rawposerr[lat];
+    poserr2 += sample->wcsposerr[lng]*sample->wcsposerr[lat];
 
   return set->nsample? poserr2/set->nsample : 0.0;
   }
@@ -1401,14 +1411,14 @@ double	mean_rawposvar(setstruct *set)
 /****** compute_rawpos ******************************************************
 PROTO	void compute_rawpos(wcsstruct *wcs, samplestruct *refsample,
 			int nsample)
-PURPOSE	Convert world positions and position errors into raw (pixel) units.
+PURPOSE	Convert world positions to raw (pixel) units.
 INPUT	ptr to the destination WCS,
 	ptr to the input (reference) sample array,
 	nb of samples.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/03/2006
+VERSION	01/07/2012
  ***/
 void	compute_rawpos(wcsstruct *wcs, samplestruct *refsample, int nrefsample)
   {
@@ -1417,13 +1427,7 @@ void	compute_rawpos(wcsstruct *wcs, samplestruct *refsample, int nrefsample)
   lng = wcs->lng;
   lat = wcs->lat;
   for (i=nrefsample; i--; refsample++)
-    {
     wcs_to_raw(wcs, refsample->wcspos, refsample->rawpos);
-/*-- Compute position errors in pixel coordinates, too */
-    refsample->rawposerr[lng] = refsample->rawposerr[lat]
-	= sqrt(refsample->wcsposerr[lng]*refsample->wcsposerr[lat]
-		/wcs_scale(wcs, refsample->rawpos));
-   }
 
   return;
   }
