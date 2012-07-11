@@ -39,17 +39,8 @@
 /* Define to 1 if you have the <clapack.h> header file. */
 #undef HAVE_CLAPACK_H
 
-/* Define to 1 if you have the `dlclose' function. */
-#undef HAVE_DLCLOSE
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
-
-/* Define to 1 if you have the `dlopen' function. */
-#undef HAVE_DLOPEN
-
-/* Define to 1 if you have the `dlsym' function. */
-#undef HAVE_DLSYM
 
 /* Define if you have the FFTW double precision libraries and header files. */
 #undef HAVE_FFTW
@@ -79,6 +70,9 @@
 
 /* Second isnan check */
 #undef HAVE_ISNAN2
+
+/* Define if you have the LAPACK libraries. */
+#undef HAVE_LAPACK
 
 /* Define if you have the LAPACKe libraries. */
 #undef HAVE_LAPACKE
@@ -118,6 +112,9 @@
 
 /* Define to 1 if you have the `mkdir' function. */
 #undef HAVE_MKDIR
+
+/* Define if you have the MKL libraries. */
+#undef HAVE_MKL
 
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
@@ -180,6 +177,9 @@
 /* LAPACKe header filename. */
 #undef LAPACKE_H
 
+/* LAPACK header filename. */
+#undef LAPACK_H
+
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */
 #undef LSTAT_FOLLOWS_SLASHED_SYMLINK
@@ -187,6 +187,9 @@
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
+
+/* MKL header filename. */
+#undef MKL_H
 
 /* Name of package */
 #undef PACKAGE

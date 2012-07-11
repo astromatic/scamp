@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/06/2012
+*	Last modified:		11/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -162,7 +162,7 @@ pkeystruct key[] =
   {"MOSAIC_TYPE", P_KEYLIST, prefs.mosaic_type, 0,0, 0.0,0.0,
    {"UNCHANGED", "SAME_CRVAL", "SHARE_PROJAXIS", "FIX_FOCALPLANE","LOOSE", ""},
     0, MAXASTRINSTRU, &prefs.nmosaic_type},
-  {"NTHREADS", P_INT, &prefs.nthreads, 0, THREADS_PREFMAX},
+  {"NTHREADS", P_INT, &prefs.nthreads, -THREADS_PREFMAX, THREADS_PREFMAX},
   {"PHOT_ACCURACY", P_FLOAT, &prefs.photaccuracy, 0,0, 0.0, 1.0},
   {"PHOTCLIP_NSIGMA", P_FLOAT, &prefs.photclip_nsig, 0,0, 0.0,1e31},
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
