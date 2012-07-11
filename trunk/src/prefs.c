@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/06/2012
+*	Last modified:		11/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -31,14 +31,17 @@
 #endif
 
 #include	<ctype.h>
+
 #ifdef HAVE_MALLOPT
  #include	<malloc.h>
 #endif
+
 #include	<math.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
 #include	<unistd.h>
+
 #if defined(USE_THREADS) \
 && (defined(__APPLE__) || defined(FREEBSD) || defined(NETBSD))	/* BSD, Apple */
  #include	<sys/types.h>
@@ -46,6 +49,11 @@
 #elif defined(USE_THREADS) && defined(HAVE_MPCTL)		/* HP/UX */
  #include	<sys/mpctl.h>
 #endif
+
+#ifdef HAVE_MKL
+ #include MKL_H
+#endif
+
 #include	"define.h"
 #include	"globals.h"
 #include	"check.h"
@@ -82,10 +90,11 @@ documentation)
 void    readprefs(char *filename, char **argkey, char **argval, int narg)
 
   {
-   FILE          *infile;
-   char          *cp, str[MAXCHARL], *keyword, *value, **dp;
-   int           i, ival, nkey, warn, argi, flagc, flagd, flage, flagz;
-   float         dval;
+   FILE		*infile;
+   char		str[MAXCHARL],
+		*cp,  *keyword, *value, **dp;
+   int		i, ival, nkey, warn, argi, flagc, flagd, flage, flagz;
+   float	dval;
 #ifndef	NO_ENVVAR
    char		value2[MAXCHARL],envname[MAXCHAR];
    char		*dolpos;
@@ -399,7 +408,7 @@ void	useprefs(void)
 
   {
    FILE			*testfile;
-   char			teststr[80],
+   char			teststr[80],str[80],
 			*pstr;
    unsigned short	ashort=1;
    int			i, flag;
@@ -412,7 +421,7 @@ void	useprefs(void)
 
 /* Multithreading */
 #ifdef USE_THREADS
-  if (!prefs.nthreads)
+  if (prefs.nthreads <= 0)
     {
 /*-- Get the number of processors for parallel builds */
 /*-- See, e.g. http://ndevilla.free.fr/threads */
@@ -438,19 +447,25 @@ void	useprefs(void)
 #endif
 
     if (nproc>0)
-      prefs.nthreads = nproc;
+      prefs.nthreads = ((prefs.nthreads) && nproc>(-prefs.nthreads))?
+		-prefs.nthreads : nproc;
     else
       {
-      prefs.nthreads = 2;
-      warning("Cannot find the number of CPUs on this system:",
-		"NTHREADS defaulted to 2");
+      prefs.nthreads = prefs.nthreads? -prefs.nthreads : 2;
+      sprintf(str, "NTHREADS defaulted to %d", prefs.nthreads);
+      warning("Cannot find the number of CPUs on this system:", str);
       }
     }
+
 #if defined(HAVE_ATLAS) && !defined(HAVE_ATLAS_MP)
    if (prefs.nthreads>1)
      warning("This executable has been compiled using a version of the ATLAS "
 	"library without support for multithreading. ",
 	"Performance will be degraded.");
+#endif
+
+#ifdef HAVE_MKL
+  mkl_set_num_threads(prefs.nthreads);
 #endif
 
 #else

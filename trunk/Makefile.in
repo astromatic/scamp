@@ -71,8 +71,7 @@ DIST_COMMON = README $(am__configure_deps) $(dist_pkgdata_DATA) \
 	autoconf/install-sh autoconf/ltmain.sh autoconf/missing \
 	autoconf/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/acx_search_incdir.m4 \
-	$(top_srcdir)/acx_search_libdir.m4 $(top_srcdir)/acx_atlas.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/acx_atlas.m4 \
 	$(top_srcdir)/acx_cdsclient.m4 $(top_srcdir)/acx_fftw.m4 \
 	$(top_srcdir)/acx_mkl.m4 $(top_srcdir)/acx_plplot.m4 \
 	$(top_srcdir)/acx_prog_cc_optim.m4 \
