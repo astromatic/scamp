@@ -15077,7 +15077,7 @@ else
         as_fn_error $? "$cdsclient not found. exiting.
 	\"aclient_cgi\" from the CDSclient package is required to use SCAMP:
 	1. Install the CDSclient package: http://cdsweb.u-strasbg.fr/doc/cdsclient.html
-	2. Use the --with-cdsclient=<aclient_path> configure option
+	2. Use the --with-cdsclient-dir=<aclient_path> configure option
 	if aclient_cgi is not in your execution PATH." "$LINENO" 5
 fi
 
