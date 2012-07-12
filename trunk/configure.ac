@@ -252,7 +252,7 @@ ACX_CDSCLIENT($with_cdsclient_dir,
 	AC_MSG_ERROR([$cdsclient not found. exiting.]
 	["aclient_cgi" from the CDSclient package is required to use SCAMP:]
 	[1. Install the CDSclient package: http://cdsweb.u-strasbg.fr/doc/cdsclient.html]
-	[2. Use the --with-cdsclient=<aclient_path> configure option
+	[2. Use the --with-cdsclient-dir=<aclient_path> configure option
 	if aclient_cgi is not in your execution PATH.]))
 AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient", [CDSclient executable])
 
