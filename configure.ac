@@ -269,8 +269,8 @@ else
 fi
 AM_CONDITIONAL(USE_PLPLOT, test "$use_plplot" = "yes")
 
-# Link with gprof option
-if test "$enable_gprof" = "yes"; then
+# Compile with profiling option
+if test "$enable_profiling" = "yes"; then
   if test "$enable_icc" = "yes"; then
     AM_CFLAGS="$AM_CFLAGS -pq"
   else
