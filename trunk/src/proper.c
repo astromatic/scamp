@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/04/2012
+*	Last modified:		23/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -239,7 +239,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/04/2012
+VERSION	23/07/2012
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -304,7 +304,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
             {
             for (d=0; d<naxis; d++)
               samp->wcsprop[d] = samp->wcsproperr[d] = 0.0;
-            samp->wcsparal = samp->wcsparalerr = 0.0;
+            samp->wcsparal = samp->wcsparalerr = samp->wcschi2 = 0.0;
             }
           continue;
           }

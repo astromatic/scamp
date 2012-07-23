@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/12/2011
+*	Last modified:		23/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	14/02/2011
+VERSION	23/07/2012
  ***/
 void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   {
@@ -162,6 +162,15 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
         samp = set->sample;
         for (n=set->nsample; n--; samp++)
           {
+          if (!samp->prevsamp)
+            {
+            if (!samp->nextsamp)
+              samp->colour = 0.0;
+            continue;
+            }
+          if (samp->nextsamp)
+            continue;
+
           if (samp->nextsamp || !samp->prevsamp)
             continue;
           memset(mag, 0, ninstru*sizeof(double));
