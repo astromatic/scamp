@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/05/2012
+*	Last modified:		24/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -102,7 +102,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	17/05/2012
+VERSION	24/07/2012
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -225,12 +225,16 @@ field->index2 = -1;
       if (!strcmp(contextname[c], "X_IMAGE")
 	|| !strcmp(contextname[c], "XWIN_IMAGE")
 	|| !strcmp(contextname[c], "XPSF_IMAGE")
-	|| !strcmp(contextname[c], "XPEAK_IMAGE"))
+	|| !strcmp(contextname[c], "XMODEL_IMAGE")
+	|| !strcmp(contextname[c], "XPEAK_IMAGE")
+	|| !strcmp(set->contextname[c], prefs.centroid_key[0]))
         cx = c;
       else if (!strcmp(contextname[c], "Y_IMAGE")
 	|| !strcmp(contextname[c], "YWIN_IMAGE")
 	|| !strcmp(contextname[c], "YPSF_IMAGE")
-	|| !strcmp(contextname[c], "YPEAK_IMAGE"))
+	|| !strcmp(contextname[c], "YMODEL_IMAGE")
+	|| !strcmp(contextname[c], "YPEAK_IMAGE")
+	|| !strcmp(set->contextname[c], prefs.centroid_key[1]))
         cy = c;
       }
     }
@@ -1150,7 +1154,7 @@ OUTPUT	-.
 NOTES	Unfortunately the present WCS description of distortions is valid
 	in 2D only.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/05/2012
+VERSION	24/07/2012
  ***/
 void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
 		setstruct *set)
@@ -1192,12 +1196,16 @@ void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
     if (!strcmp(set->contextname[c], "X_IMAGE")
 	|| !strcmp(set->contextname[c], "XWIN_IMAGE")
 	|| !strcmp(set->contextname[c], "XPSF_IMAGE")
-	|| !strcmp(set->contextname[c], "XPEAK_IMAGE"))
+	|| !strcmp(set->contextname[c], "XMODEL_IMAGE")
+	|| !strcmp(set->contextname[c], "XPEAK_IMAGE")
+	|| !strcmp(set->contextname[c], prefs.centroid_key[0]))
       cx = c;
     else if (!strcmp(set->contextname[c], "Y_IMAGE")
 	|| !strcmp(set->contextname[c], "YWIN_IMAGE")
 	|| !strcmp(set->contextname[c], "YPSF_IMAGE")
-	|| !strcmp(set->contextname[c], "YPEAK_IMAGE"))
+	|| !strcmp(set->contextname[c], "YMODEL_IMAGE")
+	|| !strcmp(set->contextname[c], "YPEAK_IMAGE")
+	|| !strcmp(set->contextname[c], prefs.centroid_key[1]))
       cy = c;
     else if (set->contextname[c][0] == ':')
 /*---- It is a FITS keyword parameter */
