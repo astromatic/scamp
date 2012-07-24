@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/07/2012
+*	Last modified:		24/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1082,7 +1082,7 @@ INPUT   set structure pointer.
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 02/07/2012
+VERSION 24/07/2012
 */
 void	locate_set(setstruct *set)
 
@@ -1123,7 +1123,7 @@ void	locate_set(setstruct *set)
   raw_to_wcs(wcs, pixpos, wcspos);
   set->radius = wcs_dist(wcs, set->wcspos, wcspos);
 
-  if (set->astraccuracy > 0,0)
+  if (set->astraccuracy > 0.0)
     {
 /*-- Update astrometric accuracy floor */
     if (prefs.astraccuracy_type==ASTACC_SIGMA_PIXEL)
