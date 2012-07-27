@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/07/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 29/06/2012
+VERSION 26/07/2012
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -78,15 +78,16 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
    wcsstruct		*wcs;
    t_type		contexttyp[MAXCONTEXT];
    void			*context[MAXCONTEXT];
-   char			str[MAXCHAR];
-   char			**kstr,
+   char			str[MAXCHAR],
+			**kstr,
 			*buf,*head,*head0;
    double		contextval[MAXCONTEXT], *cmin,*cmax, *dfluxrad, *delong,
-			dminrad,dmaxrad, dmaxelong, dval;
-   float		*xm,*ym, *flux, *fluxerr, *erra,*errb, *fluxrad, *elong,
-			minrad,maxrad, maxelong;
-   double		*dxm, *dym, *derra,*derrb, *dflux,*dfluxerr,
+			*dxm, *dym, *derra,*derrb, *dflux,*dfluxerr, *dspread,
+			dminrad,dmaxrad, dmaxelong, dval,
 			x,y, ea,eb, f, ferr, xmax,ymax, max;
+   float		*xm,*ym, *flux, *fluxerr, *erra,*errb, *fluxrad, *elong,
+			*spread,
+			minrad,maxrad, maxelong;
    unsigned int		*imaflags;
    int			*lxm,*lym,
 			i, n, nsample,nsamplemax, nnobjflag,
@@ -239,7 +240,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       }
     }
 
-  /* Load optional SExtractor FLAGS parameter */
+/* Load optional SExtractor FLAGS parameter */
   if (!(key = name_to_key(keytab, "FLAGS")))
     warning("FLAGS parameter not found in catalog ", rfilename);
   flags = key? (unsigned short *)key->ptr : NULL;
@@ -282,6 +283,20 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     {
     delong = NULL;
     elong = NULL;
+    }
+
+/* Load optional SExtractor SPREAD_MODEL parameter */
+  if ((key = name_to_key(keytab, "SPREAD_MODEL")))
+    {
+    if (key->ttype == T_DOUBLE)
+      dspread = (double *)key->ptr;
+    else
+      spread = (float *)key->ptr;
+    }
+  else
+    {
+    dspread = NULL;
+    spread = NULL;
     }
 
 /* Try to load the set of context keys */
@@ -335,6 +350,9 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     if (fitsread(head, prefs.expotime_key, &set->expotime,
 	H_FLOAT, T_DOUBLE) != RETURN_OK)
       set->expotime = 1.0;
+    set->epochmin = set->wcs->obsdate;
+    set->epochmax = set->epochmin==0.0? 0.0 : set->epochmin+set->expotime/YEAR;
+    set->epoch = set->epochmin==0.0? 0.0 : set->epochmin+set->expotime/2.0/YEAR;
     if (fitsread(head, prefs.extcoeff_key, &set->extcoeff,
 	H_FLOAT, T_DOUBLE) != RETURN_OK)
       set->extcoeff = 0.0;
@@ -470,6 +488,12 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       sample->fwhm = 2.0**dfluxrad;
     else
       sample->fwhm = 0.0;
+    if (spread)
+      sample->spread = *spread;
+    else if (dspread)
+      sample->spread = *dspread;
+    else
+      sample->spread = 0.0;
 
     sample->rawposerr[0] = sample->rawposerr[1] = sqrt(ea*ea+eb*eb);
 /*-- In case of a contamination, position errors are strongly degraded */

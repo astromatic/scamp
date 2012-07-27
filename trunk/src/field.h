@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/06/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -86,6 +86,7 @@ typedef struct field
 /* ---- astrometric parameters */
   projenum	projection_type;	/* Celestial projection type */
   double	epoch;			/* Epoch of observations */
+  double	epochmin,epochmax;	/* Min and max epoch */
   double	meanwcspos[NAXIS];	/* Mean pixel coordinate */
   double	meanwcsscale[NAXIS];	/* Mean pixel scale */
   double	maxradius;		/* Approximate radius of field (deg)*/
@@ -108,7 +109,9 @@ typedef struct field
   int		photomlink;		/* True if linked to a photom field*/
   double	dmagzero;		/* Magnitude zero-point correction */
   double	airmass;		/* Average field airmass */
+  double	airmassmin,airmassmax;	/* Min and max airmass */
   double	expotime;		/* Average exposure time */
+  double	expotimemin,expotimemax;/* Min and max exposure time */
   int		index;			/* CONTEXT index */  
   int		index2;			/* field-dependent index */  
 /* ---- checkplot parameters */

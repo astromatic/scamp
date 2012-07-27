@@ -151,19 +151,17 @@ INPUT	file or stream pointer.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	Global preferences are used.
 AUTHOR	E. Bertin (IAP)
-VERSION	06/10/2006
+VERSION	26/07/2012
  ***/
 int	write_xml_header(FILE *file)
   {
-   char		sysname[16];
 
   fprintf(file, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   fprintf(file, "<?xml-stylesheet type=\"text/xsl\" href=\"%s\"?>\n",
 	prefs.xsl_name);
-  fprintf(file, "<VOTABLE "
-	"xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
-	"xsi:noNamespaceSchemaLocation="
-	"\"http://www.ivoa.net/xml/VOTable/v1.1\">\n");
+  fprintf(file, "<VOTABLE version=\"1.1\"\n"
+	" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
+	" xsi:noNamespaceSchemaLocation=\"http://www.ivoa.net/xml/VOTable/v1.1\">\n");
   fprintf(file, "<DESCRIPTION>produced by %s</DESCRIPTION>\n", BANNER);
   fprintf(file, "<!-- VOTable description at "
 	"http://www.ivoa.net/Documents/latest/VOT.html -->\n");
@@ -172,7 +170,6 @@ int	write_xml_header(FILE *file)
   fprintf(file, " <DESCRIPTION>Data related to %s"
 	"</DESCRIPTION>\n", BANNER);
   fprintf(file, " <INFO name=\"QUERY_STATUS\" value=\"OK\" />\n");
-  sprintf(sysname, "ICRS");
 
   fprintf(file, " <COOSYS ID=\"J2000\" equinox=\"J2000\""
 	" epoch=\"2000.0\" system=\"ICRS\"/>\n");
@@ -251,13 +248,13 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"meta.number;meta.software\" value=\"%d\"/>\n",
     	prefs.nthreads);
   fprintf(file, "  <PARAM name=\"Date\" datatype=\"char\" arraysize=\"*\""
-	" ucd=\"time.event.end;meta.software\" value=\"%s\"/>\n",
+	" ucd=\"time.end;meta.software\" value=\"%s\"/>\n",
 	prefs.sdate_end);
   fprintf(file, "  <PARAM name=\"Time\" datatype=\"char\" arraysize=\"*\""
-	" ucd=\"time.event.end;meta.software\" value=\"%s\"/>\n",
+	" ucd=\"time.end;meta.software\" value=\"%s\"/>\n",
 	prefs.stime_end);
   fprintf(file, "  <PARAM name=\"Duration\" datatype=\"float\""
-	" ucd=\"time.event;meta.software\" value=\"%.0f\" unit=\"s\"/>\n",
+	" ucd=\"time.duration;meta.software\" value=\"%.0f\" unit=\"s\"/>\n",
 	prefs.time_diff);
 
   fprintf(file, "  <PARAM name=\"User\" datatype=\"char\" arraysize=\"*\""
@@ -342,7 +339,7 @@ int	write_xml_meta(FILE *file, char *msgerror)
   fprintf(file, "   <FIELD name=\"Lng_Axis\" datatype=\"int\""
         " ucd=\"meta.id;pos.eq.ra\"/>\n");
   fprintf(file, "   <FIELD name=\"Lat_Axis\" datatype=\"int\""
-        " ucd=\"meta.id;pos.eq.de\"/>\n");
+        " ucd=\"meta.id;pos.eq.dec\"/>\n");
   fprintf(file, "   <FIELD name=\"Ext_Header\" datatype=\"boolean\""
 	" ucd=\"meta.code\"/>\n");
   fprintf(file, "   <FIELD name=\"NDetect\" datatype=\"int\""
@@ -364,10 +361,10 @@ int	write_xml_meta(FILE *file, char *msgerror)
   fprintf(file, "   <FIELD name=\"AirMass\" datatype=\"float\""
 	" ucd=\"obs.airMass\"/>\n");
   fprintf(file, "   <FIELD name=\"Field_Coordinates\" datatype=\"double\""
-	" arraysize=\"%d\" ucd=\"pos.eq;obs.image\" unit=\"%s\"/>\n",
-	naxis, lng!=lat? "deg":"pix");
+	" arraysize=\"%d\" ucd=\"pos.eq.ra;pos.eq.dec;obs.field\""
+	" unit=\"%s\"/>\n", naxis, lng!=lat? "deg":"pix");
   fprintf(file, "   <FIELD name=\"Pixel_Scale\" datatype=\"float\""
-	" arraysize=\"%d\"  ucd=\"instr.pixel;obs.image;stat.mean\""
+	" arraysize=\"%d\"  ucd=\"instr.scale;instr.pixel;stat.mean\""
 	" unit=\"%s\"/>\n", naxis, lng!=lat? "arcsec":"pix");
   fprintf(file, "   <FIELD name=\"Max_Radius\" datatype=\"float\""
 	" ucd=\"phys.size.radius\" unit=\"%s\"/>\n", lng!=lat? "arcmin":"pix");
@@ -377,15 +374,15 @@ int	write_xml_meta(FILE *file, char *msgerror)
     {
     fprintf(file, "   <!-- =========== MATCHing statistics =========== -->\n");
     fprintf(file, "   <FIELD name=\"DPixelScale\" datatype=\"float\""
-	" ucd=\"instr.pixel;obs.image;arith.ratio\"/>\n");
+	" ucd=\"instr.scale;instr.pixel;arith.ratio\"/>\n");
     fprintf(file, "   <FIELD name=\"DPosAngle\" datatype=\"float\""
 	" ucd=\"pos.posAng;obs.image;arith.diff\" unit=\"deg\"/>\n");
     fprintf(file, "   <FIELD name=\"AS_Contrast\" datatype=\"float\""
 	" ucd=\"stat.correlation;arith.ratio\"/>\n");
     fprintf(file, "   <FIELD name=\"DX\" datatype=\"float\""
-	" ucd=\"pos.eq;arith.diff\" unit=\"deg\"/>\n");
+	" ucd=\"pos.eq.ra;arith.diff\" unit=\"deg\"/>\n");
     fprintf(file, "   <FIELD name=\"DY\" datatype=\"float\""
-	" ucd=\"pos.eq;arith.diff\" unit=\"deg\"/>\n");
+	" ucd=\"pos.eq.dec;arith.diff\" unit=\"deg\"/>\n");
     fprintf(file, "   <FIELD name=\"XY_Contrast\" datatype=\"float\""
 	" ucd=\"stat.correlation;arith.ratio\"/>\n");
     fprintf(file, "   <FIELD name=\"Shear\" datatype=\"float\""
@@ -404,8 +401,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
   fprintf(file, "   <FIELD name=\"NDeg_Internal_HighSN\" datatype=\"int\""
 	" ucd=\"stat.fit.dof\"/>\n");
   fprintf(file, "   <FIELD name=\"AstromOffset_Reference\" datatype=\"float\""
-	" arraysize=\"%d\" ucd=\"arith.diff;pos.eq;obs.field\" unit=\"%s\"/>\n",
-	naxis, lng!=lat? "arcsec":"pix");
+	" arraysize=\"%d\" ucd=\"pos.eq.ra;pos.eq.dec;arith.diff;obs.field\""
+	" unit=\"%s\"/>\n", naxis, lng!=lat? "arcsec":"pix");
   fprintf(file, "   <FIELD name=\"AstromSigma_Reference\" datatype=\"float\""
 	" arraysize=\"%d\" ucd=\"stat.stdev;pos.eq;obs.field\" unit=\"%s\"/>\n",
 	naxis, lng!=lat? "arcsec":"pix");
@@ -417,7 +414,7 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	" ucd=\"stat.fit.dof\"/>\n");
   fprintf(file, "   <FIELD name=\"AstromOffset_Reference_HighSN\""
 	" datatype=\"float\" arraysize=\"%d\""
-	" ucd=\"arith.diff;pos.eq;obs.field\" unit=\"%s\"/>\n",
+	" ucd=\"pos.eq.ra;pos.eq.dec;arith.diff;obs.field\" unit=\"%s\"/>\n",
 	naxis, lng!=lat? "arcsec":"pix");
   fprintf(file, "   <FIELD name=\"AstromSigma_Reference_HighSN\""
 	" datatype=\"float\" arraysize=\"%d\""
@@ -517,7 +514,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
   fprintf(file, "   <FIELD name=\"Lat_Axis\" datatype=\"int\""
         " ucd=\"meta.id;pos.eq.de\"/>\n");
   fprintf(file, "   <FIELD name=\"Field_Coordinates\" datatype=\"double\""
-	" arraysize=\"%d\" ucd=\"pos.eq;obs.field\" unit=\"%s\"/>\n",
+	" arraysize=\"%d\" ucd=\"pos.eq.ra;pos.eq.dec;obs.field\""
+	" unit=\"%s\"/>\n",
 	naxis, lng!=lat? "deg":"pix");
   fprintf(file, "   <FIELD name=\"Pixel_Scale\" datatype=\"float\""
 	" arraysize=\"%d\"  ucd=\"instr.pixel;obs.field;stat.mean\""
@@ -947,9 +945,9 @@ int	write_xml_meta(FILE *file, char *msgerror)
 	"   <DESCRIPTION>%s warnings (limited to the last %d)</DESCRIPTION>\n",
 	BANNER, WARNING_NMAX);
   fprintf(file, "   <FIELD name=\"Date\" datatype=\"char\" arraysize=\"*\""
-	" ucd=\"meta;time.event.end\"/>\n");
+	" ucd=\"meta;time.end\"/>\n");
   fprintf(file, "   <FIELD name=\"Time\" datatype=\"char\" arraysize=\"*\""
-	" ucd=\"meta;time.event.end\"/>\n");
+	" ucd=\"meta;time.end\"/>\n");
   fprintf(file, "   <FIELD name=\"Msg\" datatype=\"char\" arraysize=\"*\""
 	" ucd=\"meta\"/>\n");
   fprintf(file, "   <DATA><TABLEDATA>\n");

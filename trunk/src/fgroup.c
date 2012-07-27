@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/05/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -161,29 +161,32 @@ INPUT   Field group pointer.
 OUTPUT  -.
 NOTES   -.
 AUTHOR  E. Bertin (IAP)
-VERSION 19/09/2004
+VERSION 26/07/2012
 */
 void	locate_fgroup(fgroupstruct *fgroup)
   {
-   fieldstruct	**field;
+   fieldstruct	**fields,
+		*field;
    wcsstruct	*wcs;
    char		*ctype[NAXIS];
    double	*scale[NAXIS],*scalet[NAXIS],
 		crpix[NAXIS], cdelt[NAXIS],
 		*wcsmean, *wcspos,
-		cosalpha,sinalpha,sindelta, dist, maxradius, dscale;
+		cosalpha,sinalpha,sindelta, dist, maxradius, dscale,
+		epoch,epochmin,epochmax;
    int		naxisn[NAXIS],
-		lat,lng, naxis,nfield, f,i;
+		f,i, lat,lng, naxis,nfield, nepoch;
 
   if (!fgroup->nfield)
     return;
 
 /* Set angular coordinates (we assume there are the same in all fields) */
-  field = fgroup->field;
-  wcs = field[0]->set[0]->wcs;
-  lng = fgroup->lng = field[0]->lng;
-  lat = fgroup->lat = field[0]->lat;
-  naxis = fgroup->naxis = field[0]->naxis;
+  fields = fgroup->field;
+  field = fields[0];
+  wcs = field->set[0]->wcs;
+  lng = fgroup->lng = field->lng;
+  lat = fgroup->lat = field->lat;
+  naxis = fgroup->naxis = field->naxis;
   nfield = fgroup->nfield;
   wcsmean = fgroup->meanwcspos;
   for (i=0; i<naxis; i++)
@@ -194,11 +197,15 @@ void	locate_fgroup(fgroupstruct *fgroup)
     wcsmean[i] = 0.0;
     }
 
-/* Compute average angular coordinates */
+/* Compute min/max/mean epoch and average coordinates for the whole group */
+  epoch = 0.0;
+  epochmax = -(epochmin = BIG);
+  nepoch = 0;
   cosalpha = sinalpha = sindelta = 0.0;
   for (f=0; f<nfield; f++)
     {
-    wcspos = field[f]->meanwcspos;
+    field = fields[f];
+    wcspos = field->meanwcspos;
     if (lng != lat)
       {
       cosalpha += cos(wcspos[lng]*DEG);
@@ -209,9 +216,22 @@ void	locate_fgroup(fgroupstruct *fgroup)
       {
       if (lat==lng || (i!=lng && i!=lat))
         wcsmean[i] += wcspos[i];
-      *(scalet[i]++) = field[f]->meanwcsscale[i];
+      *(scalet[i]++) = field->meanwcsscale[i];
+      }
+    if (field->epochmin != 0.0 && field->epochmin < epochmin)
+      epochmin = field->epochmin;
+    if (field->epochmax != 0.0 && field->epochmax > epochmax)
+      epochmax = field->epochmax;
+    if (field->epoch != 0.0)
+      {
+      epoch += field->epoch;
+      nepoch++;
       }
     }
+
+  fgroup->epoch = (nepoch)? epoch / nepoch : 0.0;
+  fgroup->epochmin = epochmin < BIG/2? epochmin : 0.0;
+  fgroup->epochmax = epochmax > -BIG/2? epochmax : 0.0;
 
 /* Now make the stats on each axis */
   for (i=0; i<naxis; i++)
@@ -243,13 +263,14 @@ void	locate_fgroup(fgroupstruct *fgroup)
   maxradius = 0.0;
   for (f=0; f<nfield; f++)
     {
-    dist = wcs_dist(wcs, field[f]->meanwcspos, fgroup->meanwcspos)
-		+ field[f]->maxradius;
+    field = fields[f];
+    dist = wcs_dist(wcs,field->meanwcspos,fgroup->meanwcspos)+ field->maxradius;
     if (dist>maxradius)
       maxradius = dist;
     }
 
   fgroup->maxradius = maxradius;
+  field = fields[0];
   for (i=0; i<naxis; i++)
     {
     cdelt[i] = fgroup->meanwcsscale[i];
@@ -258,14 +279,14 @@ void	locate_fgroup(fgroupstruct *fgroup)
     if (lat!=lng && (i==lng || i==lat))
       {
       naxisn[i] = (int)(2.0*fgroup->maxradius / fgroup->meanwcsscale[i]+1);
-      sprintf(ctype[i], "%5.5sSTG", field[0]->set[0]->wcs->ctype[i]);
+      sprintf(ctype[i], "%5.5sSTG", field->set[0]->wcs->ctype[i]);
       }
     else
       {
       naxisn[i] = (lat==lng)?
 		(int)(2.0*fgroup->maxradius / fgroup->meanwcsscale[i] + 1.0)
-		: field[0]->set[0]->wcs->naxisn[i];
-      strcpy(ctype[i], field[0]->set[0]->wcs->ctype[i]);
+		: field->set[0]->wcs->naxisn[i];
+      strcpy(ctype[i], field->set[0]->wcs->ctype[i]);
       }
     crpix[i] = (naxisn[i]+1.0) / 2.0;
     }

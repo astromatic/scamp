@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/06/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -86,6 +86,7 @@ typedef struct sample
   float		magerr;			/* Magnitude uncertainty (1-sigma) */
   float		colour;			/* A colour index */
   float		fwhm;			/* Full Width at Half Maximum */
+  float		spread;			/* SExtractor's SPREAD_MODEL */
   short		sexflags;		/* Source extraction flags */
   short		scampflags;		/* SCAMP flags */		
   }	samplestruct;
@@ -106,6 +107,8 @@ typedef struct set
   float		match_dlng, match_dlat;	/* Positional corrections */
   float		match_asig, match_sig;	/* Contrasts for angle/scale and pos */
 /* ---- astrometric parameters */
+  double	epoch;			/* Mean epoch of observation */
+  double	epochmin,epochmax;	/* Min and max epoch of observation */
   double	wcspos[NAXIS];		/* Central pixel coordinate */
   double	wcsscale[NAXIS];	/* Central pixel scale */
   double	radius;			/* Approximate radius of set [deg] */
