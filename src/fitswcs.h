@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/06/2012
+*	Last modified:		27/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -40,6 +40,10 @@
 #define		ARCMIN	(DEG/60.0)	/* 1 arcsec in radians */
 #define		ARCSEC	(DEG/3600.0)	/* 1 arcsec in radians */
 #define		MAS	(ARCSEC/1000.0)	/* 1 mas in radians */
+#define		YEAR	(365.25*DAY)	/* 1 year in seconds */
+#define		DAY	(24.0*HOUR)	/* 1 day in seconds */
+#define		HOUR	(60.0*MINUTE)	/* 1 hour in seconds */
+#define		MINUTE	60.0		/* 1 minute in seconds */
 #define		MJD2000	51544.50000	/* Modified Julian date for J2000.0 */
 #define		MJD1950	33281.92346	/* Modified Julian date for B1950.0 */
 #define		JU2TROP	1.0000214	/* 1 Julian century in tropical units*/

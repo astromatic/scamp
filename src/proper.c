@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/07/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -428,13 +428,14 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/12/2011
+VERSION	26/07/2012
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
 			double wis, double *chi2)
   {
    fieldstruct	*field, *field1,*field2;
+   setstruct	*set, *set1;
    samplestruct	*samp1,*samp2;
    wcsstruct	*wcs;
    double 	mpos[NAXIS], mposw[NAXIS],  projpos[NAXIS],
@@ -463,7 +464,8 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   sy2 = 0.0;
   nfree = -ncoeff;
 
-  field = samp->set->field;
+  set = samp->set;
+  field = set->field;
 
   for (samp1=samp; samp1 && samp1->set->field->astromlabel>=0;
 		samp1 = samp1->prevsamp)
@@ -471,7 +473,8 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
     if ((samp1->sexflags & (OBJ_SATUR|OBJ_TRUNC))
 		|| (samp1->scampflags & SCAMP_BADPROPER))
       continue;
-    field1 = samp1->set->field;
+    set1 = samp1->set;
+    field1 = set1->field;
     f1 = field1->index;
     if (meanflag)
       {
@@ -514,7 +517,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
       ecpos[lat] = samp1->wcspos[lat];
       eq_to_celsys(wcsec, ecpos);
       bec = ecpos[lat]*DEG;
-      lec = field1->epoch - 0.246; /* l_sun ~ 0 when frac. part=0 */
+      lec = set1->epoch - 0.246; /* l_sun ~ 0 when frac. part=0 */
       lec = ecpos[lng]*DEG - (lec - floor(lec))*2*PI;	/* l - l_sun */
       ecpos[lng] -= (fabs(cbec=cos(bec)) > 1e-12?
 			(ARCSEC/DEG)*sin(lec)/cbec : 0.0);
@@ -525,7 +528,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
       pfac[lat] = projpos[lat] - samp1->projpos[lat];
       }
 
-    dt = field1->epoch - field->epoch;
+    dt = set1->epoch - set->epoch;
 
 /* Fill the normal equation matrix */
 /* Basis functions are              */
@@ -590,5 +593,49 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
     }
 
   return nfree;
+  }
+
+
+/****** astrconnect_fgroup ****************************************************
+PROTO	void astrconnect_fgroup(fgroupstruct *fgroup)
+PURPOSE	Connect different "sources" (matched detections) in a group of fields,
+	based on their proper motions.
+INPUT	ptr to a group of field.
+OUTPUT	-.
+NOTES	Not complete yet. Input structures must have gone through
+	astrprop_fgroup() first.
+AUTHOR	E. Bertin (IAP)
+VERSION	26/07/2012
+ ***/
+void	astrconnect_fgroup(fgroupstruct *fgroup)
+  {
+   fieldstruct	*field;
+   setstruct	*set;
+   samplestruct	*samp;
+   double	depoch;
+   int		f,s,n, nfield, nsamp;
+
+  depoch = fgroup->epochmax - fgroup->epochmin;
+  if (depoch<=0.0)
+    return;
+
+  nfield = fgroup->nfield;
+  for (f=0; f<nfield; f++)
+    {
+    field = fgroup->field[f];
+    for (s=0; s<field->nset; s++)
+      {
+      set = field->set[s];
+      nsamp = set->nsample;
+      samp = set->sample;
+      for (n=nsamp; n--; samp++)
+        {
+        if (samp->nextsamp)
+          continue;
+        }
+      }
+    }
+
+  return;
   }
 

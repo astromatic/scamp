@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/06/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -362,7 +362,7 @@ INPUT   Pointer to field structure.
 OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 17/06/2012
+VERSION 26/07/2012
 */
 void	locate_field(fieldstruct *field)
   {
@@ -370,9 +370,10 @@ void	locate_field(fieldstruct *field)
    wcsstruct		*wcs;
    double		*scale[NAXIS],*scalet[NAXIS],
 			*wcsmean,
-			cosalpha,sinalpha, sindelta, dist, maxradius, airmass,
-			expotime;
-   int			i, s, lat,lng, nset, naxis;
+			cosalpha,sinalpha, sindelta, dist, maxradius,
+			airmass,airmassmin,airmassmax, epoch,epochmin,epochmax,
+			expotime,expotimemin,expotimemax;
+   int			i, s, lat,lng, nset, naxis, nairmass,nepoch,nexpotime;
 
 /* Some initializations */
   nset = field->nset;
@@ -415,7 +416,6 @@ void	locate_field(fieldstruct *field)
 /* Now make the stats on each axis */
   lng = field->lng = field->set[0]->wcs->lng;
   lat = field->lat = field->set[0]->wcs->lat;
-  field->epoch = field->set[0]->wcs->obsdate;
   for (i=0; i<naxis; i++)
     {
     if (lat!=lng && (i==lng))
@@ -430,8 +430,11 @@ void	locate_field(fieldstruct *field)
     field->meanwcsscale[i] = dhmedian(scale[i], nset);
     }
 
-/* Compute the radius of the field, mean exposure time and mean airmass */
-  airmass = expotime = maxradius = 0.0;
+/* Compute the field radius, as well as airmass,epoch,exposure time stats */
+  airmass = epoch = expotime = maxradius = 0.0;
+  airmassmax = expotimemax = epochmax
+				= -(airmassmin = expotimemin = epochmin = BIG);
+  nairmass = nexpotime = nepoch = 0;
   pset = field->set;
   set=*(pset++);
   for (s=nset; s--; set=*(pset++))
@@ -440,13 +443,61 @@ void	locate_field(fieldstruct *field)
     dist = wcs_dist(set->wcs, set->wcspos, field->meanwcspos) + set->radius;
     if (dist>maxradius)
       maxradius = dist;
-    airmass += set->airmass;
+    if (set->airmass != 0.0)
+      {
+      airmass += set->airmass;
+      if (set->airmass < airmassmin)
+        airmassmin = set->airmass;
+      if (set->airmass > airmassmax)
+        airmassmax = set->airmass;
+      nairmass++;
+      }
+    if (set->epochmin!=0.0)
+      {
+      epoch += set->epoch;
+      if (set->epochmin < epochmin)
+        epochmin = set->epochmin;
+      if (set->epochmax > epochmax)
+        epochmax = set->epochmax;
+      nepoch++;
+      }
+    if (set->expotime != 0.0)
+      {
+      expotime += set->expotime;
+      if (set->expotime < expotimemin)
+        expotimemin = set->expotime;
+      if (set->expotime > expotimemax)
+        expotimemax = set->expotime;
+      nexpotime++;
+      }
     expotime += set->expotime;
     }
 
   field->maxradius = maxradius;
-  field->airmass = airmass / nset;
-  field->expotime = expotime / nset;
+  if ((nairmass))
+    {
+    field->airmass = airmass / nairmass;
+    field->airmassmin = airmassmin;
+    field->airmassmax = airmassmax;
+    }
+  else
+    field->airmass = field->airmassmin = field->airmassmax = 0.0;
+  if ((nepoch))
+    {
+    field->epoch = epoch / nepoch;
+    field->epochmin = epochmin;
+    field->epochmax = epochmax;
+    }
+  else
+    field->epoch = field->epochmin = field->epochmax = 0.0;
+  if ((nexpotime))
+    {
+    field->expotime = expotime / nexpotime;
+    field->expotimemin = expotimemin;
+    field->expotimemax = expotimemax;
+    }
+  else
+    field->expotime = field->expotimemin = field->expotimemax = 0.0;
 
 /* Free memory */
   for (i=0; i<naxis; i++)

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/04/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 24/04/2012
+VERSION 26/07/2012
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -86,7 +86,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
 			wcsparal,wcsparalerr, wcschi2,
-			epoch,epochmin,epochmax, err2, colour, dummy;
+			epoch,epochmin,epochmax, err2, colour, spread, dummy;
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
@@ -201,11 +201,11 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     key->naxis = 2;
     QMALLOC(key->naxisn, int, key->naxis);
     key->naxisn[0] = 80;
-    key->naxisn[1] = 36;
+    key->naxisn[1] = fitsfind(key->ptr, "END     ")+1;
     key->htype = H_STRING;
     key->ttype = T_STRING;
     key->nobj = 1;
-    key->nbytes = 80*(fitsfind(key->ptr, "END     ")+1);
+    key->nbytes = key->naxisn[0]*key->naxisn[1];
     add_key(key, imtab, 0);
     save_tab(cat, imtab);
     free_tab(imtab);
@@ -276,7 +276,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
 		= wcsprop[d] = wcsproperr[d] = 0.0;
           wcsparal = wcsparalerr = wcschi2 = 0.0;
-          epoch = 0.0;
+          epoch = spread = 0.0;
           epochmin = BIG;
           epochmax = -BIG;
           for (samp2 = samp;
@@ -306,11 +306,13 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             wcsparalerr += samp2->wcsparalerr*samp2->wcsparalerr;
             wcschi2 += samp2->wcschi2;
 /*---------- Epochs */
-            epoch += samp2->set->field->epoch;
-            if (samp2->set->field->epoch < epochmin)
-              epochmin = samp2->set->field->epoch;
-            if (samp2->set->field->epoch > epochmax)
-              epochmax = samp2->set->field->epoch;
+            epoch += samp2->set->epoch;
+            if (samp2->set->epochmin < epochmin)
+              epochmin = samp2->set->epochmin;
+            if (samp2->set->epochmax > epochmax)
+              epochmax = samp2->set->epochmax;
+/*---------- Morphometry */
+            spread += samp2->spread;
 /*---------- Flags */
             msample.sexflags |= samp2->sexflags;
             msample.scampflags |= samp2->scampflags;
@@ -345,6 +347,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             msample.epoch = epoch / nok;
             msample.epochmin = epochmin;
             msample.epochmax = epochmax;
+            msample.spread = spread / nok;
             }
           msample.npos_tot = nall;
           msample.npos_ok = nok;
@@ -403,7 +406,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 22/07/2011
+VERSION 26/07/2012
 */
 void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -539,11 +542,11 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
     key->naxis = 2;
     QMALLOC(key->naxisn, int, key->naxis);
     key->naxisn[0] = 80;
-    key->naxisn[1] = 36;
+    key->naxisn[1] = fitsfind(key->ptr, "END     ")+1;
     key->htype = H_STRING;
     key->ttype = T_STRING;
     key->nobj = 1;
-    key->nbytes = 80*(fitsfind(key->ptr, "END     ")+1);
+    key->nbytes = key->naxisn[0]*key->naxisn[1];
     add_key(key, imtab, 0);
     save_tab(cat, imtab);
     free_tab(imtab);
@@ -583,11 +586,13 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
               fsample.wcspos[d] = samp2->wcspos[d];
               fsample.wcsposerr[d] = samp2->wcsposerr[d];
               fsample.wcspostheta = 0.0;
-              fsample.epoch = samp2->set->field->epoch;
+              fsample.epoch = samp2->set->epoch;
               }
 /*---------- Photometry */
             fsample.mag = samp2->mag;
             fsample.magerr = samp2->magerr;
+/*---------- Morphometry */
+            fsample.spread = samp2->spread;
 /*---------- Flags */
             fsample.sexflags = samp2->sexflags;
             fsample.scampflags = samp2->scampflags;

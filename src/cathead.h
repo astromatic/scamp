@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/04/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -113,6 +113,9 @@ keystruct		refmergedkey[] = {
   {"COLOR", "Color index",
 	&refmergedsample.colour, H_FLOAT, T_FLOAT,
 	"%8.4f", "", "phot.color", "mag"},
+  {"SPREAD_MODEL", "Average image spread with respect to local PSF",
+	&refmergedsample.spread, H_FLOAT, T_FLOAT,
+	"%8.4f", "", "src.class.starGalaxy", ""},
   {"FLAGS_EXTRACTION", "Extraction flags",
 	&refmergedsample.sexflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},
@@ -182,6 +185,9 @@ keystruct		reffullkey[] = {
   {"MAGERR", "RMS mag error estimate in the current band",
 	&reffullsample.magerr, H_FLOAT, T_FLOAT,
 	"%9.5f", "mag", "stat.error;phot.mag", "mag"},
+  {"SPREAD_MODEL", "Average image spread with respect to local PSF",
+	&reffullsample.spread, H_FLOAT, T_FLOAT,
+	"%8.4f", "", "src.class.starGalaxy", ""},
   {"FLAGS_EXTRACTION", "Extraction flags",
 	&reffullsample.sexflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},

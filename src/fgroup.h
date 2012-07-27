@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/05/2012
+*	Last modified:		26/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -49,6 +49,8 @@ typedef struct fgroup
   int		no;			/* Group ID (number) */
   struct field	**field;		/* Pointer to an array of fields */
   int		nfield;			/* Number of fields in the group */
+  double	epoch;			/* Mean epoch of observations */
+  double	epochmin, epochmax;	/* Min and max epoch of observations */
   double	meanwcspos[NAXIS];	/* Mean field coordinates */
   double	meanwcsscale[NAXIS];	/* Mean pixel scale */
   double	projposmin[NAXIS];	/* Projected coordinate boundaries */
