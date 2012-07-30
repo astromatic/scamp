@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		30/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -86,13 +86,13 @@ keystruct		refmergedkey[] = {
 	&refmergedsample.wcschi2, H_FLOAT, T_FLOAT,
 	"%10e", "", "stat.fit.chi2;pos.pm;pos.parallax.trig;", ""},
   {"EPOCH", "Mean epoch",
-	&refmergedsample.epoch, H_FLOAT, T_FLOAT,
+	&refmergedsample.epoch, H_FLOAT, T_DOUBLE,
 	"%15.10f", "yr", "time.epoch;stat.mean", "yr"},
   {"EPOCH_MIN", "Minimum epoch",
-	&refmergedsample.epochmin, H_FLOAT, T_FLOAT,
+	&refmergedsample.epochmin, H_FLOAT, T_DOUBLE,
 	"%15.10f", "yr", "time.epoch;stat.min", "yr"},
   {"EPOCH_MAX", "Maximum epoch",
-	&refmergedsample.epochmax, H_FLOAT, T_FLOAT,
+	&refmergedsample.epochmax, H_FLOAT, T_DOUBLE,
 	"%15.10f", "yr", "time.epoch;stat.max", "yr"},
   {"NMAG", "Number of overlaps for each band",
 	&refmergedsample.nmag, H_INT, T_LONG,
@@ -177,7 +177,7 @@ keystruct		reffullkey[] = {
 	&reffullsample.wcspostheta, H_FLOAT, T_FLOAT,
 	"%10e", "deg", "stat.error;stat.min;pos.errorEllipse;meta.main", "deg"},
   {"EPOCH", "Epoch",
-	&reffullsample.epoch, H_FLOAT, T_FLOAT,
+	&reffullsample.epoch, H_FLOAT, T_DOUBLE,
 	"%15.10f", "yr", "time.epoch;stat.mean", "yr"},
   {"MAG", "Magnitude in the current band",
 	&reffullsample.mag, H_FLOAT, T_FLOAT,
