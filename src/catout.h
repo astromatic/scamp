@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		31/07/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -53,9 +53,9 @@ typedef struct mergedsample
   float		wcsparal;		/* Parallax in mas */
   float		wcsparalerr;		/* Parallax error mas */
   float		wcschi2;		/* P. motion/parallax fit Chi2/d.o.f.*/
-  float		epochmin;		/* Min epoch for observations */
-  float		epoch;			/* Mean epoch for observations */
-  float		epochmax;		/* Max epoch for observations */
+  double	epochmin;		/* Min epoch for observations */
+  double	epoch;			/* Mean epoch for observations */
+  double	epochmax;		/* Max epoch for observations */
   float		flux[MAXPHOTINSTRU];	/* Mean flux */
   float		fluxerr[MAXPHOTINSTRU];	/* Mean flux uncertainty (1-sigma) */
   float		mag[MAXPHOTINSTRU];	/* "Mean" magnitude */
@@ -82,7 +82,7 @@ typedef struct fullsample
   double	wcspos[NAXIS];		/* World Coordinate positions */
   float		wcsposerr[NAXIS];	/* Errors on WCS positions */
   float		wcspostheta;		/* WCS error position angle */
-  float		epoch;			/* Epoch for observations */
+  double	epoch;			/* Epoch for observations */
   float		mag;			/* Magnitude */
   float		magerr;			/* Mag. uncertainty (1-sigma) */
   float		spread;			/* SExtractor's SPREAD_MODEL */
