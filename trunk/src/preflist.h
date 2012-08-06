@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		11/07/2012
+*	Last modified:		05/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -115,7 +115,8 @@ pkeystruct key[] =
      "SHEAR_VS_AIRMASS", "PHOT_ERROR", "PHOT_ERRORVSMAG", "PHOT_ZPCORR",
      "ASTR_CHI2", "ASTR_INTERROR2D", "ASTR_REFERROR2D", "PHOT_ZPCORR3D",
      "ASTR_COLSHIFT1D" , "ASTR_REFPROPER", "ASTR_INTSYSMAP",
-     "ASTR_REFSYSMAP", "ASTR_OBSDATE3D", "ASTR_INTPROPER2D", ""},
+     "ASTR_REFSYSMAP", "ASTR_OBSDATE3D", "ASTR_INTPROPER2D",
+     "ASTR_PIXERROR2D", ""},
     0, MAXCHECK, &prefs.ncplot_type},
   {"COMPUTE_PARALLAXES", P_BOOL, &prefs.parallax_flag},
   {"COMPUTE_PROPERMOTIONS", P_BOOL, &prefs.propmotion_flag},

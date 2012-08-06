@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/11/2011
+*	Last modified:		06/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -957,29 +957,32 @@ OUTPUT  -.
 NOTES   see http://plplot.sourceforge.net/docbook-manual/
             plplot-html-5.5.3/contour-plots.html#contour-plots-c
 AUTHOR  E. Bertin (IAP)
-VERSION 30/11/2005
+VERSION 05/08/2012
 ***/
 static void distort_map(PLFLT x,PLFLT y,PLFLT *tx,PLFLT *ty, void *pltr_data)
-{
- wcsstruct	**wcs;
- double	 	rawpos[NAXIS], wcspos[NAXIS], wcspos2[NAXIS];
- int		i, lng, lat, naxis;
+  {
+   distortstruct	*distort;
+   wcsstruct		*wcsin,*wcsout;
+   double 		rawpos[NAXIS], wcspos[NAXIS], wcspos2[NAXIS];
+   int			i, lng, lat, naxis;
 
 
-  wcs = (wcsstruct **)pltr_data;
-  if ((naxis=wcs[0]->naxis) > 2)
+  distort = (distortstruct *)pltr_data;
+  wcsin = distort->wcsin;
+  wcsout = distort->wcsout;
+  if ((naxis=wcsin->naxis) > 2)
     for (i=0; i<naxis; i++)
-      rawpos[i]= wcs[0]->naxisn[i]/2.0 + 0.5;
-  lng = wcs[0]->lng;
-  lat = wcs[0]->lat;
-  rawpos[lng] = (x+0.5)*wcs[0]->naxisn[lng]/CPLOT_NDISTGRID + 0.5;
-  rawpos[lat] = (y+0.5)*wcs[0]->naxisn[lat]/CPLOT_NDISTGRID + 0.5;
-  raw_to_wcs(wcs[0], rawpos, wcspos);
-  wcspos2[wcs[1]->lng] = wcspos[lng];
-  wcspos2[wcs[1]->lat] = wcspos[lat];
-  wcs_to_raw(wcs[1], wcspos2, rawpos);
-  *tx = rawpos[wcs[1]->lng];
-  *ty = rawpos[wcs[1]->lat];
+      rawpos[i]= wcsin->naxisn[i]/2.0 + 0.5;
+  lng = wcsin->lng;
+  lat = wcsin->lat;
+  rawpos[lng] = (x+0.5)*wcsin->naxisn[lng]/distort->ngridx + 0.5;
+  rawpos[lat] = (y+0.5)*wcsin->naxisn[lat]/distort->ngridy + 0.5;
+  raw_to_wcs(wcsin, rawpos, wcspos);
+  wcspos2[wcsout->lng] = wcspos[lng];
+  wcspos2[wcsout->lat] = wcspos[lat];
+  wcs_to_raw(wcsout, wcspos2, rawpos);
+  *tx = rawpos[wcsout->lng];
+  *ty = rawpos[wcsout->lat];
 
   return;
   }
@@ -991,23 +994,23 @@ INPUT	Pointer to the field.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	05/08/2012
  ***/
 int	cplot_distort(fieldstruct *field)
   {
-   wcsstruct	*wcsptr[2],
-		*wcs, *wcsin;
-   setstruct	*set;
-   PLFLT	**scale,
-		clevel[CPLOT_NSHADES], cpoint[3], r[3],g[3],b[3],
-		cscale, scalemin,scalemax, mscale,dscale;
-   PLINT	lwid;
-   char		*ctype[NAXIS],
-		str[80];
-   double	crpix[NAXIS], cdelt[NAXIS], raw[NAXIS],
-		xmin,ymin,xmax,ymax, xstep,ystep;
-   int		naxisn[NAXIS],
-		i,j, s, lng,lat, naxis;
+   distortstruct	distort;
+   wcsstruct		*wcs, *wcsin;
+   setstruct		*set;
+   PLFLT		**scale,
+			clevel[CPLOT_NSHADES], cpoint[3], r[3],g[3],b[3],
+			cscale, scalemin,scalemax, mscale,dscale;
+   PLINT		lwid;
+   char			*ctype[NAXIS],
+			str[80];
+   double		crpix[NAXIS], cdelt[NAXIS], raw[NAXIS],
+			xmin,ymin,xmax,ymax, xstep,ystep;
+   int			naxisn[NAXIS],
+			i,j, s, lng,lat, naxis;
 
   if (cplot_init(1,1, CPLOT_DISTORT) == RETURN_ERROR)
     {
@@ -1050,6 +1053,7 @@ int	cplot_distort(fieldstruct *field)
   pllsty(1);
   plcol0(15);
   plscmap1n(256);
+  distort.ngridx = distort.ngridy = CPLOT_NDISTGRID;
 
   scalemin = BIG;
   scalemax = -BIG;
@@ -1116,12 +1120,12 @@ int	cplot_distort(fieldstruct *field)
       raw[lat] += ystep;
       }
 
-    wcsptr[0] = set->wcs;
-    wcsptr[1] = wcs;
+    distort.wcsin = set->wcs;
+    distort.wcsout = wcs;
     plshades((const PLFLT **)scale, CPLOT_NDISTGRID, CPLOT_NDISTGRID, NULL,
 	     xstep/2.0+0.5, set->wcs->naxisn[lng]-xstep/2.0+0.5,
              ystep/2.0+0.5, set->wcs->naxisn[lat]-ystep/2.0+0.5,
-	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 1, distort_map, wcsptr);
+	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 0, distort_map, &distort);
 /*
     plwid(0);
     cplot_drawfgrids(set->wcs, wcs);
@@ -4769,6 +4773,269 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   plend();
 
   cplot_adprophisto2d(fgroup, hsn_thresh);	/* Recursive stuff */
+
+  return RETURN_OK;
+  }
+
+
+/****** cplot_pixerrhisto2d ***************************************************
+PROTO	int cplot_pixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
+PURPOSE	Plot a 2d astrometric difference histogram between all 
+	dimension as a function of image pixel coordinates for a given
+	astrometric intrument.
+INPUT	Pointer to an array of field group pointers,
+	Number of field groups,
+	Astrometric intrument index.
+OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
+NOTES	crossid_fgroup() must have been run on all groups first.
+AUTHOR	E. Bertin (IAP)
+VERSION	06/08/2012
+ ***/
+int	cplot_pixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
+  {
+   distortstruct	distort;
+   fgroupstruct		*fgroup;
+   fieldstruct		*field,*field0;
+   setstruct		*set,*set0;
+   samplestruct		*samp,*samp2,*sampb,*sampn;
+   wcsstruct		*wcs, *wcs0;
+   PLFLT		**resi,**scale,
+			clevel[CPLOT_NSHADES], cpoint[3], hue[4],lig[4],sat[4],
+			scalemin,scalemax, dscale, fval;
+   PLINT		lwid;
+   char			*ctype[NAXIS],
+			str[80];
+   double		*meanx,*meany,*weight,
+			crpix[NAXIS], cdelt[NAXIS], rawpos2[NAXIS],
+			xmin,ymin,xmax,ymax, xstep,ystep, xscale,yscale,
+			lim,maxlim, w;
+   int			naxisn[NAXIS],
+			d,f,g, i,j, n,p,s, ix,iy, naxis,nset, npixx,npixy;
+
+  if (cplot_init(1,1, CPLOT_PIXERROR2D) == RETURN_ERROR)
+    {
+    cplot_end(CPLOT_PIXERROR2D);
+    return RETURN_OK;
+    }
+
+/* Compute instrument projection (for display only) */
+  wcs0 = NULL;
+  field0 = NULL;	/* to avoid gcc -Wall warnings */
+  set0 = NULL;		/* to avoid gcc -Wall warnings */
+  naxis = 0;		/* to avoid gcc -Wall warnings */
+  nset = 0;
+  maxlim = 0.0;
+
+  for (g=0; g<ngroup; g++)
+    {
+    fgroup = fgroups[g];
+/*-- Set limits in residual intensity */
+    for (d=0; d<fgroup->naxis; d++)
+      if ((lim=2.0*fgroup->sig_interr_hsn[d]/fgroup->meanwcsscale[d]) > maxlim)
+        maxlim = lim;
+
+    if (wcs0)
+      continue;
+
+    for (f=0; f<fgroup->nfield; f++)
+      {
+      field = fgroup->field[f];
+/*---- Find a suitable field with the right astrometric instrument */
+      if (field->astromlabel == instru)
+        {
+        field0 = field;
+        nset = field0->nset;
+        set0 = field0->set[0];
+        wcs0 = set0->wcs;
+        if (!wcs0 || wcs0->naxis<2)
+          return RETURN_ERROR;
+        naxis = wcs0->naxis;
+        break;
+        }
+      }
+    }
+
+  if (!nset)
+    return RETURN_ERROR;
+
+  if (maxlim<=0.0)
+    maxlim = 1.0;
+
+  for (d=0; d<naxis; d++)
+    {
+    QMALLOC(ctype[d], char, 16); 
+    strncpy(ctype[d],wcs0->ctype[d], 16);
+    crpix[d] = 50.0;
+    cdelt[d] = field0->maxradius/50.0;
+    if (d==set0->lng)
+      cdelt[d] = -cdelt[d];	/* Put East to the left */
+    naxisn[d] = 100;
+    }
+
+  wcs = create_wcs(ctype,field0->meanwcspos,crpix,cdelt,naxisn, naxis);
+
+  xmin = 0.5;
+  xmax = 100.5;
+  ymin = 0.5;
+  ymax = 100.5;
+  lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
+  plwid(lwid);
+  plfont(2);
+  plcol0(15);
+  plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
+  sprintf(str, "#uInstrument A%d: residual map", field->astromlabel+1);
+  pllab("","", str);
+  plwid(0);
+  plcol0(7);
+  cplot_drawloccoordgrid(wcs, xmin, xmax, ymin, ymax);
+
+  pllsty(1);
+  plcol0(15);
+  plscmap1n(256);
+
+  scalemin = -maxlim;
+  scalemax = maxlim;
+
+/* Compute color map  */
+  dscale = scalemax - scalemin;
+  for (i=0; i<CPLOT_NSHADES; i++)
+    clevel[i] = scalemin + (i-0.5) * dscale / (CPLOT_NSHADES-2);
+  cpoint[0] = 0.0;   hue[0] = 240.0; lig[0] = 0.5; sat[0] = 1.0;
+  cpoint[1] = 0.499; hue[1] = 240.0; lig[1] = 1.0; sat[1] = 0.0;
+  cpoint[2] = 0.501; hue[2] = 0.0;   lig[2] = 1.0; sat[2] = 0.0;
+  cpoint[3] = 1.0;   hue[3] = 0.0;   lig[3] = 0.5; sat[3] = 1.0;
+  plscmap1l(0, 4, cpoint, hue, lig, sat, NULL);
+
+  if (wcs0->naxisn[0]>wcs0->naxisn[1])
+    {
+    if ((npixx = ((CPLOT_NPIXERRGRID*wcs0->naxisn[0])/wcs0->naxisn[1]/4)*4)<4)
+      npixx = 4;
+    npixy = CPLOT_NPIXERRGRID;
+    }
+  else if (wcs0->naxisn[1]>wcs0->naxisn[0])
+    {
+    npixx = CPLOT_NPIXERRGRID;
+    if ((npixy = ((CPLOT_NPIXERRGRID*wcs0->naxisn[1])/wcs0->naxisn[0]/4)*4)<4)
+      npixy = 4;
+    }
+  else
+    npixx = npixy = CPLOT_NPIXERRGRID;
+
+  QMALLOC(meanx, double, npixx*npixy);
+  QMALLOC(meany, double, npixx*npixy);
+  QMALLOC(weight, double, npixx*npixy);
+  plAlloc2dGrid(&resi, npixx,npixy);
+  distort.ngridx = npixx;
+  distort.ngridy = npixy;
+
+/* Now the real 2D astrometric residual histogram */
+  for (s=0; s<nset; s++)
+    {
+    memset(meanx, 0, npixx*npixy*sizeof(double)); 
+    memset(meany, 0, npixx*npixy*sizeof(double)); 
+    memset(weight, 0, npixx*npixy*sizeof(double)); 
+    set0 = field0->set[s];
+    wcs0 = set0->wcs;
+    if (!wcs0 || wcs0->naxis<2)
+      return RETURN_ERROR;
+    xscale = (double)npixx/wcs0->naxisn[0];
+    yscale = (double)npixy/wcs0->naxisn[1];
+    for (g=0; g<ngroup; g++)
+      {
+      fgroup = fgroups[g];
+      for (f=0; f<fgroup->nfield; f++)
+        {
+        field = fgroup->field[f];
+        if (field->astromlabel == instru)
+          {
+          set = field->set[s];
+          samp = set->sample;
+          for (n=set->nsample; n--; samp++)
+            {
+            if (samp->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+              continue;
+            ix = (int)((samp->rawpos[0]-0.501)*xscale);
+            iy = (int)((samp->rawpos[1]-0.501)*yscale);
+            if (ix<0 || ix>=npixx || iy<0 || iy>=npixy)
+              continue;
+            p = iy*npixx + ix;
+/*---------- Explore forward and backward directions */
+            sampn = sampb = samp;
+            while ((sampn && (samp2 = sampn = sampn->nextsamp))
+		|| ((samp2 = sampb = sampb->prevsamp)
+			&& sampb->set->field->astromlabel>=0))
+              {
+              if (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+                continue;
+              w = samp->wcsposerr[0]*samp->wcsposerr[0]
+		+ samp2->wcsposerr[0]*samp2->wcsposerr[0];
+              w = w>TINY? 1.0/w : 0.0;
+              wcs_to_raw(set->wcs, samp2->wcspos, rawpos2);
+              weight[p] += w;
+              meanx[p] += (samp->rawpos[0] - rawpos2[0])*w;
+              meany[p] += (samp->rawpos[1] - rawpos2[1])*w;
+              }
+            }
+          }
+        }
+      }
+
+    for (j=0; j<npixy; j++)
+      for (i=0; i<npixx; i++)
+        {
+        w = weight[j*npixx + i];
+        fval = w>0.0?
+		(meanx[j*npixx+i]+meany[j*npixx+i]) / w
+		: 0.0;
+        resi[i][j] = fval<scalemin? scalemin : (fval>scalemax? scalemax : fval);
+        }
+
+    distort.wcsin = wcs0;
+    distort.wcsout = wcs;
+    xstep = wcs0->naxisn[0] / npixx;
+    ystep = wcs0->naxisn[1] / npixy;
+    plshades((const PLFLT **)resi, npixx, npixy, NULL,
+	     xstep/2.0+0.5, wcs0->naxisn[0]-xstep/2.0+0.5,
+             ystep/2.0+0.5, wcs0->naxisn[1]-ystep/2.0+0.5,
+	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 0, distort_map, &distort);
+    plcol0(7);
+    plwid(lwid);
+    cplot_drawbounds(wcs0, wcs);
+    }
+
+  free(meanx);
+  free(meany);
+  free(weight);
+
+  plFree2dGrid(resi, npixx, npixy);
+
+/* Draw Colour scale */
+  plAlloc2dGrid(&scale, 2, CPLOT_NSHADES);
+  for (j=0; j<CPLOT_NSHADES; j++)
+    scale[0][j] = scale[1][j] = scalemin + j * dscale/(CPLOT_NSHADES-1);
+
+  plvpor(0.91,0.935,0.115,0.885);
+  plwind(0.0,1.0,scalemin,scalemax);
+  plshades((const PLFLT **)scale, 2, CPLOT_NSHADES, NULL, 0.0, 1.0,
+	   scalemin,scalemax, clevel,
+	   CPLOT_NSHADES, 1, 0, 0, plfill, 1, NULL, NULL);
+  plcol0(15);
+  plschr(0.0, 0.5);
+  plbox("bc", 0.0, 0, "bnstv", 0.0, 0);
+  sprintf(str, "%s", "pixel");
+  plschr(0.0, 0.6);
+  plmtex("l", 5.0, 0.5, 0.0, str);
+  plmtex("b", 2.0, 0.5, 0.5, "amplitude");
+
+  plFree2dGrid(scale, 2, CPLOT_NSHADES);
+  plend();
+
+  end_wcs(wcs);
+
+  for (i=0; i<naxis; i++)
+    free(ctype[i]);
+
+  cplot_pixerrhisto2d(fgroups, ngroup, instru);	/* Recursive stuff */
 
   return RETURN_OK;
   }
