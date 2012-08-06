@@ -34,7 +34,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		26/07/2012
+#	Last modified:		02/08/2012
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -209,7 +209,7 @@
      <xsl:value-of select="PARAM[@name='Software']/@value"/>&nbsp;<xsl:value-of select="PARAM[@name='Version']/@value"/>
     </b>
    </a>
-   run, completed on
+   completed on
    <b><xsl:value-of select="PARAM[@name='Date']/@value"/></b>
    at
    <b><xsl:value-of select="PARAM[@name='Time']/@value"/></b>
@@ -243,7 +243,7 @@
      </xsl:choose>
     </b>)
     <br />
-   was started by user <b><xsl:value-of select="PARAM[@name='User']/@value"/></b>
+   started by user <b><xsl:value-of select="PARAM[@name='User']/@value"/></b>
    from <b><xsl:value-of select="PARAM[@name='Host']/@value"/></b>
    in <b><mono><xsl:value-of select="PARAM[@name='Path']/@value"/></mono></b>
   </p>

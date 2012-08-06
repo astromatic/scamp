@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/05/2012
+*	Last modified:		05/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -366,6 +366,8 @@ void	makeit(void)
 /* Plot sub-pixel astrometric error dependency */
   for (i=0; i<prefs.nastrinstrustr; i++)
     cplot_pixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_pixerrhisto2d(fgroups, ngroup, i);
   for (i=0; i<prefs.nastrinstrustr; i++)
     cplot_subpixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
 
