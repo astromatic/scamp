@@ -95,6 +95,7 @@ typedef struct fgroup
   double	*sig_refmagerr_hsn;	/* RMS mag error with respect to refs*/
   double	*chi2_refmag_hsn;	/* Chi2/d.o.f. for ref. mag errors */
   int		*nrefmagmatch_hsn;	/* Number of matches with mag refs */
+  double	meanwcsprop[NAXIS];	/* (Clipped) averaged proper motions */
 /* Maps */
   int		map_nmesh[NAXIS];	/* Meshes per axis for maps */
   int		map_step[NAXIS];	/* Mesh step per axis for maps */

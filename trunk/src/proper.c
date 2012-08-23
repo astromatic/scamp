@@ -239,7 +239,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/07/2012
+VERSION	10/08/2012
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -249,11 +249,11 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
    wcsstruct	*wcs, *wcsec;
    char		*wcsectype[NAXIS];
    double	alpha[25], beta[5],
-		coord[NAXIS], coorderr[NAXIS],
+		coord[NAXIS], coorderr[NAXIS], propmean[NAXIS],
 		wis, paral,paralerr, chi2,chi2min, propmod,propmodmin;
    int		d,f,s,n, naxis, nfield, nsamp, lng,lat, celflag,
 		propflag, paralflag, ncoeff,ncoeffp1,
-		nfree,nbad, bad, nfreemin;
+		nfree,nbad, bad, nfreemin, npropmean;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
@@ -268,6 +268,9 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   paral = paralerr = 0.0;
   ncoeff = paralflag? 5 : 4;
   ncoeffp1 = ncoeff+1;
+  for (d=0; d<naxis; d++)
+    propmean[d] = 0.0;
+  npropmean = 0;
 
 /* Set up a WCS structure to handle ecliptic coordinates */
   if (paralflag)
@@ -391,6 +394,16 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           coord[d] -= samp->wcspos[d];
         if (celflag)
           coord[lng] *= cos(samp->wcspos[lat]*DEG);
+        propmod = 0.0;
+        for (d=0; d<naxis; d++)
+          propmod += coord[d]*coord[d];
+        if (sqrt(propmod)*DEG/MAS<20.0)
+          {
+          for (d=0; d<naxis; d++)
+            propmean[d] += coord[d];
+          npropmean++;
+          }
+
         for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2 = samp2->prevsamp)
           {
@@ -406,6 +419,9 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         }
       }
     }
+
+ for (d=0; d<naxis; d++)
+   fgroup->meanwcsprop[d] = npropmean? propmean[d]/npropmean : 0.0;
 
   if (wcsec)
     end_wcs(wcsec);
@@ -638,4 +654,69 @@ void	astrconnect_fgroup(fgroupstruct *fgroup)
 
   return;
   }
+
+
+/****** astrpropclip_fgroup *****************************************************
+PROTO	void astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod)
+PURPOSE	Removes sources with large proper-motions from cross-identification
+	linked lists.
+INPUT	ptr to a group of fields pointers,
+	threshold modulus in sigmas.
+OUTPUT	-.
+NOTES	Input structures must have gone through crossid_fgroup() and
+	astrprop_fgroup() first.
+AUTHOR	E. Bertin (IAP)
+VERSION	12/08/2012
+ ***/
+int	astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod)
+  {
+   fieldstruct	**fields,
+		*field;
+   setstruct	*set;
+   samplestruct	*samp,*samp2,*prevsamp2;
+   double	*meanprop,
+		prop, propmod, maxpropmod2, properr,propmoderr;
+   int		i,f,n,s, naxis,nfield,nsamp, nclip;
+
+  maxpropmod *= MAS/DEG;	/* Convert threshold to native deg/yr units */
+  maxpropmod2 = maxpropmod*maxpropmod;	/* Square to accelerate computations */
+  meanprop = fgroup->meanwcsprop;
+  naxis = fgroup->naxis;
+  nclip= 0;
+  nfield = fgroup->nfield;
+  fields = fgroup->field;
+  for (f=0; f<nfield; f++)
+    {
+    field=fields[f];
+    for (s=0; s<field->nset; s++)
+      {
+      set = field->set[s];
+      nsamp = set->nsample;
+      samp = set->sample;
+      for (n=nsamp; n--; samp++)
+        if (!samp->nextsamp && samp->prevsamp)
+          {
+          propmod = 0.0;
+          for (i=0; i<naxis; i++)
+            {
+            prop = samp->wcsprop[i] - meanprop[i];
+            propmod += prop*prop;
+            properr = samp->wcsproperr[i];
+            propmoderr += properr*properr;
+            }
+          if (propmod>maxpropmod2*propmoderr)
+            for (samp2 = samp; samp2; samp2=prevsamp2)
+              {
+              prevsamp2 = samp2->prevsamp;
+/*------------ Remove (unlink) outlier */
+              samp2->prevsamp = samp2->nextsamp = NULL;
+              nclip++;
+              }
+          }
+      }
+    }
+
+  return nclip;
+  }
+
 

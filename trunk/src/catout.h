@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/07/2012
+*	Last modified:		23/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -64,7 +64,8 @@ typedef struct mergedsample
   float		magdisp[MAXPHOTINSTRU];	/* Mean mag. dispersion (1-sigma) */
   int		nband;			/* Number of available bands */
   float		colour;			/* Colour index */
-  float		spread;			/* SExtractor's SPREAD_MODEL */
+  float		spread;			/* SPREAD_MODEL weighted average*/
+  float		spreaderr;		/* SPREAD_MODEL uncertainty */
   short		sexflags;		/* Merged SExtractor flags */
   short		scampflags;		/* Merged SCAMP flags */
   }	mergedsamplestruct;
@@ -86,6 +87,7 @@ typedef struct fullsample
   float		mag;			/* Magnitude */
   float		magerr;			/* Mag. uncertainty (1-sigma) */
   float		spread;			/* SExtractor's SPREAD_MODEL */
+  float		spreaderr;		/* SPREAD_MODEL uncertainty */
   short		sexflags;		/* Merged SExtractor flags */
   short		scampflags;		/* Merged SCAMP flags */
   }	fullsamplestruct;

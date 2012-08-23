@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		23/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -47,6 +47,8 @@
 #endif
 #include "wcs/wcs.h"
 
+#define WFCAM_FIX	0
+
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
  extern pthread_mutex_t	sortmutex;
@@ -67,7 +69,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 26/07/2012
+VERSION 23/08/2012
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -83,15 +85,19 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 			*buf,*head,*head0;
    double		contextval[MAXCONTEXT], *cmin,*cmax, *dfluxrad, *delong,
 			*dxm, *dym, *derra,*derrb, *dflux,*dfluxerr, *dspread,
+			*dspreaderr,
 			dminrad,dmaxrad, dmaxelong, dval,
 			x,y, ea,eb, f, ferr, xmax,ymax, max;
    float		*xm,*ym, *flux, *fluxerr, *erra,*errb, *fluxrad, *elong,
-			*spread,
+			*spread,*spreaderr,
 			minrad,maxrad, maxelong;
    unsigned int		*imaflags;
    int			*lxm,*lym,
 			i, n, nsample,nsamplemax, nnobjflag,
 			nobj, headflag, head0flag, errorflag, fflag, sexflags;
+#ifdef WFCAM_FIX
+   int			wfcamflag;
+#endif
    unsigned short	*flags, *wflags;
    short		*sxm,*sym;
 
@@ -292,11 +298,26 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       dspread = (double *)key->ptr;
     else
       spread = (float *)key->ptr;
+    prefs.spread_flag = 1;
     }
   else
     {
     dspread = NULL;
     spread = NULL;
+    }
+
+/* Load optional SExtractor SPREADERR_MODEL parameter */
+  if ((key = name_to_key(keytab, "SPREADERR_MODEL")))
+    {
+    if (key->ttype == T_DOUBLE)
+      dspreaderr = (double *)key->ptr;
+    else
+      spreaderr = (float *)key->ptr;
+    }
+  else
+    {
+    dspreaderr = NULL;
+    spreaderr = NULL;
     }
 
 /* Try to load the set of context keys */
@@ -336,6 +357,9 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       contexttyp[i] = key->ttype;
       strcpy(set->contextname[i], key->name);
       }
+#ifdef WFCAM_FIX
+  wfcamflag = strncmp(rfilename,"w2", 2)? 0 : 1;
+#endif
 
 /* Read photometric parameters */
   if (headflag)
@@ -438,6 +462,17 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       y = *sym;
     if (x<0.5 || x>xmax || y<0.5 || y>ymax)
       continue;
+#ifdef WFCAM_FIX
+    if (wfcamflag && y>1024.5)
+      {
+      y += 0.07;	/* compensate for quadrant gap in y */
+      if (dym)
+        *dym += 0.07;
+      else if (ym)
+        *ym += 0.07;
+      }
+#endif
+
     f = flux? *flux:*dflux;
 #ifdef HAVE_ISNAN2
     fflag = isnan(f);
@@ -494,6 +529,12 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       sample->spread = *dspread;
     else
       sample->spread = 0.0;
+    if (spreaderr)
+      sample->spreaderr = *spreaderr;
+    else if (dspreaderr)
+      sample->spreaderr = *dspreaderr;
+    else
+      sample->spreaderr = 0.0;
 
     sample->rawposerr[0] = sample->rawposerr[1] = sqrt(ea*ea+eb*eb);
 /*-- In case of a contamination, position errors are strongly degraded */
@@ -508,7 +549,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     for (i=0; i<set->ncontext; i++)
       {
       ttypeconv(context[i], &dval, contexttyp[i], T_DOUBLE);
-        sample->context[i] = dval;
+      sample->context[i] = dval;
 /*---- Update min and max */
       if (dval<cmin[i])
         cmin[i] = dval;

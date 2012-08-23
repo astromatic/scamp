@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		06/08/2012
+*	Last modified:		23/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -4789,7 +4789,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	06/08/2012
+VERSION	23/08/2012
  ***/
 int	cplot_pixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -4800,7 +4800,7 @@ int	cplot_pixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
    samplestruct		*samp,*samp2,*sampb,*sampn;
    wcsstruct		*wcs, *wcs0;
    PLFLT		**resi,**scale,
-			clevel[CPLOT_NSHADES], cpoint[3], hue[4],lig[4],sat[4],
+			clevel[CPLOT_NSHADES], cpoint[4], hue[4],lig[4],sat[4],
 			scalemin,scalemax, dscale, fval;
    PLINT		lwid;
    char			*ctype[NAXIS],
