@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		11/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -46,6 +46,7 @@
 
 
 /*-------------------------------- protos -----------------------------------*/
+int	astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod);
 
 void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield),
 	astrconnect_fgroup(fgroupstruct *fgroup),

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/05/2012
+*	Last modified:		23/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -121,6 +121,7 @@ typedef struct
   char		fullcat_name[MAXCHAR];/* Output filename */
   cattypenum	fullcat_type;		/* Output catalog type */
   int		fullcatpipe_flag;	/* Pipe output catalogs? */
+  int		spread_flag;		/* SPREAD_MODEL in input catalog(s)? */
 
 /* Pattern-matching */
   int		match_flag;		/* Compute pattern-matching? */

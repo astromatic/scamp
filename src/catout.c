@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		23/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -42,6 +42,7 @@
 #include "catout.h"
 #include "fgroup.h"
 #include "field.h"
+#include "key.h"
 #include "prefs.h"
 #include "samples.h"
 #ifdef USE_THREADS
@@ -59,7 +60,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 26/07/2012
+VERSION 23/08/2012
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -86,7 +87,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
 			wcsparal,wcsparalerr, wcschi2,
-			epoch,epochmin,epochmax, err2, colour, spread, dummy;
+			epoch,epochmin,epochmax, err2, colour, spread, wspread,
+			weight,dummy;
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
@@ -106,6 +108,9 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   dptr = (long)((char *)&msample - (char *)&refmergedsample);
   for (k=0; refmergedkey[k].name[0]; k++)
     {
+    if (!prefs.spread_flag
+	&& !cistrcmp(refmergedkey[k].name, "SPREAD", FIND_NOSTRICT))
+      continue;
     objkeys[k] = refmergedkey[k];
     key = objkeys+k;
 /*-- A trick to access the fields of the dynamic mergedsample structure */
@@ -276,7 +281,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
 		= wcsprop[d] = wcsproperr[d] = 0.0;
           wcsparal = wcsparalerr = wcschi2 = 0.0;
-          epoch = spread = 0.0;
+          epoch = spread = wspread = 0.0;
           epochmin = BIG;
           epochmax = -BIG;
           for (samp2 = samp;
@@ -312,7 +317,13 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             if (samp2->set->epochmax > epochmax)
               epochmax = samp2->set->epochmax;
 /*---------- Morphometry */
-            spread += samp2->spread;
+            if (prefs.spread_flag)
+              {
+              weight = samp2->spreaderr>TINY?
+		1.0/(samp2->spreaderr*samp2->spreaderr) : 1.0;
+              spread += weight*samp2->spread;
+              wspread += weight;
+              }
 /*---------- Flags */
             msample.sexflags |= samp2->sexflags;
             msample.scampflags |= samp2->scampflags;
@@ -347,7 +358,11 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
             msample.epoch = epoch / nok;
             msample.epochmin = epochmin;
             msample.epochmax = epochmax;
-            msample.spread = spread / nok;
+            if (prefs.spread_flag)
+              {
+              msample.spread = spread / wspread;
+              msample.spreaderr = sqrt(1.0 / wspread);
+              }
             }
           msample.npos_tot = nall;
           msample.npos_ok = nok;
@@ -406,7 +421,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 26/07/2012
+VERSION 23/08/2012
 */
 void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -447,6 +462,9 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
   dptr = (long)((char *)&fsample - (char *)&reffullsample);
   for (k=0; reffullkey[k].name[0]; k++)
     {
+    if (!prefs.spread_flag
+	&& !cistrcmp(reffullkey[k].name, "SPREAD", FIND_NOSTRICT))
+      continue;
     objkeys[k] = reffullkey[k];
     key = objkeys+k;
 /*-- A trick to access the fields of the dynamic fullsample structure */
@@ -593,6 +611,7 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
             fsample.magerr = samp2->magerr;
 /*---------- Morphometry */
             fsample.spread = samp2->spread;
+            fsample.spreaderr = samp2->spreaderr;
 /*---------- Flags */
             fsample.sexflags = samp2->sexflags;
             fsample.scampflags = samp2->scampflags;
