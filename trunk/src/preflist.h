@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/08/2012
+*	Last modified:		27/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -84,6 +84,8 @@ pkeystruct key[] =
   {"ASTREFERR_KEYS", P_STRINGLIST, prefs.astreferr_key, 0,0, 0.0,0.0,
    {""}, 2, (NAXIS*(NAXIS+1))/2, &prefs.nastreferr_key},
   {"ASTREFMAG_KEY", P_STRING, prefs.astrefmag_key},
+  {"ASTREFMAGERR_KEY", P_STRING, prefs.astrefmagerr_key},
+  {"ASTREFOBSDATE_KEY", P_STRING, prefs.astrefobsdate_key},
   {"ASTREFMAG_LIMITS", P_FLOATLIST, prefs.astref_maglim, 0,0, -99.0,99.0,
     {""}, 2, 2, &prefs.nastref_maglim},
   {"ASTRINSTRU_KEY", P_STRINGLIST, prefs.astrinstru_key, 0,0, 0.0,0.0,
@@ -145,6 +147,7 @@ pkeystruct key[] =
   {"HEADER_TYPE", P_KEY, &prefs.header_type, 0,0, 0.0,0.0,
    {"NORMAL","FOCAL_PLANE",""}},
   {"IMAFLAGS_MASK", P_INT, &prefs.imaflags_mask, 0,0x7fffffff, 0.0,0.0},
+  {"INCLUDE_ASTREFCATALOG", P_BOOL, &prefs.astrefinprop_flag},
   {"MAGZERO_KEY", P_STRING, prefs.magzero_key},
   {"MAGZERO_OUT", P_FLOATLIST, prefs.magzero_out, 0,0, -1000.0,1000.0,
     {""}, 1, MAXPHOTINSTRU, &prefs.nmagzero_out},
@@ -224,11 +227,13 @@ char *default_prefs[] =
 "                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,SDSS-R8",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
-"ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",
-"ASTREFCENT_KEYS        X_WORLD,Y_WORLD # Local ref.cat.centroid parameters",
-"ASTREFERR_KEYS         ERRA_WORLD, ERRB_WORLD, ERRTHETA_WORLD",
-"                                       # Local ref.cat.error ellipse parameters",
-"ASTREFMAG_KEY          MAG             # Local ref.cat.magnitude parameter",
+"*ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",
+"*ASTREFCENT_KEYS        X_WORLD,Y_WORLD # Local ref.cat. centroid parameters",
+"*ASTREFERR_KEYS         ERRA_WORLD, ERRB_WORLD, ERRTHETA_WORLD",
+"*                                       # Local ref.cat. err. ellipse params",
+"*ASTREFMAG_KEY          MAG             # Local ref.cat. magnitude parameter",
+"*ASTREFMAGERR_KEY       MAGERR          # Local ref.cat. mag. error parameter",
+"*ASTREFOBSDATE_KEY      OBSDATE         # Local ref.cat. obs. date parameter",
 "ASTREFMAG_LIMITS       -99.0,99.0      # Select magnitude range in ASTREF_BAND",
 "SAVE_REFCATALOG        N               # Save ref catalogs in FITS-LDAC format?",
 "REFOUT_CATPATH         .               # Save path for reference catalogs",
@@ -283,6 +288,7 @@ char *default_prefs[] =
 "*COMPUTE_PARALLAXES     N               # Compute trigonom. parallaxes (Y/N)?",
 "*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
+"*INCLUDE_ASTREFCATALOG  Y               # Include ref.cat in prop.motions (Y/N)?",
 " ",
 "#---------------------------- Photometric solution ----------------------------",
 " ",

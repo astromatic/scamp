@@ -517,6 +517,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     sample->mag = (sample->flux>0.0)? -2.5*log10(sample->flux) : 99.0;
     sample->rawpos[0] = x;
     sample->rawpos[1] = y;
+    sample->epoch = set->epoch;
     if (fluxrad)
       sample->fwhm = 2.0**fluxrad;
     else if (dfluxrad)

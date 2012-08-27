@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/06/2012
+*	Last modified:		27/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -186,7 +186,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	17/06/2012
+VERSION	27/08/2012
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -1051,6 +1051,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
     write_xmlconfigparam(file, "AstrClip_NSigma", "",
 		"meta.id;stat.param;pos", "%.6g");
     write_xmlconfigparam(file, "Correct_ColourShifts", "",
+		"meta.code;obs.param", "%c");
+    write_xmlconfigparam(file, "Include_AstRefCatalog", "",
 		"meta.code;obs.param", "%c");
 /*-- Photometric solution */
     write_xmlconfigparam(file, "Solve_Photom", "",

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/08/2012
+*	Last modified:		24/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -72,6 +72,7 @@ typedef struct sample
   double	projpos[NAXIS];		/* Projected coordinates */
   double	rawpos[NAXIS];		/* Raw coordinates */
   double	wcspos[NAXIS];		/* World Coordinate positions */
+  double	epoch;			/* Epoch of observation */
   float		rawposerr[NAXIS];	/* Uncertainty on raw coordinates */
   float		wcsposerr[NAXIS];	/* Errors on WCS positions */
   float		wcsprop[NAXIS];		/* Proper motion vectors in the WCS */

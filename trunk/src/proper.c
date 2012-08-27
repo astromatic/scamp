@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		24/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -444,7 +444,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/07/2012
+VERSION	24/08/2012
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -483,8 +483,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   set = samp->set;
   field = set->field;
 
-  for (samp1=samp; samp1 && samp1->set->field->astromlabel>=0;
-		samp1 = samp1->prevsamp)
+  for (samp1=samp; samp1; samp1 = samp1->prevsamp)
     {
     if ((samp1->sexflags & (OBJ_SATUR|OBJ_TRUNC))
 		|| (samp1->scampflags & SCAMP_BADPROPER))
@@ -498,8 +497,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
         mpos[d] = mposw[d] = 0.0;
 
 /*---- First pass through overlapping detections to compute averages*/
-      for (samp2=samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2 = samp2->prevsamp)
+      for (samp2=samp; samp2;  samp2 = samp2->prevsamp)
         {
         if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
 		|| (samp2->scampflags & SCAMP_BADPROPER))
@@ -533,7 +531,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
       ecpos[lat] = samp1->wcspos[lat];
       eq_to_celsys(wcsec, ecpos);
       bec = ecpos[lat]*DEG;
-      lec = set1->epoch - 0.246; /* l_sun ~ 0 when frac. part=0 */
+      lec = samp1->epoch - 0.246; /* l_sun ~ 0 when frac. part=0 */
       lec = ecpos[lng]*DEG - (lec - floor(lec))*2*PI;	/* l - l_sun */
       ecpos[lng] -= (fabs(cbec=cos(bec)) > 1e-12?
 			(ARCSEC/DEG)*sin(lec)/cbec : 0.0);
@@ -544,7 +542,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
       pfac[lat] = projpos[lat] - samp1->projpos[lat];
       }
 
-    dt = set1->epoch - set->epoch;
+    dt = samp1->epoch - samp->epoch;
 
 /* Fill the normal equation matrix */
 /* Basis functions are              */
