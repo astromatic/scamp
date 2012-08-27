@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/05/2012
+*	Last modified:		24/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -63,6 +63,8 @@ keystruct       refkey[] = {
         &refsample.mag, H_FLOAT, T_FLOAT, "%8.4f", "mag"},
   {"MAGERR", "Generic magnitude RMS error",
         &refsample.magerr, H_FLOAT, T_FLOAT, "%8.4f", "mag"},
+  {"OBSDATE", "Observation date",
+        &refsample.epoch, H_FLOAT, T_DOUBLE, "%13.8f", "yr"},
   {""},
   };
 
@@ -114,7 +116,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 22/05/2012
+VERSION 24/08/2012
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -748,10 +750,11 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             if (str[i] == '|')
               str[i] = ' ';
           sscanf(str, "%lf %lf %lf %lf %*f %*s %s %s %*s %*s %s %s %*s %*s "
-		"%s %s %*s %*s %*s %*s %*s %s",
+		"%s %s %*s %*s %*s %*s %*s %s %*s %*s %*s %*s %*s %*s %*s %*s"
+		" %*s %*s %*s %*s %*s %lf",
 		&alpha, &delta, &poserr[lng], &poserr[lat],
 		smag[0],  smagerr[0], smag[1], smagerr[1], smag[2],smagerr[2],
-		sflag);
+		sflag, &epoch);
 /*-------- Avoid contaminated observations */
           if (sflag[0]!='0' || sflag[1]!='0' || sflag[2]!='0')
             continue;
@@ -765,6 +768,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
               }
           poserr[lng] *= ARCSEC/DEG;
           poserr[lat] *= ARCSEC/DEG;
+/*-------- Convert JDs to epoch */
+          epoch = 2000.0 - (JD2000 - epoch)/365.25;
           dist = 0.0;
           break;
 
@@ -773,9 +778,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           for (i=0; str[i]; i++)
             if (str[i] == '|')
               str[i] = ' ';
-          sscanf(str, "%*s %*s %*s %lf %lf %8c%5c%8c%5c%8c%5c",
+          sscanf(str, "%*s %*s %*s %lf %lf %8c%5c%8c%5c%8c%5c%*357c%lf",
 		&alpha, &delta, 
-		smag[0], smagerr[0], smag[1],smagerr[1], smag[2],smagerr[2]);
+		smag[0], smagerr[0], smag[1],smagerr[1], smag[2],smagerr[2],
+		&epoch);
           smag[0][8]=smag[1][8]=smag[2][8]='\0';
           smagerr[0][5]=smagerr[1][5]=smagerr[2][5]='\0';
           for (b=0; b<nband; b++)
@@ -788,6 +794,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
               }
           poserr[lng] = DENIS3_POSERR;
           poserr[lat] = poserr[lng];
+/*-------- Convert JDs to epoch */
+          epoch = 2000.0 - (JD2000 - epoch)/365.25;
           dist = 0.0;
           break;
 
@@ -1043,6 +1051,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         sample->wcsprop[lat] = prop[lat];
         sample->wcsproperr[lng] = properr[lng];
         sample->wcsproperr[lat] = properr[lat];
+        sample->epoch = epoch;
         sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
         sample->set = set;
         nsample++;
@@ -1339,7 +1348,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 31/01/2011
+VERSION 24/08/2012
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1353,8 +1362,8 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
    char			str[MAXCHAR];
    char			*buf;
    unsigned short	*flags;
-   float		*xm,*ym, *mag, *erra,*errb;
-   double		*dxm, *dym, *dmag, *derra, *derrb,
+   float		*xm,*ym, *mag, *magerr, *obsdate, *erra,*errb;
+   double		*dxm, *dym, *dmag, *dmagerr, *dobsdate, *derra, *derrb,
 			x,y, dx,dy,dfac, ea,eb, maxradius2, mmag;
    int			n, nsample,nsamplemax, nobj, objflags, maglimflag;
 
@@ -1433,6 +1442,36 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
   else
     mag = (float *)key->ptr;
 
+  if (!(key = name_to_key(keytab, prefs.astrefmagerr_key)))
+    {
+    sprintf(str, "%s parameter not found in catalog ", prefs.astrefmagerr_key);
+    warning(str, rfilename);
+    dmagerr = NULL;
+    magerr = NULL;
+    }
+  else
+    {
+    if (key->ttype == T_DOUBLE)
+      dmagerr = (double *)key->ptr;
+    else
+      magerr = (float *)key->ptr;
+    }
+
+  if (!(key = name_to_key(keytab, prefs.astrefobsdate_key)))
+    {
+    sprintf(str, "%s parameter not found in catalog ", prefs.astrefobsdate_key);
+    warning(str, rfilename);
+    dobsdate = NULL;
+    obsdate = NULL;
+    }
+  else
+    {
+    if (key->ttype == T_DOUBLE)
+      dobsdate = (double *)key->ptr;
+    else
+      obsdate = (float *)key->ptr;
+    }
+
 /* Check that catalog contains enough bands if needed */
   if (band && (!key->naxis || band>=*key->naxisn))
     {
@@ -1459,7 +1498,7 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
       NFPRINTF(OUTPUT, str);
       }
 /*---- Apply some selection over flags, fluxes... */
-    mmag = mag? *mag : *dmag;
+    mmag = mag? mag[band] : dmag[band];
     if (maglimflag && (mmag<maglim[0] || mmag>maglim[1]))
       continue;
     if (flags)
@@ -1503,6 +1542,8 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     sample->set = set;
     sample->sexflags = objflags;
     sample->mag = mag? mag[band] : dmag[band];
+    sample->magerr = magerr? magerr[band] : (dmagerr? dmagerr[band] : 0.0);
+    sample->epoch = dobsdate? *dobsdate : (obsdate? *obsdate : 0.0);
     sample->flux = 0.0;
     sample->wcspos[lng] = x;
     sample->wcspos[lat] = y;

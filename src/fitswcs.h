@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/07/2012
+*	Last modified:		24/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,7 +45,9 @@
 #define		HOUR	(60.0*MINUTE)	/* 1 hour in seconds */
 #define		MINUTE	60.0		/* 1 minute in seconds */
 #define		MJD2000	51544.50000	/* Modified Julian date for J2000.0 */
+#define		JD2000	(2400000.5+MJD2000)	/* Julian date for J2000.0 */
 #define		MJD1950	33281.92346	/* Modified Julian date for B1950.0 */
+#define		JD1950	(2400000.5+MJD1950)	/* Julian date for B1950.0 */
 #define		JU2TROP	1.0000214	/* 1 Julian century in tropical units*/
 #define		WCS_NOCOORD	1e31	/* Code for non-existing coordinates */
 

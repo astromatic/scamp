@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/08/2012
+*	Last modified:		27/08/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -108,7 +108,9 @@ typedef struct
   int		nastrefcent_key;	/* nb of params */
   char		*(astreferr_key[(NAXIS*(NAXIS+1))/2]);/* err.ellipse keywords*/
   int		nastreferr_key;		/* nb of params */
-  char		astrefmag_key[72];	/* Path for ref.catalog output files */
+  char		astrefmag_key[72];	/* Astrom ref. cat. mag. keyword */
+  char		astrefmagerr_key[72];	/* Astrom ref. cat. mag. error keyword*/
+  char		astrefobsdate_key[72];	/* Astrom ref. cat. obs. date keyword */
   int		outrefcat_flag;		/* Save a FITS-LDAC copy of ref.cats?*/
   char		outref_path[MAXCHAR];	/* Path for ref.catalog output files */
 
@@ -200,6 +202,7 @@ typedef struct
   int		propmotion_flag;		/* Compute proper motions? */
 /* Differential Chromatic Refraction (DRC) */
   int		colourshift_flag;		/* Correct colour shift in pm?*/
+  int		astrefinprop_flag;		/* Use ref.catalog in pm? */
 
 /* Check-plots */
   cplotenum	cplot_device[MAXCHECK];		/* check-plot format */
