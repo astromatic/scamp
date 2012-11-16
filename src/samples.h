@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/08/2012
+*	Last modified:		10/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -40,8 +40,8 @@
 #define MAX_FLUX	1e26	/* Maximum flux allowed [ADU] */
 #define MIN_FLUXERR	1e-15	/* Minimum flux uncertainty allowed [ADU] */
 #define MIN_POSERR	1e-6	/* Minimum position uncertainties [pix] */
-#define	SIGMA_ATMOS	0.038	/* Han & Gatewood's 1995 sig_a / sqrt(2) ... */
-				/* ... for seeing=1",d=10',T=1s [arcsec] */
+#define	SIGMA_ATMOS	0.054	/* Han & Gatewood's 1995 sig_a at Mauna Kea...*/
+				/* ... for d=10',T=1s [arcsec] */
 
 /*-------------------------------- flags ------------------------------------*/
 
@@ -58,7 +58,7 @@
 /*--------------------------------- typedefs --------------------------------*/
 
 typedef	enum {ASTACC_SIGMA_PIXEL, ASTACC_SIGMA_ARCSEC,
-		ASTACC_SEEING_PIXEL, ASTACC_SEEING_ARCSEC}	accuracyenum;
+		ASTACC_TURBULENCE_ARCSEC}	accuracyenum;
 typedef enum {UNION_RAW, UNION_PROJ, UNION_WCS}	unionmodenum;
 
 /*--------------------------- structure definitions -------------------------*/
@@ -162,8 +162,6 @@ void		copy_samples(samplestruct *samplein, setstruct *set,
 		union_samples(samplestruct *samplein, setstruct *set,
 			int nsamplein, double radius, unionmodenum mode),
 		unlink_samples(setstruct *set),
-		update_retina(setstruct *set, samplestruct *sample,
-			float pixstep);
-
+		update_samples(setstruct *set, double radius);
 
 #endif

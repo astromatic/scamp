@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/07/2012
+*	Last modified:		29/09/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -93,7 +93,7 @@ INPUT	ptr to the field to be matched,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/07/2012
+VERSION	29/09/2012
  ***/
 void	match_field(fieldstruct *field, fieldstruct *reffield)
   {
@@ -166,6 +166,7 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
 	(nmax < set->nsample || nmax < refset2->nsample);
 	nmax*=2);
       locate_set(set);
+      update_samples(set, set->radius);
       update_wcsas(set->wcs, -set->wcs->chirality*angle, scale);
       sig = match_setll(set, refset2, matchresol, &dlng, &dlat);
       if (prefs.posangle_maxerr > 90.0)
@@ -196,7 +197,6 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       update_wcscc(set->wcs, -ddlng, -ddlat);
       end_set(refset2);
       compute_wcsss(set->wcs, &sangletot, &sheartot);
-      locate_set(set);
 
       field->match_dscale += (set->match_dscale = scale*dscale);
       field->match_dangle += (set->match_dangle = fmod(angle+dangle, 180.0));
@@ -293,7 +293,6 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       set = field->set[i];
       update_wcsas(set->wcs, -angle, scale);
       update_wcsll(set->wcs, dlng, dlat);
-      locate_set(set);
       }
 /* Update higher level localisation data */
     locate_field(field);
@@ -316,7 +315,6 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       update_wcsas(set->wcs, dangle, dscale);
       update_wcsss(set->wcs, sangle, shear);
       update_wcsll(set->wcs, -ddlng, -ddlat);
-      locate_set(set);
       }
     end_set(refset2); 
     end_set(fieldset);
@@ -345,7 +343,7 @@ INPUT	ptr to the original field.
 OUTPUT	ptr to the virtual set.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	28/05/2006
+VERSION	29/09/2012
  ***/
 setstruct	*new_fieldset(fieldstruct *field)
   {
@@ -403,6 +401,7 @@ setstruct	*new_fieldset(fieldstruct *field)
       sample->rawpos[d] -= minpos[d];
 
   locate_set(fieldset);
+  update_samples(fieldset, fieldset->radius);
 
   return fieldset;
   }

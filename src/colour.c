@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/07/2012
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/07/2012
+VERSION	04/10/2012
  ***/
 void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   {
@@ -78,8 +78,10 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
    double	*colmat,*wcolmat, *mcol,*wmcol, *col,*wcol, *mag,*wmag,
 		sum,wsum, weight, cweight, err2;
    float	colour;
+   short	flagmask;
    int		c,f,g,n,s, b1, b2, c1,c2, band, ncolour, ninstru;
 
+  flagmask = (short)prefs.phot_flagsmask;
   ninstru = prefs.nphotinstrustr;
   ncolour = (ninstru * (ninstru-1)) / 2;
 
@@ -111,7 +113,7 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
           for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
             {
-            if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+            if ((samp2->sexflags & flagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
               continue;
@@ -180,7 +182,7 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
           for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
             {
-            if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+            if ((samp2->sexflags & flagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
               continue;
@@ -262,7 +264,7 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
           for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
             {
-            if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+            if ((samp2->sexflags & flagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
               continue;

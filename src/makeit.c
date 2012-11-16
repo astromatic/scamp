@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/08/2012
+*	Last modified:		19/09/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -367,7 +367,9 @@ void	makeit(void)
   for (i=0; i<prefs.nastrinstrustr; i++)
     cplot_pixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
   for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_pixerrhisto2d(fgroups, ngroup, i);
+    cplot_xpixerrhisto2d(fgroups, ngroup, i);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_ypixerrhisto2d(fgroups, ngroup, i);
   for (i=0; i<prefs.nastrinstrustr; i++)
     cplot_subpixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
 

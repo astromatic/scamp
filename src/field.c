@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		29/09/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -362,7 +362,7 @@ INPUT   Pointer to field structure.
 OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 26/07/2012
+VERSION 29/09/2012
 */
 void	locate_field(fieldstruct *field)
   {
@@ -470,10 +470,14 @@ void	locate_field(fieldstruct *field)
         expotimemax = set->expotime;
       nexpotime++;
       }
-    expotime += set->expotime;
     }
 
   field->maxradius = maxradius;
+
+/* Update sample uncertainties */
+  for (s=0; s<nset; s++)
+    update_samples(field->set[s], maxradius);
+
   if ((nairmass))
     {
     field->airmass = airmass / nairmass;

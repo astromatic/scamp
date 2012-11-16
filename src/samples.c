@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/08/2012
+*	Last modified:		10/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -47,7 +47,7 @@
 #endif
 #include "wcs/wcs.h"
 
-#define WFCAM_FIX	0
+//#define WFCAM_FIX	1
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
@@ -69,7 +69,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 23/08/2012
+VERSION  04/10/2012
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -95,11 +95,12 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
    int			*lxm,*lym,
 			i, n, nsample,nsamplemax, nnobjflag,
 			nobj, headflag, head0flag, errorflag, fflag, sexflags;
-#ifdef WFCAM_FIX
-   int			wfcamflag;
-#endif
    unsigned short	*flags, *wflags;
    short		*sxm,*sym;
+
+#ifdef WFCAM_FIX
+   int	wfcamflag;
+#endif
 
   head = head0 = NULL;	/* to avoid gcc -Wall warnings */
   cmin = cmax = NULL;	/* to avoid gcc -Wall warnings */
@@ -420,7 +421,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       if (*flags & prefs.flags_mask)
         continue;
 /*---- Mapping from SExtractor flags is straightforward */
-      sexflags = *flags & (OBJ_CROWDED|OBJ_MERGED|OBJ_SATUR);
+      sexflags = *flags;
       if (sexflags & OBJ_SATUR)		/* A saturated object */
         set->nsaturated++;
       else if ((fluxrad && (*fluxrad < minrad || *fluxrad > maxrad))
@@ -462,14 +463,55 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       y = *sym;
     if (x<0.5 || x>xmax || y<0.5 || y>ymax)
       continue;
+
 #ifdef WFCAM_FIX
-    if (wfcamflag && y>1024.5)
+    if (wfcamflag)
       {
-      y += 0.07;	/* compensate for quadrant gap in y */
+       double	dx,dy;
+       int	xflag,yflag;
+
+      xflag = x<1024.5;
+      yflag = y<1024.5;
+      if (yflag)
+        {
+        if (xflag)
+/*-------- lower left quadrant */
+          {
+          dx = -0.015;
+          dy = -0.004;
+          }
+        else
+          {
+/*-------- lower right quadrant */
+          dx = -0.014;
+          dy = -0.019;
+          }
+        }
+      else
+        {
+        if (xflag)
+/*-------- upper left quadrant */
+          {
+          dx = 0.013;
+          dy = 0.026;
+          }
+        else
+          {
+/*-------- upper right quadrant */
+          dx = 0.021;
+          dy = -0.022;
+          }
+        }
+      x -= dx;
+      if (dxm)
+        *dxm -= dx;
+      else if (xm)
+        *xm -= dx;
+      y -= dy;
       if (dym)
-        *dym += 0.07;
+        *dym -= dy;
       else if (ym)
-        *ym += 0.07;
+        *ym -= dy;
       }
 #endif
 
@@ -537,15 +579,17 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     else
       sample->spreaderr = 0.0;
 
-    sample->rawposerr[0] = sample->rawposerr[1] = sqrt(ea*ea+eb*eb);
+    sample->rawposerr[0] = sample->rawposerr[1] = sqrt(0.5*(ea*ea+eb*eb));
 /*-- In case of a contamination, position errors are strongly degraded */
     if (flags)
       {
       if (*flags&2)
         sample->rawposerr[0] = (sample->rawposerr[1]
-		= sqrt(sample->rawposerr[0]*sample->rawposerr[0]+0.25));
+		= sqrt(sample->rawposerr[0]*sample->rawposerr[0]+0.01));
+/*
       else if (*flags&1)
         sample->rawposerr[0] = (sample->rawposerr[1] *= 3.0);
+*/
       }
     for (i=0; i<set->ncontext; i++)
       {
@@ -1141,53 +1185,31 @@ void	copy_samples(samplestruct *samplein, setstruct *set,
   }
 
 
-/****** locate_set **********************************************************
-PROTO   void locate_set(setstruct *set)
-PURPOSE Find set center coordinates and radius
-INPUT   set structure pointer.
+/****** update_samples *******************************************************
+PROTO   void update_samples(setstruct *set, double *radius)
+PURPOSE Update position uncertainties.
+INPUT   set structure pointer,
+	field (or set) radius (for computing atm. turbulence contribution).
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 24/07/2012
+VERSION 10/10/2012
 */
-void	locate_set(setstruct *set)
+void	update_samples(setstruct *set, double radius)
 
   {
-   wcsstruct	*wcs;
    samplestruct	*samp;
-   double	pixpos[NAXIS], wcspos[NAXIS],
-		dwcsscale, dwcsastacc2;
-   float	wcsastacc2[NAXIS], wcsscale[NAXIS],wcsscale2[NAXIS];
-   int		i,e, naxis, lng,lat;
+   double	dwcsastacc2;
+   float	wcsscale[NAXIS],wcsscale2[NAXIS], wcsastacc2[NAXIS];
+   int		e,i, naxis;
 
-  wcs = set->wcs;
-  dwcsscale = 0.0;	/* to avoid gcc -Wall warnings */
-  lng = set->lng = wcs->lng;
-  lat = set->lat = wcs->lat;
-  naxis = set->naxis = wcs->naxis;
+  naxis = set->naxis = set->wcs->naxis;
 
-/* Find center of set*/
-  for (i=0; i<naxis; i++)
-    pixpos[i] = (wcs->naxisn[i]+1.0)/2.0;
-  raw_to_wcs(wcs, pixpos, set->wcspos);
-
-/* Find center pixel scale */
-  if (lat != lng)
-    dwcsscale = sqrt(wcs_scale(wcs, pixpos));
   for (i=0; i<naxis; i++)
     {
-    if (lat==lng || (i!=lng && i!=lat))
-      wcsscale[i] = (set->wcsscale[i] = fabs(wcs->cd[i*(naxis+1)]));
-    else
-      wcsscale[i] = (set->wcsscale[i] = dwcsscale);
+    wcsscale[i] = set->wcsscale[i];
     wcsscale2[i] = wcsscale[i]*wcsscale[i];
     }
-
-/* Find set "radius" */
-  for (i=0; i<naxis; i++)
-    pixpos[i] = 0.0;
-  raw_to_wcs(wcs, pixpos, wcspos);
-  set->radius = wcs_dist(wcs, set->wcspos, wcspos);
 
   if (set->astraccuracy > 0.0)
     {
@@ -1204,15 +1226,12 @@ void	locate_set(setstruct *set)
 /*---- Atmospheric turbulence scaled from seeing (e.g. Han & Gatewood 1995) */
       {
 /*---- 2/3 factor because integ of (dx2+dy2)^1/6 ~ ((w^2+h^2)^(1/2)/3)^(1/3) */
-      dwcsastacc2 = SIGMA_ATMOS * set->astraccuracy
-		* pow(set->radius*2.0/3.0*DEG/(10.0*ARCMIN), 1/3.0)
+      dwcsastacc2 = set->astraccuracy * sqrt(1/2.0)
+		* pow(radius*2.0/3.0*DEG/(10.0*ARCMIN), 1/3.0)
 		/ sqrt(set->expotime) * ARCSEC/DEG;
       dwcsastacc2 *= dwcsastacc2;
       for (i=0; i<naxis; i++)
         wcsastacc2[i] = dwcsastacc2;
-      if (prefs.astraccuracy_type == ASTACC_SEEING_PIXEL)
-        for (i=0; i<naxis; i++)
-          wcsastacc2[i] *= wcsscale2[i];
       }
 
 /*-- Update sample positional errors */
@@ -1233,4 +1252,54 @@ void	locate_set(setstruct *set)
 
   return;
   }
+
+
+/****** locate_set **********************************************************
+PROTO   void locate_set(setstruct *set)
+PURPOSE Find set center coordinates and radius
+INPUT   set structure pointer.
+OUTPUT  -.
+NOTES   Global preferences are used.
+AUTHOR  E. Bertin (IAP)
+VERSION 29/09/2012
+*/
+void	locate_set(setstruct *set)
+
+  {
+   wcsstruct	*wcs;
+   double	pixpos[NAXIS], wcspos[NAXIS],
+		dwcsscale;
+   int		i, naxis, lng,lat;
+
+  wcs = set->wcs;
+  dwcsscale = 0.0;	/* to avoid gcc -Wall warnings */
+  lng = set->lng = wcs->lng;
+  lat = set->lat = wcs->lat;
+  naxis = set->naxis = wcs->naxis;
+
+/* Find center of set*/
+  for (i=0; i<naxis; i++)
+    pixpos[i] = (wcs->naxisn[i]+1.0)/2.0;
+  raw_to_wcs(wcs, pixpos, set->wcspos);
+
+/* Find center pixel scale */
+  if (lat != lng)
+    dwcsscale = sqrt(wcs_scale(wcs, pixpos));
+  for (i=0; i<naxis; i++)
+    {
+    if (lat==lng || (i!=lng && i!=lat))
+      set->wcsscale[i] = fabs(wcs->cd[i*(naxis+1)]);
+    else
+      set->wcsscale[i] = dwcsscale;
+    }
+
+/* Find set "radius" */
+  for (i=0; i<naxis; i++)
+    pixpos[i] = 0.0;
+  raw_to_wcs(wcs, pixpos, wcspos);
+  set->radius = wcs_dist(wcs, set->wcspos, wcspos);
+
+  return;
+  }
+
 

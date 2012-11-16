@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/07/2012
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -102,7 +102,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/07/2012
+VERSION	19/09/2012
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -175,20 +175,25 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 /*---- Index current field */
       if (field->nset > nsetmax[instru])
         nsetmax[instru] = field->nset;
-      if (prefs.stability_type[instru] == STABILITY_EXPOSURE)
+      switch(prefs.stability_type[instru])
         {
-        field->index = findex[instru+1];
-        findex[instru+1] += field->nset;
-        field->index2 = -1;
-        findex2[instru+1] = 0;
-        }
-      else
-        {
-        field->index2 = findex2[instru+1]++ - 1;
-/*
-field->index2 = -1;
-*/
-        findex[instru+1] = nsetmax[instru];
+        case STABILITY_INSTRUMENT:
+          field->index2 = findex2[instru+1]++ - 1;
+          findex[instru+1] = nsetmax[instru];
+          break;
+        case STABILITY_EXPOSURE:
+          field->index = findex[instru+1];
+          findex[instru+1] += field->nset;
+          field->index2 = -1;
+          findex2[instru+1] = -1;
+          break;
+        case STABILITY_PREDISTORTED:
+          field->index = -1;
+          findex[instru+1] = 0;
+          field->index2 = findex2[instru+1]++;
+          break;
+        default:
+          break;
         }
 /*---- Index sets */
       for (s=0; s<field->nset; s++)
@@ -248,11 +253,14 @@ field->index2 = -1;
   nicoeff2 = ncoeff2*naxis;
 
   ncoefftot = startindex2 = 0;
+
   for (i=0; i<ninstru; i++)
     {
+    if (prefs.stability_type[instru]!=STABILITY_PREDISTORTED)
     findex2[i+1]--;	/* Remove first field (too many degrees of freedom) */
 /*-- Set the extra exposure-dependent parameter flag */
-    ncoefftot += ncoeff*findex[i+1];
+    if (findex[i+1]>0)
+      ncoefftot += ncoeff*findex[i+1];
     startindex2 += ncoeff*findex[i+1];
     if (findex2[i+1]>0)
       ncoefftot += ncoeff2*findex2[i+1];
@@ -261,6 +269,7 @@ field->index2 = -1;
       findex[i] += findex[i-1];
       findex2[i] += findex2[i-1];
       }
+
     }
 
 /* Compute the "definitive" index for each set */
@@ -279,7 +288,7 @@ field->index2 = -1;
       for (s=0; s<field->nset; s++)
         {
         set = field->set[s];
-        set->index = index + set->index*ncoeff;
+        set->index = field->index<0? -1 : index + set->index*ncoeff;
         set->index2 = index2;
         set->nconst = 0;
         set->ncoeff = ncoeff;
@@ -359,47 +368,50 @@ field->index2 = -1;
     for (f=0; f<nfield; f++)
       {
       field = fields[f];
-      for (s=0; s<field->nset; s++)
+      if (field->index >= 0)
         {
-        set = field->set[s];
-        index = set->index;
-        if (nconst[index] < set->ncoeff)
-	  {
-          if (field->nset > 1)
-	    sprintf(str,"set #%d of instrument A%d ",s+1,field->astromlabel+1);
-          else
-            sprintf(str, "instrument A%d ", field->astromlabel+1);
-          warning("Not enough matched detections in ", str);
-          nmiss = set->ncoeff - nconst[index];
-/*-------- Trim the matrices */
-          shrink_mat(alpha,beta, ncoefftot, index+nconst[index], nmiss);
-/*-------- Shift all other indexes above */
-          nc = nconst+index+nconst[index];
-          nc2 = nc + nmiss;
-          for (i=ncoefftot-index-set->ncoeff; i--;)
-	    *(nc++) = *(nc2++);
-          for (g2=0; g2<nfgroup; g2++)
-            {    
-            nfield2 = fgroups[g2]->nfield;
-            fields2 = fgroups[g2]->field;
-            for (f2=0; f2<nfield2; f2++)
-              {
-              field2 = fields2[f2];
-              if (field2->index2>=0)
-                field2->index2 -= nmiss;
-              for (s2=0; s2<field2->nset; s2++)
-	        {
-                set2 = field2->set[s2];
-                if (set2->index2>=0)
-                  set2->index2 -= nmiss;
-                if (set2->ncoeff && set2->index == index)
-		  set2->ncoeff -= nmiss;
-                if (set2->index > index)
-                  set2->index -= nmiss;
+        for (s=0; s<field->nset; s++)
+          {
+          set = field->set[s];
+          index = set->index;
+          if (nconst[index] < set->ncoeff)
+            {
+            if (field->nset > 1)
+	      sprintf(str,"set #%d of instrument A%d ",s+1,field->astromlabel+1);
+            else
+              sprintf(str, "instrument A%d ", field->astromlabel+1);
+            warning("Not enough matched detections in ", str);
+            nmiss = set->ncoeff - nconst[index];
+/*---------- Trim the matrices */
+            shrink_mat(alpha,beta, ncoefftot, index+nconst[index], nmiss);
+/*---------- Shift all other indexes above */
+            nc = nconst+index+nconst[index];
+            nc2 = nc + nmiss;
+            for (i=ncoefftot-index-set->ncoeff; i--;)
+	      *(nc++) = *(nc2++);
+            for (g2=0; g2<nfgroup; g2++)
+              {    
+              nfield2 = fgroups[g2]->nfield;
+              fields2 = fgroups[g2]->field;
+              for (f2=0; f2<nfield2; f2++)
+                {
+                field2 = fields2[f2];
+                if (field2->index2>=0)
+                  field2->index2 -= nmiss;
+                for (s2=0; s2<field2->nset; s2++)
+	          {
+                  set2 = field2->set[s2];
+                  if (set2->index2>=0)
+                    set2->index2 -= nmiss;
+                  if (set2->ncoeff && set2->index == index)
+                    set2->ncoeff -= nmiss;
+                  if (set2->index > index)
+                    set2->index -= nmiss;
+                  }
                 }
               }
+            ncoefftot -= nmiss;
             }
-          ncoefftot -= nmiss;
           }
         }
       }
@@ -419,8 +431,10 @@ field->index2 = -1;
         for (c=s=0; s<field->nset; s++)
           {
           set = field->set[s];
-          if (set->ncoeff)
+          if (set->index >= 0 && set->ncoeff)
             c += nconst[set->index] - set->ncoeff;
+          else
+            c += nconst[index2];
           }
         if (c < ncoeff2)
           {
@@ -456,22 +470,27 @@ field->index2 = -1;
           }
         else
 	  {
-/*-------- Remove ncoeff2 constraints in a "balanced" way */
-          for (n=ncoeff2; n-=naxis;)
+          if (field->index>=0)
             {
-            for (sm=-1,cm=s=0; s<field->nset; s++)
+/*---------- Remove ncoeff2 constraints in a "balanced" way */
+            for (n=ncoeff2; n-=naxis;)
               {
-              set = field->set[s];
-              if (set->ncoeff && (c = nconst[set->index] - set->ncoeff) > cm)
-	        {
-                cm = c;
-                sm = s;
+              for (sm=-1,cm=s=0; s<field->nset; s++)
+                {
+                set = field->set[s];
+                if (set->index>=0 && set->ncoeff
+			&& (c = nconst[set->index] - set->ncoeff) > cm)
+	          {
+                  cm = c;
+                  sm = s;
+                  }
                 }
+              if (sm<0)
+                error(EXIT_FAILURE, "*Internal Error*: mismatched d.o.f. in ",
+			"astrsolve_fgroups()");
+              if (set->index >=0 )
+                nconst[field->set[sm]->index] -= naxis;
               }
-            if (sm<0)
-              error(EXIT_FAILURE, "*Internal Error*: mismatched d.o.f. in ",
-		"astrsolve_fgroups()");
-            nconst[field->set[sm]->index] -= naxis;
             }
           }
         }
@@ -540,7 +559,7 @@ INPUT	Ptr to the set structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	04/10/2012
  ***/
 void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 			int ncoefftot,
@@ -556,6 +575,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 			*cc,*cco,*ccoa, *cc2,*cco2,*ccoa2, *x, *jac,*jact,
 			*basis,*basis2, *czero, *cscale,
 			sigma2,sigma3, weight, weightfac;
+   short		flagmask;
    int			*coeffindex,*coeffindex2,
 			*ci,*cio,*cioa, *ci2,*cio2,*cioa2,
 			nlsamp,nlsampmax, nscoeffmax, nscoeffmax2, instru,
@@ -568,6 +588,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
    int			imut=0;
 #endif
 
+  flagmask = (short)prefs.astr_flagsmask;
   naxis = set->naxis;
   npcoeff = poly->ncoeff;
   ncoeff = npcoeff*naxis;
@@ -575,7 +596,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
   npcoeff2 = poly2->ncoeff;
   ncoeff2 = npcoeff2*naxis;
   nicoeff2 = ncoeff2*naxis;
-  
+
   nlsampmax = 0;
   ncontext = set->ncontext;
   coeffval = coeffval2 = coeffconst = coeffconst2 = (double *)NULL;
@@ -594,7 +615,9 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
       {
       samp2 = samp;
 /*---- Count the samples in the pair-list */
-      for (nlsamp=1; (samp2=samp2->prevsamp); nlsamp++);
+      for (nlsamp=1; (samp2=samp2->prevsamp);)
+        if (!(samp2->sexflags & flagmask))
+          nlsamp++;
 /*---- Allocate memory for storing list sample information */
       if (nlsamp>nlsampmax)
         {
@@ -626,6 +649,9 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
       cc2 = coeffconst2;
       for (samp2 = samp; samp2; samp2=samp2->prevsamp)
         {
+/*------ Drop it if the object is saturated or truncated */
+        if ((samp2->sexflags & flagmask))
+          continue;
         cio = ci;
         cio2 = ci2;
         cvo = cv;
@@ -644,7 +670,8 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
           QPTHREAD_MUTEX_LOCK(&nconstastromutex);
 #endif
           set2->nconst += naxis;
-          nconst[index]+=naxis;
+          if (index>=0)
+            nconst[index]+=naxis;
           if (index2>=0)
             nconst[index2]+=naxis;
 #ifdef USE_THREADS
@@ -653,6 +680,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
           }
         else
           index = index2 = -1;
+
 /*------ Compute the value of the basis functions at each sample */
         if (instru >= 0)
 	  {
@@ -673,7 +701,8 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
               context[c] = (samp2->context[c]-czero[c])*cscale[c];
             }
 /*-------- The basis functions are computed from reduced context values*/
-          poly_func(poly, context);
+          if (index>=0)
+            poly_func(poly, context);
 /*-------- Compute the local Jacobian matrix */
           compute_jacobian(samp2,dprojdred);
           if (index2>=0)
@@ -722,9 +751,6 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
               }
             }
           }
-/*------ Drop it if the object is saturated or truncated */
-        if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-          continue;
 /*------ Compute the relative positional variance for this source */
         sigma2 = 0.0;
         for (d=0; d<naxis; d++)
@@ -741,120 +767,104 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
         for (samp3 = samp; samp3 != samp2; samp3=samp3->prevsamp)
           {
 /*------ Drop it if the object is saturated or truncated */
-          if (!(samp3->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
-            {
-/*---------- Compute the relative weight of the pair */
-            sigma3 = 0.0;
-            for (d=0; d<naxis; d++)
-              sigma3 += samp3->wcsposerr[d]*samp3->wcsposerr[d];
-            weight = (instru<0 ? samp3->set->weightfac*weightfac : 1.0)
+          if ((samp3->sexflags & flagmask))
+            continue;
+
+/*-------- Compute the relative weight of the pair */
+          sigma3 = 0.0;
+          for (d=0; d<naxis; d++)
+            sigma3 += samp3->wcsposerr[d]*samp3->wcsposerr[d];
+          weight = (instru<0 ? samp3->set->weightfac*weightfac : 1.0)
 			/(sigma3+sigma2);
-/*
-weight = sqrt(weight);
-*/
-/*---------- Fill the matrices */
-/*---------- First, the contribution from the 1st detection itself */
+
+/*-------- Fill the matrices */
+/*-------- First, the contribution from the 1st detection itself */
 #ifdef USE_THREADS
-            if (*cio>=0)
-              {
-              imut = (*cio/ncoeff)%NMAT_MUTEX;
-              QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
-              }
+          if (*cio>=0)
+            {
+            imut = (*cio/ncoeff)%NMAT_MUTEX;
+            QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
+            }
 #endif
-            add_alphamat(alpha,naxis,ncoefftot,weight,
+          add_alphamat(alpha,naxis,ncoefftot,weight,
 		cio,cvo,ncoeff, cio,cvo,ncoeff);
-            add_alphamat(alpha,naxis,ncoefftot,weight,
+          add_alphamat(alpha,naxis,ncoefftot,weight,
 		cio,cvo,ncoeff, cio2,cvo2,ncoeff2);
-            if (*cioa>=*cio)
-              add_alphamat(alpha,naxis,ncoefftot,-weight,
+          if (*cioa>=*cio)
+            add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio,cvo,ncoeff, cioa,cvoa,ncoeff);
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
+          add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio,cvo,ncoeff, cioa2,cvoa2,ncoeff2);
-            add_betamat(beta,naxis,weight, cio,cvo,cco,ncoeff);
-            add_betamat(beta,naxis,-weight, cio,cvo,ccoa,ncoeff);
+          add_betamat(beta,naxis,weight, cio,cvo,cco,ncoeff);
+          add_betamat(beta,naxis,-weight, cio,cvo,ccoa,ncoeff);
 #ifdef USE_THREADS
-            if (*cio>=0)
-              {
-              QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
-              }
-            if (*cio2>=0)
-              {
-              imut = (*cio2/ncoeff)%NMAT_MUTEX2;
-              QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
-              }
+          if (*cio>=0)
+            {
+            QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
+            }
+          if (*cio2>=0)
+            {
+            imut = (*cio2/ncoeff)%NMAT_MUTEX2;
+            QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
+            }
 #endif
-/*
-            add_alphamat(alpha,naxis,ncoefftot,weight,
-		cio2,cvo2,ncoeff2, cio,cvo,ncoeff);
-*/
-            add_alphamat(alpha,naxis,ncoefftot,weight,
+          add_alphamat(alpha,naxis,ncoefftot,weight,
 		cio2,cvo2,ncoeff2, cio2,cvo2,ncoeff2);
-/*
+          if (*cioa2>=*cio2)
             add_alphamat(alpha,naxis,ncoefftot,-weight,
-		cio2,cvo2,ncoeff2,  cioa,cvoa,ncoeff);
-*/
-            if (*cioa2>=*cio2)
-              add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cio2,cvo2,ncoeff2,  cioa2,cvoa2,ncoeff2);
-            add_betamat(beta,naxis,weight, cio2,cvo2,cco2,ncoeff2);
-            add_betamat(beta,naxis,-weight, cio2,cvo2,ccoa2,ncoeff2);
-/*---------- Then, the contribution from the 2nd detection itself */
+          add_betamat(beta,naxis,weight, cio2,cvo2,cco2,ncoeff2);
+          add_betamat(beta,naxis,-weight, cio2,cvo2,ccoa2,ncoeff2);
+
+/*-------- Next, the contribution from the 2nd detection itself */
 #ifdef USE_THREADS
-            if (*cio2>=0)
-              {
-              QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
-              }
-            if (*cioa>=0)
-              {
-              imut = (*cioa/ncoeff)%NMAT_MUTEX;
-              QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
-              }
+          if (*cio2>=0)
+            {
+            QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
+            }
+          if (*cioa>=0)
+            {
+            imut = (*cioa/ncoeff)%NMAT_MUTEX;
+            QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
+            }
 #endif
-            add_alphamat(alpha,naxis,ncoefftot,weight,
+          add_alphamat(alpha,naxis,ncoefftot,weight,
 		cioa,cvoa,ncoeff, cioa,cvoa,ncoeff);
-            add_alphamat(alpha,naxis,ncoefftot,weight,
+          add_alphamat(alpha,naxis,ncoefftot,weight,
 		cioa,cvoa,ncoeff, cioa2,cvoa2,ncoeff2);
-            if (*cio>=*cioa)
+          if (*cio>=*cioa)
               add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cioa,cvoa,ncoeff, cio,cvo,ncoeff);
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
+          add_alphamat(alpha,naxis,ncoefftot,-weight,
 		cioa,cvoa,ncoeff, cio2,cvo2,ncoeff2);
-            add_betamat(beta,naxis,weight, cioa,cvoa,ccoa,ncoeff);
-            add_betamat(beta,naxis,-weight, cioa,cvoa,cco,ncoeff);
+          add_betamat(beta,naxis,weight, cioa,cvoa,ccoa,ncoeff);
+          add_betamat(beta,naxis,-weight, cioa,cvoa,cco,ncoeff);
 #ifdef USE_THREADS
-            if (*cioa>=0)
-              {
-              QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
-              }
-            if (*cioa2>=0)
-              {
-              imut = (*cioa2/ncoeff)%NMAT_MUTEX2;
-              QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
-              }
-#endif
-/*
-            add_alphamat(alpha,naxis,ncoefftot,weight,
-		cioa2,cvoa2,ncoeff2, cioa,cvoa,ncoeff);
-*/
-            add_alphamat(alpha,naxis,ncoefftot,weight,
-		cioa2,cvoa2,ncoeff2, cioa2,cvoa2,ncoeff2);
-            add_betamat(beta,naxis,weight, cioa2,cvoa2,ccoa2,ncoeff2);
-/*---------- Then, the crossed contributions */
-/*
-            add_alphamat(alpha,naxis,ncoefftot,-weight,
-		cioa2,cvoa2,ncoeff2, cio,cvo,ncoeff);
-*/
-            if (*cio2>=*cioa2)
-              add_alphamat(alpha,naxis,ncoefftot,-weight,
-		cioa2,cvoa2,ncoeff2, cio2,cvo2,ncoeff2);
-            add_betamat(beta,naxis,-weight, cioa2,cvoa2,cco2,ncoeff2);
-#ifdef USE_THREADS
-            if (*cioa2>=0)
-              {
-              QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
-              }
-#endif
+          if (*cioa>=0)
+            {
+            QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
             }
+          if (*cioa2>=0)
+            {
+            imut = (*cioa2/ncoeff)%NMAT_MUTEX2;
+            QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
+            }
+#endif
+          add_alphamat(alpha,naxis,ncoefftot,weight,
+		cioa2,cvoa2,ncoeff2, cioa2,cvoa2,ncoeff2);
+          add_betamat(beta,naxis,weight, cioa2,cvoa2,ccoa2,ncoeff2);
+
+/*-------- Next, the crossed contributions */
+          if (*cio2>=*cioa2)
+            add_alphamat(alpha,naxis,ncoefftot,-weight,
+		cioa2,cvoa2,ncoeff2, cio2,cvo2,ncoeff2);
+          add_betamat(beta,naxis,-weight, cioa2,cvoa2,cco2,ncoeff2);
+#ifdef USE_THREADS
+          if (*cioa2>=0)
+            {
+              QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
+            }
+#endif
           cvoa += nicoeff;
           cioa += nicoeff;
           ccoa += nicoeff;
@@ -1024,7 +1034,7 @@ void    *pthread_fillastromatrix_thread(void *arg)
         }
       QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
 
-/*---- Match field */
+/*---- Fetch field data */
       fill_astromatrix(pthread_fgroups[gindex]->field[findex]->set[sindex],
 		pthread_alpha, pthread_beta, pthread_ncoefftot,
 		poly, poly2, pthread_nconst);
@@ -1109,7 +1119,7 @@ void	pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
   pthread_gindex = pthread_findex = pthread_sindex = 0;
   pthread_endflag = 0;
   QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
-  NFPRINTF(OUTPUT, "Starting field matching...");
+  NFPRINTF(OUTPUT, "Starting fetching to matrix...");
 /* Release threads!! */
   threads_gate_sync(pthread_startgate);
 /* ( Slave threads process the current buffer data here ) */
@@ -1226,7 +1236,7 @@ void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
       }
     }
 
-  if (cx>=0 || cy>=0)
+  if (set->index>=0 && (cx>=0 || cy>=0))
     {
     for (d=0; d<naxis; d++)
       if (!wcs->nprojp)

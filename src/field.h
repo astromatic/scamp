@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		19/09/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -54,8 +54,8 @@
 
 typedef enum {MOSAIC_UNCHANGED, MOSAIC_SAMECRVAL, MOSAIC_SHAREPROJAXIS,
 	      MOSAIC_FIXFOCALPLANE, MOSAIC_LOOSE} mosaicenum;
-typedef enum {STABILITY_EXPOSURE, STABILITY_GROUP, STABILITY_INSTRUMENT,
-		STABILITY_ALL}	stabilityenum;
+typedef enum {STABILITY_EXPOSURE, STABILITY_PREDISTORTED, STABILITY_INSTRUMENT}
+		stabilityenum;
 typedef enum {PROJECTION_SAME, PROJECTION_TPV, PROJECTION_TAN}	projenum;
 
 typedef struct field

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/08/2012
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -168,6 +168,7 @@ typedef struct
   int		nmagzero_interr;		/* nb of params */
   double	magzero_referr[MAXPHOTINSTRU];	/* Photom.field ZP error RMS */
   int		nmagzero_referr;		/* nb of params */
+  int		phot_flagsmask;			/* Photom. mask on SEx FLAGS */
 
 /* Astrometric solution */
   projenum	projection_type[MAXFILE];	/* Celestial projection type */
@@ -203,6 +204,7 @@ typedef struct
 /* Differential Chromatic Refraction (DRC) */
   int		colourshift_flag;		/* Correct colour shift in pm?*/
   int		astrefinprop_flag;		/* Use ref.catalog in pm? */
+  int		astr_flagsmask;			/* Astrom. mask on SEx FLAGS */
 
 /* Check-plots */
   cplotenum	cplot_device[MAXCHECK];		/* check-plot format */

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		11/08/2012
+*	Last modified:		06/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -35,9 +35,10 @@
 
 /*--------------------------------- constants -------------------------------*/
 
-#define	PROPER_MAXNBAD	2	/* Maximum number of bad measurements */
-#define	PROPER_MAXCHI2	4.0	/* Trigger chi2/d.o.f. threshold for source
-				/* source clipping */
+#define	PROPER_MAXNBAD		2	/* Maximum number of bad measurements */
+#define	PROPER_MAXFRACBAD	0.2	/* Max. fraction of bad measurements */
+#define	PROPER_MAXCHI2		6.0	/* Trigger chi2/d.o.f. threshold for */
+					/* source clipping */
 
 /*--------------------------------- typedefs --------------------------------*/
 
