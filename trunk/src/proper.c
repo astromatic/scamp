@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/08/2012
+*	Last modified:		23/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -78,7 +78,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2011
+VERSION	04/10/2012
  ***/
 void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -88,9 +88,11 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
    double	*ss[NAXIS],*sx[NAXIS],*sxx[NAXIS],*sy[NAXIS],*sxy[NAXIS],
 		sigma[NAXIS],
 		sig, a,b, wi,xi,yi, delta;
+   short	flagmask;
    int		*ncolshift[NAXIS],
 		d,f1,f2,n,s, naxis, nfield, instru1,instru2, ninstru;
 
+  flagmask = (short)prefs.astr_flagsmask | (short)prefs.phot_flagsmask;
   nfield = fgroup->nfield;
   naxis = fgroup->naxis;
   ninstru = prefs.nphotinstrustr;
@@ -145,7 +147,7 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 /*------ Explore the forward direction */
         for (samp2=samp; (samp2=samp2->nextsamp);)
           {
-          if (samp2->flux <= 0.0 || (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+          if (samp2->flux <= 0.0 || (samp2->sexflags & flagmask))
             continue;
           field2 = samp2->set->field;
           f2 = (field2==reffield ? nfield : field2->index);
@@ -168,7 +170,7 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 /*------ Explore the backward direction */
         for (samp2=samp; (samp2=samp2->prevsamp);)
           {
-          if (samp2->flux <= 0.0 || (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+          if (samp2->flux <= 0.0 || (samp2->sexflags & flagmask))
             continue;
           field2 = samp2->set->field;
           f2 = (field2==reffield ? nfield : field2->index);
@@ -239,7 +241,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/08/2012
+VERSION	23/10/2012
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -251,14 +253,17 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
    double	alpha[25], beta[5],
 		coord[NAXIS], coorderr[NAXIS], propmean[NAXIS],
 		wis, paral,paralerr, chi2,chi2min, propmod,propmodmin;
-   int		d,f,s,n, naxis, nfield, nsamp, lng,lat, celflag,
-		propflag, paralflag, ncoeff,ncoeffp1,
-		nfree,nbad, bad, nfreemin, npropmean;
+   short	flagmask;
+   int		d,f,s,n, naxis, nfield, nsamp,nsamp2, lng,lat, celflag,
+		propflag, paralflag, refflag, ncoeff,ncoeffp1,
+		nfree, nbad,nbadmax, bad, nfreemin, npropmean;
 
   NFPRINTF(OUTPUT, "Computing proper motions...");
 
+  flagmask = (short)prefs.astr_flagsmask;
   paralflag = prefs.parallax_flag;
   propflag = prefs.propmotion_flag;
+  refflag = prefs.astrefinprop_flag;
   naxis = fgroup->naxis;
   nfield = fgroup->nfield;
   wcs = fgroup->wcs;
@@ -313,20 +318,29 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           }
         if (samp->nextsamp)
           continue;
+/*------ Count detections */
+        nsamp2 = 0;
+        for (samp2=samp; samp2; samp2 = samp2->prevsamp)
+          if ((refflag || samp2->set->field->astromlabel>=0)
+		&& !(samp2->sexflags & flagmask)
+		&& !(samp2->scampflags & SCAMP_BADPROPER))
+            nsamp2++;
+        if ((nbadmax=(int)(PROPER_MAXFRACBAD*nsamp2)) < PROPER_MAXNBAD)
+          nbadmax = PROPER_MAXNBAD;
         wis = wcs_scale(wcs, samp->projpos);
         nfreemin = astrprop_solve(fgroup,samp,wcsec, alpha,beta, wis, &chi2min);
         sampmin = NULL;
         propmodmin = BIG;
-        for (nbad=0; nbad<PROPER_MAXNBAD; nbad++)
+        for (nbad=0; nbad<nbadmax; nbad++)
           {
 /*-------- Exit if chi2 is OK or if less than 2 degrees of freedom remain */
           if (chi2min<nfreemin*PROPER_MAXCHI2 || nfreemin<2)
             break;
           sampmin = samppropmod = NULL;
-          for (samp2=samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2 = samp2->prevsamp)
+          for (samp2=samp; samp2; samp2 = samp2->prevsamp)
             {
-            if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+            if (!(refflag || samp2->set->field->astromlabel>=0)
+		|| (samp2->sexflags & flagmask)
 		|| (samp2->scampflags & SCAMP_BADPROPER))
               continue;
 /*---------- Switch detection to "bad" state */
@@ -338,7 +352,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
               sampmin = samp2;
               nfreemin = nfree;
               }
-            propmod = sqrt(beta[0]*beta[0]+beta[2]*beta[2]);
+            propmod = sqrt(beta[0]*beta[0]+beta[1]*beta[1]);
             if (propmod<propmodmin)
               {
               propmodmin = propmod;
@@ -377,9 +391,14 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 #else
         clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
 #endif
+/*------ Prepare a normalization factor to avoid problems with large motions */
+        propmod = 0.0;
+        for (d=0; d<naxis; d++)
+           propmod += beta[d]*beta[d];
+        propmod = sqrt(propmod + 1.0);
         for (d=0; d<naxis; d++)
           {
-          coord[d] = samp->projpos[d] + beta[d];
+          coord[d] = samp->projpos[d] + beta[d] / propmod;
           coorderr[d] = sqrt(alpha[d*ncoeffp1]*wis);
           }
         if (paralflag)
@@ -391,7 +410,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
         raw_to_wcs(wcs, coord, coord);
 /*------ ... and recover the proper motion vector in celestial coords */
         for (d=0; d<naxis; d++)
-          coord[d] -= samp->wcspos[d];
+          coord[d] = (coord[d] - samp->wcspos[d])*propmod;
         if (celflag)
           coord[lng] *= cos(samp->wcspos[lat]*DEG);
         propmod = 0.0;
@@ -444,7 +463,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/08/2012
+VERSION	23/10/2012
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -458,10 +477,11 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 		ecpos[NAXIS], pfac[NAXIS],a[25],b[5],
 		**csscale, **cszero,
 		sig, wi,yi, sy2, dt, bec,cbec,lec, dval;
-
+   short	flagmask;
    int		d,j,k, f1,ff, naxis, nfield, ncoeff,nfree, ncoeffp1, lng,lat,
-		colcorflag,paralflag,meanflag;
+		colcorflag,paralflag,meanflag,refflag;
 
+  flagmask = (short)prefs.astr_flagsmask;
   nfield = fgroup->nfield;
   naxis = fgroup->naxis;
   wcs = fgroup->wcs;
@@ -469,6 +489,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   lat = wcs->lat;
   csscale = fgroup->intcolshiftscale;
   cszero = fgroup->intcolshiftzero;
+  refflag = prefs.astrefinprop_flag;
   colcorflag = prefs.colourshift_flag;
   paralflag = prefs.parallax_flag;
   meanflag = 1;	/* Always set for the 1st detection in chain */
@@ -485,7 +506,8 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 
   for (samp1=samp; samp1; samp1 = samp1->prevsamp)
     {
-    if ((samp1->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+    if (!(refflag || samp1->set->field->astromlabel>=0)
+		|| (samp1->sexflags & flagmask)
 		|| (samp1->scampflags & SCAMP_BADPROPER))
       continue;
     set1 = samp1->set;
@@ -497,9 +519,10 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
         mpos[d] = mposw[d] = 0.0;
 
 /*---- First pass through overlapping detections to compute averages*/
-      for (samp2=samp; samp2;  samp2 = samp2->prevsamp)
+      for (samp2=samp; samp2; samp2 = samp2->prevsamp)
         {
-        if ((samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC))
+        if (!(refflag || samp2->set->field->astromlabel)
+		|| (samp2->sexflags & flagmask)
 		|| (samp2->scampflags & SCAMP_BADPROPER))
           continue;
         field2 = samp2->set->field;

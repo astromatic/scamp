@@ -34,7 +34,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		02/08/2012
+#	Last modified:		26/09/2012
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -144,7 +144,7 @@
     </HEAD>
     <BODY>
      <div id="header">
-      <a href="/"><img style="vertical-align: middle; border:0px" src="http://astromatic.net/xsl/astromatic.png" title="Astromatic home" alt="Astromatic.net" /></a>  Processing summary
+      <a href="http://astromatic.net"><img style="vertical-align: middle; border:0px" src="http://astromatic.net/xsl/astromatic.png" title="Astromatic home" alt="Astromatic.net" /></a>  Processing summary
      </div>
      <xsl:call-template name="VOTable"/>
    </BODY>
@@ -257,6 +257,7 @@
 <!-- ********************** XSL template for Fields ********************** -->
   <xsl:template name="Fields">
    <xsl:variable name="asplotflag" select="count(PARAM[@name='AllSkyPlot'])"/>
+   <xsl:variable name="matchflag" select="count(PARAM[@name='XY_Contrast'])"/>
    <xsl:variable name="number" select="count(FIELD[@name='Catalog_Number']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="name" select="count(FIELD[@name='Catalog_Name']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="ident" select="count(FIELD[@name='Image_Ident']/preceding-sibling::FIELD)+1"/>
@@ -333,12 +334,14 @@
       <TH>Declination</TH>
       <TH>Radius</TH>
       <TH>Pixel scale</TH>
-      <TH>&Delta;Pixel Scale</TH>
-      <TH>&Delta;Position Angle</TH>
-      <TH>A/S contrast</TH>
-      <TH>&Delta;<i>X</i></TH>
-      <TH>&Delta;<i>Y</i></TH>
-      <TH><i>X</i>/<i>Y</i> contrast</TH>
+      <xsl:if test="$matchflag &gt; 0">
+        <TH>&Delta;Pixel Scale</TH>
+        <TH>&Delta;Position Angle</TH>
+        <TH>A/S contrast</TH>
+        <TH>&Delta;<i>X</i></TH>
+        <TH>&Delta;<i>Y</i></TH>
+        <TH><i>X</i>/<i>Y</i> contrast</TH>
+      </xsl:if>
       <TH><i>&chi;</i><sup>2</sup> <sub>int</sub></TH>
       <TH><i>&chi;</i><sup>2</sup> <sub>int</sub><BR/><elm>High S/N</elm></TH>
       <TH><i>&chi;</i><sup>2</sup> <sub>ref</sub></TH>
@@ -442,44 +445,46 @@
          <xsl:variable name="pix2" select="number(substring-after(string(TD[$pixscale]), ' '))"/>
          <el><xsl:value-of select="format-number(($pix1+$pix2) div 2.0, '##0.0000')"/>&asec;</el>
         </td>
+        <xsl:if test="$matchflag &gt; 0">
 <!-- Delta Pixel scale --> 
-        <td align="right">
-         <el><xsl:value-of select="format-number(TD[$dpscale], '##0.0000')"/></el>
-        </td>
+          <td align="right">
+           <el><xsl:value-of select="format-number(TD[$dpscale], '##0.0000')"/></el>
+          </td>
 <!-- Delta Pos Angle --> 
-        <td align="right">
-         <el><xsl:value-of select="TD[$dposangle]"/>&deg;</el>
-        </td>
+          <td align="right">
+           <el><xsl:value-of select="TD[$dposangle]"/>&deg;</el>
+          </td>
 <!-- A/S contrast --> 
-        <td align="right">
-         <xsl:choose>
-          <xsl:when test="TD[$xycont] &lt; 2.0">
-           <elep><xsl:value-of select="format-number(TD[$ascont], '##0.0')"/></elep>
-          </xsl:when>
-          <xsl:otherwise>
-            <elen><xsl:value-of select="format-number(TD[$ascont], '##0.0')"/></elen>
-          </xsl:otherwise>
-         </xsl:choose>
-        </td>
+          <td align="right">
+           <xsl:choose>
+            <xsl:when test="TD[$xycont] &lt; 2.0">
+             <elep><xsl:value-of select="format-number(TD[$ascont], '##0.0')"/></elep>
+            </xsl:when>
+            <xsl:otherwise>
+              <elen><xsl:value-of select="format-number(TD[$ascont], '##0.0')"/></elen>
+            </xsl:otherwise>
+           </xsl:choose>
+          </td>
 <!-- Delta X -->
-        <td align="right">
-         <el><xsl:value-of select="TD[$dx]"/>&deg;</el>
-        </td>
+          <td align="right">
+           <el><xsl:value-of select="TD[$dx]"/>&deg;</el>
+          </td>
 <!-- Delta Y -->
-        <td align="right">
-         <el><xsl:value-of select="TD[$dy]"/>&deg;</el>
-        </td>
+          <td align="right">
+           <el><xsl:value-of select="TD[$dy]"/>&deg;</el>
+          </td>
 <!-- X/Y contrast --> 
-        <td align="right">
-         <xsl:choose>
-          <xsl:when test="TD[$xycont] &lt; 2.0">
-           <elep><xsl:value-of select="format-number(TD[$xycont], '##0.0')"/></elep>
-          </xsl:when>
-          <xsl:otherwise>
-            <elen><xsl:value-of select="format-number(TD[$xycont], '##0.0')"/></elen>
-          </xsl:otherwise>
-         </xsl:choose>
-        </td>
+          <td align="right">
+           <xsl:choose>
+            <xsl:when test="TD[$xycont] &lt; 2.0">
+             <elep><xsl:value-of select="format-number(TD[$xycont], '##0.0')"/></elep>
+            </xsl:when>
+            <xsl:otherwise>
+              <elen><xsl:value-of select="format-number(TD[$xycont], '##0.0')"/></elen>
+            </xsl:otherwise>
+           </xsl:choose>
+          </td>
+        </xsl:if>
 <!-- Chi2 int --> 
         <td align="right">
          <el><xsl:value-of select="format-number(TD[$chi2int], '######0.00')"/></el>
@@ -1272,7 +1277,21 @@
      <xsl:for-each select="PARAM[position()>2]">
       <tr>
        <td><el><xsl:value-of select="@name"/></el></td>
-       <td><el><xsl:value-of select="@value"/></el></td>
+       <xsl:choose>
+         <xsl:when test="@datatype != 'boolean' ">
+           <td><el><xsl:value-of select="@value"/></el></td>
+         </xsl:when>
+         <xsl:otherwise>
+           <xsl:choose>
+             <xsl:when test="@value = 'T' ">
+               <td><el>Y</el></td>
+             </xsl:when>
+             <xsl:otherwise>
+               <td><el>N</el></td>
+             </xsl:otherwise>
+           </xsl:choose>
+         </xsl:otherwise>
+       </xsl:choose>
       </tr>
      </xsl:for-each>
     </TABLE>

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/08/2012
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -66,14 +66,15 @@ pkeystruct key[] =
   {"AHEADER_SUFFIX", P_STRING, prefs.ahead_suffix},
   {"AIRMASS_KEY", P_STRING, prefs.airmass_key},
   {"ASTR_ACCURACY", P_FLOAT, &prefs.astraccuracy,0,0, 0.0, 1e6},
+  {"ASTR_FLAGSMASK", P_INT, &prefs.astr_flagsmask, 0,0xff, 0.0,0.0},
   {"ASTRACCURACY_KEY", P_STRING, prefs.astraccuracy_key},
   {"ASTRACCURACY_TYPE", P_KEY, &prefs.astraccuracy_type, 0,0, 0.0,0.0,
-    "SIGMA-PIXEL", "SIGMA-ARCSEC", "SEEING-PIXEL", "SEEING-ARCSEC", ""},
+    "SIGMA-PIXEL", "SIGMA-ARCSEC", "TURBULENCE-ARCSEC", ""},
   {"ASTRCLIP_NSIGMA", P_FLOAT, &prefs.astrclip_nsig, 0,0, 0.0,1e31},
   {"ASTREF_BAND", P_STRING, prefs.astref_bandname},
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
-    "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3",
+    "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3", "UCAC-4",
     "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "SDSS-R8", "NOMAD-1",
     "PPMX", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
@@ -118,7 +119,7 @@ pkeystruct key[] =
      "ASTR_CHI2", "ASTR_INTERROR2D", "ASTR_REFERROR2D", "PHOT_ZPCORR3D",
      "ASTR_COLSHIFT1D" , "ASTR_REFPROPER", "ASTR_INTSYSMAP",
      "ASTR_REFSYSMAP", "ASTR_OBSDATE3D", "ASTR_INTPROPER2D",
-     "ASTR_PIXERROR2D", ""},
+     "ASTR_XPIXERROR2D", "ASTR_YPIXERROR2D", ""},
     0, MAXCHECK, &prefs.ncplot_type},
   {"COMPUTE_PARALLAXES", P_BOOL, &prefs.parallax_flag},
   {"COMPUTE_PROPERMOTIONS", P_BOOL, &prefs.propmotion_flag},
@@ -168,6 +169,7 @@ pkeystruct key[] =
     0, MAXASTRINSTRU, &prefs.nmosaic_type},
   {"NTHREADS", P_INT, &prefs.nthreads, -THREADS_PREFMAX, THREADS_PREFMAX},
   {"PHOT_ACCURACY", P_FLOAT, &prefs.photaccuracy, 0,0, 0.0, 1.0},
+  {"PHOT_FLAGSMASK", P_INT, &prefs.phot_flagsmask, 0,0xff, 0.0,0.0},
   {"PHOTCLIP_NSIGMA", P_FLOAT, &prefs.photclip_nsig, 0,0, 0.0,1e31},
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
   {"PHOTFLUXERR_KEY", P_STRING, prefs.photfluxerr_key},
@@ -192,14 +194,14 @@ pkeystruct key[] =
   {"SOLVE_ASTROM", P_BOOL, &prefs.solvastrom_flag},
   {"SOLVE_PHOTOM", P_BOOL, &prefs.solvphotom_flag},
   {"STABILITY_TYPE", P_KEYLIST, prefs.stability_type, 0,0, 0.0,0.0,
-    {"EXPOSURE", "GROUP", "INSTRUMENT", "ALL",""},
+    {"EXPOSURE", "PRE-DISTORTED", "INSTRUMENT", ""},
     0, MAXASTRINSTRU, &prefs.nstability_type},
   {"VERBOSE_TYPE", P_KEY, &prefs.verbose_type, 0,0, 0.0,0.0,
    {"QUIET","NORMAL","LOG", "FULL",""}},
-  {"XML_NAME", P_STRING, prefs.xml_name},
-  {"XSL_URL", P_STRING, prefs.xsl_name},
   {"WEIGHTFLAGS_MASK", P_INT, &prefs.wflags_mask, 0,0xff, 0.0,0.0},
   {"WRITE_XML", P_BOOL, &prefs.xml_flag},
+  {"XML_NAME", P_STRING, prefs.xml_name},
+  {"XSL_URL", P_STRING, prefs.xsl_name},
   {""}
  };
 
@@ -222,8 +224,9 @@ char *default_prefs[] =
 "*REF_PORT               80              # Ports to connect to catalog servers",
 "*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
 "ASTREF_CATALOG         USNO-B1         # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
-"                                       # GSC-1.3,GSC-2.2,GSC-2.3, UCAC-1,UCAC-2,",
-"                                       # UCAC-3, NOMAD-1, PPMX, 2MASS, DENIS-3,",
+"                                       # GSC-1.3,GSC-2.2,GSC-2.3,",
+"                                       # UCAC-1,UCAC-2,UCAC-3,UCAC-4,",
+"                                       # NOMAD-1, PPMX, 2MASS, DENIS-3,",
 "                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,SDSS-R8",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
@@ -271,7 +274,7 @@ char *default_prefs[] =
 "SOLVE_ASTROM           Y               # Compute astrometric solution (Y/N) ?",
 "PROJECTION_TYPE        SAME            # SAME, TPV or TAN",	
 "ASTRINSTRU_KEY         FILTER,QRUNID   # FITS keyword(s) defining the astrom",
-"STABILITY_TYPE         INSTRUMENT      # EXPOSURE, GROUP, INSTRUMENT or FILE",
+"STABILITY_TYPE         INSTRUMENT      # EXPOSURE, PRE-DISTORTED or INSTRUMENT",
 "CENTROID_KEYS          XWIN_IMAGE,YWIN_IMAGE # Cat. parameters for centroiding",
 "CENTROIDERR_KEYS       ERRAWIN_IMAGE,ERRBWIN_IMAGE,ERRTHETAWIN_IMAGE",
 "                                       # Cat. params for centroid err ellipse",
@@ -281,7 +284,7 @@ char *default_prefs[] =
 "*FOCDISTORT_DEGREE      1               # Polynom degree for focal plane coords",
 "*ASTREF_WEIGHT          1.0             # Relative weight of ref.astrom.cat.",
 "*ASTRACCURACY_TYPE      SIGMA-PIXEL     # SIGMA-PIXEL, SIGMA-ARCSEC,",
-"*                                       # SEEING-PIXEL or SEEING-ARCSEC",
+"*                                       # or TURBULENCE-ARCSEC",
 "*ASTRACCURACY_KEY       ASTRACCU        # FITS keyword for ASTR_ACCURACY param.",
 "*ASTR_ACCURACY          0.01            # Astrom. uncertainty floor parameter",
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
@@ -289,6 +292,7 @@ char *default_prefs[] =
 "*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
 "*INCLUDE_ASTREFCATALOG  Y               # Include ref.cat in prop.motions (Y/N)?",
+"*ASTR_FLAGSMASK         0x00fc          # Astrometry rejection mask on SEx FLAGS",
 " ",
 "#---------------------------- Photometric solution ----------------------------",
 " ",
@@ -306,6 +310,7 @@ char *default_prefs[] =
 "PHOTFLUXERR_KEY        FLUXERR_AUTO    # Catalog parameter for the flux error",
 "*PHOTCLIP_NSIGMA        3.0             # Photom.clipping threshold in sigmas",
 "*PHOT_ACCURACY          1e-3            # Photometric uncertainty floor (frac.)",
+"*PHOT_FLAGSMASK         0x00fc          # Photometry rejection mask on SEx FLAGS",
 " ",
 "#------------------------------- Check-plots ----------------------------------",
 " ",

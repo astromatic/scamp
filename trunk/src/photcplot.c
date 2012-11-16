@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/11/2011
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -254,7 +254,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	04/10/2012
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -277,10 +277,12 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
    PLINT	lwid;
 
    char		xlabel[80], ylabel[80], str[80];
+   short	flagmask;
    int		d,f,i, s,n,
 		nsamp, firstflag, instru, ninstru, npinstru,
 		ix,iy, nx,ny;
 
+  flagmask = (short)prefs.phot_flagsmask;
   ninstru = prefs.nphotinstrustr;
   npinstru = 0;
   for (instru=0; instru<ninstru; instru++)
@@ -360,7 +362,7 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 		samp=samp->prevsamp)
               if (samp->set->field->photomlabel == instru
 		&& samp->flux > 0.0
-		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & flagmask))
                 {
                 samp2 = samp;
                 break;
@@ -376,7 +378,7 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 /*------------ or the flux is negative or the source is cropped/saturated */
               if (samp2->set->field->photomlabel != instru
 		|| samp2->flux <= 0.0
-		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| (samp2->sexflags & flagmask))
                 continue;
               dy = samp2->mag - samp->mag;
               for (d=0; d<fgroup->naxis; d++)
@@ -557,12 +559,13 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 		r[2],g[2],b[2],cpoint[2],
 		maxlim, cy, z;
    PLINT	lwid;
-
    char		xlabel[80], ylabel[80], str[80];
+   short	flagmask;
    int		f,i, s,n,
 		nsamp, firstflag, instru, ninstru, npinstru,
 		ix,iy, nx,ny;
 
+  flagmask = (short)prefs.phot_flagsmask;
   ninstru = prefs.nphotinstrustr;
   npinstru = 0;
   for (instru=0; instru<ninstru; instru++)
@@ -661,7 +664,7 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 		samp=samp->prevsamp)
               if (samp->set->field->photomlabel == instru
 		&& samp->flux > 0.0
-		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & flagmask))
                 {
                 samp2 = samp;
                 break;
@@ -677,7 +680,7 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 /*------------ or the flux is negative */
               if (samp2->set->field->photomlabel != instru
 		|| samp2->flux <= 0.0
-		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| (samp2->sexflags & flagmask))
                 continue;
               dy = samp2->mag - samp->mag;
               ix = (int)((samp->mag-xoffset)*xscale);

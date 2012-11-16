@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/08/2011
+*	Last modified:		13/09/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@ INPUT	ptr to the group of fields,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/08/2011
+VERSION	13/09/2012
  ***/
 void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double tolerance)
@@ -65,11 +65,12 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
    wcsstruct	*wcs;
    setstruct	**pset1,**pset2, **pset,
 		*set1,*set2, *set;
-   samplestruct	*samp1,*presamp1, *samp2,*samp2b,*samp2min;
+   samplestruct	*samp1,*nexsamp1, *samp2,*samp2b,*samp2min,
+		*prevsamp2,*nextsamp1,*nextsamp2;
    double	projmin2[NAXIS], projmax2[NAXIS],
 		*proj1,
 		lng1,lat1, latmin1,latmax1, lngmin2,lngmax2,latmin2,latmax2,
-		dlng,dlat, dx, rlim,rlimmin,r2,r2min;
+		dlng,dlat, dx, rlim,rlimmin,r2,r2n,r2p,r2min;
    float	fmax;
    int		i, f,f1,f2, s1,s2, nset1,nset2, nsamp, nsamp2,nsamp2b,
 		s, nfield, naxis, lng,lat, yaxis;
@@ -105,7 +106,7 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
     }
 
 /* Now start the real cross-id loop */
-  for (f1=0; f1<nfield; f1++)
+  for (f1=1; f1<nfield; f1++)
     {
     field1 = field[f1];
     pset1 = field1->set;
@@ -113,7 +114,7 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
     nset1 = field1->nset;
     for (s1=nset1; s1--; set1=*(pset1++))
       {
-      for (f2=f1+1; f2<nfield; f2++)
+      for (f2=0; f2<f1; f2++)
         {
         field2 = field[f2];
         pset2 = field2->set;
@@ -140,8 +141,6 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
           nsamp2b = set2->nsample;
           for (nsamp=set1->nsample; nsamp--; samp1++)
             {
-            if (samp1->nextsamp)
-              continue;
             if (lat!=lng)
               {
               lng1 = samp1->projpos[lng];
@@ -171,8 +170,7 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
             nsamp2b = ++nsamp2;
             for (; nsamp2-- && samp2->projpos[yaxis]<latmax1; samp2++)
               {
-              if ((samp2->prevsamp && samp2->prevsamp->set->field!=field1)
-			|| samp2->nextsamp)
+              if (samp2->nextsamp && samp2->nextsamp->set->field!=field1)
                 continue;
               if (lat!=lng)
                 {
@@ -198,57 +196,55 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
               }
             if (samp2min)
               {
-              if ((presamp1=samp2min->prevsamp))
+              r2p = r2n = BIG;
+              if ((prevsamp2=samp1->prevsamp))
                 {
 /*-------------- Check if it is a better match than the previous one */
                 if (lat!=lng)
                   {
-                  dlng = presamp1->projpos[lng] - samp2min->projpos[lng];
-                  dlat = presamp1->projpos[lat] - samp2min->projpos[lat];
-                  r2 = dlng*dlng + dlat*dlat;
+                  dlng = prevsamp2->projpos[lng] - samp1->projpos[lng];
+                  dlat = prevsamp2->projpos[lat] - samp1->projpos[lat];
+                  r2p = dlng*dlng + dlat*dlat;
                   }
                 else
                   {
-                  r2 = 0.0;
+                  r2p = 0.0;
                   for (i=0; i<naxis; i++)
                     {
-                    dx = presamp1->projpos[i] - samp2min->projpos[i];
-                    r2 += dx*dx;
+                    dx = prevsamp2->projpos[i] - samp1->projpos[i];
+                    r2p += dx*dx;
                     }
                   }
-                if (r2<r2min)
-/*-------------- unlink from previous match if this is a better match */
+                }
+              if ((nextsamp1=samp2min->nextsamp))
+                {
+/*-------------- Check if it is a better match than the previous one */
+                if (lat!=lng)
                   {
-                  presamp1->nextsamp = NULL;
-                  samp1->nextsamp = samp2min;
-                  samp2min->prevsamp = samp1;
+                  dlng = samp2min->projpos[lng] - nextsamp1->projpos[lng];
+                  dlat = samp2min->projpos[lat] - nextsamp1->projpos[lat];
+                  r2n = dlng*dlng + dlat*dlat;
+                  }
+                else
+                  {
+                  r2n = 0.0;
+                  for (i=0; i<naxis; i++)
+                    {
+                    dx = samp2min->projpos[i] - nextsamp1->projpos[i];
+                    r2n += dx*dx;
+                    }
                   }
                 }
-              else
+              if (r2min<r2p && r2min<r2n)
+/*------------ unlink from previous match if this is a better match */
                 {
-                samp1->nextsamp = samp2min;
-                samp2min->prevsamp = samp1;
+                if (prevsamp2)
+                  prevsamp2->nextsamp = NULL;
+                if (nextsamp1)
+                  nextsamp1->prevsamp = NULL;
+                samp1->prevsamp = samp2min;
+                samp2min->nextsamp = samp1;
                 }
-/*------------ Link fields too */
-/*
-              for (ffield=field2; (fieldn=ffield->nextfield); ffield=fieldn)
-                if (fieldn == field1)
-                  break;
-              if (fieldn)
-                continue;
-              for (ffield=field2; (fieldp=ffield->prevfield); ffield=fieldp)
-                if (fieldp == field1)
-                  break;
-              if (fieldp)
-                continue;
-              fieldp = ffield;
-*/
-/*------------ Jump through links to find a free slot */
-/*
-              for (ffield=field1; (fieldn=ffield->nextfield); ffield=fieldn);
-              ffield->nextfield = fieldp;
-              fieldp->prevfield = ffield;
-*/
 	      }
 	    }
 	  }
@@ -338,15 +334,44 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
                 r2 += dx*dx;
                 }
               }
-/*---------- Finally select the brightest source within the search disk */
-            if (r2<r2min && (!samp2min || samp2->flux>samp2min->flux))
+/*---------- Finally select the closest source within the search disk */
+            if (r2<r2min)
+              {
+              r2min = r2;
               samp2min = samp2;
+              }
             }
           if (samp2min)
             {
-            samp1->nextsamp = samp2min;
-            samp2min->prevsamp = samp1;
-	    }
+            r2n = BIG;
+            if ((nextsamp2=samp1->nextsamp))
+              {
+/*------------ Check if it is a better match than the previous one */
+              if (lat!=lng)
+                {
+                dlng = nextsamp2->projpos[lng] - samp1->projpos[lng];
+                dlat = nextsamp2->projpos[lat] - samp1->projpos[lat];
+                r2n = dlng*dlng + dlat*dlat;
+                }
+              else
+                {
+                r2n = 0.0;
+                for (i=0; i<naxis; i++)
+                  {
+                  dx = nextsamp2->projpos[i] - samp1->projpos[i];
+                  r2n += dx*dx;
+                  }
+                }
+              }
+            if (r2min<r2n)
+/*---------- unlink from previous match if this is a better match */
+              {
+              if (nextsamp2)
+                nextsamp2->prevsamp = NULL;
+              samp1->nextsamp = samp2min;
+              samp2min->prevsamp = samp1;
+              }
+            }
           }
         }
       }

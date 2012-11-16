@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/08/2012
+*	Last modified:		19/09/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -95,7 +95,7 @@ typedef enum {CPLOT_NONE, CPLOT_ALLSKY, CPLOT_FGROUPS, CPLOT_PHOTOM,
 	CPLOT_PHOTZP, CPLOT_CHI2, CPLOT_ADERROR2D, CPLOT_REFERROR2D,
 	CPLOT_PHOTZP3D, CPLOT_ASTRCOLSHIFT1D, CPLOT_REFPROP,
 	CPLOT_ADSYSMAP2D, CPLOT_REFSYSMAP2D, CPLOT_ASTREPOCH3D,
-	CPLOT_ADPROP2D, CPLOT_PIXERROR2D}
+	CPLOT_ADPROP2D, CPLOT_XPIXERROR2D, CPLOT_YPIXERROR2D}
 		cplotenum;
 
 typedef enum {CPLOT_NULL, CPLOT_XWIN, CPLOT_TK, CPLOT_PLMETA, CPLOT_PS,
@@ -152,8 +152,6 @@ extern int		cplot_aderrhisto1d(fgroupstruct *fgroup,
 			cplot_photzp3d(fgroupstruct *fgroup),
 			cplot_pixerrhisto1d(fgroupstruct **fgroups,
 				int ngroup, int instru, double hsn_thresh),
-			cplot_pixerrhisto2d(fgroupstruct **fgroups, int ngroup,
-				int instru),
 			cplot_shear(fgroupstruct **fgroups, int ngroup,
 					int instru),
 			cplot_subpixerrhisto1d(fgroupstruct **fgroups,
@@ -163,7 +161,12 @@ extern int		cplot_aderrhisto1d(fgroupstruct *fgroup,
 					double hsn_thresh),
 			cplot_referrhisto2d(fgroupstruct *fgroup,
 					fieldstruct *reffield,
-					double hsn_thresh);
+					double hsn_thresh),
+			cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup,
+				int instru),
+			cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup,
+				int instru);
+
 
 char			*cplot_degtosexal(char *str, double alpha,double step),
 			*cplot_degtosexde(char *str, double delta,double step);

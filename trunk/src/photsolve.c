@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/12/2011
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -64,7 +64,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	16/12/2011
+VERSION	04/10/2012
  ***/
 void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -78,6 +78,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 			*coeffval,*coeffconst, *coeffval2,*coeffconst2, 
 			sigma2,sigma3, sigmaoverlap, sigmaref,
 			weight, weightref, mag;
+   short		flagmask;
    int			*ci,*cio,*cioa,
 			*ci2,*cio2,*cioa2,
 			*coeffindex, *coeffindex2,
@@ -87,6 +88,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 			nlsampmax, offlag, photcode, nsamp2, nsamp3;
 
 
+  flagmask = (short)prefs.phot_flagsmask;
   alpha = beta = NULL;	/* To avoid gcc -Wall warnings*/
   naxis = fgroups[0]->naxis;
   ninstru = prefs.nphotinstrustr;
@@ -189,7 +191,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
                 for (nlsamp=1;
 		samp2->set->field->photomlabel>=0 && (samp2=samp2->prevsamp);)
                   if (samp2->set->field->photomlabel==instru
-			&& !(samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+			&& !(samp2->sexflags & flagmask))
                     nlsamp++;
 /*-------------- Allocate memory for storing list sample information */
                 if (nlsamp>nlsampmax)
@@ -226,7 +228,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
                   {
                   nsamp2++;
                   if (samp2->set->field->photomlabel != instru
-			|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp2->sexflags & flagmask))
                     continue;
                   cio = ci;
                   cio2 = ci2;
@@ -270,7 +272,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
                   for (samp3 = samp; nsamp3--; samp3=samp3->prevsamp)
                     {
                     if (samp3->set->field->photomlabel != instru
-			|| (samp3->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp3->sexflags & flagmask))
                       continue;
                     set3 = samp3->set;
                     field3 = set3->field;
@@ -377,7 +379,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	compmags_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	04/10/2012
  ***/
 void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
   {
@@ -388,10 +390,12 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
    long double	lsig, lsig_hsn, lchi2, lchi2_hsn;
    double	mean,mean_hsn, dm, sn2, chi2, meanr, sig2;
    long long	ndeg,ndeg_hsn;
+   short	flagmask;
    int		f,n,s, nfield,nsamp, nsource,nsource_hsn,
 		nmean,nmean_hsn, nmatch,nmatch_hsn,
 		nmeanr;
 
+  flagmask = (short)prefs.phot_flagsmask;
   lsig = lsig_hsn = 0.0;
   lchi2 = lchi2_hsn = 0.0;
   sn2 = 0.0;
@@ -419,7 +423,7 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
           for (samp = samp1; samp && samp->set->field->photomlabel>=0;
 		samp=samp->prevsamp)
             if (samp->set->field->photomlabel == instru
-		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & flagmask))
               {
               samp2 = samp;
               break;
@@ -434,7 +438,7 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
 /*---------- Don't bother if field is a different instru or photometric ref */
 /*---------- or the flux is negative, or the object is saturated */
             if (field2->photomlabel != instru || samp2->flux <= 0.0
-		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| (samp2->sexflags & flagmask))
               continue;
             mean += samp2->mag;
             nmean++;
@@ -459,7 +463,7 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
 	      {
               field2 = samp2->set->field;
               if (field2->photomlabel != instru || samp2->flux <= 0.0
-			|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp2->sexflags & flagmask))
                 continue;
               dm = samp2->mag - mean;
               lsig += dm*dm / (nmean-1.0);
@@ -477,7 +481,7 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
                 {
                 field3 = samp3->set->field;
                 if (field3->photomlabel != instru || samp3->flux <= 0.0
-			|| (samp3->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+			|| (samp3->sexflags & flagmask))
                   continue;
                 dm = samp2->mag - samp3->mag;
                 lchi2 += (chi2 = dm*dm / (samp2->magerr*samp2->magerr
@@ -533,7 +537,7 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
             field = samp->set->field;
             if (field->photomlabel == instru && field->photomflag == 1
 		&& samp->flux > 0.0
-		&& !(samp->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		&& !(samp->sexflags & flagmask))
               {
               meanr += samp->mag;
               sig2 += samp->magerr*samp->magerr;
@@ -551,7 +555,7 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
             field2 = samp2->set->field;
             if (field2->photomlabel != instru || field2->photomflag == 1
 		|| samp2->flux <= 0.0
-		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| (samp2->sexflags & flagmask))
               continue;
             mean += samp2->mag;
             dm = samp2->mag - meanr;
@@ -611,7 +615,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	photstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/01/2011
+VERSION	04/10/2012
  ***/
 int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
   {
@@ -620,8 +624,10 @@ int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
    setstruct	*set;
    samplestruct	*samp,*samp2;
    double	dm, clip, mean;
+   short	flagmask;
    int		f,n,s, nfield,nsamp, nmean, nclip;
 
+  flagmask = (short)prefs.phot_flagsmask;
   clip = fgroup->sig_intmagerr[instru] > 0.0 ? nsigma*nsigma
 		*fgroup->sig_intmagerr[instru]*fgroup->sig_intmagerr[instru]
 			: BIG;
@@ -645,7 +651,7 @@ int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
 		samp2=samp2->prevsamp)
             {
             if (samp2->set->field->photomlabel != instru
-		|| (samp2->sexflags & (OBJ_SATUR|OBJ_TRUNC)))
+		|| (samp2->sexflags & flagmask))
               continue;
             mean += samp2->mag;
             nmean++;

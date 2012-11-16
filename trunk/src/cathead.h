@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		30/07/2012
+*	Last modified:		04/10/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -40,7 +40,7 @@ keystruct		refmergedkey[] = {
   {"NPOS_TOTAL", "Total number of overlapping detections",
 	&refmergedsample.npos_tot, H_INT, T_LONG,
 	"%4d", "", "meta.number", ""},
-  {"NPOS_OK", "Number of unsaturated, uncropped overlapping detections",
+  {"NPOS_OK", "Number of overlapping detections used for astrometry",
 	&refmergedsample.npos_ok, H_INT, T_LONG,
 	"%4d", "", "meta.number", ""},
   {"ALPHA_J2000", "Position along right ascension",
@@ -94,7 +94,7 @@ keystruct		refmergedkey[] = {
   {"EPOCH_MAX", "Maximum epoch",
 	&refmergedsample.epochmax, H_FLOAT, T_DOUBLE,
 	"%15.10f", "yr", "time.epoch;stat.max", "yr"},
-  {"NMAG", "Number of overlaps for each band",
+  {"NMAG", "Number of overlaps used for each band",
 	&refmergedsample.nmag, H_INT, T_LONG,
 	"%4d", "", "meta.number", "",
 	1, &refmergedsample.nband},
