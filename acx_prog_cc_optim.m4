@@ -25,7 +25,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		19/07/2012
+dnl	Last modified:		19/11/2012
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -60,15 +60,15 @@ EOF
       if $CC -V 2>&1 | grep -i "Intel(R) 64" > /dev/null 2>&1 &&
            $CC -c -O conftest.c > /dev/null 2>&1 &&
            test -f conftest.o; then
-        prog_cc_optim_cv_flags="-O3 -axSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX2,CORE-AVX-I -no-prec-div -unroll"
-        prog_ld_optim_cv_flags="-static-intel"
+        prog_cc_optim_cv_flags="-O3 -axSSSE3,SSE4.1,SSE4.2,AVX,CORE-AVX2,CORE-AVX-I -no-prec-div -unroll"
+        prog_ld_optim_cv_flags="-static-intel -no-intel-extensions"
 
       dnl INTEL C 32bits compiler
       elif $CC -V 2>&1 | grep -i "Intel(R)" > /dev/null 2>&1 &&
            $CC -c -O conftest.c > /dev/null 2>&1 &&
            test -f conftest.o; then
         prog_cc_optim_cv_flags="-O3 -axSSE2,SSE3,SSE4.1,SSE4.2,AVX,CORE-AVX2,CORE-AVX-I -no-prec-div -unroll"
-        prog_ld_optim_cv_flags="-static-intel"
+        prog_ld_optim_cv_flags="-static-intel -no-intel-extensions"
 
       dnl GCC
       elif test "$GCC" = "yes"; then
