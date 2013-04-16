@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/11/2010
+*	Last modified:		14/03/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,7 +45,7 @@
 #include "samples.h"
 
 /*-------------------------- Worthy WCS keywords ----------------------------*/
-char	wcskey[][12] = {"EQUINOX", "RADECSYS", "CTYPE???", "CUNIT???",
+char	wcskey[][12] = {"EQUINOX", "RADESYS?", "CTYPE???", "CUNIT???",
 		"CRVAL???", "CRPIX???", "CDELT???", "CD?_?", "PV?_????",
 		"FGROUPNO", "ASTIRMS?", "ASTRRMS?", "ASTINST ",
 		"FLXSCALE", "MAGZEROP", "PHOTIRMS", "PHOTINST", "PHOTLINK",
@@ -61,15 +61,15 @@ INPUT	Name of the ASCII file,
 OUTPUT	RETURN_OK if the file was found, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/09/2004
+VERSION	14/03/2013
  ***/
 int	read_aschead(char *filename, int frameno, tabstruct *tab)
   {
-   char		keyword[88],data[88],comment[88], str[88];
+   char		keyword[88],data[88],comment[88], str[MAXCHAR];
    FILE         *file;
    h_type       htype;
    t_type       ttype;
-   int          i;
+   int          i, cdfirstflag,pvfirstflag;
 
   if ((file=fopen(filename, "r")))
     {
@@ -79,7 +79,8 @@ int	read_aschead(char *filename, int frameno, tabstruct *tab)
                 && strncmp(str,"END ",4)
                 && strncmp(str,"END\n",4));
     memset(str, ' ', 80);
-    while (fgets(str, 81, file) && strncmp(str,"END ",4)
+    cdfirstflag = pvfirstflag = 1;
+    while (fgets(str, MAXCHAR, file) && strncmp(str,"END ",4)
                                 && strncmp(str,"END\n",4))
       {
       fitspick(str, keyword, data, &htype, &ttype, comment);
@@ -90,6 +91,17 @@ int	read_aschead(char *filename, int frameno, tabstruct *tab)
         ||!wstrncmp(keyword, "BSCALE  ", 8)
         ||!wstrncmp(keyword, "BZERO   ", 8))
         continue;
+/*---- Wipe out conflicting keywords */
+      if (!wstrncmp(keyword, "PV?_????", 8) && pvfirstflag)
+        {
+        removekeywordfrom_head(tab, "PV?_????");
+        pvfirstflag = 0;
+        }
+      if (!wstrncmp(keyword, "CD?_????", 8) && cdfirstflag)
+        {
+        removekeywordfrom_head(tab, "CDELT???");
+        cdfirstflag = 0;
+        }
       addkeywordto_head(tab, keyword, comment);
       fitswrite(tab->headbuf, keyword, data, htype, ttype);
       memset(str, ' ', 80);
@@ -112,7 +124,7 @@ INPUT	Name of the ASCII file,
 OUTPUT	RETURN_OK if the file was found, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	16/11/2010
+VERSION	29/11/2012
  ***/
 int	write_aschead(char *filename, fieldstruct *field)
   {
@@ -135,6 +147,12 @@ int	write_aschead(char *filename, fieldstruct *field)
 	field->filename);
   naxis = fgroup->naxis;
 
+  sprintf(str, "HISTORY   Astrometric solution by %s version %s (%s)",
+		BANNER,MYVERSION,DATE);
+  fprintf(file, "%.79s\n", str); 
+  sprintf(str, "COMMENT   (c) %s", COPYRIGHT);
+  fprintf(file, "%.79s\n", str); 
+  fprintf(file, "COMMENT   \n");
   for (s=0; s<field->nset; s++)
     {
     tab = new_tab("");
@@ -185,23 +203,20 @@ int	write_aschead(char *filename, fieldstruct *field)
         addkeywordto_head(tab,"PHOTLINK",
 		"True if linked to a photometric field");
         fitswrite(tab->headbuf,"PHOTLINK", &field->photomlink, H_BOOL, T_LONG);
-/*------ We are only interested in astrometric and photometric informations */
-        sprintf(str, "HISTORY   Astrometric solution by %s version %s (%s)",
-		BANNER,MYVERSION,DATE);
-        fprintf(file, "%.79s\n", str); 
-        sprintf(str, "COMMENT   (c) %s", COPYRIGHT);
-        fprintf(file, "%.79s\n", str); 
-        fprintf(file, "COMMENT   \n");
         for (i=0; *wcskey[i]; i++)
           for (ptr=tab->headbuf; (n=fitsfind(ptr, wcskey[i])) != RETURN_ERROR;
 		ptr+=80)
             fprintf(file, "%.79s\n", ptr += n*80);          
         break;
       case FOCAL_PLANE:
+/*------ Write only relative astrometric information */
         for (ptr=tab->headbuf; (n=fitsfind(ptr, "CRPIX???")) != RETURN_ERROR;
 		ptr+=80)
-          fprintf(file, "%.79s\n", ptr += n*80);          
+          fprintf(file, "%.79s\n", ptr += n*80);
         for (ptr=tab->headbuf; (n=fitsfind(ptr, "CD?_?")) != RETURN_ERROR;
+		ptr+=80)
+          fprintf(file, "%.79s\n", ptr += n*80);
+        for (ptr=tab->headbuf; (n=fitsfind(ptr, "PV?_????")) != RETURN_ERROR;
 		ptr+=80)
           fprintf(file, "%.79s\n", ptr += n*80);          
         break;

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/10/2012
+*	Last modified:		07/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -44,6 +44,7 @@
 #include "field.h"
 #include "fits/fitscat.h"
 #include "fitswcs.h"
+#include "merge.h"
 #include "prefs.h"
 #include "proper.h"
 #include "samples.h"
@@ -143,7 +144,7 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
           sig = samp->wcsposerr[d];
           sigma[d] = sig*sig;
           }
-         xi = samp->colour;
+         xi = samp->msamp->colour;
 /*------ Explore the forward direction */
         for (samp2=samp; (samp2=samp2->nextsamp);)
           {
@@ -241,12 +242,13 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/10/2012
+VERSION	10/03/2013
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
    fieldstruct	*field;
    setstruct	*set;
+   msamplestruct	*msamp;
    samplestruct	*samp,*samp2, *sampmin, *samppropmod;
    wcsstruct	*wcs, *wcsec;
    char		*wcsectype[NAXIS];
@@ -254,11 +256,9 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
 		coord[NAXIS], coorderr[NAXIS], propmean[NAXIS],
 		wis, paral,paralerr, chi2,chi2min, propmod,propmodmin;
    short	flagmask;
-   int		d,f,s,n, naxis, nfield, nsamp,nsamp2, lng,lat, celflag,
+   int		d,f,s,m,n, naxis, nfield, nsamp,nsamp2, lng,lat, celflag,
 		propflag, paralflag, refflag, ncoeff,ncoeffp1,
 		nfree, nbad,nbadmax, bad, nfreemin, npropmean;
-
-  NFPRINTF(OUTPUT, "Computing proper motions...");
 
   flagmask = (short)prefs.astr_flagsmask;
   paralflag = prefs.parallax_flag;
@@ -296,147 +296,126 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
   for (f=0; f<nfield; f++)
     fgroup->field[f]->index = f;
 
-  for (f=0; f<nfield; f++)
+
+  msamp = fgroup->msample;
+  for (m=fgroup->nmsample; m--; msamp++)
     {
-    field = fgroup->field[f];
-    for (s=0; s<field->nset; s++)
+    samp = msamp->samp;
+    if (!samp->prevsamp)
       {
-      set = field->set[s];
-      nsamp = set->nsample;
-      samp = set->sample;
-      for (n=nsamp; n--; samp++)
+      for (d=0; d<naxis; d++)
+         msamp->wcsprop[d] = msamp->wcsproperr[d] = 0.0;
+      msamp->wcsparal = msamp->wcsparalerr = msamp->wcschi2 = 0.0;
+      continue;
+      }
+
+/*-- Switch off SCAMP_BADPROPER flag */
+    for (samp2=samp; samp2; samp2 = samp2->prevsamp)
+      samp2->scampflags ^= (samp2->scampflags&SCAMP_BADPROPER);
+/*-- Count detections */
+    nsamp2 = msamp->npos_ok;
+    if ((nbadmax=(int)(PROPER_MAXFRACBAD*nsamp2)) < PROPER_MAXNBAD)
+      nbadmax = PROPER_MAXNBAD;
+    wis = wcs_scale(wcs, samp->projpos);
+    nfreemin = astrprop_solve(fgroup, samp, wcsec, alpha,beta, wis, &chi2min);
+    sampmin = NULL;
+    propmodmin = BIG;
+    for (nbad=0; nbad<nbadmax; nbad++)
+      {
+/*----- Exit if chi2 is OK or if less than 2 degrees of freedom remain */
+      if (chi2min<nfreemin*PROPER_MAXCHI2 || nfreemin<2)
+        break;
+      sampmin = samppropmod = NULL;
+      for (samp2=samp; samp2; samp2 = samp2->prevsamp)
         {
-        if (!samp->prevsamp)
-          {
-          if (!samp->nextsamp)
-            {
-            for (d=0; d<naxis; d++)
-              samp->wcsprop[d] = samp->wcsproperr[d] = 0.0;
-            samp->wcsparal = samp->wcsparalerr = samp->wcschi2 = 0.0;
-            }
-          continue;
-          }
-        if (samp->nextsamp)
-          continue;
-/*------ Count detections */
-        nsamp2 = 0;
-        for (samp2=samp; samp2; samp2 = samp2->prevsamp)
-          if ((refflag || samp2->set->field->astromlabel>=0)
-		&& !(samp2->sexflags & flagmask)
-		&& !(samp2->scampflags & SCAMP_BADPROPER))
-            nsamp2++;
-        if ((nbadmax=(int)(PROPER_MAXFRACBAD*nsamp2)) < PROPER_MAXNBAD)
-          nbadmax = PROPER_MAXNBAD;
-        wis = wcs_scale(wcs, samp->projpos);
-        nfreemin = astrprop_solve(fgroup,samp,wcsec, alpha,beta, wis, &chi2min);
-        sampmin = NULL;
-        propmodmin = BIG;
-        for (nbad=0; nbad<nbadmax; nbad++)
-          {
-/*-------- Exit if chi2 is OK or if less than 2 degrees of freedom remain */
-          if (chi2min<nfreemin*PROPER_MAXCHI2 || nfreemin<2)
-            break;
-          sampmin = samppropmod = NULL;
-          for (samp2=samp; samp2; samp2 = samp2->prevsamp)
-            {
-            if (!(refflag || samp2->set->field->astromlabel>=0)
+        if (!(refflag || samp2->set->field->astromlabel>=0)
 		|| (samp2->sexflags & flagmask)
 		|| (samp2->scampflags & SCAMP_BADPROPER))
-              continue;
-/*---------- Switch detection to "bad" state */
-            samp2->scampflags |= SCAMP_BADPROPER;
-            nfree = astrprop_solve(fgroup,samp, wcsec,alpha,beta, wis, &chi2);
-            if (chi2*nfreemin<chi2min*nfree)
-              {
-              chi2min = chi2;
-              sampmin = samp2;
-              nfreemin = nfree;
-              }
-            propmod = sqrt(beta[0]*beta[0]+beta[1]*beta[1]);
-            if (propmod<propmodmin)
-              {
-              propmodmin = propmod;
-              samppropmod = samp2;
-              }
-/*---------- Revert detection to "good" state */
-            samp2->scampflags ^= SCAMP_BADPROPER;
-            }
-          if (sampmin)
-            {
-            if (nfreemin<=0 && samppropmod)
-              samppropmod->scampflags |= SCAMP_BADPROPER;
-            else
-              sampmin->scampflags |= SCAMP_BADPROPER;
-            }
-          }
-
-        if (nfreemin<0)
-          {
-/*-------- Not enough "good" detections to derive a solution */
-          for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2 = samp2->prevsamp)
-            {
-            for (d=0; d<naxis; d++)
-              samp2->wcsprop[d] = samp2->wcsproperr[d] = 0.0;
-            samp2->wcsparal = samp2->wcsparalerr = 0.0;
-            samp2->wcschi2 = 0.0;
-            }
           continue;
-          }
-
-        if (sampmin)
-          nfreemin = astrprop_solve(fgroup,samp,wcsec,alpha,beta,wis, &chi2min);
-#if defined(HAVE_LAPACKE)
-        LAPACKE_dpotri(LAPACK_COL_MAJOR, 'L',ncoeff, alpha, ncoeff);
-#else
-        clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
-#endif
-/*------ Prepare a normalization factor to avoid problems with large motions */
-        propmod = 0.0;
-        for (d=0; d<naxis; d++)
-           propmod += beta[d]*beta[d];
-        propmod = sqrt(propmod + 1.0);
-        for (d=0; d<naxis; d++)
+/*------ Switch detection to "bad" state */
+        samp2->scampflags |= SCAMP_BADPROPER;
+        nfree = astrprop_solve(fgroup,samp, wcsec,alpha,beta, wis, &chi2);
+        if (chi2*nfreemin<chi2min*nfree)
           {
-          coord[d] = samp->projpos[d] + beta[d] / propmod;
-          coorderr[d] = sqrt(alpha[d*ncoeffp1]*wis);
+          chi2min = chi2;
+          sampmin = samp2;
+          nfreemin = nfree;
           }
-        if (paralflag)
+        propmod = sqrt(beta[0]*beta[0]+beta[1]*beta[1]);
+        if (propmod<propmodmin)
           {
-          paral = beta[4];
-          paralerr = sqrt(alpha[24]);
+          propmodmin = propmod;
+          samppropmod = samp2;
           }
-/*------ Project shifted coordinates onto the sky... */
-        raw_to_wcs(wcs, coord, coord);
-/*------ ... and recover the proper motion vector in celestial coords */
-        for (d=0; d<naxis; d++)
-          coord[d] = (coord[d] - samp->wcspos[d])*propmod;
-        if (celflag)
-          coord[lng] *= cos(samp->wcspos[lat]*DEG);
-        propmod = 0.0;
-        for (d=0; d<naxis; d++)
-          propmod += coord[d]*coord[d];
-        if (sqrt(propmod)*DEG/MAS<20.0)
-          {
-          for (d=0; d<naxis; d++)
-            propmean[d] += coord[d];
-          npropmean++;
-          }
-
-        for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
-		samp2 = samp2->prevsamp)
-          {
-          for (d=0; d<naxis; d++)
-            {
-            samp2->wcsprop[d] = coord[d];
-            samp2->wcsproperr[d] = fabs(coorderr[d]);
-            }
-          samp2->wcsparal = paral;
-          samp2->wcsparalerr = paralerr;
-          samp2->wcschi2 = nfreemin? chi2min / nfreemin : 0.0;
-          }
+/*------ Revert detection to "good" state */
+        samp2->scampflags ^= SCAMP_BADPROPER;
+        }
+      if (sampmin)
+        {
+        if (nfreemin<=0 && samppropmod)
+          samppropmod->scampflags |= SCAMP_BADPROPER;
+        else
+          sampmin->scampflags |= SCAMP_BADPROPER;
         }
       }
+
+    if (nfreemin<0)
+      {
+/*---- Not enough "good" detections to derive a solution */
+      for (d=0; d<naxis; d++)
+        msamp->wcsprop[d] = msamp->wcsproperr[d] = 0.0;
+      msamp->wcsparal = msamp->wcsparalerr = 0.0;
+      msamp->wcschi2 = 0.0;
+      continue;
+      }
+
+    if (sampmin)
+      nfreemin = astrprop_solve(fgroup,samp,wcsec,alpha,beta,wis, &chi2min);
+#if defined(HAVE_LAPACKE)
+    LAPACKE_dpotri(LAPACK_COL_MAJOR, 'L',ncoeff, alpha, ncoeff);
+#else
+    clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
+#endif
+/*-- Prepare a normalization factor to avoid problems with large motions */
+    propmod = 0.0;
+    for (d=0; d<naxis; d++)
+       propmod += beta[d]*beta[d];
+    propmod = sqrt(propmod + 1.0);
+    for (d=0; d<naxis; d++)
+      {
+      coord[d] = samp->projpos[d] + beta[d] / propmod;
+      coorderr[d] = sqrt(alpha[d*ncoeffp1]*wis);
+      }
+    if (paralflag)
+      {
+      paral = beta[4];
+      paralerr = sqrt(alpha[24]);
+      }
+/*-- Project shifted coordinates onto the sky... */
+    raw_to_wcs(wcs, coord, coord);
+/*-- ... and recover the proper motion vector in celestial coords */
+    for (d=0; d<naxis; d++)
+      coord[d] = (coord[d] - samp->wcspos[d])*propmod;
+    if (celflag)
+      coord[lng] *= cos(samp->wcspos[lat]*DEG);
+    propmod = 0.0;
+    for (d=0; d<naxis; d++)
+      propmod += coord[d]*coord[d];
+    if (sqrt(propmod)*DEG/MAS<20.0)
+      {
+      for (d=0; d<naxis; d++)
+        propmean[d] += coord[d];
+      npropmean++;
+      }
+
+    for (d=0; d<naxis; d++)
+      {
+      msamp->wcsprop[d] = coord[d];
+      msamp->wcsproperr[d] = fabs(coorderr[d]);
+      }
+    msamp->wcsparal = paral;
+    msamp->wcsparalerr = paralerr;
+    msamp->wcschi2 = nfreemin? chi2min / nfreemin : 0.0;
     }
 
  for (d=0; d<naxis; d++)
@@ -463,7 +442,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/10/2012
+VERSION	07/04/2013
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -476,7 +455,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
    double 	mpos[NAXIS], mposw[NAXIS],  projpos[NAXIS],
 		ecpos[NAXIS], pfac[NAXIS],a[25],b[5],
 		**csscale, **cszero,
-		sig, wi,yi, sy2, dt, bec,cbec,lec, dval;
+		sig, wi,yi, sy2, dt, bec,cbec,lec, dval, colour;
    short	flagmask;
    int		d,j,k, f1,ff, naxis, nfield, ncoeff,nfree, ncoeffp1, lng,lat,
 		colcorflag,paralflag,meanflag,refflag;
@@ -489,8 +468,9 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   lat = wcs->lat;
   csscale = fgroup->intcolshiftscale;
   cszero = fgroup->intcolshiftzero;
+  colour = samp->msamp->colour;
   refflag = prefs.astrefinprop_flag;
-  colcorflag = prefs.colourshift_flag;
+  colcorflag = prefs.colourshiftcorr_flag;
   paralflag = prefs.parallax_flag;
   meanflag = 1;	/* Always set for the 1st detection in chain */
   ncoeff = paralflag? 5 : 4;
@@ -537,8 +517,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
             wi = 0.0;
 /*-------- DCR correction */
           mpos[d] += colcorflag?
-		wi*(samp2->projpos[d]
-			+ samp2->colour*csscale[d][ff] + cszero[d][ff])
+		wi*(samp2->projpos[d] + colour*csscale[d][ff] + cszero[d][ff])
 		: wi*samp2->projpos[d];
           mposw[d] += wi;
           }
@@ -674,70 +653,6 @@ void	astrconnect_fgroup(fgroupstruct *fgroup)
     }
 
   return;
-  }
-
-
-/****** astrpropclip_fgroup *****************************************************
-PROTO	void astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod)
-PURPOSE	Removes sources with large proper-motions from cross-identification
-	linked lists.
-INPUT	ptr to a group of fields pointers,
-	threshold modulus in sigmas.
-OUTPUT	-.
-NOTES	Input structures must have gone through crossid_fgroup() and
-	astrprop_fgroup() first.
-AUTHOR	E. Bertin (IAP)
-VERSION	12/08/2012
- ***/
-int	astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod)
-  {
-   fieldstruct	**fields,
-		*field;
-   setstruct	*set;
-   samplestruct	*samp,*samp2,*prevsamp2;
-   double	*meanprop,
-		prop, propmod, maxpropmod2, properr,propmoderr;
-   int		i,f,n,s, naxis,nfield,nsamp, nclip;
-
-  maxpropmod *= MAS/DEG;	/* Convert threshold to native deg/yr units */
-  maxpropmod2 = maxpropmod*maxpropmod;	/* Square to accelerate computations */
-  meanprop = fgroup->meanwcsprop;
-  naxis = fgroup->naxis;
-  nclip= 0;
-  nfield = fgroup->nfield;
-  fields = fgroup->field;
-  for (f=0; f<nfield; f++)
-    {
-    field=fields[f];
-    for (s=0; s<field->nset; s++)
-      {
-      set = field->set[s];
-      nsamp = set->nsample;
-      samp = set->sample;
-      for (n=nsamp; n--; samp++)
-        if (!samp->nextsamp && samp->prevsamp)
-          {
-          propmod = 0.0;
-          for (i=0; i<naxis; i++)
-            {
-            prop = samp->wcsprop[i] - meanprop[i];
-            propmod += prop*prop;
-            properr = samp->wcsproperr[i];
-            propmoderr += properr*properr;
-            }
-          if (propmod>maxpropmod2*propmoderr)
-            for (samp2 = samp; samp2; samp2=prevsamp2)
-              {
-              prevsamp2 = samp2->prevsamp;
-/*------------ Remove (unlink) outlier */
-              samp2->prevsamp = samp2->nextsamp = NULL;
-              nclip++;
-              }
-          }
-      }
-    }
-
-  return nclip;
   }
 
 

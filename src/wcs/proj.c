@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic WCS library
 *
-*	Copyright:		(C) 2000-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2000-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *				(C) 1995-1999 Mark Calabretta (original version)
 *
 *	Licenses:		GNU General Public License
@@ -24,7 +24,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		06/12/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*============================================================================
@@ -221,7 +221,7 @@
 *   Author: Mark Calabretta, Australia Telescope National Facility
 *   IRAF's TNX added by E.Bertin 2000/08/23
 *   Behaviour of Cartesian-like projections modified by E.Bertin 2005/08/29
-*   $Id: proj.c,v 1.1.1.1 2008/01/10 18:00:00 bertin Exp $
+*   $Id: proj.c,v 1.1.1.1 2012/12/06 18:00:00 bertin Exp $
 *===========================================================================*/
 
 #ifdef HAVE_CONFIG_H
@@ -392,7 +392,9 @@ struct prjprm *prj;
       prj->flag = PRJSET;
    } 
 
-   for (k = 99; k >= 0 && prj->p[k] == 0.0 && prj->p[k+100] == 0.0; k--);
+   for (k = 99;
+	k >= 0 && fabs(prj->p[k]) <= 1e-30 && fabs(prj->p[k+100]) <= 1e-30;
+	k--);
    if (k < 0)
      k = 0;
 
@@ -410,7 +412,7 @@ struct prjprm *prj;
 double *x, *y;
 
 {
-   double r, s, xp[2];
+   double r, s, xp[2], x1,y1;
 
    if (abs(prj->flag) != PRJSET) {
       if(tanset(prj)) return 1;
@@ -422,9 +424,17 @@ double *x, *y;
    r =  prj->r0*wcs_cosd(theta)/s;
    xp[0] =  r*wcs_sind(phi);
    xp[1] = -r*wcs_cosd(phi);
+   if (prj->n)
+     pv_to_raw(prj, xp[0],xp[1], x,y);
+   else
+     {
+     *x = xp[0];
+     *y = xp[1];
+     }
+/*
    *x = prj->inv_x? poly_func(prj->inv_x, xp) : xp[0];
    *y = prj->inv_y? poly_func(prj->inv_y, xp) : xp[1];
-
+*/
    if (prj->flag == PRJSET && s < 0.0) {
       return 2;
    }
@@ -3852,3 +3862,23 @@ poly_end:
    return 0;
 }
 
+/*--------------------------------------------------------------------------*/
+
+int pv_to_raw(struct prjprm *prj, double x, double y, double *xo, double *yo)
+
+{
+  double	x1,y1;
+
+   if (abs(prj->flag) != PRJSET) {
+      if (tanset(prj)) return 1;
+   }
+
+  raw_to_pv(prj, x,y, xo,yo);
+  *xo = 2*x - *xo;
+  *yo=  2*y - *yo;
+  raw_to_pv(prj, *xo,*yo, &x1, &y1);
+  *xo -= x1 - x;
+  *yo -= y1 - y;
+
+   return 0;
+}

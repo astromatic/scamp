@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		29/11/2012
+#	Last modified:		04/04/2013
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[2.0b6],[bertin@iap.fr])
+AC_INIT([scamp],[2.0b8],[bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -213,18 +213,20 @@ if test "$use_pthreads" = "yes"; then
   ACX_PTHREAD
   CC="$PTHREAD_CC"
   [AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS -D_REENTRANT"]
-  LIBS="$PTHREAD_LIBS $LIBS"
+  LIBS="$LIBS $PTHREAD_LIBS"
 fi
 AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
 ############ handle the INTEL MKL library (FFTW + LAPACKe) ###########
 if test "$enable_mkl" = "yes"; then
-  ACX_MKL()
+  convlibs="${srcdir}/wcs/libwcs_c.a"
+  ACX_MKL(,yes,$enable_best_link,$convlibs)
   if test "$MKL_WARN" != ""; then
-      AC_MSG_WARN([$MKL_WARN])
+    AC_MSG_WARN([$MKL_WARN])
   fi
   AM_CFLAGS="$AM_CFLAGS $MKL_CFLAGS "
-  LIBS="$MKL_LIBS $LIBS"
+  AM_LDFLAGS="$AM_LDFLAGS $MKL_LDFLAGS "
+  LIBS="$LIBS $MKL_LIBS"
 else
 ################ handle the FFTW library (Fourier transforms) ################
   ACX_FFTW($with_fftw_libdir,$with_fftw_incdir,$use_pthreads,yes,
@@ -240,7 +242,21 @@ else
 	  AC_MSG_WARN([$ATLAS_WARN])
 	fi,
 	AC_MSG_ERROR([$ATLAS_ERROR Exiting.]))
+fi													
+
+################# handle the PLPlot library (graphic plots) ##################
+if test "$enable_plplot" = "yes"; then
+  ACX_PLPLOT($with_plplot_libdir,$with_plplot_incdir,
+    [use_plplot="yes"]
+    [AM_CPPFLAGS="$AM_CPPFLAGS $PLPLOT_CFLAGS"]
+    [LIBS="$LIBS $PLPLOT_LIBS"],
+    [use_plplot="no"]
+    AC_MSG_WARN([PLPlot library not found/incomplete! Plotting deactivated.]))
+else
+  AC_MSG_WARN([Plotting deactivated by user.])
 fi
+AM_CONDITIONAL(USE_PLPLOT, test "$use_plplot" = "yes")
+
 
 ################# handle the CDSclient package (CDS queries) #################
 ACX_CDSCLIENT($with_cdsclient_dir,
@@ -256,19 +272,6 @@ ACX_CDSCLIENT($with_cdsclient_dir,
 	if aclient_cgi is not in your execution PATH.]))
 AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient", [CDSclient executable])
 
-################# handle the PLPlot library (graphic plots) ##################
-if test "$enable_plplot" = "yes"; then
-  ACX_PLPLOT($with_plplot_libdir,$with_plplot_incdir,
-    [use_plplot="yes"]
-    [AM_CPPFLAGS="$AM_CPPFLAGS $PLPLOT_CFLAGS"]
-    [LIBS="$PLPLOT_LIBS $LIBS"],
-    [use_plplot="no"]
-    AC_MSG_WARN([PLPlot library not found/incomplete! Plotting deactivated.]))
-else
-  AC_MSG_WARN([Plotting deactivated by user.])
-fi
-AM_CONDITIONAL(USE_PLPLOT, test "$use_plplot" = "yes")
-
 # Compile with profiling option
 if test "$enable_profiling" = "yes"; then
   if test "$enable_icc" = "yes"; then
@@ -283,7 +286,7 @@ fi
 if test "$enable_best_link" = "yes"; then
   if test "$enable_icc" = "yes"; then
     AM_LDFLAGS="-static-intel -openmp-link static -shared-libgcc \
-	-static-libtool-libs -avoid-version $AM_LDFLAGS"
+	-static-libtool-libs -no-intel-extensions -avoid-version $AM_LDFLAGS"
   else
     AM_LDFLAGS="-shared-libgcc -static-libtool-libs -avoid-version $AM_LDFLAGS"
   fi

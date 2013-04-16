@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/12/2011
+*	Last modified:		05/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -35,11 +35,31 @@
 #define		HIPASS_SLOPE	1000	/* Slope of the sigmoid filter */
 
 /*------------------------------- Other Macros ------------------------------*/
-#define	QFFTWMALLOC(ptr, typ, nel) \
-		{if (!(ptr = (typ *)fftwf_malloc((size_t)(nel)*sizeof(typ)))) \
-		  error(EXIT_FAILURE, "Not enough memory for ", \
-			#ptr " (" #nel " elements) !");;}
-#define	QFFTWFREE(ptr)	fftwf_free(ptr)
+#define	QFFTWF_MALLOC(ptr, typ, nel) \
+		{ \
+		if (!(ptr = (typ *)fftwf_malloc((size_t)(nel)*sizeof(typ)))) \
+		   { \
+		   sprintf(gstr, #ptr " (" #nel "=%lu elements) " \
+			"at line %d in module " __FILE__ " !", \
+			(size_t)(nel)*sizeof(typ), __LINE__); \
+		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
+                   }; \
+                 }
+
+#define	QFFTWF_CALLOC(ptr, typ, nel) \
+		{ \
+		if (!(ptr = (typ *)fftwf_malloc((size_t)(nel)*sizeof(typ)))) \
+		   { \
+		   sprintf(gstr, #ptr " (" #nel "=%lu elements) " \
+			"at line %d in module " __FILE__ " !", \
+			(size_t)(nel)*sizeof(typ), __LINE__); \
+		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
+                   }; \
+		memset(ptr, 0, (size_t)(nel)*sizeof(typ)); \
+		}
+
+#define	QFFTWF_FREE(ptr) \
+		{fftwf_free(ptr); ptr=NULL;}
 
 /*--------------------------- structure definitions -------------------------*/
 
@@ -47,5 +67,5 @@
 extern void	fastcorr(float *data1, float *data2, int naxis, int *size,
 			double *lambda_lopass, double *lambda_hipass),
 		fft_end(void),
-		fft_init(void),
+		fft_init(int nthreads),
 		shiftcube(float *data, int naxis, int *size);

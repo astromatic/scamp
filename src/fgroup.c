@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		28/01/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -410,13 +410,14 @@ INPUT   Field group pointer.
 OUTPUT  -.
 NOTES   -.
 AUTHOR  E. Bertin (IAP)
-VERSION 25/05/2012
+VERSION 28/01/2013
 */
 void	end_fgroup(fgroupstruct *fgroup)
   {
    int	i;
 
   free(fgroup->field);
+  free(fgroup->msample);
   free(fgroup->sig_intmagerr);
   free(fgroup->chi2_intmag);
   free(fgroup->nintmagmatch);

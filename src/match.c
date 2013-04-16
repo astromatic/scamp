@@ -38,6 +38,23 @@
 #include <stdlib.h>
 #include <string.h>
  
+#ifdef USE_THREADS
+#include "threads.h"
+#endif
+
+#ifdef HAVE_ATLAS
+#include ATLAS_LAPACK_H
+#endif
+
+#ifdef HAVE_LAPACKE
+#include LAPACKE_H
+#endif
+
+
+#ifdef HAVE_MKL
+ #include MKL_H
+#endif
+
 #include "define.h"
 #include "globals.h"
 #include "check.h"
@@ -51,18 +68,6 @@
 #include "astrefcat.h"
 #include "samples.h"
 #include "wcs/wcs.h"
-
-#ifdef USE_THREADS
-#include "threads.h"
-#endif
-
-#ifdef HAVE_ATLAS
-#include ATLAS_LAPACK_H
-#endif
-
-#ifdef HAVE_LAPACKE
-#include LAPACKE_H
-#endif
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
