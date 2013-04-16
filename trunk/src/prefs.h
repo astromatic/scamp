@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		07/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -201,8 +201,9 @@ typedef struct
   int		parallax_flag;			/* Compute parallaxes? */
 /* Proper motions */
   int		propmotion_flag;		/* Compute proper motions? */
+  int		propmotioncorr_flag;		/* Correct proper motions? */
 /* Differential Chromatic Refraction (DRC) */
-  int		colourshift_flag;		/* Correct colour shift in pm?*/
+  int		colourshiftcorr_flag;		/* Correct colour shifts?*/
   int		astrefinprop_flag;		/* Use ref.catalog in pm? */
   int		astr_flagsmask;			/* Astrom. mask on SEx FLAGS */
 

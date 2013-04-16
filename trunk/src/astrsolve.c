@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		05/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -38,19 +38,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "define.h"
-#include "globals.h"
-#include "astrsolve.h"
-#include "fgroup.h"
-#include "field.h"
-#include "fits/fitscat.h"
-#include "fitswcs.h"
-#include "prefs.h"
-#include "samples.h"
-#include "wcs/poly.h"
-
-#ifdef USE_THREADS
-#include "threads.h"
+#ifdef HAVE_MKL
+ #include MKL_H
 #endif
 
 #ifdef HAVE_ATLAS
@@ -60,6 +49,24 @@
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #define MATSTORAGE_PACKED 1
+#endif
+
+#include <sys/mman.h>
+
+#include "define.h"
+#include "globals.h"
+#include "astrsolve.h"
+#include "fgroup.h"
+#include "field.h"
+#include "fits/fitscat.h"
+#include "fitswcs.h"
+#include "merge.h"
+#include "prefs.h"
+#include "samples.h"
+#include "wcs/poly.h"
+
+#ifdef USE_THREADS
+#include "threads.h"
 #endif
 
 /*------------------- global variables for multithreading -------------------*/
@@ -102,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/09/2012
+VERSION	25/03/2013
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -125,7 +132,12 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 			d, index, index2,
 			ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
 			startindex2, nmiss;
+size_t size;
 
+#ifdef HAVE_MKL
+/* Set number of MKL threads (may be changed later in the code) */
+  mkl_set_num_threads(prefs.nthreads);
+#endif
 
 /* Compute weight factors for each set based on the relative number of */
 /* astrometric references and detections */
@@ -178,6 +190,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
       switch(prefs.stability_type[instru])
         {
         case STABILITY_INSTRUMENT:
+          field->index = 0;
           field->index2 = findex2[instru+1]++ - 1;
           findex[instru+1] = nsetmax[instru];
           break;
@@ -307,7 +320,13 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   QCALLOC(nconst, int, ncoefftot);
 
 #ifdef MATSTORAGE_PACKED
-  QCALLOC(alpha, double, ((size_t)(ncoefftot+1)*ncoefftot)/2);
+  size=((size_t)(ncoefftot+1)*ncoefftot)/2*sizeof(double);
+  if ((alpha = mmap(NULL, size,PROT_WRITE|PROT_READ,MAP_PRIVATE|MAP_ANONYMOUS,-1,0))==(void *)-1)
+    {
+    sprintf(gstr, "alpha ((ncoefftot+1)*ncoefftot)/2 =%lld bytes) "
+			"at line %d in module " __FILE__ " !", size, __LINE__);
+    error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
+    }
 #else
   QCALLOC(alpha, double, (size_t)ncoefftot*ncoefftot);
 #endif
@@ -503,17 +522,23 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   if (ncoefftot)
     {
 #if defined(HAVE_LAPACKE)
+
   #ifdef MATSTORAGE_PACKED
-    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, beta, ncoefftot) !=0)
+    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, beta, ncoefftot) != 0)
   #else
     if (LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
 		beta, ncoefftot) !=0)
   #endif
+
 #else
     if (clapack_dposv(CblasRowMajor, CblasUpper,
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot) != 0)
 #endif
       warning("Not a positive definite matrix", " in astrometry solver");
+
+#ifdef HAVE_MKL
+   mkl_free_buffers();	/* Avoid MKL memory leaks */
+#endif
     }    
 
 /* Fill the astrom structures with the derived parameters */
@@ -534,7 +559,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 
   poly_end(poly);
   poly_end(poly2);
-  free(alpha);
+  munmap(alpha,size);
   free(beta);
   free(nconst);
   free(findex);
@@ -692,7 +717,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 /*------------ Image coordinates receive a special treatment */
               if (!redflag)
                 {
-                raw_to_red(set2->wcs, samp2->rawpos, redpos);
+                raw_to_red(set2->wcs, samp2->vrawpos, redpos);
                 redflag = 1;
                 }
               context[c] = redpos[c==cx?lng:lat];
@@ -708,7 +733,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
           if (index2>=0)
             {
             if (!redflag)
-              raw_to_red(set2->wcs, samp2->rawpos, redpos);
+              raw_to_red(set2->wcs, samp2->vrawpos, redpos);
               poly_func(poly2, redpos);
             }
           }
@@ -959,7 +984,7 @@ INPUT	ptr to the right-hand matrix,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/12/2003
+VERSION	04/04/2013
  ***/
 static void add_betamat(double *beta, int naxis,
 		double weight, int *ci, double *cv, double *cc, int ncoeff)
@@ -970,6 +995,7 @@ static void add_betamat(double *beta, int naxis,
     return;
 
   for (d=naxis; d--;)
+#pragma ivdep
     for (p=ncoeff; p--;)
       beta[*(ci++)] -= weight**(cv++)**(cc++);
 
@@ -1164,7 +1190,7 @@ OUTPUT	-.
 NOTES	Unfortunately the present WCS description of distortions is valid
 	in 2D only.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/07/2012
+VERSION	04/04/2013
  ***/
 void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
 		setstruct *set)
@@ -1324,6 +1350,7 @@ void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
       wcs->cd[lng*naxis + lat] = cd[lng*naxis + lat];
       wcs->cd[lat*naxis + lng] = cd[lat*naxis + lng];
       wcs->cd[lat*naxis + lat] = cd[lat*naxis + lat];
+#pragma ivdep
       for (p=100; p--;)
         projp[p+lng*100] = projp[p+lat*100] = 0.0;
       }
@@ -1441,7 +1468,7 @@ int	compute_jacobian(samplestruct *sample, double *dprojdred)
     return RETURN_ERROR;
   naxis = wcs->naxis;
   for (i=0; i<naxis; i++)
-    rawpos[i] = sample->rawpos[i];
+    rawpos[i] = sample->vrawpos[i];
   for (i=0; i<naxis; i++)
     {
 /*-- Compute terms of the Jacobian dproj/dred matrix */
@@ -1465,24 +1492,29 @@ int	compute_jacobian(samplestruct *sample, double *dprojdred)
 
 
 /****** reproj_fgroup *******************************************************
-PROTO	void reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
+PROTO	void reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
+			int propflag)
 PURPOSE	Perform re-projection of sources in a group of fields.
-INPUT	ptr to the group of fields.
+INPUT	pointer to the group of fields,
+	pointer to the reference field,
+	proper motion correction flag.
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/09/2004
+VERSION	05/04/2013
  ***/
-void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
+void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield, int propflag)
   {
-   fieldstruct	**field;
-   wcsstruct	*wcs;
-   setstruct	**pset,
-		*set;
+   fieldstruct		**field;
+   wcsstruct		*wcs;
+   setstruct		**pset,
+			*set;
+   msamplestruct	*msamp;
    samplestruct	*samp;
-   double	*projposmin,*projposmax;
-   int		i, f, nsamp,
-		s, nfield, naxis;
+   double		wcspos[NAXIS],
+			*projposmin,*projposmax,
+			prop2, properr2, rprop;
+   int			i,f,s, lng,lat, nsamp, nfield, naxis;
 
   field = fgroup->field;
   nfield = fgroup->nfield;
@@ -1503,12 +1535,38 @@ void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     set = *(pset++);
     for (s=field[f]->nset; s--; set=*(pset++))
       {
+      lng = set->lng;
+      lat = set->lat;
       samp = set->sample;
       for (nsamp=set->nsample; nsamp--; samp++)
         {
-/*------ Compute new projection */
         raw_to_wcs(set->wcs, samp->rawpos, samp->wcspos);
-        wcs_to_raw(wcs, samp->wcspos, samp->projpos);
+        if (propflag && samp->msamp)
+/*-------- Correct for proper motions if asked to */
+          {
+          msamp = samp->msamp;
+          for (i=0; i<naxis; i++)
+            {
+            wcspos[i] = samp->wcspos[i];
+            if ((properr2=msamp->wcsprop[i]*msamp->wcsprop[i]*msamp->wcschi2) > TINY
+		&& (prop2=msamp->wcsprop[i]*msamp->wcsprop[i]) > TINY)
+              {
+              rprop = msamp->wcsprop[i] * prop2 / (prop2 + properr2);
+              wcspos[i] += (msamp->epoch - samp->epoch)
+		* (i==lng?rprop/cos(samp->wcspos[lat]*DEG) : rprop);
+              }
+            }
+          wcs_to_raw(set->wcs, wcspos, samp->vrawpos);
+/*-------- Compute new projection */
+          wcs_to_raw(wcs, wcspos, samp->projpos);
+          }
+        else
+          {
+          for (i=0; i<naxis; i++)
+            samp->vrawpos[i] = samp->rawpos[i];
+/*-------- Compute new projection */
+          wcs_to_raw(wcs, samp->wcspos, samp->projpos);
+          }
         }
 /*---- Compute the boundaries of projected positions for the whole group */
       sort_samples(set);
@@ -1527,7 +1585,27 @@ void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     set = reffield->set[0];
     samp = set->sample;
     for (nsamp=set->nsample; nsamp--; samp++)
-      wcs_to_raw(wcs, samp->wcspos, samp->projpos);
+      {
+      if (propflag && samp->msamp)
+/*----- Correct for proper motions if asked to */
+        {
+        msamp = samp->msamp;
+	for (i=0; i<naxis; i++)
+	  {
+	  wcspos[i] = samp->wcspos[i];
+          if ((properr2=msamp->wcsprop[i]*msamp->wcsprop[i]*msamp->wcschi2) > TINY
+		&& (prop2=msamp->wcsprop[i]*msamp->wcsprop[i]) > TINY)
+            {
+            rprop = msamp->wcsprop[i] * prop2 / (prop2 + properr2);
+            wcspos[i] += (msamp->epoch - samp->epoch)
+		* (i==lng?rprop/cos(samp->wcspos[lat]*DEG) : rprop);
+		    }
+          }
+        wcs_to_raw(wcs, wcspos, samp->projpos);
+        }
+      else
+        wcs_to_raw(wcs, samp->wcspos, samp->projpos);
+      }
     }
 
   return;

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/09/2012
+*	Last modified:		20/11/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,7 +69,7 @@ OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used. The function is not reentrant because
 	of static variables (prefs structure members are updated).
 AUTHOR  E. Bertin (IAP)
-VERSION 12/04/2012
+VERSION 20/11/2012
 */
 fieldstruct	*load_field(char *filename, int fieldindex)
   {
@@ -312,6 +312,8 @@ fieldstruct	*load_field(char *filename, int fieldindex)
         }
       precess_wcs(wcs, wcs->equinox, 2000.0);
       }
+/*-- Force coordinate system to be ICRS */
+    wcs->radecsys = RDSYS_ICRS;
 /*-- Indicate what is the parent field */
     set[i]->field = field;
     }

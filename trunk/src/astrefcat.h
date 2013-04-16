@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/09/2012
+*	Last modified:		29/11/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -51,6 +51,7 @@
 #define         NOMAD1_MAGERR   0.30
 #define         GSC_MAGERR	0.20
 #define         UCAC_MAGERR     0.12		/* Just a default value */
+#define         TWOMASS_MAGERR  0.1		/* Just a default value */
 
 #define		ASTREF_ASSOCRADIUS	(0.2*ARCSEC/DEG)
 
@@ -62,7 +63,7 @@ typedef enum {ASTREFCAT_NONE, ASTREFCAT_FILE,
 		ASTREFCAT_UCAC2, ASTREFCAT_UCAC3, ASTREFCAT_UCAC4,
 		ASTREFCAT_SDSSR3, ASTREFCAT_SDSSR5, ASTREFCAT_SDSSR6,
 		ASTREFCAT_SDSSR7, ASTREFCAT_SDSSR8,
-		ASTREFCAT_NOMAD1, ASTREFCAT_PPMX}
+		ASTREFCAT_NOMAD1, ASTREFCAT_PPMX, ASTREFCAT_CMC14}
 			astrefenum;
 
 typedef struct

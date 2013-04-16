@@ -465,6 +465,7 @@ void	useprefs(void)
 #endif
 
 #ifdef HAVE_MKL
+/* Set default number of MKL threads (may be changed later in the code) */
   mkl_set_num_threads(prefs.nthreads);
 #endif
 

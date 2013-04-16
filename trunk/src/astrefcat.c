@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/11/2012
+*	Last modified:		10/03/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -94,6 +94,7 @@ astrefstruct	astrefcat[] =
 			{"B", "V", "R", "J", "H", "K",""}},
   {"PPMX", 7, 3, {"B", "V", "R", "Rf", "J", "H", "Ks",""},
 			{"B", "V", "R", "C", "J", "H", "K",""}},
+  {"CMC-14", 4, 0, {"r", "J", "H", "Ks",""}, {"r", "J", "H", "K",""}},
   {""}
  };
 
@@ -118,7 +119,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 11/09/2012
+VERSION 10/03/2013
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -588,6 +589,24 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
 		maxradius*DEG/ARCMIN);
       break;
+    case ASTREFCAT_CMC14:
+      if (maglimflag)
+        sprintf(cmdline, "%s %s%s cmc14 -c %f12,%+f12 -r %16g -lm %f,%f -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		wcspos[lng], wcspos[lat],
+		maxradius*DEG/ARCMIN,
+		prefs.astref_maglim[0],
+		prefs.astref_maglim[1]);
+      else
+        sprintf(cmdline, "%s %s%s cmc14 -c %f12,%+f12 -r %16g -m 10000000",
+		prefs.cdsclient_path,
+		prefs.ref_server[0],
+		sport,
+		wcspos[lng], wcspos[lat],
+		maxradius*DEG/ARCMIN);
+      break;
     default:
       return NULL;
     }
@@ -800,7 +819,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				*ARCSEC/DEG;
 
 /*-------- Convert JDs to epoch */
-          epoch = 2000.0 - (JD2000 - epoch)/365.25;
+          epoch = 2000.0 + (epoch - JD2000)/365.25;
           break;
 
         case ASTREFCAT_DENIS3:
@@ -823,7 +842,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
               }
           poserr[lat] = poserr[lng] = DENIS3_POSERR;
 /*-------- Convert JDs to epoch */
-          epoch = 2000.0 - (JD2000 - epoch)/365.25;
+          epoch = 2000.0 + (epoch - JD2000)/365.25;
           break;
 
         case ASTREFCAT_UCAC1:
@@ -1085,6 +1104,28 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
               }
           break;
 
+        case ASTREFCAT_CMC14:
+          alpha = sextodegal(astref_strncpy(col, str+17, 13));
+          delta = sextodegde(astref_strncpy(col, str+30, 13));
+          epoch = atof(astref_strncpy(col, str+44, 4));
+          strcpy(smag[0], astref_strncpy(col, str+49, 6));
+          poserr[lng] = atof(astref_strncpy(col, str+66, 5))*ARCSEC/DEG;
+          poserr[lat] = atof(astref_strncpy(col, str+72, 5))*ARCSEC/DEG;
+          strcpy(smagerr[0], astref_strncpy(col, str+78, 5));
+          strcpy(smag[1], astref_strncpy(col, str+84, 6));
+          strcpy(smag[2], astref_strncpy(col, str+91, 6));
+          strcpy(smag[3], astref_strncpy(col, str+98, 6));
+/*-------- Convert JDs to epoch */
+          epoch = 2000.0 + (epoch - (JD2000-2451263.5))/365.25;
+          for (b=0; b<nband; b++)
+            if (smag[b][2] == '-')
+              mag[b] = magerr[b] = 99.0;
+            else
+              {
+              mag[b] = atof(smag[b]);
+              magerr[b] = (b==0) ? atof(smagerr[b]) : TWOMASS_MAGERR;
+              }
+          break;
         case ASTREFCAT_NONE:
         default:
           break;
@@ -1134,10 +1175,12 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           if (mag[b] > 98.0)
             continue;
           }
+/*
         if (nband>1 && mag[0]<98.0 && mag[1]<98.0)
           sample->colour = mag[0] - mag[1];
         else
           sample->colour = 99.0;
+*/
 /*
 printf("%10f %10f +/-%4.0f %4.0f  %4.0f %4.0f +/-%4.0f %4.0f  %7.2f  %5.2f +/- %4.2f\n",
 alpha,delta,poserr[lng]*DEG/MAS,poserr[lat]*DEG/MAS,
@@ -1149,12 +1192,15 @@ epoch, sample->mag, sample->magerr);
         sample->wcspos[lat] = delta;
         sample->wcsposerr[lng] = poserr[lng];
         sample->wcsposerr[lat] = poserr[lat];
+/*
         sample->wcsprop[lng] = prop[lng];
         sample->wcsprop[lat] = prop[lat];
         sample->wcsproperr[lng] = properr[lng];
         sample->wcsproperr[lat] = properr[lat];
+*/
         sample->epoch = epoch;
         sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
+        sample->scampflags = 0;
         sample->set = set;
         nsample++;
         }

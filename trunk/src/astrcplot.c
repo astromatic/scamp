@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/10/2012
+*	Last modified:		28/01/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -30,22 +30,23 @@
 #include	"config.h"
 #endif
 
-#include	<math.h>
-#include	<stdio.h>
-#include	<stdlib.h>
-#include	<string.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include	PLPLOT_H
-#include	PLPLOTP_H
+#include PLPLOT_H
+#include PLPLOTP_H
 
-#include	"define.h"
-#include	"globals.h"
-#include	"cplot.h"
-#include	"fgroup.h"
-#include	"field.h"
-#include	"fitswcs.h"
-#include	"prefs.h"
-#include	"samples.h"
+#include "define.h"
+#include "globals.h"
+#include "cplot.h"
+#include "fgroup.h"
+#include "field.h"
+#include "fitswcs.h"
+#include "merge.h"
+#include "prefs.h"
+#include "samples.h"
 
 extern devicestruct	cplot_device[];
 struct	focplanestruct {PLFLT x[5], y[5], z[5]; PLINT colour; char *str;};
@@ -3791,7 +3792,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	28/01/2013
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -3884,7 +3885,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp)
           {
-          dmag = samp->colour;
+          dmag = samp->msamp->colour;
           mdmag += dmag;
           mdmag2 += dmag*dmag;
           ndmag += 1.0;
@@ -3953,7 +3954,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 			|| samp2->flux <= 0.0
 			|| (samp2->sexflags & flagmask))
                     continue;
-                  ix = (int)((samp1->colour - xoffset)*xscale);
+                  ix = (int)((samp1->msamp->colour - xoffset)*xscale);
                   for (d=0; d<naxis; d++)
                     {
                     dy = (samp2->projpos[d]-samp->projpos[d])*pixscale[d];
@@ -3976,7 +3977,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
                   if (samp->flux < hsn_thresh*samp->fluxerr
 			|| samp2->flux < hsn_thresh*samp2->fluxerr)
                     continue;
-                  ix = (int)((samp1->colour - xoffset_hsn)*xscale_hsn);
+                  ix = (int)((samp1->msamp->colour - xoffset_hsn)*xscale_hsn);
                   for (d=0; d<naxis; d++)
                     {
                     dy = (samp2->projpos[d]-samp->projpos[d])*pixscale[d];
@@ -4142,6 +4143,7 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
   {
    wcsstruct	*wcs;
    setstruct	*set;
+   msamplestruct	*msamp;
    samplestruct	*samp, *samp2;
    char		str[80];
    double	offset,offset_hsn, scale,scale_hsn, boffset,bscale, err;
@@ -4202,17 +4204,18 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 	&& !(samp->sexflags & flagmask)
 	&& !(samp2->sexflags & flagmask))
         {
+        msamp = samp2->msamp;
 /*------ Do not plot objects with bad S/N on proper motions */
-        err = samp->wcsproperr[lng]*samp->wcsproperr[lng]
-		+ samp->wcsproperr[lat]*samp->wcsproperr[lat];
+        err = msamp->wcsproperr[lng]*msamp->wcsproperr[lng]
+		+ msamp->wcsproperr[lat]*msamp->wcsproperr[lat];
 /*
-        if (err == 0.0 || (samp->wcsprop[0]*samp->wcsprop[0]
-		+ samp->wcsprop[1]*samp->wcsprop[1])/err
+        if (err == 0.0 || (msamp->wcsprop[0]*msamp->wcsprop[0]
+		+ msamp->wcsprop[1]*msamp->wcsprop[1])/err
 		< CPLOT_ASTREFPROPMINSN*CPLOT_ASTREFPROPMINSN)
           continue;
 */
-        ix = (int)((samp->wcsprop[lng]*DEG/MAS - offset)*scale);
-        iy = (int)((samp2->wcsprop[lng]*DEG/MAS - offset)*scale);
+        ix = (int)((msamp->wcsprop[lng]*DEG/MAS - offset)*scale);
+        iy = (int)((msamp->wcsprop[lng]*DEG/MAS - offset)*scale);
         if (ix>=0 && ix<CPLOT_REFPROPN && iy>=0 && iy<CPLOT_REFPROPN)
           {
           z = (histo[0][ix][iy] += 1.0);
@@ -4221,8 +4224,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
           }
         if (samp2->flux >= hsn_thresh*samp2->fluxerr)
           {
-          ix = (int)((samp->wcsprop[lng]*DEG/MAS - offset_hsn)*scale_hsn);
-          iy = (int)((samp2->wcsprop[lng]*DEG/MAS - offset_hsn)*scale_hsn);
+          ix = (int)((msamp->wcsprop[lng]*DEG/MAS - offset_hsn)*scale_hsn);
+          iy = (int)((msamp->wcsprop[lng]*DEG/MAS - offset_hsn)*scale_hsn);
           if (ix>=0 && ix<CPLOT_REFPROPN_HSN
 		&& iy>=0 && iy<CPLOT_REFPROPN_HSN)
             {
@@ -4231,8 +4234,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
               zmax_hsn[0] = z;
             }
           }
-        ix = (int)((samp->wcsprop[lat]*DEG/MAS - offset)*scale);
-        iy = (int)((samp2->wcsprop[lat]*DEG/MAS - offset)*scale);
+        ix = (int)((msamp->wcsprop[lat]*DEG/MAS - offset)*scale);
+        iy = (int)((msamp->wcsprop[lat]*DEG/MAS - offset)*scale);
         if (ix>=0 && ix<CPLOT_REFPROPN && iy>=0 && iy<CPLOT_REFPROPN)
           {
           z = (histo[1][ix][iy] += 1.0);
@@ -4241,8 +4244,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
           }
         if (samp2->flux >= hsn_thresh*samp2->fluxerr)
           {
-          ix = (int)((samp->wcsprop[lat]*DEG/MAS - offset_hsn)*scale_hsn);
-          iy = (int)((samp2->wcsprop[lat]*DEG/MAS - offset_hsn)*scale_hsn);
+          ix = (int)((msamp->wcsprop[lat]*DEG/MAS - offset_hsn)*scale_hsn);
+          iy = (int)((msamp->wcsprop[lat]*DEG/MAS - offset_hsn)*scale_hsn);
           if (ix>=0 && ix<CPLOT_REFPROPN_HSN
 		&& iy>=0 && iy<CPLOT_REFPROPN_HSN)
             {
@@ -4562,13 +4565,14 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	28/01/2013
  ***/
 int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
    fieldstruct	*field;
    wcsstruct	*wcs;
    setstruct	*set;
+   msamplestruct	*msamp;
    samplestruct	*samp, *samp2;
    char		str[80];
    double	offset,offset_hsn, scale,scale_hsn, boffset,bscale,
@@ -4580,7 +4584,7 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
 		*clevel,*cutbin,*cutx,*cutx_hsn,*cuty,*cuty_hsn,
 		lim,maxlim, z,zmax,zmax_hsn;
    PLINT	lwid;
-   int		d,d2, f,i,s,n, ix,iy,
+   int		d,d2, f,i,m,n,s, ix,iy,
 		nsamp;
 
   if (cplot_init(1,1, CPLOT_ADPROP2D) == RETURN_ERROR)
@@ -4632,74 +4636,65 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
 
   cutxmax = cutxmax_hsn = cutymax = cutymax_hsn = 0.0;;
   zmax = zmax_hsn = 0.0;
-  for (f=0; f<fgroup->nfield; f++)
+  msamp = fgroup->msample;
+  for (m=fgroup->nmsample; m--;)
     {
-    field = fgroup->field[f];
-    for (s=0; s<field->nset; s++)
+    if (msamp->wcsproperr[0]>0.0 && msamp->wcsproperr[1]>0.0)
       {
-      set = field->set[s];
-      nsamp = set->nsample;
-      samp = set->sample;
-      for (n=nsamp; n--; samp++)
-        if (!samp->nextsamp && samp->prevsamp
-		&& samp->wcsproperr[0]>0.0
-		&& samp->wcsproperr[1]>0.0)
+      dx = msamp->wcsprop[0]*DEG/MAS;
+      dy = msamp->wcsprop[1]*DEG/MAS;
+      ix = (int)((dx - offset)*scale);
+      iy = (int)((dy - offset)*scale);
+      if (ix>=0 && ix<CPLOT_ADERR2DN && iy>=0 && iy<CPLOT_ADERR2DN)
+        {
+        z = (histo[ix][iy] += 1.0);
+        if (z>zmax)
+          zmax = z;
+        }
+      ix = (int)((dx - boffset)*bscale);
+      if (ix>=0 && ix<CPLOT_NADERRHISTBIN)
+        {
+        cx = (cutx[ix] += 1.0);
+        if (cx>cutxmax)
+        cutxmax = cx;
+        }
+      iy = (int)((dy - boffset)*bscale);
+      if (iy>=0 && iy<CPLOT_NADERRHISTBIN)
+        {
+        cy = (cuty[iy] += 1.0);
+        if (cy>cutymax)
+          cutymax = cy;
+        }
+      if (msamp->wcsprop[0]*msamp->wcsprop[0]
+	+msamp->wcsprop[1]*msamp->wcsprop[1] >
+		hsn_thresh*hsn_thresh*(msamp->wcsproperr[0]*msamp->wcsproperr[0]
+		+msamp->wcsproperr[1]*msamp->wcsproperr[1]))
+        {
+        ix = (int)((dx - offset_hsn)*scale_hsn);
+        iy = (int)((dy - offset_hsn)*scale_hsn);
+        if (ix>=0 && ix<CPLOT_ADERR2DN_HSN && iy>=0 && iy<CPLOT_ADERR2DN_HSN)
           {
-          dx = samp->wcsprop[0]*DEG/MAS;
-          dy = samp->wcsprop[1]*DEG/MAS;
-          ix = (int)((dx - offset)*scale);
-          iy = (int)((dy - offset)*scale);
-          if (ix>=0 && ix<CPLOT_ADERR2DN && iy>=0 && iy<CPLOT_ADERR2DN)
-            {
-            z = (histo[ix][iy] += 1.0);
-            if (z>zmax)
-              zmax = z;
-            }
-          ix = (int)((dx - boffset)*bscale);
-          if (ix>=0 && ix<CPLOT_NADERRHISTBIN)
-            {
-            cx = (cutx[ix] += 1.0);
-            if (cx>cutxmax)
-              cutxmax = cx;
-            }
-          iy = (int)((dy - boffset)*bscale);
-          if (iy>=0 && iy<CPLOT_NADERRHISTBIN)
-            {
-            cy = (cuty[iy] += 1.0);
-            if (cy>cutymax)
-              cutymax = cy;
-            }
-          if (samp->wcsprop[0]*samp->wcsprop[0]
-		+samp->wcsprop[1]*samp->wcsprop[1] >
-		hsn_thresh*hsn_thresh*(samp->wcsproperr[0]*samp->wcsproperr[0]
-		+samp->wcsproperr[1]*samp->wcsproperr[1]))
-                {
-                ix = (int)((dx - offset_hsn)*scale_hsn);
-                iy = (int)((dy - offset_hsn)*scale_hsn);
-                if (ix>=0 && ix<CPLOT_ADERR2DN_HSN
-			&& iy>=0 && iy<CPLOT_ADERR2DN_HSN)
-                  {
-                  z = (histo_hsn[ix][iy] += 1.0);
-                  if (z>zmax_hsn)
-                    zmax_hsn = z;
-                  }
-                ix = (int)((dx - boffset)*bscale);
-                if (ix>=0 && ix<CPLOT_NADERRHISTBIN)
-                  {
-                  cx = (cutx_hsn[ix] += 1.0);
-                  if (cx>cutxmax_hsn)
-                    cutxmax_hsn = cx;
-                  }
-                iy = (int)((dy - boffset)*bscale);
-                if (iy>=0 && iy<CPLOT_NADERRHISTBIN)
-                  {
-                  cy = (cuty_hsn[iy] += 1.0);
-                  if (cy>cutymax_hsn)
-                    cutymax_hsn = cy;
-                  }
-                }
+          z = (histo_hsn[ix][iy] += 1.0);
+          if (z>zmax_hsn)
+            zmax_hsn = z;
           }
+        ix = (int)((dx - boffset)*bscale);
+        if (ix>=0 && ix<CPLOT_NADERRHISTBIN)
+          {
+          cx = (cutx_hsn[ix] += 1.0);
+          if (cx>cutxmax_hsn)
+            cutxmax_hsn = cx;
+          }
+        iy = (int)((dy - boffset)*bscale);
+        if (iy>=0 && iy<CPLOT_NADERRHISTBIN)
+          {
+          cy = (cuty_hsn[iy] += 1.0);
+          if (cy>cutymax_hsn)
+            cutymax_hsn = cy;
+          }
+        }
       }
+    msamp++;
     }
 
 /* Adjust histogram to fit in the displayed box */

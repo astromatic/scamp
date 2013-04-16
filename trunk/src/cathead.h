@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		01/02/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -33,7 +33,7 @@
 /* Merged output catalog fields */
 
 mergedsamplestruct	refmergedsample;
-keystruct		refmergedkey[] = {
+keystruct	refmergedkey[] = {
   {"SOURCE_NUMBER", "Source index",
 	&refmergedsample.sourceindex, H_INT, T_LONG,
 	"%10d", "", "meta.number", ""},

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		16/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -76,7 +76,7 @@ pkeystruct key[] =
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
     "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3", "UCAC-4",
     "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "SDSS-R8", "NOMAD-1",
-    "PPMX", ""}},
+    "PPMX", "CMC-14", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
@@ -123,7 +123,8 @@ pkeystruct key[] =
     0, MAXCHECK, &prefs.ncplot_type},
   {"COMPUTE_PARALLAXES", P_BOOL, &prefs.parallax_flag},
   {"COMPUTE_PROPERMOTIONS", P_BOOL, &prefs.propmotion_flag},
-  {"CORRECT_COLOURSHIFTS", P_BOOL, &prefs.colourshift_flag},
+  {"CORRECT_COLOURSHIFTS", P_BOOL, &prefs.colourshiftcorr_flag},
+//  {"CORRECT_PROPERMOTIONS", P_BOOL, &prefs.propmotioncorr_flag},
   {"CROSSID_RADIUS", P_FLOAT, &prefs.crossid_radius, 0,0, 0.0,1e31},
   {"DISTORT_KEYS", P_STRINGLIST, prefs.context_name, 0,0,0.0,0.0,
     {""}, 0, MAXCONTEXT, &prefs.ncontext_name},
@@ -223,10 +224,10 @@ char *default_prefs[] =
 "REF_SERVER         cocat1.u-strasbg.fr # Internet addresses of catalog servers",
 "*REF_PORT               80              # Ports to connect to catalog servers",
 "*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
-"ASTREF_CATALOG         USNO-B1         # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
+"ASTREF_CATALOG          2MASS          # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
 "                                       # GSC-1.3,GSC-2.2,GSC-2.3,",
 "                                       # UCAC-1,UCAC-2,UCAC-3,UCAC-4,",
-"                                       # NOMAD-1, PPMX, 2MASS, DENIS-3,",
+"                                       # NOMAD-1, PPMX, CMC-14, 2MASS, DENIS-3,",
 "                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,SDSS-R8",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
@@ -290,6 +291,7 @@ char *default_prefs[] =
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
 "*COMPUTE_PARALLAXES     N               # Compute trigonom. parallaxes (Y/N)?",
 "*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",
+//"*CORRECT_PROPERMOTIONS  N               # Correct for proper motions (Y/N)?",
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
 "*INCLUDE_ASTREFCATALOG  Y               # Include ref.cat in prop.motions (Y/N)?",
 "*ASTR_FLAGSMASK         0x00fc          # Astrometry rejection mask on SEx FLAGS",
@@ -335,7 +337,7 @@ char *default_prefs[] =
 "SN_THRESHOLDS          10.0,100.0      # S/N thresholds (in sigmas) for all and",
 "                                       # high-SN sample",
 "FWHM_THRESHOLDS        0.0,100.0       # FWHM thresholds (in pixels) for sources",
-"*ELLIPTICITY_MAX        0.5             # Max. ellipticty for unsaturated sources",
+"*ELLIPTICITY_MAX        0.5             # Max. source ellipticity",
 "*FLAGS_MASK             0x00f0          # Rejection mask on SEx FLAGS",
 "*WEIGHTFLAGS_MASK       0x00ff          # Rejection mask on SEx FLAGS_WEIGHT",
 "*IMAFLAGS_MASK          0x0             # Rejection mask on SEx IMAFLAGS_ISO",

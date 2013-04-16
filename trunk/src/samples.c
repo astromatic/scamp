@@ -1187,7 +1187,7 @@ void	copy_samples(samplestruct *samplein, setstruct *set,
 
 /****** update_samples *******************************************************
 PROTO   void update_samples(setstruct *set, double *radius)
-PURPOSE Update position uncertainties.
+PURPOSE Update "effective" positions and position uncertainties.
 INPUT   set structure pointer,
 	field (or set) radius (for computing atm. turbulence contribution).
 OUTPUT  -.
@@ -1210,6 +1210,12 @@ void	update_samples(setstruct *set, double radius)
     wcsscale[i] = set->wcsscale[i];
     wcsscale2[i] = wcsscale[i]*wcsscale[i];
     }
+
+/* Update virtual raw coordinates */
+  samp = set->sample;
+  for (e=set->nsample; e--; samp++)
+    for (i=0; i<naxis; i++)
+      samp->vrawpos[i] = samp->rawpos[i];
 
   if (set->astraccuracy > 0.0)
     {

@@ -34,7 +34,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		26/09/2012
+#	Last modified:		01/12/2012
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
 
@@ -257,7 +257,7 @@
 <!-- ********************** XSL template for Fields ********************** -->
   <xsl:template name="Fields">
    <xsl:variable name="asplotflag" select="count(PARAM[@name='AllSkyPlot'])"/>
-   <xsl:variable name="matchflag" select="count(PARAM[@name='XY_Contrast'])"/>
+   <xsl:variable name="matchflag" select="count(FIELD[@name='XY_Contrast'])"/>
    <xsl:variable name="number" select="count(FIELD[@name='Catalog_Number']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="name" select="count(FIELD[@name='Catalog_Name']/preceding-sibling::FIELD)+1"/>
    <xsl:variable name="ident" select="count(FIELD[@name='Image_Ident']/preceding-sibling::FIELD)+1"/>

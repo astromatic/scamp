@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		28/01/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,6 +45,7 @@
 #include "fits/fitscat.h"
 #include "fitswcs.h"
 #include "colour.h"
+#include "merge.h"
 #include "photsolve.h"
 #include "prefs.h"
 #include "samples.h"
@@ -67,19 +68,20 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	28/01/2013
  ***/
 void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   {
-   fgroupstruct	*fgroup;
-   fieldstruct	*field;
-   setstruct	*set;
-   samplestruct	*samp,*samp2;
-   double	*colmat,*wcolmat, *mcol,*wmcol, *col,*wcol, *mag,*wmag,
-		sum,wsum, weight, cweight, err2;
-   float	colour;
-   short	flagmask;
-   int		c,f,g,n,s, b1, b2, c1,c2, band, ncolour, ninstru;
+   fgroupstruct		*fgroup;
+   fieldstruct		*field;
+   setstruct		*set;
+   msamplestruct	*msamp;
+   samplestruct		*samp,*samp2;
+   double		*colmat,*wcolmat, *mcol,*wmcol, *col,*wcol, *mag,*wmag,
+			sum,wsum, weight, cweight, err2;
+   float		colour;
+   short		flagmask;
+   int			c,f,g,m,n,s, b1, b2, c1,c2, band, ncolour, ninstru;
 
   flagmask = (short)prefs.phot_flagsmask;
   ninstru = prefs.nphotinstrustr;
@@ -97,48 +99,41 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   for (g=0; g<ngroup; g++)
     {
     fgroup = fgroups[g];
-    for (f=0; f<fgroup->nfield; f++)
+    msamp = fgroup->msample;
+    for (m=fgroup->nmsample; m--; msamp++)
       {
-      field = fgroup->field[f];
-      for (s=0; s<field->nset; s++)
-        {
-        set = field->set[s];
-        samp = set->sample;
-        for (n=set->nsample; n--; samp++)
-          {
-          if (samp->nextsamp || !samp->prevsamp)
-            continue;
-          memset(mag, 0, ninstru*sizeof(double));
-          memset(wmag, 0, ninstru*sizeof(double));
-          for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
+      samp = msamp->samp;
+      if (!samp->prevsamp)
+        continue;
+      memset(mag, 0, ninstru*sizeof(double));
+      memset(wmag, 0, ninstru*sizeof(double));
+      for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
-            {
-            if ((samp2->sexflags & flagmask)
+        {
+        if ((samp2->sexflags & flagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
-              continue;
-            weight = 1.0/(err2 + PHOTOM_MINMAGERR*PHOTOM_MINMAGERR);
-            mag[band] += weight*samp2->mag;
-            wmag[band] += weight;
-            }
-          for (band=0; band<ninstru; band++)
-            if (wmag[band] > 0.0)
-              mag[band] /= wmag[band];
-/*-------- Update the colour average vector */
-          c = 0;
-          for (b2=1; b2<ninstru; b2++)
-            {
-            if (wmag[b2] > 0.0)
-              for (b1=0; b1<b2; b1++)
-                if (wmag[b1] > 0.0)
-                  {
-                  cweight = 1.0;
-                  mcol[c+b1] += cweight*(mag[b1]-mag[b2]);
-                  wmcol[c+b1] += cweight;
-                  }
-            c += b2;
-            }
-          }
+          continue;
+        weight = 1.0/(err2 + PHOTOM_MINMAGERR*PHOTOM_MINMAGERR);
+        mag[band] += weight*samp2->mag;
+        wmag[band] += weight;
+        }
+      for (band=0; band<ninstru; band++)
+        if (wmag[band] > 0.0)
+          mag[band] /= wmag[band];
+/*---- Update the colour average vector */
+      c = 0;
+      for (b2=1; b2<ninstru; b2++)
+        {
+        if (wmag[b2] > 0.0)
+          for (b1=0; b1<b2; b1++)
+            if (wmag[b1] > 0.0)
+              {
+              cweight = 1.0;
+              mcol[c+b1] += cweight*(mag[b1]-mag[b2]);
+              wmcol[c+b1] += cweight;
+              }
+        c += b2;
         }
       }
     }
@@ -155,72 +150,59 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   for (g=0; g<ngroup; g++)
     {
     fgroup = fgroups[g];
-    for (f=0; f<fgroup->nfield; f++)
+    msamp = fgroup->msample;
+    for (m=fgroup->nmsample; m--; msamp++)
       {
-      field = fgroup->field[f];
-      for (s=0; s<field->nset; s++)
+      samp = msamp->samp;
+      if (!samp->prevsamp)
         {
-        set = field->set[s];
-        samp = set->sample;
-        for (n=set->nsample; n--; samp++)
-          {
-          if (!samp->prevsamp)
-            {
-            if (!samp->nextsamp)
-              samp->colour = 0.0;
-            continue;
-            }
-          if (samp->nextsamp)
-            continue;
-
-          if (samp->nextsamp || !samp->prevsamp)
-            continue;
-          memset(mag, 0, ninstru*sizeof(double));
-          memset(wmag, 0, ninstru*sizeof(double));
-          memset(col, 0, ncolour*sizeof(double));
-          memset(wcol, 0, ncolour*sizeof(double));
-          for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
+        msamp->colour = 0.0;
+        continue;
+        }
+      memset(mag, 0, ninstru*sizeof(double));
+      memset(wmag, 0, ninstru*sizeof(double));
+      memset(col, 0, ncolour*sizeof(double));
+      memset(wcol, 0, ncolour*sizeof(double));
+      for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
-            {
-            if ((samp2->sexflags & flagmask)
+        {
+        if ((samp2->sexflags & flagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
-              continue;
-            weight = 1.0/( err2 + PHOTOM_MINMAGERR*PHOTOM_MINMAGERR);
-            mag[band] += weight*samp2->mag;
-            wmag[band] += weight;
-            }
-          for (band=0; band<ninstru; band++)
-            if (wmag[band] > 0.0)
-              mag[band] /= wmag[band];
-/*-------- Compute centred colour vector */
-          c = 0;
-          for (b2=1; b2<ninstru; b2++)
-            {
-            if (wmag[b2] > 0.0)
-              for (b1=0; b1<b2; b1++)
-                if (wmag[b1] > 0.0)
-                  {
-                  cweight = 1.0;
-                  col[c+b1] = cweight*(mag[b1]-mag[b2] - mcol[c+b1]);
-                  wcol[c+b1] = cweight;
-                  }
-            c += b2;
-            }
-/*-------- Update the covariance matrix */
-          for (c2=0; c2<ncolour; c2++)
-            {
-            if (wcol[c2] > 0.0)
-              for (c1=0; c1<=c2; c1++)
-                if (wcol[c1] > 0.0)
-                  {
-                  cweight = 1.0;
-                  c = c2*ncolour+c1;
-                  colmat[c] += cweight*col[c1]*col[c2];
-                  wcolmat[c] += cweight;
-                  }
-            }
-          }
+          continue;
+        weight = 1.0/( err2 + PHOTOM_MINMAGERR*PHOTOM_MINMAGERR);
+        mag[band] += weight*samp2->mag;
+        wmag[band] += weight;
+        }
+      for (band=0; band<ninstru; band++)
+        if (wmag[band] > 0.0)
+          mag[band] /= wmag[band];
+/*---- Compute centred colour vector */
+      c = 0;
+      for (b2=1; b2<ninstru; b2++)
+        {
+        if (wmag[b2] > 0.0)
+          for (b1=0; b1<b2; b1++)
+            if (wmag[b1] > 0.0)
+              {
+              cweight = 1.0;
+              col[c+b1] = cweight*(mag[b1]-mag[b2] - mcol[c+b1]);
+              wcol[c+b1] = cweight;
+              }
+        c += b2;
+        }
+/*---- Update the covariance matrix */
+      for (c2=0; c2<ncolour; c2++)
+        {
+        if (wcol[c2] > 0.0)
+          for (c1=0; c1<=c2; c1++)
+            if (wcol[c1] > 0.0)
+              {
+              cweight = 1.0;
+              c = c2*ncolour+c1;
+              colmat[c] += cweight*col[c1]*col[c2];
+              wcolmat[c] += cweight;
+              }
         }
       }
     }
@@ -248,63 +230,55 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   for (g=0; g<ngroup; g++)
     {
     fgroup = fgroups[g];
-    for (f=0; f<fgroup->nfield; f++)
+    msamp = fgroup->msample;
+    for (m=fgroup->nmsample; m--; msamp++)
       {
-      field = fgroup->field[f];
-      for (s=0; s<field->nset; s++)
-        {
-        set = field->set[s];
-        samp = set->sample;
-        for (n=set->nsample; n--; samp++)
-          {
-          if (samp->nextsamp || !samp->prevsamp)
-            continue;
-          memset(mag, 0, ninstru*sizeof(double));
-          memset(wmag, 0, ninstru*sizeof(double));
-          for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
+      samp = msamp->samp;
+      if (!samp->prevsamp)
+        continue;
+      memset(mag, 0, ninstru*sizeof(double));
+      memset(wmag, 0, ninstru*sizeof(double));
+      for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
-            {
-            if ((samp2->sexflags & flagmask)
+        {
+        if ((samp2->sexflags & flagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
-              continue;
-            weight = 1.0/(err2 + PHOTOM_MINMAGERR*PHOTOM_MINMAGERR);
-            mag[band] += weight*samp2->mag;
-            wmag[band] += weight;
-            }
-          for (band=0; band<ninstru; band++)
-            if (wmag[band] > 0.0)
-              mag[band] /= wmag[band];
-/*-------- Compute centred colour vector */
-          c = 0;
-          sum = wsum = 0.0;
-          for (b2=1; b2<ninstru; b2++)
-            {
-            if (wmag[b2] > 0.0)
-              for (b1=0; b1<b2; b1++)
-                if (wmag[b1] > 0.0)
-                  {
-                  sum += col[c+b1]*(mag[b1]-mag[b2] - mcol[c+b1]);
-                  wsum += col[c+b1]*col[c+b1];
-                  }
-            c += b2;
-            }
-/*-------- Compute incomplete dot product */
-          if (wsum>0.0)
-            {
-            colour = (float)(sum / wsum);
-            for (samp2 = samp; samp2 && samp2->set->field->photomlabel>=0;
-		samp2 = samp2->prevsamp)
-              samp2->colour = colour;
-            }
-          else
-            for (samp2 = samp; samp2 && samp2->set->field->photomlabel>=0;
-		samp2 = samp2->prevsamp)
+          continue;
+        weight = 1.0/(err2 + PHOTOM_MINMAGERR*PHOTOM_MINMAGERR);
+        mag[band] += weight*samp2->mag;
+        wmag[band] += weight;
+        }
+      for (band=0; band<ninstru; band++)
+        if (wmag[band] > 0.0)
+          mag[band] /= wmag[band];
+/*---- Compute centred colour vector */
+      c = 0;
+      sum = wsum = 0.0;
+      for (b2=1; b2<ninstru; b2++)
+        {
+        if (wmag[b2] > 0.0)
+          for (b1=0; b1<b2; b1++)
+            if (wmag[b1] > 0.0)
               {
-              samp2->colour = 0.0;
-              samp2->scampflags |= SCAMP_PHOTNOCOLOR;
+              sum += col[c+b1]*(mag[b1]-mag[b2] - mcol[c+b1]);
+              wsum += col[c+b1]*col[c+b1];
               }
-          }
+        c += b2;
+        }
+/*---- Compute incomplete dot product */
+      if (wsum>0.0)
+        {
+        colour = (float)(sum / wsum);
+        msamp->colour = colour;
+        }
+      else
+        {
+        for (samp2 = samp; samp2 && samp2->set->field->photomlabel>=0;
+		samp2 = samp2->prevsamp)
+          samp2->scampflags |= SCAMP_PHOTNOCOLOR;
+        msamp->colour = 0.0;
+        msamp->scampflags |= SCAMP_PHOTNOCOLOR;
         }
       }
     }

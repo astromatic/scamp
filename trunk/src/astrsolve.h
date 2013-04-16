@@ -57,7 +57,8 @@ extern void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup),
 		astrweight_fgroups(fgroupstruct **fgroups, int nfgroup),
 		mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
 				setstruct *set),
-		reproj_fgroup(fgroupstruct *fgroup,fieldstruct *field),
+		reproj_fgroup(fgroupstruct *fgroup,fieldstruct *field,
+				int propflag),
 		shrink_mat(double *alpha, double *beta, int ncoefftot,
 				int index, int nmiss);
 

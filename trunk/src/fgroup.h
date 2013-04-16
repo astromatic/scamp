@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		26/07/2012
+*	Last modified:		28/01/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -37,7 +37,6 @@
 #ifndef _FGROUP_H_
 #define _FGROUP_H_
 
-
 /*----------------------------- Internal constants --------------------------*/
 #define		MAXASTRINSTRU	256	/* Max. number of astrom. instruments*/
 #define		MAXPHOTINSTRU	256	/* Max. number of photom. instruments*/
@@ -49,6 +48,8 @@ typedef struct fgroup
   int		no;			/* Group ID (number) */
   struct field	**field;		/* Pointer to an array of fields */
   int		nfield;			/* Number of fields in the group */
+  struct msample *msample;		/* Merged sample array (sources) */
+  int		nmsample;		/* Number of merged samples */
   double	epoch;			/* Mean epoch of observations */
   double	epochmin, epochmax;	/* Min and max epoch of observations */
   double	meanwcspos[NAXIS];	/* Mean field coordinates */

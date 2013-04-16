@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		05/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -36,6 +36,10 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifdef HAVE_MKL
+ #include MKL_H
+#endif
 
 #ifndef FFTW3_H
 #include FFTW_H
@@ -71,18 +75,19 @@ NOTES	For data1 and data2, memory must be allocated for
 	size[0]* ... * 2*(size[naxis-1]/2+1) floats (padding required).
 	This function works in up to 10 dimensions.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/09/2004
+VERSION	05/04/2013
  ***/
 void	fastcorr(float *data1, float *data2, int naxis, int *size,
 		double *lambda_lopass, double *lambda_hipass)
   {
-   fftwf_plan	plan;
-   double	lambda_def[10],
-		dx, r02l, r02h, r2l, r2h, passl,passh;
-   float	*fdata1, *fdata2, *fdata1p,*fdata2p,
-		real,imag, fac, pass;
-   int		x[10], size2[10],
-		d, i,j, npix,npix2, size0, x0;
+   fftwf_plan		plan;
+   double		lambda_def[10],
+			dx, r02l, r02h, r2l, r2h, passl,passh;
+   fftwf_complex	*fdata1,*fdata2;
+   float		*fdata1p,*fdata2p,
+			real,imag, fac, pass;
+   int			x[10], size2[10],
+			d, i,j, npix,npix2, size0, x0;
 
   if (naxis>10)
     return;
@@ -93,7 +98,7 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
     npix *= (size2[j++] = size[i]);
   size0 = size[0];
   npix2 = npix/size0;
-  npix2 *= 2 * (size0/2 + 1);
+  npix2 *= (size0/2 + 1);
 
   /*  fft_init();*/	/* May have been called earlier (it does not matter) */
 
@@ -102,9 +107,8 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_LOCK(&fftmutex);
 #endif
-  QFFTWMALLOC(fdata1, float, npix2);
-  plan = fftwf_plan_dft_r2c(naxis, (const int *)size2, data1,
-	(fftwf_complex *)fdata1,
+  QFFTWF_MALLOC(fdata1, fftwf_complex, npix2);
+  plan = fftwf_plan_dft_r2c(naxis, (const int *)size2, data1, fdata1,
 	FFTW_ESTIMATE | FFTW_DESTROY_INPUT);
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_UNLOCK(&fftmutex);
@@ -118,9 +122,8 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
   fftwf_destroy_plan(plan);
 
 /*-- Forward FFT for data2 */
-  QFFTWMALLOC(fdata2, float, npix2);
-  plan = fftwf_plan_dft_r2c(naxis, (const int *)size2, data2,
-	(fftwf_complex *)fdata2,
+  QFFTWF_MALLOC(fdata2, fftwf_complex, npix2);
+  plan = fftwf_plan_dft_r2c(naxis, (const int *)size2, data2, fdata2,
 	FFTW_ESTIMATE | FFTW_DESTROY_INPUT);
 
 #ifdef USE_THREADS
@@ -139,21 +142,23 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
 
 /* Actual correlation (Fourier conjugate product) */
   fac = 1.0/(npix/2);  
-  fdata1p = fdata1;
-  fdata2p = fdata2;
-  for (i=npix2/2; i--; fdata2p+=2)
+  fdata1p = (float *)fdata1;
+  fdata2p = (float *)fdata2;
+  for (i=npix2; i--;)
     {
     real = *fdata1p**fdata2p + *(fdata1p+1)**(fdata2p+1);
     imag = *(fdata1p+1)**fdata2p - *fdata1p**(fdata2p+1);
-    *(fdata1p++) = fac*real;
-    *(fdata1p++) = fac*imag;
+    *(fdata1p) = fac*real;
+    *(fdata1p+1) = fac*imag;
+    fdata1p += 2;
+    fdata2p += 2;
     }
 
 /* Free one of the buffers */
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_LOCK(&fftmutex);
 #endif
-  QFFTWFREE(fdata2);
+  QFFTWF_FREE(fdata2);
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_UNLOCK(&fftmutex);
 #endif
@@ -170,7 +175,7 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
    lambda_lopass = lambda_def;
   if (!lambda_hipass)
     lambda_hipass = lambda_def;
-  fdata1p = fdata1;
+  fdata1p = (float *)fdata1;
   for (j=npix/size0; j--;)
     {
     r02l = r02h = 0.0;
@@ -225,8 +230,9 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
       passh = HIPASS_SLOPE*(1.0-sqrt(r2h));
       passh = (passh<70.0)? (passh>-70.0? (1/(1+exp(passh))) : 1.0) : 0.0;
       pass *= passh;
-      *(fdata1p++) *= pass;
-      *(fdata1p++) *= pass; 
+      *(fdata1p) *= pass;
+      *(fdata1p+1) *= pass; 
+      fdata1p += 2;
       }
 /*-- Update coordinate vector */
     for (d=1; d<naxis; d++)
@@ -240,8 +246,7 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_LOCK(&fftmutex);
 #endif
-  plan = fftwf_plan_dft_c2r(naxis, (const int *)size2,(fftwf_complex *)fdata1, 
-	data1, 
+  plan = fftwf_plan_dft_c2r(naxis, (const int *)size2, fdata1, data1, 
 	FFTW_ESTIMATE | FFTW_DESTROY_INPUT);
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_UNLOCK(&fftmutex);
@@ -255,7 +260,7 @@ void	fastcorr(float *data1, float *data2, int naxis, int *size,
   fftwf_destroy_plan(plan);
 
 /* Free the fdata1 scratch array */
-  QFFTWFREE(fdata1);
+  QFFTWF_FREE(fdata1);
 #ifdef USE_THREADS
   QPTHREAD_MUTEX_UNLOCK(&fftmutex);
 #endif
@@ -306,26 +311,28 @@ void	shiftcube(float *data, int naxis, int *size)
 
 
 /****** fft_init ************************************************************
-PROTO	void fft_init(void)
+PROTO	void fft_init(int nthreads)
 PURPOSE	Initialize the FFT routines
-INPUT	-.
+INPUT	Number of threads.
 OUTPUT	-.
 NOTES	Global preferences are used for multhreading.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/06/2009
+VERSION	27/11/2012
  ***/
-void	fft_init(void)
+void	fft_init(int nthreads)
  {
   if (!firsttimeflag)
     {
-#ifdef USE_THREADS
-/*
-#ifdef HAVE_FFTWF_MP
-    if (!fftwf_init_threads())
-      error(EXIT_FAILURE, "*Error*: thread initialization failed in ", "FFTW");
-    fftwf_plan_with_nthreads(prefs.nthreads);
-#endif
-*/
+#if defined(USE_THREADS)
+    if (!nthreads)
+      nthreads = 1;
+  #if defined(HAVE_MKL)
+    mkl_set_num_threads(nthreads);
+  #elif defined(HAVE_FFTWF_MP)
+    if (fftwf_init_threads())
+      fftwf_plan_with_nthreads(nthreads);
+  #endif
+
     QPTHREAD_MUTEX_INIT(&fftmutex, NULL);
 #endif
     firsttimeflag = 1;
@@ -342,7 +349,7 @@ INPUT	-.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/06/2009
+VERSION	27/11/2012
  ***/
 void	fft_end(void)
  {
@@ -350,12 +357,12 @@ void	fft_end(void)
   if (firsttimeflag)
     {
     firsttimeflag = 0;
+
 #ifdef USE_THREADS
-/*
-#ifdef HAVE_FFTWF_MP
+  #ifdef HAVE_FFTWF_MP
     fftwf_cleanup_threads();
-#endif
-*/
+  #endif
+
     QPTHREAD_MUTEX_DESTROY(&fftmutex);
 #endif
     fftwf_cleanup();

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/09/2012
+*	Last modified:		16/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,7 +68,7 @@ time_t		thetime, thetime2;
 /********************************** makeit ***********************************/
 void	makeit(void)
   {
-   static char		filename[MAXCHAR], extension[MAXCHAR], str[88];
+   static char		filename[MAXCHAR], extension[MAXCHAR], str[MAXCHAR];
    fgroupstruct		**fgroups;
    fieldstruct		**fields, **reffields;
    struct tm		*tm;
@@ -211,7 +211,7 @@ void	makeit(void)
 /* Find where fields are in the sky */
   if (prefs.match_flag && prefs.astrefcat != ASTREFCAT_NONE)
     {
-    fft_init();
+    fft_init(prefs.nthreads/nfield);
     QPRINTF(OUTPUT, "\n----- Astrometric matching:\n\n");
 #ifdef USE_THREADS
     pthread_match_fields(fgroups, reffields, ngroup);
@@ -241,7 +241,7 @@ void	makeit(void)
   for (g=0; g<ngroup; g++)
     {
 /*-- Reproject all fields from a group to a common projection */
-    reproj_fgroup(fgroups[g], reffields[g]);
+    reproj_fgroup(fgroups[g], reffields[g], 0);
 /*-- Perform cross-identifications across catalogs */
     sprintf(str, "Making preliminary cross-identifications in group %d", g+1);
     NFPRINTF(OUTPUT, str);
@@ -259,7 +259,7 @@ void	makeit(void)
     for (g=0; g<ngroup; g++)
       {
 /*---- Reproject all fields from a group to a common projection (update) */
-      reproj_fgroup(fgroups[g], reffields[g]);
+      reproj_fgroup(fgroups[g], reffields[g], 0);
 /*---- Perform cross-identifications across catalogs */
       sprintf(str, "Making cross-identifications in group %d", g+1);
       NFPRINTF(OUTPUT, str);
@@ -291,7 +291,7 @@ void	makeit(void)
   for (g=0; g<ngroup; g++)
     {
 /*-- Reproject all fields from a group to a common projection (update) */
-    reproj_fgroup(fgroups[g], reffields[g]);
+    reproj_fgroup(fgroups[g], reffields[g], 0);
 /*-- Perform cross-identifications across catalogs */
     sprintf(str, "Making cross-identifications in group %d", g+1);
     NFPRINTF(OUTPUT, str);
@@ -336,57 +336,6 @@ void	makeit(void)
 	fgroups[g]->sig_referr_hsn[1]*DEG/ARCSEC,
 	fgroups[g]->chi2_ref_hsn, fgroups[g]->nrefmatch_hsn);
     }
-
-#ifdef HAVE_PLPLOT
-
-/* Plot field and source positions */
-  NFPRINTF(OUTPUT, "Generating group plots...");
-  for (g=0; g<ngroup; g++)
-    cplot_fgroup(fgroups[g], reffields[g]);
-  for (g=0; g<ngroup; g++)
-    cplot_astrepoch3d(fgroups[g]);
-/* Plot photometric relations */
-  cplot_photom(fgroups, ngroup, reffields);
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_shear(fgroups, ngroup, i);
-
-/* Plot astrometric errors in alpha and delta */
-  NFPRINTF(OUTPUT, "Generating astrometric plots...");
-  for (g=0; g<ngroup; g++)
-    cplot_aderrhisto2d(fgroups[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_aderrhisto1d(fgroups[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_referrhisto2d(fgroups[g], reffields[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_referrhisto1d(fgroups[g], reffields[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_chi2(fgroups[g]);
-
-/* Plot sub-pixel astrometric error dependency */
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_pixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_xpixerrhisto2d(fgroups, ngroup, i);
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_ypixerrhisto2d(fgroups, ngroup, i);
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_subpixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
-
-/* Plot astrometric distortions */
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    for (f=0; f<nfield; f++)
-      if (fields[f]->astromlabel == i)
-        {
-        cplot_distort(fields[f]);
-        break;
-        }
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_astintsysmap(fgroups, ngroup, i, prefs.sn_thresh[1]);
-  for (i=0; i<prefs.nastrinstrustr; i++)
-    cplot_astrefsysmap(fgroups, ngroup, i, prefs.sn_thresh[1]);
-#endif
-
 
   if (prefs.solvphotom_flag)
     {
@@ -473,45 +422,53 @@ void	makeit(void)
 
   QPRINTF(OUTPUT, "\n");
 
-#ifdef HAVE_PLPLOT
-  NFPRINTF(OUTPUT, "Generating photometric plots...");
+  NFPRINTF(OUTPUT, "Merging detections...");
   for (g=0; g<ngroup; g++)
-    cplot_photzp(fgroups[g]);
-  for (g=0; g<ngroup; g++)
-    cplot_photzp3d(fgroups[g]);
-  for (g=0; g<ngroup; g++)
-    cplot_photerrhisto(fgroups[g], reffields[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_photerrhistomag(fgroups[g], reffields[g], prefs.sn_thresh[1]);
-#endif
+    merge_fgroup(fgroups[g], reffields[g]);
 
-/* Cross-ID one last time if necessary */
-#ifdef HAVE_PLPLOT
-  if (prefs.propmotion_flag || prefs.mergedcat_type != CAT_NONE
-	|| cplot_check(CPLOT_ASTRCOLSHIFT1D)!=RETURN_ERROR
-	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
-	|| cplot_check(CPLOT_ADPROP2D)!=RETURN_ERROR)
-#else
-  if (prefs.propmotion_flag || prefs.mergedcat_type != CAT_NONE)
-#endif
-    {
-/*-- Compute colour indices */
-    NFPRINTF(OUTPUT, "Computing global color indices");
-    colour_fgroup(fgroups, ngroup);
+/* Compute colour indices */
+  NFPRINTF(OUTPUT, "Computing global color indices");
+  colour_fgroup(fgroups, ngroup);
 
-/*-- Compute 2nd order colour shifts */
+/* Correct colour shifts */
+  if (prefs.colourshiftcorr_flag)
+/*-- Correct positions for colour-dependent effects */
     for (g=0; g<ngroup; g++)
       {
       sprintf(str, "Computing colour shifts in group %d", g+1);
       NFPRINTF(OUTPUT, str);
       astrcolshift_fgroup(fgroups[g], reffields[g]);
       }
+
+  if (prefs.propmotioncorr_flag && prefs.solvastrom_flag)
+    {
 /*-- Re-do Cross-ID to recover possibly fast moving objects */
+    NFPRINTF(OUTPUT, "Pairing detections...");
     for (g=0; g<ngroup; g++)
       crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+    NFPRINTF(OUTPUT, "Merging detections...");
+    for (g=0; g<ngroup; g++)
+      merge_fgroup(fgroups[g], reffields[g]);
+    for (g=0; g<ngroup; g++)
+      {
+      sprintf(str, "Computing proper motions in group %d", g+1);
+      NFPRINTF(OUTPUT, str);
+      astrprop_fgroup(fgroups[g]);
+      }
+    for (g=0; g<ngroup; g++)
+/*---- Reproject to a common projection while correcting for proper motions */
+      reproj_fgroup(fgroups[g], reffields[g], 1);
+    NFPRINTF(OUTPUT, "Pairing detections...");
+    for (g=0; g<ngroup; g++)
+      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+    NFPRINTF(OUTPUT, "Merging detections...");
+    for (g=0; g<ngroup; g++)
+      merge_fgroup(fgroups[g], reffields[g]);
+/*-- Compute global astrometric solution: 3rd iteration */
+    astrsolve_fgroups(fgroups, ngroup);
     }
 
-/* Compute proper motions and other 2nd order corrections */
+/* Compute final proper motions and parallaxes */
 #ifdef HAVE_PLPLOT
   if (prefs.propmotion_flag || prefs.parallax_flag
 	|| cplot_check(CPLOT_REFPROP)!=RETURN_ERROR
@@ -519,22 +476,24 @@ void	makeit(void)
 #else
   if (prefs.propmotion_flag || prefs.parallax_flag)
 #endif
+    {
+/*-- Re-do Cross-ID to recover possibly fast moving objects */
+    NFPRINTF(OUTPUT, "Pairing detections...");
+    for (g=0; g<ngroup; g++)
+      crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+    NFPRINTF(OUTPUT, "Merging detections...");
+    for (g=0; g<ngroup; g++)
+      merge_fgroup(fgroups[g], reffields[g]);
     for (g=0; g<ngroup; g++)
       {
       sprintf(str, "Computing proper motions in group %d", g+1);
       NFPRINTF(OUTPUT, str);
       astrprop_fgroup(fgroups[g]);
       }
-
-#ifdef HAVE_PLPLOT
-  NFPRINTF(OUTPUT, "Generating proper-motion plots...");
-  for (g=0; g<ngroup; g++)
-    cplot_astrcolshift1d(fgroups[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_astrefprop(fgroups[g], reffields[g], prefs.sn_thresh[1]);
-  for (g=0; g<ngroup; g++)
-    cplot_adprophisto2d(fgroups[g], prefs.sn_thresh[1]);
-#endif
+    for (g=0; g<ngroup; g++)
+/*---- Reproject all fields from a group to a common projection (update) */
+      reproj_fgroup(fgroups[g], reffields[g], 1);
+    }
 
 /* Save headers */
   NFPRINTF(OUTPUT, "Saving image headers...");
@@ -547,6 +506,74 @@ void	makeit(void)
     sprintf(pstr, "%s", prefs.head_suffix);
     write_aschead(filename, fields[f]);
     }
+
+#ifdef HAVE_PLPLOT
+
+/* Plot field and source positions */
+  NFPRINTF(OUTPUT, "Generating group plots...");
+  for (g=0; g<ngroup; g++)
+    cplot_fgroup(fgroups[g], reffields[g]);
+  for (g=0; g<ngroup; g++)
+    cplot_astrepoch3d(fgroups[g]);
+/* Plot photometric relations */
+  cplot_photom(fgroups, ngroup, reffields);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_shear(fgroups, ngroup, i);
+
+/* Plot astrometric errors in alpha and delta */
+  NFPRINTF(OUTPUT, "Generating astrometric plots...");
+  for (g=0; g<ngroup; g++)
+    cplot_aderrhisto2d(fgroups[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_aderrhisto1d(fgroups[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_referrhisto2d(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_referrhisto1d(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_chi2(fgroups[g]);
+
+/* Plot sub-pixel astrometric error dependency */
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_pixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_xpixerrhisto2d(fgroups, ngroup, i);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_ypixerrhisto2d(fgroups, ngroup, i);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_subpixerrhisto1d(fgroups, ngroup, i, prefs.sn_thresh[1]);
+
+/* Plot astrometric distortions */
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    for (f=0; f<nfield; f++)
+      if (fields[f]->astromlabel == i)
+        {
+        cplot_distort(fields[f]);
+        break;
+        }
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_astintsysmap(fgroups, ngroup, i, prefs.sn_thresh[1]);
+  for (i=0; i<prefs.nastrinstrustr; i++)
+    cplot_astrefsysmap(fgroups, ngroup, i, prefs.sn_thresh[1]);
+
+  NFPRINTF(OUTPUT, "Generating photometric plots...");
+  for (g=0; g<ngroup; g++)
+    cplot_photzp(fgroups[g]);
+  for (g=0; g<ngroup; g++)
+    cplot_photzp3d(fgroups[g]);
+  for (g=0; g<ngroup; g++)
+    cplot_photerrhisto(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_photerrhistomag(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+
+  NFPRINTF(OUTPUT, "Generating proper-motion plots...");
+  for (g=0; g<ngroup; g++)
+    cplot_astrcolshift1d(fgroups[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_astrefprop(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+  for (g=0; g<ngroup; g++)
+    cplot_adprophisto2d(fgroups[g], prefs.sn_thresh[1]);
+#endif
 
   init_xml(fields, nfield, fgroups, ngroup);
 

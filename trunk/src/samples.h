@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2012
+*	Last modified:		29/01/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,24 +68,20 @@ typedef struct sample
   struct sample	*prevsamp;		/* Link to previous sample */
   struct sample	*nextsamp;		/* Link to next sample */
   struct set	*set;			/* Link to parent set */
+  struct msample *msamp;		/* Link to merged sample (source) */
   double	*context;		/* Context vector */
   double	projpos[NAXIS];		/* Projected coordinates */
   double	rawpos[NAXIS];		/* Raw coordinates */
+  double	vrawpos[NAXIS];		/* "Virtual" raw coordinates */
   double	wcspos[NAXIS];		/* World Coordinate positions */
   double	epoch;			/* Epoch of observation */
   float		rawposerr[NAXIS];	/* Uncertainty on raw coordinates */
   float		wcsposerr[NAXIS];	/* Errors on WCS positions */
-  float		wcsprop[NAXIS];		/* Proper motion vectors in the WCS */
-  float		wcsproperr[NAXIS];	/* P. motion vector errors in the WCS */
-  float		wcsparal;		/* Trigonometric parallax */
-  float		wcsparalerr;		/* Trigonometric parallax error */
-  float		wcschi2;		/* P. motion/parallax fit Chi2/d.o.f.*/
   float		weight;			/* Relative weight in solutions */
   float		flux;			/* Flux */
   float		fluxerr;		/* Flux uncertainty (1-sigma) */
   float		mag;			/* Magnitude */
   float		magerr;			/* Magnitude uncertainty (1-sigma) */
-  float		colour;			/* A colour index */
   float		fwhm;			/* Full Width at Half Maximum */
   float		spread;			/* SExtractor's SPREAD_MODEL */
   float		spreaderr;		/* SExtractor's SPREADERR_MODEL */

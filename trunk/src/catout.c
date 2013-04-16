@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		07/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -43,6 +43,7 @@
 #include "fgroup.h"
 #include "field.h"
 #include "key.h"
+#include "merge.h"
 #include "prefs.h"
 #include "samples.h"
 #ifdef USE_THREADS
@@ -60,7 +61,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 04/10/2012
+VERSION 07/04/2013
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -76,7 +77,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
    catstruct		*cat;
    tabstruct		*asctab, *imtab, *objtab;
    keystruct		*key, *objkeys;
-   mergedsamplestruct	msample;
+   msamplestruct	*msamp;
+   mergedsamplestruct	mergedsample;
    fieldstruct		*field;
    setstruct		*set;
    samplestruct		*samp,*samp2;
@@ -87,14 +89,14 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			wcspos[NAXIS], wcsposerr[NAXIS], wcsposdisp[NAXIS],
 			wcsposref[NAXIS], wcsprop[NAXIS],wcsproperr[NAXIS],
 			wcsparal,wcsparalerr, wcschi2,
-			epoch,epochmin,epochmax, err2, colour, spread, wspread,
+			epoch,epochmin,epochmax, err2,
 			weight,weights, dummy;
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
    short		astrflagmask,photflagmask;
    int			nmag[MAXPHOTINSTRU],
-			d,f,i,k,n,p,s, nall,nphotok,nposok, npinstru, naxis,
+			d,f,i,k,m,n,p,s, nall,nphotok,nposok, npinstru, naxis,
 			index, refflag;
 
   if (prefs.mergedcat_type == CAT_NONE)
@@ -110,7 +112,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   objtab = new_tab("LDAC_OBJECTS");
 /* Set key pointers */
   QCALLOC(objkeys, keystruct, (sizeof(refmergedkey) / sizeof(keystruct)));
-  dptr = (long)((char *)&msample - (char *)&refmergedsample);
+  dptr = (long)((char *)&mergedsample - (char *)&refmergedsample);
   for (k=0; refmergedkey[k].name[0]; k++)
     {
     if (!prefs.spread_flag
@@ -224,178 +226,88 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     }
 
   index=0;
-  for (f=0; f<fgroup->nfield; f++)
+  msamp = fgroup->msample;
+  for (m=fgroup->nmsample; m--; msamp++)
     {
-    field = fgroup->field[f];
-    for (s=0; s<field->nset; s++)
+    samp = msamp->samp;
+    memset(&mergedsample, 0, sizeof(mergedsample));
+    mergedsample.sourceindex = msamp->sourceindex;
+/*-- Photometry */
+    for (p=0; p<npinstru; p++)
       {
-      set = field->set[s];
-      samp = set->sample;
-      for (n=set->nsample; n--; samp++)
-        if (!samp->nextsamp)
-          {
-          memset(&msample, 0, sizeof(msample));
-          msample.sourceindex = ++index;
-/*-------- Photometry */
-          for (p=0; p<npinstru; p++)
-            {
-            mag[p] = magerr[p] = magdisp[p] = magchi2[p] = magref[p] = 0.0;
-            nmag[p] = 0;
-            }
-          nphotok = 0;
-          colour = 0.0;
-          for (samp2 = samp;
-		samp2 && (p=samp2->set->field->photomlabel)>=0;
+      mag[p] = magerr[p] = magdisp[p] = magchi2[p] = magref[p] = 0.0;
+      nmag[p] = 0;
+      }
+    nphotok = 0;
+    for (samp2 = samp; samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
-            {
-            if (samp2->sexflags & photflagmask)
-              continue;
-            colour += samp2->colour;
-            if (samp2->flux > 0.0 && (err2 = samp2->magerr*samp2->magerr)>0.0)
-              {
-              magerr[p] += 1.0 / err2;
-              mag[p] += samp2->mag / err2;
-              if (!nmag[p])
-                magref[p] = samp2->mag;
-              magdisp[p] += (samp2->mag-magref[p]) * (samp2->mag - magref[p]);
-              nmag[p]++;
-              }
-            nphotok++;
-            }
-          msample.colour = nphotok? colour/nphotok : 0.0;
-          for (p=0; p<npinstru; p++)
-            {
-            if ((nphotok=nmag[p]))
-              {
-              msample.mag[p] = mag[p] / magerr[p];
-              msample.magerr[p] = sqrt(1.0 / magerr[p]);
-              msample.magdisp[p] = nphotok > 1?
-		sqrt(fabs(magdisp[p]
-		 - nphotok*(msample.mag[p] - magref[p])
-		 *(msample.mag[p] - magref[p]))/(nphotok-1.0))
+      {
+      if (samp2->sexflags & photflagmask)
+        continue;
+      if (samp2->flux > 0.0 && (err2 = samp2->magerr*samp2->magerr)>0.0)
+        {
+        magerr[p] += 1.0 / err2;
+        mag[p] += samp2->mag / err2;
+        if (!nmag[p])
+          magref[p] = samp2->mag;
+        magdisp[p] += (samp2->mag-magref[p]) * (samp2->mag - magref[p]);
+        nmag[p]++;
+        }
+      nphotok++;
+      }
+    for (p=0; p<npinstru; p++)
+      {
+      if ((nphotok=nmag[p]))
+        {
+        mergedsample.mag[p] = mag[p] / magerr[p];
+        mergedsample.magerr[p] = sqrt(1.0 / magerr[p]);
+        mergedsample.magdisp[p] = nphotok > 1? sqrt(fabs(magdisp[p]
+			 - nphotok*(mergedsample.mag[p] - magref[p])
+		 	*(mergedsample.mag[p] - magref[p]))/(nphotok-1.0))
 		: 0.0;
-              }
-            else
-              msample.mag[p] = msample.magerr[p] = msample.magdisp[p] = 99.0;
-            msample.nmag[p] = nmag[p];
-            }
+        }
+      else
+        mergedsample.mag[p] = mergedsample.magerr[p]
+		= mergedsample.magdisp[p] = 99.0;
+        mergedsample.nmag[p] = nmag[p];
+      }
 
-/*-------- Astrometry */
-          nall = nposok = 0;
-          for (d=0; d<naxis; d++)
-            wcspos[d] = wcsposerr[d] = wcsposdisp[d] = wcsposref[d]
-		= wcsprop[d] = wcsproperr[d] = 0.0;
-          wcsparal = wcsparalerr = wcschi2 = weights = 0.0;
-          epoch = spread = wspread = 0.0;
-          epochmin = BIG;
-          epochmax = -BIG;
-          for (samp2 = samp;
-		samp2 && ((p=samp2->set->field->photomlabel)>=0 || refflag);
-                samp2=samp2->prevsamp)
-            {
-            nall++;
-            if ((samp2->sexflags & astrflagmask)
-		|| (samp2->scampflags & SCAMP_BADPROPER))
-              continue;
-            for (d=0; d<naxis; d++)
-              {
-              err2 = samp2->wcsposerr[d]*samp2->wcsposerr[d];
-              wcspos[d] += samp2->wcspos[d];
-              if (err2 <= 0.0)
-                err2 += 1*MAS / DEG;
-              weight = 1.0/err2;
-              weights += weight;
-              epoch += weight*samp2->epoch;
-              wcsposerr[d] += weight;
-              wcspos[d] += weight*samp2->wcspos[d];
-              if (!nposok)
-                wcsposref[d] = samp2->wcspos[d];
-              wcsposdisp[d] += (samp2->wcspos[d] - wcsposref[d])
-				* (samp2->wcspos[d] - wcsposref[d]);
-              wcsprop[d] += samp2->wcsprop[d];
-              wcsproperr[d] += samp2->wcsproperr[d]*samp2->wcsproperr[d];
-              }
+    mergedsample.colour = msamp->colour;
 
-            wcsparal += samp2->wcsparal;
-            wcsparalerr += samp2->wcsparalerr*samp2->wcsparalerr;
-            wcschi2 += samp2->wcschi2;
-/*---------- Epochs */
-            if (p>=0)
-              {
-              if (samp2->set->epochmin < epochmin)
-                epochmin = samp2->set->epochmin;
-              if (samp2->set->epochmax > epochmax)
-                epochmax = samp2->set->epochmax;
-              }
-            else	/* Special treatment for astrometric ref. catalog */
-              {
-              if (samp2->epoch < epochmin)
-                epochmin = samp2->epoch;
-              if (samp2->epoch > epochmax)
-                epochmax = samp2->epoch;
-              }
-/*---------- Morphometry */
-            if (prefs.spread_flag && p>=0)	/* Exclude ref. from stats */
-              {
-              weight = samp2->spreaderr>TINY?
-		1.0/(samp2->spreaderr*samp2->spreaderr) : 1.0;
-              spread += weight*samp2->spread;
-              wspread += weight;
-              }
-/*---------- Flags */
-            msample.sexflags |= samp2->sexflags;
-            msample.scampflags |= samp2->scampflags;
-            nposok++;
-            }
-          if (nposok)
-            {
-            for (d=0; d<naxis; d++)
-              {
-              msample.wcspos[d] = wcspos[d] / wcsposerr[d];
-              msample.wcsposerr[d] = sqrt(1.0/wcsposerr[d]);
-              msample.wcsposdisp[d] = nposok > 1?
-		sqrt(fabs(wcsposdisp[d]
-		 - nposok*(msample.wcspos[d] - wcsposref[d])
-			*(msample.wcspos[d] - wcsposref[d]))/(nposok-1.0))
-		: 0.0;
-              msample.wcsprop[d] = nposok>1? (wcsprop[d]/nposok)*DEG/MAS : 0.0;
-              msample.wcsproperr[d] = nposok>1?
-				sqrt(wcsproperr[d]/nposok) * DEG/MAS : 0.0;
-              }
-            if (msample.wcsposerr[0] < msample.wcsposerr[1])
-              {
-              dummy = msample.wcsposerr[0];
-              msample.wcsposerr[0] = msample.wcsposerr[1];
-              msample.wcsposerr[1] = dummy;
-              msample.wcspostheta = 90.0;
-              }
-            else
-              msample.wcspostheta = 0.0;
-            msample.wcsparal = (wcsparal/nposok) * DEG/MAS;
-            msample.wcsparalerr = sqrt(wcsparalerr/nposok) * DEG/MAS;
-            msample.wcschi2 = wcschi2/nposok;
-            msample.epoch = epoch / weights;
-            msample.epochmin = epochmin;
-            msample.epochmax = epochmax;
-            if (prefs.spread_flag)
-              {
-              msample.spread = spread / wspread;
-              msample.spreaderr = sqrt(1.0 / wspread);
-              }
-            }
-          msample.npos_tot = nall;
-          msample.npos_ok = nposok;
-/*-------- Write to the catalog */
-          if (prefs.mergedcat_type == CAT_ASCII_HEAD
+/*-- Astrometry */
+    for (d=0; d<naxis; d++)
+      {
+      mergedsample.wcspos[d] = msamp->wcspos[d];
+      mergedsample.wcsposerr[d] = msamp->wcsposerr[d];
+      mergedsample.wcsprop[d] = msamp->wcsprop[d] * DEG/MAS;
+      mergedsample.wcsproperr[d] = msamp->wcsproperr[d] * DEG/MAS;
+      }
+    mergedsample.wcschi2 = msamp->wcschi2;
+
+/*-- Epochs */
+    mergedsample.epoch = msamp->epoch;
+    mergedsample.epochmin = msamp->epochmin;
+    mergedsample.epochmax = msamp->epochmax;
+    mergedsample.npos_tot = msamp->npos_tot;
+    mergedsample.npos_ok = msamp->npos_ok;
+
+/*-- Morphometry */
+    mergedsample.spread = msamp->spread;
+    mergedsample.spreaderr = msamp->spreaderr;
+
+/*-- Flags */
+    mergedsample.sexflags = msamp->sexflags;
+    mergedsample.scampflags = msamp->scampflags;
+
+/*-- Write to the catalog */
+    if (prefs.mergedcat_type == CAT_ASCII_HEAD
 		|| prefs.mergedcat_type == CAT_ASCII
 		|| prefs.mergedcat_type == CAT_ASCII_SKYCAT)
-            print_obj(ascfile, objtab);
-          else if (prefs.mergedcat_type == CAT_ASCII_VOTABLE)
-            voprint_obj(ascfile, objtab);
-          else
-            write_obj(objtab, buf);
-          }
-      }
+      print_obj(ascfile, objtab);
+    else if (prefs.mergedcat_type == CAT_ASCII_VOTABLE)
+      voprint_obj(ascfile, objtab);
+    else
+      write_obj(objtab, buf);
     }
 
   if (prefs.mergedcat_type == CAT_ASCII_HEAD

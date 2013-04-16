@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/07/2012
+*	Last modified:		06/12/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -328,7 +328,7 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/06/2012
+VERSION	06/12/2012
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
@@ -572,7 +572,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
       }
     else
       {
-      FITSREADF(buf, "LONGPOLE", wcs->longpole, 999.0);
+      FITSREADF(buf, "LONPOLE", wcs->longpole, 999.0);
       FITSREADF(buf, "LATPOLE ", wcs->latpole, 999.0);
 /*---- Old convention */
       if (fitsfind(buf, "PROJP???") != RETURN_ERROR)
@@ -616,7 +616,7 @@ INPUT	tab structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/09/2010
+VERSION	06/12/2012
  ***/
 void	write_wcs(tabstruct *tab, wcsstruct *wcs)
 
@@ -644,26 +644,26 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
     addkeywordto_head(tab, "MJD-OBS ", "Modified Julian date at start");
     fitswrite(tab->headbuf, "MJD-OBS ", &mjd, H_EXPO,T_DOUBLE);
     }
-  addkeywordto_head(tab, "RADECSYS", "Astrometric system");
+  addkeywordto_head(tab, "RADESYS ", "Astrometric system");
   switch(wcs->radecsys)
     {
     case RDSYS_ICRS:
-      fitswrite(tab->headbuf, "RADECSYS", "ICRS", H_STRING, T_STRING);
+      fitswrite(tab->headbuf, "RADESYS ", "ICRS", H_STRING, T_STRING);
       break;
     case RDSYS_FK5:
-      fitswrite(tab->headbuf, "RADECSYS", "FK5", H_STRING, T_STRING);
+      fitswrite(tab->headbuf, "RADESYS ", "FK5", H_STRING, T_STRING);
       break;
     case RDSYS_FK4:
-      fitswrite(tab->headbuf, "RADECSYS", "FK4", H_STRING, T_STRING);
+      fitswrite(tab->headbuf, "RADESYS ", "FK4", H_STRING, T_STRING);
       break;
     case RDSYS_FK4_NO_E:
-      fitswrite(tab->headbuf, "RADECSYS", "FK4-NO-E", H_STRING, T_STRING);
+      fitswrite(tab->headbuf, "RADESYS ", "FK4-NO-E", H_STRING, T_STRING);
       break;
     case RDSYS_GAPPT:
-      fitswrite(tab->headbuf, "RADECSYS", "GAPPT", H_STRING, T_STRING);
+      fitswrite(tab->headbuf, "RADESYS ", "GAPPT", H_STRING, T_STRING);
       break;
     default:
-      error(EXIT_FAILURE, "*Error*: unknown RADECSYS type in write_wcs()", "");
+      error(EXIT_FAILURE, "*Error*: unknown RADESYS type in write_wcs()", "");
     }
   for (l=0; l<naxis; l++)
     {
@@ -686,7 +686,7 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
       fitswrite(tab->headbuf, str, &wcs->cd[l*naxis+j], H_EXPO, T_DOUBLE);
       }
     for (j=0; j<100; j++)
-      if (wcs->projp[j+100*l] != 0.0)
+      if (fabs(wcs->projp[j+100*l]) > TINY)
         {
         sprintf(str, "PV%d_%d", l+1, j);
         addkeywordto_head(tab, str, "Projection distortion parameter");
@@ -696,6 +696,42 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
 
 /* Update the tab data */
   readbasic_head(tab);
+
+  return;
+  }
+
+
+/******* wipe_wcs ***********************************************************
+PROTO	void wipe_wcs(tabstruct *tab)
+PURPOSE	Remove all WCS (World Coordinate System) info in a FITS header.
+INPUT	tab structure.
+OUTPUT	-.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION	06/12/2012
+ ***/
+void	wipe_wcs(tabstruct *tab)
+
+  {
+  removekeywordfrom_head(tab, "CRVAL???");
+  removekeywordfrom_head(tab, "CTYPE???");
+  removekeywordfrom_head(tab, "CUNIT???");
+  removekeywordfrom_head(tab, "CRPIX???");
+  removekeywordfrom_head(tab, "CRDER???");
+  removekeywordfrom_head(tab, "CSYER???");
+  removekeywordfrom_head(tab, "CDELT???");
+  removekeywordfrom_head(tab, "CROTA???");
+  removekeywordfrom_head(tab, "CD?_????");
+  removekeywordfrom_head(tab, "PROJP_??");
+  removekeywordfrom_head(tab, "PV?_????");
+  removekeywordfrom_head(tab, "PC?_????");
+  removekeywordfrom_head(tab, "PC00?00?");
+  removekeywordfrom_head(tab, "EQUINOX?");
+  removekeywordfrom_head(tab, "RADESYS?");
+  removekeywordfrom_head(tab, "RADECSYS");
+  removekeywordfrom_head(tab, "LONPOLE?");
+  removekeywordfrom_head(tab, "LATPOLE?");
+  removekeywordfrom_head(tab, "WAT?????");
 
   return;
   }
@@ -773,7 +809,7 @@ INPUT	WCS structure.
 OUTPUT	-.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/07/2012
+VERSION	20/11/2012
  ***/
 void	invert_wcs(wcsstruct *wcs)
 
@@ -782,7 +818,7 @@ void	invert_wcs(wcsstruct *wcs)
    double		pixin[NAXIS],raw[NAXIS],rawmin[NAXIS];
    double		*outpos,*outpost, *lngpos,*lngpost,
 			*latpos,*latpost,
-			lngstep,latstep, rawsize, epsilon;
+			lngstep,latstep, lngposo,latposo,rawsize, epsilon;
    int			group[] = {1,1};
 				/* Don't ask, this is needed by poly_init()! */
    int		i,j,lng,lat,deg, tnxflag, maxflag;
@@ -850,13 +886,15 @@ void	invert_wcs(wcsstruct *wcs)
   epsilon = WCS_INVACCURACY/rawsize;
 /* Find the lowest degree polynom */
   poly = NULL;  /* to avoid gcc -Wall warnings */
+/*
   maxflag = 1;
   for (deg=1; deg<=WCS_INVMAXDEG && maxflag; deg++)
     {
     if (deg>1)
       poly_end(poly);
     poly = poly_init(group, 2, &deg, 1);
-    poly_fit(poly, outpos, lngpos, NULL, WCS_NGRIDPOINTS2, NULL);
+    poly_fit(poly, outpos, lngpos, NULL, WCS_NGRIDPOINTS2, NULL,
+	1.0e-9/WCS_NGRIDPOINTS2);
     maxflag = 0;
     outpost = outpos;
     lngpost = lngpos;
@@ -867,13 +905,30 @@ void	invert_wcs(wcsstruct *wcs)
         break;
         }
     }
-  if (maxflag)
-    warning("Significant inaccuracy likely to occur in projection","");
+*/
+  maxflag = 0;
+  outpost = outpos;
+  lngpost = lngpos;
+  latpost = latpos;
+  for (i=WCS_NGRIDPOINTS2; i--; outpost+=2, lngpost++,latpost++)
+    {
+    pv_to_raw(wcs->prj, outpost[0],outpost[1], &lngposo,&latposo);
+    if (fabs(lngposo-*lngpost)>epsilon || fabs(latposo-*latpost)>epsilon)
+      {
+      maxflag = 1;
+      break;
+      }
+    }
+
+//  if (maxflag)
+//    warning("Significant inaccuracy likely to occur in projection","");
+
 /* Now link the created structure */
-  wcs->prj->inv_x = wcs->inv_x = poly;
+//  wcs->prj->inv_x = wcs->inv_x = poly;
 
 /* Invert "latitude" */
 /* Compute the extent of the pixel in reduced projected coordinates */
+/*
   linrev(rawmin, wcs->lin, pixin);
   pixin[lat] += ARCSEC/DEG;
   linfwd(pixin, wcs->lin, raw);
@@ -883,14 +938,15 @@ void	invert_wcs(wcsstruct *wcs)
     error(EXIT_FAILURE, "*Error*: incorrect linear conversion in ",
 		wcs->wcsprm->pcode);
   epsilon = WCS_INVACCURACY/rawsize;
-/* Find the lowest degree polynom */
+* Find the lowest degree polynom *
   maxflag = 1;
   for (deg=1; deg<=WCS_INVMAXDEG && maxflag; deg++)
     {
     if (deg>1)
       poly_end(poly);
     poly = poly_init(group, 2, &deg, 1);
-    poly_fit(poly, outpos, latpos, NULL, WCS_NGRIDPOINTS2, NULL);
+    poly_fit(poly, outpos, latpos, NULL, WCS_NGRIDPOINTS2, NULL,
+	1.0e-9/WCS_NGRIDPOINTS2);
     maxflag = 0;
     outpost = outpos;
     latpost = latpos;
@@ -901,11 +957,13 @@ void	invert_wcs(wcsstruct *wcs)
         break;
         }
     }
+
   if (maxflag)
     warning("Significant inaccuracy likely to occur in projection","");
-/* Now link the created structure */
-  wcs->prj->inv_y = wcs->inv_y = poly;
 
+* Now link the created structure *
+  wcs->prj->inv_y = wcs->inv_y = poly;
+*/
 /* Free memory */
   free(outpos);
   free(lngpos);

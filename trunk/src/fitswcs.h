@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		24/08/2012
+*	Last modified:		06/12/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -53,7 +53,7 @@
 
 #define		WCS_NGRIDPOINTS	12	/* Number of WCS grid points / axis */
 #define		WCS_NGRIDPOINTS2	(WCS_NGRIDPOINTS*WCS_NGRIDPOINTS)
-#define		WCS_INVMAXDEG	9	/* Maximum inversion polynom degree */
+#define		WCS_INVMAXDEG	5	/* Maximum inversion polynom degree */
 #define		WCS_INVACCURACY	0.001	/* Maximum inversion error (pixels) */
 #define		WCS_NRANGEPOINTS 32	/* Number of WCS range points / axis */
 
@@ -164,6 +164,7 @@ extern void		b2j(double yearobs, double alphain, double deltain,
 			precess_wcs(wcsstruct *wcs, double yearin,
 				double yearout),
 			range_wcs(wcsstruct *wcs),
+			wipe_wcs(tabstruct *tab),
 			write_wcs(tabstruct *tab, wcsstruct *wcs);
 
 #endif

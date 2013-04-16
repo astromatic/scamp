@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic WCS library
 *
-*	Copyright:		(C) 2000-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2000-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
 *				(C) 1995-1999 Mark Calabretta (original version)
 *
 *	Licenses:		GNU General Public License
@@ -24,7 +24,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		04/12/2012
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*=============================================================================
@@ -56,7 +56,7 @@
 *
 *   Author: Mark Calabretta, Australia Telescope National Facility
 *   IRAF's TNX added by E.Bertin 2000/03/28
-*   $Id: proj.h,v 1.1.1.1 2002/03/15 16:33:26 bertin Exp $
+*   $Id: proj.h,v 1.1.1.1 2012/12/04 16:33:26 bertin Exp $
 *===========================================================================*/
 
 #ifndef WCSLIB_PROJ
@@ -158,6 +158,7 @@ struct prjprm {
    int tnxfwd(const double, const double, struct prjprm *, double *, double *);
    int tnxrev(const double, const double, struct prjprm *, double *, double *);
    int raw_to_pv(struct prjprm *, double, double, double *, double *);
+   int pv_to_raw(struct prjprm *, double, double, double *, double *);
 #else
    int azpset(), azpfwd(), azprev();
    int tanset(), tanfwd(), tanrev();
