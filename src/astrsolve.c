@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/04/2013
+*	Last modified:		17/04/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -109,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/03/2013
+VERSION	17/04/2013
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -321,7 +321,14 @@ size_t size;
 
 #ifdef MATSTORAGE_PACKED
   size=((size_t)(ncoefftot+1)*ncoefftot)/2*sizeof(double);
-  if ((alpha = mmap(NULL, size,PROT_WRITE|PROT_READ,MAP_PRIVATE|MAP_ANONYMOUS,-1,0))==(void *)-1)
+
+  if ((alpha = mmap(NULL, size,PROT_WRITE|PROT_READ,
+ #ifdef MAP_ANONYMOUS
+	MAP_PRIVATE|MAP_ANONYMOUS,	/* Linux */
+ #else
+	MAP_PRIVATE|MAP_ANON,		/* BSD, OSX */
+ #endif
+	-1,0))==(void *)-1)
     {
     sprintf(gstr, "alpha ((ncoefftot+1)*ncoefftot)/2 =%lld bytes) "
 			"at line %d in module " __FILE__ " !", size, __LINE__);
