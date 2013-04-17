@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		04/04/2013
+#	Last modified:		17/04/2013
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[2.0b8],[bertin@iap.fr])
+AC_INIT([scamp],[2.0b9],[bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -159,6 +159,11 @@ AC_ARG_WITH(fftw-incdir,
         [AS_HELP_STRING([--with-fftw-incdir=<FFTW include dir>],
 	[Alternative directory for FFTW include files])])
 
+# Provide special options for the MKL library
+AC_ARG_WITH(mkl-dir,
+        [AS_HELP_STRING([--with-mkl-dir=<MKL path>],
+        [Provide an alternative path to the MKL library])])
+
 # Provide a special option for CDSClient
 AC_ARG_WITH(cdsclient-dir,
 	[AS_HELP_STRING([--with-cdsclient-dir=<aclient execution path>],
@@ -220,7 +225,7 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 ############ handle the INTEL MKL library (FFTW + LAPACKe) ###########
 if test "$enable_mkl" = "yes"; then
   convlibs="${srcdir}/wcs/libwcs_c.a"
-  ACX_MKL(,yes,$enable_best_link,$convlibs)
+  ACX_MKL($with_mkl_dir,yes,$enable_best_link,$convlibs)
   if test "$MKL_WARN" != ""; then
     AC_MSG_WARN([$MKL_WARN])
   fi
