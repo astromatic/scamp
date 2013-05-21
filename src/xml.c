@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/08/2012
+*	Last modified:		15/05/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -186,7 +186,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	27/08/2012
+VERSION	15/05/2013
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -1080,7 +1080,7 @@ int	write_xml_meta(FILE *file, char *msgerror)
     write_xmlconfigparam(file,"PhotFluxerr_Key", "",
 		"meta.id;phot.flux;src", "%s");
     write_xmlconfigparam(file, "PhotClip_NSigma", "",
-		"meta.id;stat.param;phot", "%d");
+		"meta.id;stat.param;phot", "%.6g");
 /*-- Check-plots */
     write_xmlconfigparam(file, "CheckPlot_CKey", "", "meta.id;meta.code", "%s");
     write_xmlconfigparam(file, "CheckPlot_Dev", "", "meta.code", "%s");
