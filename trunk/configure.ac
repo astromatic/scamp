@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[2.0b9],[bertin@iap.fr])
+AC_INIT([scamp],[2.0b10],[bertin@iap.fr])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -129,7 +129,6 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 # Provide special options for PLPlot
-enable_plplot="yes"
 AC_MSG_CHECKING([whether we should use PLPlot])
 AC_ARG_ENABLE(plplot,
 	[AS_HELP_STRING([--enable-plplot],
@@ -250,7 +249,7 @@ else
 fi													
 
 ################# handle the PLPlot library (graphic plots) ##################
-if test "$enable_plplot" = "yes"; then
+if test "$enable_plplot" != "no"; then
   ACX_PLPLOT($with_plplot_libdir,$with_plplot_incdir,
     [use_plplot="yes"]
     [AM_CPPFLAGS="$AM_CPPFLAGS $PLPLOT_CFLAGS"]
