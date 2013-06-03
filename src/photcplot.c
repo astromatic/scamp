@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		03/06/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -815,7 +815,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	03/06/2013
  ***/
 int	cplot_photzp3d(fgroupstruct *fgroup)
   {
@@ -1016,9 +1016,11 @@ int	cplot_photzp3d(fgroupstruct *fgroup)
             ddmax = dd;
             imax = i;
             }
-        x1=plP_w3wcx(focplanet->x[imax],focplanet->y[imax],focplanet->z[imax]);
+/* 
+       x1=plP_w3wcx(focplanet->x[imax],focplanet->y[imax],focplanet->z[imax]);
         y1=plP_w3wcy(focplanet->x[imax],focplanet->y[imax],focplanet->z[imax]);
         plptex(x1, y1-0.02, 1.0, -0.26, 1.1, focplanet->str);
+*/
         }
       plcol0(15);
       }
