@@ -290,7 +290,7 @@ char *default_prefs[] =
 "*ASTR_ACCURACY          0.01            # Astrom. uncertainty floor parameter",
 "*ASTRCLIP_NSIGMA        3.0             # Astrom. clipping threshold in sigmas",
 "*COMPUTE_PARALLAXES     N               # Compute trigonom. parallaxes (Y/N)?",
-"*COMPUTE_PROPERMOTIONS  Y               # Compute proper motions (Y/N)?",
+"*COMPUTE_PROPERMOTIONS  N               # Compute proper motions (Y/N)?",
 //"*CORRECT_PROPERMOTIONS  N               # Correct for proper motions (Y/N)?",
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
 "*INCLUDE_ASTREFCATALOG  Y               # Include ref.cat in prop.motions (Y/N)?",
