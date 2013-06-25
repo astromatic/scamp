@@ -1158,9 +1158,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
         sample = set->sample + nsample;
 
-/*------ Initialize the new catalog entry to 0 */
-        memset(sample, 0, sizeof(samplestruct));
-
         if (mag[band] < 98.0)
           {
           sample->mag = mag[band];
@@ -1192,11 +1189,14 @@ prop[lng]*DEG/MAS,prop[lat]*DEG/MAS,properr[lng]*DEG/MAS,properr[lat]*DEG/MAS,
 epoch, sample->mag, sample->magerr);
 */
         sample->flux = 0.0;
+        sample->rawpos[lng] = sample->rawpos[lat] = 0.0;
+        sample->rawposerr[lng] = sample->rawposerr[lat] = 0.0;
         sample->wcspos[lng] = alpha;
         sample->wcspos[lat] = delta;
         sample->wcsposerr[lng] = poserr[lng];
         sample->wcsposerr[lat] = poserr[lat];
         sample->epoch = epoch;
+        sample->spread = sample->spreaderr = 0.0;
         sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
         sample->scampflags = 0;
         sample->set = set;
