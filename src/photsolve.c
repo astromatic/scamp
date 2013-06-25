@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		25/06/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -615,7 +615,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	photstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	25/06/2013
  ***/
 int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
   {
@@ -672,6 +672,7 @@ int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
                   samp2->nextsamp->prevsamp = samp2->prevsamp;
                 if (samp2->prevsamp)
                   samp2->prevsamp->nextsamp = samp2->nextsamp;
+                samp2->prevsamp = samp2->nextsamp = NULL;
                 nclip++;
                 }
               }

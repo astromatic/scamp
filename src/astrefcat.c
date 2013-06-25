@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/03/2013
+*	Last modified:		25/06/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -119,7 +119,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 10/03/2013
+VERSION 25/06/2013
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -1157,6 +1157,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           }
 
         sample = set->sample + nsample;
+
+/*------ Initialize the new catalog entry to 0 */
+        memset(sample, 0, sizeof(samplestruct));
+
         if (mag[band] < 98.0)
           {
           sample->mag = mag[band];
@@ -1192,12 +1196,6 @@ epoch, sample->mag, sample->magerr);
         sample->wcspos[lat] = delta;
         sample->wcsposerr[lng] = poserr[lng];
         sample->wcsposerr[lat] = poserr[lat];
-/*
-        sample->wcsprop[lng] = prop[lng];
-        sample->wcsprop[lat] = prop[lat];
-        sample->wcsproperr[lng] = properr[lng];
-        sample->wcsproperr[lat] = properr[lat];
-*/
         sample->epoch = epoch;
         sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
         sample->scampflags = 0;

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		07/04/2013
+*	Last modified:		25/06/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -352,7 +352,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/08/2012
+VERSION 25/06/2013
 */
 void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -371,6 +371,7 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
    fullsamplestruct	fsample;
    fieldstruct		*field;
    setstruct		*set;
+   msamplestruct	*msamp;
    samplestruct		*samp,*samp2;
    FILE			*ascfile;
    double		wcspos[NAXIS], wcsposerr[NAXIS],
@@ -379,7 +380,7 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 			*buf, *rfilename;
    long			dptr;
    int			nmag[MAXPHOTINSTRU],
-			d,f,i,k,n,p,s,nm, npinstru, naxis, index;
+			d,i,k,m,n,p,nm, npinstru, naxis, index;
 
   if (prefs.fullcat_type == CAT_NONE)
     return;
@@ -503,60 +504,50 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
     init_writeobj(cat, objtab, &buf);
     }
 
-  index = 0;
-  for (f=0; f<fgroup->nfield; f++)
+  msamp = fgroup->msample;
+  for (m=fgroup->nmsample; m--; msamp++)
     {
-    field = fgroup->field[f];
-    for (s=0; s<field->nset; s++)
+    samp = msamp->samp;
+    for (samp2 = samp; samp2; samp2=samp2->prevsamp)
       {
-      set = field->set[s];
-      samp = set->sample;
-      for (n=set->nsample; n--; samp++)
-        if (!samp->nextsamp)
-          {
-          ++index;
-          for (samp2 = samp; samp2; samp2=samp2->prevsamp)
-            {
-/*---------- Indices */
-            fsample.sourceindex = index;
-            fsample.fieldindex = samp2->set->field->astromlabel>=0?
-					samp2->set->field->fieldindex+1 : 0;
-            fsample.setindex = samp2->set->setindex+1;
-            fsample.astrinstruindex = samp2->set->field->astromlabel>=0?
+/*---- Indices */
+      fsample.sourceindex = msamp->sourceindex;
+      fsample.fieldindex = samp2->set->field->astromlabel>=0?
+				samp2->set->field->fieldindex+1 : 0;
+      fsample.setindex = samp2->set->setindex+1;
+      fsample.astrinstruindex = samp2->set->field->astromlabel>=0?
 					samp2->set->field->astromlabel+1 : 0;
-            fsample.photinstruindex = samp2->set->field->photomlabel>=0?
+      fsample.photinstruindex = samp2->set->field->photomlabel>=0?
 					samp2->set->field->photomlabel+1 : 0;
-/*---------- Astrometry */
-            for (d=0; d<naxis; d++)
-              {
-              fsample.rawpos[d] = samp2->rawpos[d];
-              fsample.rawposerr[d] = samp2->rawposerr[d];
-              fsample.rawpostheta = 0.0;
-              fsample.wcspos[d] = samp2->wcspos[d];
-              fsample.wcsposerr[d] = samp2->wcsposerr[d];
-              fsample.wcspostheta = 0.0;
-              fsample.epoch = samp2->epoch;
-              }
-/*---------- Photometry */
-            fsample.mag = samp2->mag;
-            fsample.magerr = samp2->magerr;
-/*---------- Morphometry */
-            fsample.spread = samp2->spread;
-            fsample.spreaderr = samp2->spreaderr;
-/*---------- Flags */
-            fsample.sexflags = samp2->sexflags;
-            fsample.scampflags = samp2->scampflags;
-/*-------- Write to the catalog */
-            if (prefs.fullcat_type == CAT_ASCII_HEAD
+/*---- Astrometry */
+      for (d=0; d<naxis; d++)
+        {
+        fsample.rawpos[d] = samp2->rawpos[d];
+        fsample.rawposerr[d] = samp2->rawposerr[d];
+        fsample.wcspos[d] = samp2->wcspos[d];
+        fsample.wcsposerr[d] = samp2->wcsposerr[d];
+        }
+      fsample.rawpostheta = 0.0;
+      fsample.wcspostheta = 0.0;
+      fsample.epoch = samp2->epoch;
+/*---- Photometry */
+      fsample.mag = samp2->mag;
+      fsample.magerr = samp2->magerr;
+/*---- Morphometry */
+      fsample.spread = samp2->spread;
+      fsample.spreaderr = samp2->spreaderr;
+/*---- Flags */
+      fsample.sexflags = samp2->sexflags;
+      fsample.scampflags = samp2->scampflags;
+/*---- Write to the catalog */
+      if (prefs.fullcat_type == CAT_ASCII_HEAD
 		|| prefs.fullcat_type == CAT_ASCII
 		|| prefs.fullcat_type == CAT_ASCII_SKYCAT)
-              print_obj(ascfile, objtab);
-            else if (prefs.fullcat_type == CAT_ASCII_VOTABLE)
-              voprint_obj(ascfile, objtab);
-            else
-              write_obj(objtab, buf);
-            }
-          }
+        print_obj(ascfile, objtab);
+      else if (prefs.fullcat_type == CAT_ASCII_VOTABLE)
+        voprint_obj(ascfile, objtab);
+      else
+        write_obj(objtab, buf);
       }
     }
 

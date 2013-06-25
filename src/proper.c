@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		07/04/2013
+*	Last modified:		25/06/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -242,7 +242,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	10/03/2013
+VERSION	25/06/2013
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -356,6 +356,7 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
           samppropmod->scampflags |= SCAMP_BADPROPER;
         else
           sampmin->scampflags |= SCAMP_BADPROPER;
+        msamp->scampflags |= SCAMP_BADPROPER;
         }
       }
 

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/04/2013
+*	Last modified:		25/06/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -492,7 +492,7 @@ void	makeit(void)
       }
     for (g=0; g<ngroup; g++)
 /*---- Reproject all fields from a group to a common projection (update) */
-      reproj_fgroup(fgroups[g], reffields[g], 1);
+      reproj_fgroup(fgroups[g], reffields[g], prefs.propmotioncorr_flag);
     }
 
 /* Save headers */
