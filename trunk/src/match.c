@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/09/2012
+*	Last modified:		23/10/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -246,12 +246,12 @@ void	match_field(fieldstruct *field, fieldstruct *reffield)
       compute_rawpos(fieldset->wcs, refset2->sample, refset2->nsample);
       refcrossec = -2.0*PI*mean_wcsposvar(refset2)*log(MATCH_CONFPROB);
       crossec = -2.0*PI*mean_wcsposvar(fieldset)*log(MATCH_CONFPROB);
-/*---- Choose the smallest of them all */
+/*---- Choose the smallest of both areas */
       if (refarea < area)
         area = refarea;
-      if (refcrossec > crossec)
+      if (refcrossec < crossec)
         crossec = refcrossec;
-      matchresol = sqrt(crossec > area? crossec: area);
+      matchresol = sqrt(crossec < area? crossec: area);
       }
 /*-- Choose the number of stars used for MATCHing */
     if (prefs.nmatchmax>0)
@@ -427,7 +427,7 @@ NOTES	The output angle is expressed CCW in projected coordinates (not
 	pixel coordinates) for homogeneity reasons.
 	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/07/2012
+VERSION	23/10/2013
  ***/
 double	match_setas(setstruct *set, setstruct *refset, int nmax,
 			double matchresol, double *angle, double *scale)
@@ -540,16 +540,6 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
         rhosig = sig*rhofac;
 /*------ Take magnitudes into account */
         flux = -0.4*AS_FLUXEXP*(refsample[j].mag+refsample[k].mag);
-        if (thetasig>GAUSS_MAXSIG)
-          {
-          flux *= (GAUSS_MAXSIG*GAUSS_MAXSIG) / (thetasig*thetasig);
-          thetasig = GAUSS_MAXSIG;
-          }
-        if (rhosig>GAUSS_MAXSIG)
-          {
-          flux *= (GAUSS_MAXSIG*GAUSS_MAXSIG) / (rhosig*rhosig);
-          rhosig = GAUSS_MAXSIG;
-          }
         flux = (flux<70.0? (flux>-70.0? DEXP(flux) : 0.0) : BIG);
         if (dr2>dr2mid)
           flux *= (dr2max-dr2)/(dr2max-dr2mid);
@@ -609,16 +599,6 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
         thetasig = sig*thetafac;
         rhosig = (sig+0.0002)*rhofac;
         flux = sample[j].flux*sample[k].flux;
-        if (thetasig>GAUSS_MAXSIG)
-          {
-          flux *= (GAUSS_MAXSIG*GAUSS_MAXSIG) / (thetasig*thetasig);
-          thetasig = GAUSS_MAXSIG;
-          }
-        if (rhosig>GAUSS_MAXSIG)
-          {
-          flux *= (GAUSS_MAXSIG*GAUSS_MAXSIG) / (rhosig*rhosig);
-          rhosig = GAUSS_MAXSIG;
-          }
         flux = (flux>=0.0? pow(flux,AS_FLUXEXP) : 0.0);
         if (dr2>dr2mid)
           flux *= (dr2max-dr2)/(dr2max-dr2mid);
@@ -707,7 +687,7 @@ INPUT	ptr to the set to be matched,
 OUTPUT	Confidence level of the solution (in units of sigma).
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/07/2012
+VERSION	23/10/2013
  ***/
 double	match_setll(setstruct *set, setstruct *refset,
 			double matchresol, double *dlng, double *dlat)
@@ -797,16 +777,6 @@ double	match_setll(setstruct *set, setstruct *refset,
     ysig = refsample[i].wcsposerr[lat]*yerrfac;
 /*-- Take magnitudes into account */
     flux = -0.4*LL_FLUXEXP*refsample[i].mag;
-    if (xsig>GAUSS_MAXSIG)
-      {
-      flux *= GAUSS_MAXSIG / xsig;
-      xsig = GAUSS_MAXSIG;
-      }
-    if (ysig>GAUSS_MAXSIG)
-      {
-      flux *= GAUSS_MAXSIG / ysig;
-      ysig = GAUSS_MAXSIG;
-      }
     flux = flux<70.0? (flux>-70.0? DEXP(flux) : 0.0) : BIG;
     putgauss(rhisto, csize[0], csize[1], x,y, flux, xsig,ysig);
     }
@@ -946,7 +916,7 @@ INPUT	ptr to the histogram,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	22/09/2006
+VERSION	23/10/2013
  ***/
 void	putgauss(float *histo, int width, int height, double x, double y,
 		double flux, double xsig, double ysig)
@@ -958,11 +928,22 @@ void	putgauss(float *histo, int width, int height, double x, double y,
 /* Prepare the vignet */
   if (xsig<0.5)
     xsig = 0.5;
+  else  if (xsig>GAUSS_MAXSIG)
+    {
+    flux *= GAUSS_MAXSIG / xsig;
+    xsig = GAUSS_MAXSIG;
+    }
   vwidth = (int)(2*GAUSS_MAXNSIG*xsig);
   if (!(vwidth&1))
    vwidth++;
+
   if (ysig<0.5)
     ysig = 0.5;
+  else if (ysig>GAUSS_MAXSIG)
+    {
+    flux *= GAUSS_MAXSIG / ysig;
+    ysig = GAUSS_MAXSIG;
+    }
   vheight = (int)(2*GAUSS_MAXNSIG*ysig);
   if (!(vheight&1))
    vheight++;
@@ -1393,22 +1374,38 @@ INPUT	ptr to the input set.
 OUTPUT	variance in position, or 0.0 if the input set is empty of sources.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	01/07/2012
+VERSION	23/10/2013
  ***/
 double	mean_wcsposvar(setstruct *set)
   {
    samplestruct	*sample;
-   double	poserr2;
-   int		i, lng,lat;
+   float	fposerr2,fposerr2max;
+   double	mean, poserr2;
+   int		i, lng,lat, nsample;
 
+  if (!set->nsample)
+    return 0.0;
   lng = set->lng;
   lat = set->lat;
-  sample = set->sample;
+
+/* Trim extreme variances (those that exceed one hundred times the average) */
   poserr2 = 0.0;
+  sample = set->sample;
   for (i=set->nsample; i--; sample++)
     poserr2 += sample->wcsposerr[lng]*sample->wcsposerr[lat];
+  fposerr2max = (float)(poserr2 / set->nsample * 100.0);
 
-  return set->nsample? poserr2/set->nsample : 0.0;
+  poserr2 = 0.0;
+  nsample = 0;
+  sample = set->sample;
+  for (i=set->nsample; i--; sample++)
+    if ((fposerr2=sample->wcsposerr[lng]*sample->wcsposerr[lat]) < fposerr2max)
+      {
+      poserr2 += fposerr2;
+      nsample++;
+      }
+
+  return poserr2 / nsample;
   }
 
 
