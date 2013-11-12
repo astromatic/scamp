@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/02/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,6 +68,7 @@ typedef struct mergedsample
   float		spreaderr;		/* SPREAD_MODEL uncertainty */
   short		sexflags;		/* Merged SExtractor flags */
   short		scampflags;		/* Merged SCAMP flags */
+  unsigned int	imaflags;		/* Merged image flags */
   }	mergedsamplestruct;
 
 typedef struct fullsample
@@ -90,6 +91,7 @@ typedef struct fullsample
   float		spreaderr;		/* SPREAD_MODEL uncertainty */
   short		sexflags;		/* Merged SExtractor flags */
   short		scampflags;		/* Merged SCAMP flags */
+  unsigned int	imaflags;		/* Merged image flags */
   }	fullsamplestruct;
 
 /*-------------------------------- protos -----------------------------------*/

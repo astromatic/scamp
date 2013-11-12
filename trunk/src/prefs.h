@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		07/04/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -89,9 +89,9 @@ typedef struct
   double	fwhm_thresh[2];		/* Minimum and maximum FWHM allowed */
   int		nfwhm_thresh;		/* nb of params */
   double	maxellip;		/* Maximum ellipticity allowed */
-  int		flags_mask;		/* Rejection mask on SEx FLAGS */
+  int		sexflags_mask;		/* Rejection mask on SEx FLAGS */
   int		wflags_mask;		/* Rej. mask on SEx FLAGS_WEIGHT */
-  int		imaflags_mask;		/* Rejection mask on SEx IMAFLAG_ISO */
+  unsigned int	imaflags_mask;		/* Rejection mask on SEx IMAFLAG_ISO */
 
 /* Reference catalogs */
   astrefenum	astrefcat;		/* Reference catalog */
@@ -168,7 +168,8 @@ typedef struct
   int		nmagzero_interr;		/* nb of params */
   double	magzero_referr[MAXPHOTINSTRU];	/* Photom.field ZP error RMS */
   int		nmagzero_referr;		/* nb of params */
-  int		phot_flagsmask;			/* Photom. mask on SEx FLAGS */
+  int		phot_sexflagsmask;		/* Photom. mask on SEx FLAGS */
+  int		phot_imaflagsmask;		/* Photom. mask on image flags*/
 
 /* Astrometric solution */
   projenum	projection_type[MAXFILE];	/* Celestial projection type */
@@ -197,15 +198,16 @@ typedef struct
   accuracyenum	astraccuracy_type;		/* Astrom. uncer. input type */
   char		astraccuracy_key[72];	/* Fits keyword for astrom. uncer. */
   double	astraccuracy;			/* Astrom. uncertainty floor */
+  int		astr_sexflagsmask;		/* Astrom. mask on SEx FLAGS */
+  int		astr_imaflagsmask;		/* Astrom. mask on image flags*/
 /* Parallaxes */
   int		parallax_flag;			/* Compute parallaxes? */
 /* Proper motions */
   int		propmotion_flag;		/* Compute proper motions? */
   int		propmotioncorr_flag;		/* Correct proper motions? */
+  int		astrefinprop_flag;		/* Use ref.catalog in pm? */
 /* Differential Chromatic Refraction (DRC) */
   int		colourshiftcorr_flag;		/* Correct colour shifts?*/
-  int		astrefinprop_flag;		/* Use ref.catalog in pm? */
-  int		astr_flagsmask;			/* Astrom. mask on SEx FLAGS */
 
 /* Check-plots */
   cplotenum	cplot_device[MAXCHECK];		/* check-plot format */

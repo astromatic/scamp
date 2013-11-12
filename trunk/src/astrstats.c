@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/10/2012
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	ptr to a group of fields pointers,
 OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -76,11 +76,13 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 		corr,corr_hsn,
 		dx, sn2;
    long long	ndeg, ndeg_hsn;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		i,f,n,s, naxis,nfield,nsamp, nsource,nsource_hsn,
 		nmean,nmean_hsn, nmatch,nmatch_hsn;
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroup->naxis;
   nfield = fgroup->nfield;
   fields = fgroup->field;
@@ -124,7 +126,8 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
           for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
 	    {
-            if ((samp2->sexflags & flagmask))
+            if ((samp2->sexflags & sexflagmask)
+            	|| (samp2->imaflags & imaflagmask))
               continue;
             for (i=0; i<naxis; i++)
               mean[i] += samp2->projpos[i];
@@ -151,7 +154,8 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
             for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
 	      {
-              if ((samp2->sexflags & flagmask))
+              if ((samp2->sexflags & sexflagmask)
+			|| (samp2->imaflags & imaflagmask))
                 continue;
               corr = corr_hsn = 1.0;
               for (i=0; i<naxis; i++)
@@ -179,7 +183,8 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
               for (samp3=samp2; (samp3=samp3->prevsamp)
 			&& samp3->set->field->astromlabel>=0;)
                 {
-                if ((samp3->sexflags & flagmask))
+                if ((samp3->sexflags & sexflagmask)
+			|| (samp3->imaflags & imaflagmask))
                   continue;
                 field3 = samp3->set->field;
                 for (i=0; i<naxis; i++)
@@ -249,14 +254,16 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
   samp = set->sample;
   for (n=nsamp; n--; samp++)
     {
-    if ((samp->sexflags & flagmask))
+    if ((samp->sexflags & sexflagmask)
+	|| (samp->imaflags & imaflagmask))
       continue;
     for (i=0; i<naxis; i++)
       mean[i] = mean_hsn[i] = 0.0;
     nmean = nmean_hsn = 0;
     for (samp2 = samp; (samp2=samp2->nextsamp);)
       {
-      if ((samp2->sexflags & flagmask))
+      if ((samp2->sexflags & sexflagmask)
+	|| (samp2->imaflags & imaflagmask))
         continue;
       field2 = samp2->set->field;
       sn2 = samp2->fluxerr>0.0? samp2->flux/samp2->fluxerr: 0.0;
@@ -435,7 +442,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/03/2012
+VERSION	12/11/2013
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
@@ -446,10 +453,12 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
    samplestruct	*samp,*sampr,*samp2, *prevsamp2;
    double	clipi[NAXIS],clipr[NAXIS], meani[NAXIS],meanr[NAXIS],
 		dx,dr2, ksig2;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		i,f,n,s, naxis,nfield,nsamp, flag, nmeani,nmeanr, nclipi,nclipr;
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroup->naxis;
 
   ksig2 = nsigma;
@@ -486,7 +495,8 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
           for (samp2 = samp; samp2 && samp2->set->field->astromlabel>=0;
 		samp2=samp2->prevsamp)
             {
-            if ((samp2->sexflags & flagmask))
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (i=0; i<naxis; i++)
               meani[i] += samp2->projpos[i];

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/04/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -591,7 +591,7 @@ INPUT	Ptr to the set structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 			int ncoefftot,
@@ -607,20 +607,21 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 			*cc,*cco,*ccoa, *cc2,*cco2,*ccoa2, *x, *jac,*jact,
 			*basis,*basis2, *czero, *cscale,
 			sigma2,sigma3, weight, weightfac;
-   short		flagmask;
+   short		sexflagmask;
    int			*coeffindex,*coeffindex2,
 			*ci,*cio,*cioa, *ci2,*cio2,*cioa2,
 			nlsamp,nlsampmax, nscoeffmax, nscoeffmax2, instru,
 			index,indext,index2,indext2, redflag, naxis, ncontext,
 			npcoeff,ncoeff,nicoeff, npcoeff2,ncoeff2,nicoeff2,
-			nsamp,
+			nsamp, imaflagmask,
 			cx,cy, c, d, d1,d2, p, lng,lat;
 
 #ifdef USE_THREADS
    int			imut=0;
 #endif
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   naxis = set->naxis;
   npcoeff = poly->ncoeff;
   ncoeff = npcoeff*naxis;
@@ -648,7 +649,8 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
       samp2 = samp;
 /*---- Count the samples in the pair-list */
       for (nlsamp=1; (samp2=samp2->prevsamp);)
-        if (!(samp2->sexflags & flagmask))
+        if (!(samp2->sexflags & sexflagmask)
+		&& !(samp2->imaflags & imaflagmask))
           nlsamp++;
 /*---- Allocate memory for storing list sample information */
       if (nlsamp>nlsampmax)
@@ -682,7 +684,8 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
       for (samp2 = samp; samp2; samp2=samp2->prevsamp)
         {
 /*------ Drop it if the object is saturated or truncated */
-        if ((samp2->sexflags & flagmask))
+        if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
           continue;
         cio = ci;
         cio2 = ci2;
@@ -799,7 +802,8 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
         for (samp3 = samp; samp3 != samp2; samp3=samp3->prevsamp)
           {
 /*------ Drop it if the object is saturated or truncated */
-          if ((samp3->sexflags & flagmask))
+          if ((samp3->sexflags & sexflagmask)
+		|| (samp3->imaflags & imaflagmask))
             continue;
 
 /*-------- Compute the relative weight of the pair */

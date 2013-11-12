@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/06/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1190,7 +1190,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -1212,7 +1212,8 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		mean[NAXIS], covar[NAXIS][NAXIS], dx[NAXIS],
 		xmin,ymin,xmax,ymax, xoff,yoff,xstep,ystep, minscale,scale,
 		dispscale;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		naxisn[NAXIS], nvec[CPLOT_ASTNSUBPLOTS*CPLOT_ASTNSUBPLOTS],
 		d,d2,d3,f,g,i,n,s,  fx,fy, nx,ny, lng,lat,
 		count, naxis,nsamp, nset;
@@ -1223,7 +1224,8 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
 
 /* Compute instrument projection (for display only) */
   wcs0 = NULL;
@@ -1389,7 +1391,8 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
         nsamp = set->nsample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->sexflags & flagmask)
+          if ((samp->sexflags & sexflagmask)
+		|| (samp->imaflags & imaflagmask))
             continue;
 /*-------- Reset mean and count */
           for (d=0; d<naxis; d++)
@@ -1416,7 +1419,8 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
             {
-            if (samp2->sexflags & flagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (d=0; d<naxis; d++)
               {
@@ -1508,7 +1512,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 			double hsn_thresh)
@@ -1530,7 +1534,8 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		mean[NAXIS], covar[NAXIS][NAXIS], dx[NAXIS],
 		xmin,ymin,xmax,ymax, xoff,yoff,xstep,ystep, minscale,scale,
 		dispscale;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		naxisn[NAXIS], nvec[CPLOT_ASTNSUBPLOTS*CPLOT_ASTNSUBPLOTS],
 		d,d2,d3,f,g,i,n,s,  fx,fy, nx,ny, lng,lat,
 		count, naxis,nsamp, nset;
@@ -1541,7 +1546,8 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+   sexflagmask = (short)prefs.astr_sexflagsmask;
+   imaflagmask = prefs.astr_imaflagsmask;
 
 /* Compute instrument projection (for display only) */
   wcs0 = NULL;
@@ -1707,12 +1713,14 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
         nsamp = set->nsample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->sexflags & flagmask)
+          if ((samp->sexflags & sexflagmask)
+		|| (samp->imaflags & imaflagmask))
             continue;
 /*-------- Explore backward */
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0);
-          if (!samp2 || (samp2->sexflags & flagmask))
+          if (!samp2 || (samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
             continue;
 /*-------- Reset mean and count */
           for (d=0; d<naxis; d++)
@@ -2057,7 +2065,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2079,7 +2087,8 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
 		lim,maxlim, cy, z;
    PLINT	lwid;
    char		xlabel[80], ylabel[80], str[80];
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2,d3, f,i,s,n, naxis, nsamp, firstflag, ix,iy;
 
   if (cplot_init(1,fgroup->naxis*fgroup->naxis, CPLOT_ADERROR1D)==RETURN_ERROR)
@@ -2088,7 +2097,8 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   wcs = fgroup->wcs;
   if (!wcs)
     return RETURN_ERROR;
@@ -2147,13 +2157,15 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
       samp = set->sample;
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp
-		&& !(samp->sexflags & flagmask))
+		&& !(samp->sexflags & sexflagmask)
+		&& !(samp->imaflags & imaflagmask))
 	  {
           samp2 = samp;
           while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
             {
-            if (samp2->sexflags & flagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (d2=0; d2<naxis; d2++)
               {
@@ -2322,7 +2334,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2340,7 +2352,8 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
 		*clevel,*cutbin,*cutx,*cutx_hsn,*cuty,*cuty_hsn,
 		lim,maxlim, z,zmax,zmax_hsn;
    PLINT	lwid;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2, f,i,s,n, ix,iy,
 		nsamp;
 
@@ -2350,7 +2363,8 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   wcs = fgroup->wcs;
   if (!wcs)
     return RETURN_ERROR;
@@ -2404,13 +2418,15 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
       samp = set->sample;
       for (n=nsamp; n--; samp++)
         if (!samp->nextsamp && samp->prevsamp
-		&& !(samp->sexflags & flagmask))
+		&& !(samp->sexflags & sexflagmask)
+		&& !(samp->imaflags & imaflagmask))
           {
           samp2 = samp;
           while ((samp2=samp2->prevsamp)
 		&& samp2->set->field->astromlabel>=0)
               {
-              if (samp2->sexflags & flagmask)
+              if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
                 continue;
               dx = (samp2->projpos[0]-samp->projpos[0])*pixscale[0];
               dy = (samp2->projpos[1]-samp->projpos[1])*pixscale[1];
@@ -2576,7 +2592,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2598,7 +2614,8 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		lim,maxlim, cy, z;
    PLINT	lwid;
    char		xlabel[80], ylabel[80], str[80];
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2,d3, i,s,n, naxis, nsamp, firstflag, ix,iy;
 
   if (cplot_init(1,fgroup->naxis*fgroup->naxis, CPLOT_REFERROR1D)==RETURN_ERROR)
@@ -2607,7 +2624,8 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   wcs = fgroup->wcs;
   if (!wcs)
     return RETURN_ERROR;
@@ -2662,12 +2680,15 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
     nsamp = set->nsample;
     samp = set->sample;
     for (n=nsamp; n--; samp++)
-      if (samp->nextsamp && !(samp->sexflags & flagmask))
+      if (samp->nextsamp
+	&& !(samp->sexflags & sexflagmask)
+	&& !(samp->imaflags & imaflagmask))
         {
         samp2 = samp;
         while ((samp2=samp2->nextsamp))
           {
-          if (samp2->sexflags & flagmask)
+          if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
             continue;
           for (d2=0; d2<naxis; d2++)
             {
@@ -2838,7 +2859,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -2856,7 +2877,8 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 		*clevel,*cutbin,*cutx,*cutx_hsn,*cuty,*cuty_hsn,
 		lim,maxlim, z,zmax,zmax_hsn;
    PLINT	lwid;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2, i,s,n, ix,iy,
 		nsamp;
 
@@ -2866,7 +2888,8 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   wcs = fgroup->wcs;
   if (!wcs)
     return RETURN_ERROR;
@@ -2917,12 +2940,14 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     samp = set->sample;
     for (n=nsamp; n--; samp++)
       if (samp->nextsamp && !samp->prevsamp
-		&& !(samp->sexflags & flagmask))
+	&& !(samp->sexflags & sexflagmask)
+	&& !(samp->imaflags & imaflagmask))
         {
         samp2 = samp;
         while ((samp2=samp2->nextsamp))
           {
-          if (samp2->sexflags & flagmask)
+          if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
             continue;
           dx = (samp2->projpos[0]-samp->projpos[0])*pixscale[0];
           dy = (samp2->projpos[1]-samp->projpos[1])*pixscale[1];
@@ -3087,7 +3112,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3112,7 +3137,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		lim,maxlim,maxwidth, cy, z;
    PLINT	lwid;
    char		xlabel[80], ylabel[80], str[80];
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2,d3, f,fg,i,s,n, naxis, nsamp, firstflag, ix,iy, count;
 
   if (cplot_init(1,fgroups[0]->naxis*fgroups[0]->naxis,
@@ -3122,7 +3148,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroups[0]->naxis;
 
   QMALLOC(cutbin, PLFLT, CPLOT_NPIXERRHISTBIN);
@@ -3216,7 +3243,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         samp = set->sample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->sexflags & flagmask)
+          if ((samp->sexflags & sexflagmask)
+		|| (samp->imaflags & imaflagmask))
             continue;
 /*-------- Reset mean and count */
           for (d2=0; d2<naxis; d2++)
@@ -3226,7 +3254,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->nextsamp))
             {
-            if (samp2->sexflags & flagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3236,7 +3265,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
             {
-            if (samp2->sexflags & flagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3449,7 +3479,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3474,7 +3504,8 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		lim,maxlim, cy, z;
    PLINT	lwid;
    char		xlabel[80], ylabel[80], str[80];
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2,d3, f,fg,i,s,n, naxis, nsamp, firstflag, ix,iy, count;
 
   if (cplot_init(1,fgroups[0]->naxis*fgroups[0]->naxis,
@@ -3484,7 +3515,8 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroups[0]->naxis;
 
   QMALLOC(cutbin, PLFLT, CPLOT_NSUBPIXERRHISTBIN);
@@ -3558,7 +3590,8 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         samp = set->sample;
         for (n=nsamp; n--; samp++)
           {
-          if (samp->sexflags & flagmask)
+          if ((samp->sexflags & sexflagmask)
+		|| (samp->imaflags & imaflagmask))
             continue;
 /*-------- Reset mean and count */
           for (d2=0; d2<naxis; d2++)
@@ -3568,7 +3601,8 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->nextsamp))
             {
-            if (samp2->sexflags & flagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3578,7 +3612,8 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           samp2 = samp;
           while ((samp2=samp2->prevsamp) && samp2->set->field->astromlabel>=0)
             {
-            if (samp2->sexflags & flagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
               continue;
             for (d2=0; d2<naxis; d2++)
               mean[d2] += samp2->projpos[d2] - samp->projpos[d2];
@@ -3792,7 +3827,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	28/01/2013
+VERSION	12/11/2013
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -3815,7 +3850,8 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 		lim,maxlim, cy, z, dmagmin, dmagmax;
    PLINT	lwid;
    char		xlabel[80], ylabel[80];
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d, f,f1,f2,ff, i,s,n, naxis, nsamp, ninstru, nfield, ix,iy, gra,
 		instru1,instru2;
 
@@ -3829,7 +3865,8 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   wcs = fgroup->wcs;
   if (!wcs)
     return RETURN_ERROR;
@@ -3943,7 +3980,8 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 /*-------------- or the flux is negative */
                 if (samp->set->field->photomlabel != instru1
 			|| samp->flux <= 0.0
-			|| (samp->sexflags & flagmask))
+			|| (samp->sexflags & sexflagmask)
+			|| (samp->imaflags & imaflagmask))
                   continue;
                 for (samp2=samp1; samp2 && samp2->set->field->photomlabel>=0;
 			samp2=samp2->prevsamp)
@@ -3952,7 +3990,8 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
 /*---------------- or if the flux is negative */
                   if (samp2==samp || samp2->set->field->photomlabel != instru2
 			|| samp2->flux <= 0.0
-			|| (samp2->sexflags & flagmask))
+			|| (samp2->sexflags & sexflagmask)
+			|| (samp2->imaflags & imaflagmask))
                     continue;
                   ix = (int)((samp1->msamp->colour - xoffset)*xscale);
                   for (d=0; d<naxis; d++)
@@ -4136,7 +4175,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	22/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4152,7 +4191,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 		*clevel,
 		lim,maxlim, z;
    PLINT	lwid;
-   short	flagmask;
+   short	sexflagmask;
+   unsigned int	imaflagmask;
    int		d,d2, i,s,n, ix,iy, nsamp, lng,lat;
 
   if (cplot_init(1,1, CPLOT_REFPROP) == RETURN_ERROR)
@@ -4161,7 +4201,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   wcs = fgroup->wcs;
   lng = wcs->lng;
   lat = wcs->lat;
@@ -4201,8 +4242,10 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
     samp = set->sample;
     for (n=nsamp; n--; samp++)
       if ((samp2=samp->nextsamp) && !samp->prevsamp
-	&& !(samp->sexflags & flagmask)
-	&& !(samp2->sexflags & flagmask))
+	&& !(samp->sexflags & sexflagmask)
+	&& !(samp->imaflags & imaflagmask)
+	&& !(samp2->sexflags & sexflagmask)
+	&& !(samp2->imaflags & imaflagmask))
         {
         msamp = samp2->msamp;
 /*------ Do not plot objects with bad S/N on proper motions */
@@ -4808,7 +4851,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -4828,7 +4871,8 @@ int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
 			crpix[NAXIS], cdelt[NAXIS], rawpos2[NAXIS],
 			xmin,ymin,xmax,ymax, xstep,ystep, xscale,yscale,
 			lim,maxlim, w;
-   short		flagmask;
+   short		sexflagmask;
+   unsigned int		imaflagmask;
    int			naxisn[NAXIS],
 			d,f,g, i,j, n,p,s, ix,iy, naxis,nset, npixx,npixy;
 
@@ -4838,7 +4882,8 @@ int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
 /* Compute instrument projection (for display only) */
   wcs0 = NULL;
   field0 = NULL;	/* to avoid gcc -Wall warnings */
@@ -4972,7 +5017,8 @@ int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
           samp = set->sample;
           for (n=set->nsample; n--; samp++)
             {
-            if (samp->sexflags & flagmask)
+            if ((samp->sexflags & sexflagmask)
+		|| (samp->imaflags & imaflagmask))
               continue;
             ix = (int)((samp->rawpos[0]-0.501)*xscale);
             iy = (int)((samp->rawpos[1]-0.501)*yscale);
@@ -4985,7 +5031,8 @@ int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
 		|| ((samp2 = sampb = sampb->prevsamp)
 			&& sampb->set->field->astromlabel>=0))
               {
-              if (samp2->sexflags & flagmask)
+              if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
                 continue;
               w = samp->wcsposerr[0]*samp->wcsposerr[0]
 		+ samp2->wcsposerr[0]*samp2->wcsposerr[0];
@@ -5068,7 +5115,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	12/11/2013
  ***/
 int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -5088,7 +5135,8 @@ int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
 			crpix[NAXIS], cdelt[NAXIS], rawpos2[NAXIS],
 			xmin,ymin,xmax,ymax, xstep,ystep, xscale,yscale,
 			lim,maxlim, w;
-   short		flagmask;
+   short		sexflagmask;
+   unsigned int		imaflagmask;
    int			naxisn[NAXIS],
 			d,f,g, i,j, n,p,s, ix,iy, naxis,nset, npixx,npixy;
 
@@ -5098,7 +5146,8 @@ int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
     return RETURN_OK;
     }
 
-  flagmask = (short)prefs.astr_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
 
 /* Compute instrument projection (for display only) */
   wcs0 = NULL;
@@ -5233,7 +5282,8 @@ int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
           samp = set->sample;
           for (n=set->nsample; n--; samp++)
             {
-            if (samp->sexflags & flagmask)
+            if ((samp->sexflags & sexflagmask)
+		|| (samp->imaflags & imaflagmask))
               continue;
             ix = (int)((samp->rawpos[0]-0.501)*xscale);
             iy = (int)((samp->rawpos[1]-0.501)*yscale);
@@ -5246,7 +5296,8 @@ int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
 		|| ((samp2 = sampb = sampb->prevsamp)
 			&& sampb->set->field->astromlabel>=0))
               {
-              if (samp2->sexflags & flagmask)
+              if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask))
                 continue;
               w = samp->wcsposerr[0]*samp->wcsposerr[0]
 		+ samp2->wcsposerr[0]*samp2->wcsposerr[0];
