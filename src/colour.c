@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/01/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,7 +68,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	28/01/2013
+VERSION	12/11/2013
  ***/
 void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   {
@@ -80,10 +80,12 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
    double		*colmat,*wcolmat, *mcol,*wmcol, *col,*wcol, *mag,*wmag,
 			sum,wsum, weight, cweight, err2;
    float		colour;
-   short		flagmask;
+   short		sexflagmask;
+   unsigned int		imaflagmask;
    int			c,f,g,m,n,s, b1, b2, c1,c2, band, ncolour, ninstru;
 
-  flagmask = (short)prefs.phot_flagsmask;
+  sexflagmask = (short)prefs.phot_sexflagsmask;
+  imaflagmask = prefs.phot_imaflagsmask;
   ninstru = prefs.nphotinstrustr;
   ncolour = (ninstru * (ninstru-1)) / 2;
 
@@ -110,7 +112,8 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
       for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
         {
-        if ((samp2->sexflags & flagmask)
+        if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
           continue;
@@ -166,7 +169,8 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
       for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
         {
-        if ((samp2->sexflags & flagmask)
+        if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
           continue;
@@ -241,7 +245,8 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
       for (samp2 = samp; samp2 && (band=samp2->set->field->photomlabel)>=0;
 		samp2 = samp2->prevsamp)
         {
-        if ((samp2->sexflags & flagmask)
+        if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask)
 		|| samp2->flux <= 0.0 
 		|| (err2 = samp2->magerr*samp2->magerr)<=0.0)
           continue;

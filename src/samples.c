@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2012
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,7 +69,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION  04/10/2012
+VERSION  12/11/2013
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -418,7 +418,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 /*---- No saturated or cropped detection */
     if (flags)
       {
-      if (*flags & prefs.flags_mask)
+      if (*flags & prefs.sexflags_mask)
         continue;
 /*---- Mapping from SExtractor flags is straightforward */
       sexflags = *flags;
@@ -442,6 +442,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       if (*wflags)
         sexflags |= OBJ_TRUNC;
       }
+
     if (imaflags && (*imaflags & prefs.imaflags_mask))
       continue;
 
@@ -578,6 +579,9 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
       sample->spreaderr = *dspreaderr;
     else
       sample->spreaderr = 0.0;
+
+    if (imaflags)
+      sample->imaflags = *imaflags;
 
     sample->rawposerr[0] = sample->rawposerr[1] = sqrt(0.5*(ea*ea+eb*eb));
 /*-- In case of a contamination, position errors are strongly degraded */

@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/03/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@ INPUT	Pointer to the fgroup structure,
 OUTPUT  Pointer to an allocated array of merged samples (sources).
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 10/03/2013
+VERSION 12/11/2013
 */
 msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 
@@ -70,12 +70,13 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 			epoch,epochmin,epochmax, err2, spread, wspread,
 			weight,weights, dummy;
    long			dptr;
-   short		astrflagmask,photflagmask;
+   short		sexflagmask;
+   unsigned int		imaflagmask;
    int			d,f,i,k,n,p,s, nall,nphotok,nposok, npinstru, naxis,
 			nmsample, index, refflag;
 
-  astrflagmask = (short)prefs.astr_flagsmask;
-  photflagmask = (short)prefs.phot_flagsmask;
+  sexflagmask = (short)prefs.astr_sexflagsmask;
+  imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroup->naxis;
   npinstru = prefs.nphotinstrustr;
   refflag = prefs.astrefinprop_flag;
@@ -142,7 +143,8 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
                 samp2=samp2->prevsamp)
             {
             nall++;
-            if ((samp2->sexflags & astrflagmask)
+            if ((samp2->sexflags & sexflagmask)
+		|| (samp2->imaflags & imaflagmask)
 		|| (samp2->scampflags & SCAMP_BADPROPER))
               continue;
             for (d=0; d<naxis; d++)
@@ -188,6 +190,7 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 /*---------- Flags */
             msamp->sexflags |= samp2->sexflags;
             msamp->scampflags |= samp2->scampflags;
+            msamp->imaflags |= samp2->imaflags;
             nposok++;
             }
           if (nposok)

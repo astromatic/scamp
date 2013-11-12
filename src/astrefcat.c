@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/06/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -119,7 +119,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 25/06/2013
+VERSION 12/11/2013
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -1199,6 +1199,7 @@ epoch, sample->mag, sample->magerr);
         sample->spread = sample->spreaderr = 0.0;
         sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
         sample->scampflags = 0;
+        sample->imaflags = 0;
         sample->set = set;
         nsample++;
         }
@@ -1494,7 +1495,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 04/10/2012
+VERSION 12/11/2013
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1649,7 +1650,7 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
       continue;
     if (flags)
       {
-      if (*flags & prefs.flags_mask)
+      if (*flags & prefs.sexflags_mask)
         continue;
 /*---- Mapping from SExtractor flags is straightforward */
       objflags = *flags;

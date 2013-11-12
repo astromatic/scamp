@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/04/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -66,7 +66,8 @@ pkeystruct key[] =
   {"AHEADER_SUFFIX", P_STRING, prefs.ahead_suffix},
   {"AIRMASS_KEY", P_STRING, prefs.airmass_key},
   {"ASTR_ACCURACY", P_FLOAT, &prefs.astraccuracy,0,0, 0.0, 1e6},
-  {"ASTR_FLAGSMASK", P_INT, &prefs.astr_flagsmask, 0,0xff, 0.0,0.0},
+  {"ASTR_FLAGSMASK", P_INT, &prefs.astr_sexflagsmask, 0,0xff, 0.0,0.0},
+  {"ASTR_IMAFLAGSMASK", P_INT, &prefs.astr_imaflagsmask, 0,0xff, 0.0,0.0},
   {"ASTRACCURACY_KEY", P_STRING, prefs.astraccuracy_key},
   {"ASTRACCURACY_TYPE", P_KEY, &prefs.astraccuracy_type, 0,0, 0.0,0.0,
     "SIGMA-PIXEL", "SIGMA-ARCSEC", "TURBULENCE-ARCSEC", ""},
@@ -137,7 +138,7 @@ pkeystruct key[] =
   {"EXTINCT_KEY", P_STRING, prefs.extcoeff_key},
   {"FGROUP_RADIUS", P_FLOAT, &prefs.group_radius, 0,0, 0.0,180.0},
   {"FIXFOCALPLANE_NMIN", P_INT, &prefs.fixfocalplane_nmin, 0, 65535, 0.0, 0.0},
-  {"FLAGS_MASK", P_INT, &prefs.flags_mask, 0,0xff, 0.0,0.0},
+  {"FLAGS_MASK", P_INT, &prefs.sexflags_mask, 0,0xff, 0.0,0.0},
   {"FOCDISTORT_DEGREE", P_INT, &prefs.focal_deg, 1,16,0.0,0.0},
   {"FULLOUTCAT_NAME", P_STRING, prefs.fullcat_name},
   {"FULLOUTCAT_TYPE", P_KEY, &prefs.fullcat_type, 0,0, 0.0,0.0,
@@ -170,7 +171,8 @@ pkeystruct key[] =
     0, MAXASTRINSTRU, &prefs.nmosaic_type},
   {"NTHREADS", P_INT, &prefs.nthreads, -THREADS_PREFMAX, THREADS_PREFMAX},
   {"PHOT_ACCURACY", P_FLOAT, &prefs.photaccuracy, 0,0, 0.0, 1.0},
-  {"PHOT_FLAGSMASK", P_INT, &prefs.phot_flagsmask, 0,0xff, 0.0,0.0},
+  {"PHOT_FLAGSMASK", P_INT, &prefs.phot_sexflagsmask, 0,0xff, 0.0,0.0},
+  {"PHOT_IMAFLAGSMASK", P_INT, &prefs.phot_imaflagsmask, 0,0xff, 0.0,0.0},
   {"PHOTCLIP_NSIGMA", P_FLOAT, &prefs.photclip_nsig, 0,0, 0.0,1e31},
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
   {"PHOTFLUXERR_KEY", P_STRING, prefs.photfluxerr_key},
@@ -295,6 +297,7 @@ char *default_prefs[] =
 "*CORRECT_COLOURSHIFTS   N               # Correct for colour shifts (Y/N)?",
 "*INCLUDE_ASTREFCATALOG  Y               # Include ref.cat in prop.motions (Y/N)?",
 "*ASTR_FLAGSMASK         0x00fc          # Astrometry rejection mask on SEx FLAGS",
+"*ASTR_IMAFLAGSMASK      0x0             # Astrometry rejection mask on IMAFLAGS",
 " ",
 "#---------------------------- Photometric solution ----------------------------",
 " ",
@@ -313,6 +316,7 @@ char *default_prefs[] =
 "*PHOTCLIP_NSIGMA        3.0             # Photom.clipping threshold in sigmas",
 "*PHOT_ACCURACY          1e-3            # Photometric uncertainty floor (frac.)",
 "*PHOT_FLAGSMASK         0x00fc          # Photometry rejection mask on SEx FLAGS",
+"*PHOT_IMAFLAGSMASK      0x0             # Photometry rejection mask on IMAFLAGS",
 " ",
 "#------------------------------- Check-plots ----------------------------------",
 " ",
@@ -338,9 +342,9 @@ char *default_prefs[] =
 "                                       # high-SN sample",
 "FWHM_THRESHOLDS        0.0,100.0       # FWHM thresholds (in pixels) for sources",
 "*ELLIPTICITY_MAX        0.5             # Max. source ellipticity",
-"*FLAGS_MASK             0x00f0          # Rejection mask on SEx FLAGS",
-"*WEIGHTFLAGS_MASK       0x00ff          # Rejection mask on SEx FLAGS_WEIGHT",
-"*IMAFLAGS_MASK          0x0             # Rejection mask on SEx IMAFLAGS_ISO",
+"*FLAGS_MASK             0x00f0          # Global rejection mask on SEx FLAGS",
+"*WEIGHTFLAGS_MASK       0x00ff          # Global rejec. mask on SEx FLAGS_WEIGHT",
+"*IMAFLAGS_MASK          0x0             # Global rejec. mask on SEx IMAFLAGS_ISO",
 "*AHEADER_GLOBAL         scamp.ahead     # Filename of the global INPUT header",
 "AHEADER_SUFFIX         .ahead          # Filename extension for additional",
 "                                       # INPUT headers",

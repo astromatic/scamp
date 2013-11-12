@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/06/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -61,7 +61,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 07/04/2013
+VERSION 12/11/2013
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -94,7 +94,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
-   short		astrflagmask,photflagmask;
+   short		sexflagmask;
+   unsigned int		imaflagmask;
    int			nmag[MAXPHOTINSTRU],
 			d,f,i,k,m,n,p,s, nall,nphotok,nposok, npinstru, naxis,
 			index, refflag;
@@ -102,8 +103,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   if (prefs.mergedcat_type == CAT_NONE)
     return;
 
-  astrflagmask = (short)prefs.astr_flagsmask;
-  photflagmask = (short)prefs.phot_flagsmask;
+  sexflagmask = (short)prefs.phot_sexflagsmask;
+  imaflagmask = prefs.phot_imaflagsmask;
   naxis = fgroup->naxis;
   refmergedsample.nband = npinstru = prefs.nphotinstrustr;
   refflag = prefs.astrefinprop_flag;
@@ -242,7 +243,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     for (samp2 = samp; samp2 && (p=samp2->set->field->photomlabel)>=0;
                 samp2=samp2->prevsamp)
       {
-      if (samp2->sexflags & photflagmask)
+      if ((samp2->sexflags & sexflagmask)
+	|| (samp2->imaflags & imaflagmask))
         continue;
       if (samp2->flux > 0.0 && (err2 = samp2->magerr*samp2->magerr)>0.0)
         {
@@ -298,6 +300,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 /*-- Flags */
     mergedsample.sexflags = msamp->sexflags;
     mergedsample.scampflags = msamp->scampflags;
+    mergedsample.imaflags = msamp->imaflags;
 
 /*-- Write to the catalog */
     if (prefs.mergedcat_type == CAT_ASCII_HEAD
@@ -352,7 +355,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 25/06/2013
+VERSION 12/11/2013
 */
 void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -539,6 +542,7 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 /*---- Flags */
       fsample.sexflags = samp2->sexflags;
       fsample.scampflags = samp2->scampflags;
+      fsample.imaflags = samp2->imaflags;
 /*---- Write to the catalog */
       if (prefs.fullcat_type == CAT_ASCII_HEAD
 		|| prefs.fullcat_type == CAT_ASCII
