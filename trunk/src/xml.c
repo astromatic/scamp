@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		15/05/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -186,7 +186,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	15/05/2013
+VERSION	12/11/2013
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -993,6 +993,12 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;pos.errorEllipse","%s");
     write_xmlconfigparam(file,"AstRefMag_Key", "",
 		"meta.id;phot.mag","%s");
+    write_xmlconfigparam(file,"AstRefMagErr_Key", "",
+		"meta.id;phot.mag","%s");
+    write_xmlconfigparam(file,"AstRefObsDate_Key", "",
+		"meta.id;time.epoch","%s");
+    write_xmlconfigparam(file, "AstRefMag_Limits", "",
+		"phot.mag;stat.min;stat.max;obs.param", "%.6g");
     write_xmlconfigparam(file,"Save_RefCatalog", "",
 		"meta.code","%c");
     write_xmlconfigparam(file, "RefOut_CatPath", "",
@@ -1046,14 +1052,28 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;stat.fit.param", "%d");
     write_xmlconfigparam(file,"Distort_Degrees", "",
 		"meta.id;stat.fit.param", "%d");
+    write_xmlconfigparam(file,"FocDistort_Degree", "",
+		"meta.id;stat.fit.param", "%d");
     write_xmlconfigparam(file,"Astref_Weight", "",
 			 "meta.id;stat.fit.param", "%.6g");
+    write_xmlconfigparam(file, "AstrAccuracy_Type", "",
+		"instr.param;obs.param", "%s");
+    write_xmlconfigparam(file, "AstrAccuracy_Key", "",
+		"meta.id;stat.fit.param;src", "%s");
+    write_xmlconfigparam(file, "Astr_Accuracy", "",
+		"meta.id;stat.param;pos", "%.6g");
     write_xmlconfigparam(file, "AstrClip_NSigma", "",
 		"meta.id;stat.param;pos", "%.6g");
+    write_xmlconfigparam(file, "Compute_Parallaxes", "",
+		"meta.code;obs.param", "%c");
+    write_xmlconfigparam(file, "Compute_ProperMotions", "",
+		"meta.code;obs.param", "%c");
     write_xmlconfigparam(file, "Correct_ColourShifts", "",
 		"meta.code;obs.param", "%c");
     write_xmlconfigparam(file, "Include_AstRefCatalog", "",
 		"meta.code;obs.param", "%c");
+    write_xmlconfigparam(file, "Astr_FlagsMask", "", "meta.code.qual", "%d");
+    write_xmlconfigparam(file, "Astr_ImaFlagsMask", "", "meta.code.qual", "%d");
 /*-- Photometric solution */
     write_xmlconfigparam(file, "Solve_Photom", "",
 		"meta.code;phot.calib;obs.param", "%c");
@@ -1081,6 +1101,10 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;phot.flux;src", "%s");
     write_xmlconfigparam(file, "PhotClip_NSigma", "",
 		"meta.id;stat.param;phot", "%.6g");
+    write_xmlconfigparam(file, "Phot_Accuracy", "",
+		"meta.id;stat.param;phot", "%.6g");
+    write_xmlconfigparam(file, "Phot_FlagsMask", "", "meta.code.qual", "%d");
+    write_xmlconfigparam(file, "Phot_ImaFlagsMask", "", "meta.code.qual", "%d");
 /*-- Check-plots */
     write_xmlconfigparam(file, "CheckPlot_CKey", "", "meta.id;meta.code", "%s");
     write_xmlconfigparam(file, "CheckPlot_Dev", "", "meta.code", "%s");
@@ -1093,7 +1117,9 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;meta.file;meta.fits", "%s");
 /*-- Miscellaneous */
     write_xmlconfigparam(file, "SN_Thresholds", "",
-		"stat.snr;phot.flux;obs.param", "%.6g");
+		"stat.snr;stat.min;phot.flux;obs.param", "%.6g");
+    write_xmlconfigparam(file, "FWHM_Thresholds", "",
+		"phys.size.diameter;stat.min;instr.det.psf;obs.param", "%.6g");
     write_xmlconfigparam(file, "Flags_Mask", "", "meta.code.qual", "%d");
     write_xmlconfigparam(file, "WeightFlags_Mask", "", "meta.code.qual", "%d");
     write_xmlconfigparam(file, "ImaFlags_Mask", "", "meta.code.qual", "%d");
