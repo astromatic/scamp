@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/02/2013
+*	Last modified:		12/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -125,6 +125,9 @@ keystruct	refmergedkey[] = {
   {"FLAGS_SCAMP", "Calibration flags",
 	&refmergedsample.scampflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},
+  {"FLAGS_IMA", "Image flags",
+	&refmergedsample.imaflags, H_INT, T_LONG,
+	"%10d", "", "meta.code.qual", ""},
   {""},
   };
 
@@ -200,6 +203,9 @@ keystruct		reffullkey[] = {
   {"FLAGS_SCAMP", "Calibration flags",
 	&reffullsample.scampflags, H_INT, T_SHORT,
 	"%3d", "", "meta.code.qual", ""},
+  {"FLAGS_IMA", "Image flags",
+	&reffullsample.imaflags, H_INT, T_LONG,
+	"%10d", "", "meta.code.qual", ""},
   {""},
   };
 
