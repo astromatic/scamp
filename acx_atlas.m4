@@ -218,14 +218,26 @@ dnl Check whether the multithreaded version of ATLAS is there too:
     AC_CHECK_LIB(ptcblas, cblas_dgemm, [acx_atlast_ok=yes], [acx_atlast_ok=no],
 	[$ATLAS_LIBPATH -lcblas -latlas -lm])
     if test x$acx_atlast_ok = xyes; then
-      ATLAS_LIBS="$ATLAS_LIBPATH -llapack -lptcblas -lcblas -latlas"
+      ATLAS_LIBS="$ATLAS_LIBPATH -lptcblas -lcblas -latlas"
+dnl Check whether we are using a Debian distribution:
+      if test -f /etc/debian_version; then
+        ATLAS_LIBS="$ATLAS_LIBS -llapack_atlas"
+      else
+        ATLAS_LIBS="$ATLAS_LIBS -llapack"
+      fi
       LIBS="$OLIBS"
       AC_SUBST(ATLAS_LIBS)
       AC_DEFINE(HAVE_ATLAS_MP,1,
 	[Define if you have the parallel ATLAS libraries.])
       $4
     else
-      ATLAS_LIBS="$ATLAS_LIBPATH -llapack -lcblas -latlas"
+      ATLAS_LIBS="$ATLAS_LIBPATH -lcblas -latlas"
+dnl Check whether we are using a Debian distribution:
+      if test -f /etc/debian_version; then
+        ATLAS_LIBS="$ATLAS_LIBS -llapack_atlas"
+      else
+        ATLAS_LIBS="$ATLAS_LIBS -llapack"
+      fi
       LIBS="$OLIBS"
       AC_SUBST(ATLAS_LIBS)
       ATLAS_WARN="CBLAS/LAPack was compiled without multithreading support!"
@@ -233,7 +245,13 @@ dnl Check whether the multithreaded version of ATLAS is there too:
       $4         
     fi
   else
-    ATLAS_LIBS="$ATLAS_LIBPATH -llapack -lcblas -latlas"
+    ATLAS_LIBS="$ATLAS_LIBPATH -lcblas -latlas"
+dnl Check whether we are using a Debian distribution:
+    if test -f /etc/debian_version; then
+      ATLAS_LIBS="$ATLAS_LIBS -llapack_atlas"
+      else
+        ATLAS_LIBS="$ATLAS_LIBS -llapack"
+    fi
     LIBS="$OLIBS"
     AC_SUBST(ATLAS_LIBS)
     $4
