@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		18/02/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -70,31 +70,40 @@ keystruct       refkey[] = {
 
 astrefstruct	astrefcat[] = 
  {
-  {"NONE", 0, 0, {""}},
-  {"file", 12, 0, {"1","2","3","4","5","6","7","8","9","10","11","12",""}},
-  {"USNO-A1.0", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
-  {"USNO-A2.0", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
-  {"USNO-B1.0", 3, 0, {"Bj", "Rf", "In",""}, {"B1", "R1", "I",""}},
-  {"GSC-1.3", 1, 0, {"V",""}, {"V",""}},
-  {"GSC-2.2", 4, 0, {"Bj", "V", "Rf", "In",""}, {"F", "J", "V", "N",""}},
-  {"GSC-2.3", 6, 2, {"U", "B", "Bj", "V", "Rf", "In", ""},
+  {"NONE", "", 0, 0, {""}},
+  {"file", "", 12, 0, {"1","2","3","4","5","6","7","8","9","10","11","12",""}},
+  {"USNO-A1.0", "pmm1", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
+  {"USNO-A2.0", "pmm2", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
+  {"USNO-B1.0", "usnob1", 3, 0, {"Bj", "Rf", "In",""}, {"B1", "R1", "I",""}},
+  {"GSC-1.3", "gsc1.3", 1, 0, {"V",""}, {"V",""}},
+  {"GSC-2.2", "gsc2.2", 4, 0, {"Bj", "V", "Rf", "In",""},
+			{"F", "J", "V", "N",""}},
+  {"GSC-2.3", "gsc2.3", 6, 2, {"U", "B", "Bj", "V", "Rf", "In", ""},
 			{"U", "B", "F", "J", "V", "N", ""}},
-  {"2MASS", 3, 0, {"J", "H", "Ks",""}, {"J", "H", "K",""}},
-  {"DENIS-3", 3, 0, {"i", "J", "Ks",""}, {"I", "J", "K",""}},
-  {"UCAC-1", 1, 0, {"R",""}, {"R",""}},
-  {"UCAC-2", 1, 0, {"R",""}, {"R",""}},
-  {"UCAC-3", 1, 0, {"R",""}, {"R",""}},
-  {"UCAC-4", 1, 0, {"R",""}, {"R",""}},
-  {"SDSS-R3", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
-  {"SDSS-R5", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
-  {"SDSS-R6", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
-  {"SDSS-R7", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
-  {"SDSS-R8", 5, 2, {"u", "g", "r", "i", "z",""}, {"u", "g", "r", "i", "z",""}},
-  {"NOMAD-1.0", 6, 2, {"B", "V", "R", "J", "H", "Ks",""},
+  {"2MASS", "find2m", 3, 0, {"J", "H", "Ks",""}, {"J", "H", "K",""}},
+  {"DENIS-3", "denis3", 3, 0, {"i", "J", "Ks",""}, {"I", "J", "K",""}},
+  {"UCAC-1", "ucac1", 1, 0, {"R",""}, {"R",""}},
+  {"UCAC-2", "ucac2", 1, 0, {"R",""}, {"R",""}},
+  {"UCAC-3", "ucac3", 1, 0, {"R",""}, {"R",""}},
+  {"UCAC-4", "ucac4", 1, 0, {"R",""}, {"R",""}},
+  {"SDSS-R3", "sdss3", 5, 2, {"u", "g", "r", "i", "z",""},
+			{"u", "g", "r", "i", "z",""}},
+  {"SDSS-R5", "sdss5", 5, 2, {"u", "g", "r", "i", "z",""},
+			{"u", "g", "r", "i", "z",""}},
+  {"SDSS-R6", "sdss6", 5, 2, {"u", "g", "r", "i", "z",""},
+			{"u", "g", "r", "i", "z",""}},
+  {"SDSS-R7", "sdss7", 5, 2, {"u", "g", "r", "i", "z",""},
+			{"u", "g", "r", "i", "z",""}},
+  {"SDSS-R8", "sdss8", 5, 2, {"u", "g", "r", "i", "z",""},
+			{"u", "g", "r", "i", "z",""}},
+  {"SDSS-R9", "sdss9", 5, 2, {"u", "g", "r", "i", "z",""},
+			{"u", "g", "r", "i", "z",""}},
+  {"NOMAD-1.0", "nomad1", 6, 2, {"B", "V", "R", "J", "H", "Ks",""},
 			{"B", "V", "R", "J", "H", "K",""}},
-  {"PPMX", 7, 3, {"B", "V", "R", "Rf", "J", "H", "Ks",""},
+  {"PPMX", "ppmx", 7, 3, {"B", "V", "R", "Rf", "J", "H", "Ks",""},
 			{"B", "V", "R", "C", "J", "H", "K",""}},
-  {"CMC-14", 4, 0, {"r", "J", "H", "Ks",""}, {"r", "J", "H", "K",""}},
+  {"CMC-14", "cmc14", 4, 0, {"r", "J", "H", "Ks",""}, {"r", "J", "H", "K",""}},
+  {"TYCHO-2", "tyc2", 2, 1, {"B", "V",""}, {"B", "V",""}},
   {""}
  };
 
@@ -119,7 +128,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 12/11/2013
+VERSION 18/02/2014
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -129,8 +138,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    samplestruct	*sample;
    FILE		*file;
    char		*ctype[NAXIS],
-		cmdline[MAXCHAR], col[80], str[MAXCHAR], sport[16],
-		salpha[32],sdelta[32],
+		cmdline[MAXCHAR], maglimcmd[80],
+		col[80], str[MAXCHAR], sport[16],
 		smag[MAX_BAND][32],smagerr[MAX_BAND][32],
 		sprop[NAXIS][32],sproperr[NAXIS][32], sflag[4],
 		*bandname, *cdsbandname, *catname,
@@ -138,8 +147,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    double	poserr[NAXIS],prop[NAXIS],properr[NAXIS],
 		mag[MAX_BAND],magerr[MAX_BAND], epoch,epocha,epochd,
 		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt, temp;
-   int		b,c,d,i,n, nsample,nsamplemax, nobs, class, band, nband,
-		maglimflag;
+   int		b,c,d,i,n, nsample,nsamplemax, nobs, class, band, nband;
 
 /* One needs 2 angular coordinates here! */
   if (naxis<2)
@@ -183,8 +191,6 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
   bandname = astrefcat[(int)refcat].bandname
 	= astrefcat[(int)refcat].bandnames[band];
   cdsbandname = astrefcat[(int)refcat].cdsbandnames[band];
-  maglimflag = (prefs.astref_maglim[0]>-99.0 || prefs.astref_maglim[1]<99.0)?
-		1 : 0;
 
 /* Call the right catalog */
   if (refcat==ASTREFCAT_FILE)
@@ -215,403 +221,22 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     return field;
     }
 
-  switch(refcat)
-    {
-    case ASTREFCAT_FILE:
-/*---- Already exited at this point */
-      break;
-    case ASTREFCAT_USNOA1:
-      if (maglimflag)
-        sprintf(cmdline,
-	"%s %s%s pmm1 -sr -c %s %s -r %16g -l%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else	
-        sprintf(cmdline,
-	"%s %s%s pmm1 -sr -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_USNOA2:
-      if (maglimflag)
-        sprintf(cmdline,
-	"%s %s%s pmm2 -sr -c %s %s -r %16g -l%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline,
-	"%s %s%s pmm2 -sr -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_USNOB1:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s usnob1 -c %s %s -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s usnob1 -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_GSC1:
-      if (maglimflag)
-        sprintf(cmdline,
-	"%s %s%s gsc1.3 -c %s%s -r %16g -lm %f,%f  -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline,
-	"%s %s%s gsc1.3 -c %s%s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_GSC22:
-      if (maglimflag)
-        sprintf(cmdline,
-		"%s %s%s gsc2.2 -c %s %s -r %16g -l%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline,
-		"%s %s%s gsc2.2 -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_GSC23:
-      if (maglimflag)
-        sprintf(cmdline,
-		"%s %s%s gsc2.3 -c %s%s -r %16g -l%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline,
-		"%s %s%s gsc2.3 -c %s%s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_2MASS:
-      if (maglimflag)
-        sprintf(cmdline,
-	"%s %s%s find2m -c %f12,%+f12 -r %16g -l%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline,
-	"%s %s%s find2m -c %f12,%+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_DENIS3:
-      if (maglimflag)
-        sprintf(cmdline,
-		"%s %s%s denis3 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline,
-		"%s %s%s denis3 -c %f12,%+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_UCAC1:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s ucac1 -c %s %s -r %16g -lm %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s ucac1 -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_UCAC2:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s ucac2 -c %s %s -r %16g -lm %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s ucac2 -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_UCAC3:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s ucac3 -c %s %s -r %16g -lm %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s ucac3 -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_UCAC4:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s ucac4 -c %s %s -r %16g -lm %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s ucac4 -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_SDSSR3:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s sdss3 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s sdss3 -c %f12 %+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_SDSSR5:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s sdss5 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s sdss5 -c %f12 %+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_SDSSR6:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s sdss6 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s sdss6 -c %f12 %+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_SDSSR7:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s sdss7 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s sdss7 -c %f12 %+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_SDSSR8:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s sdss8 -c %f12 %+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s sdss8 -c %f12 %+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_NOMAD1:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s nomad1 -c %f12,%+f12 -r %16g -lm%s %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		cdsbandname,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s nomad1 -c %f12,%+f12 -r %16g -m 10000000",
-	      prefs.cdsclient_path,
-	      prefs.ref_server[0],
-	      sport,
-	      wcspos[lng], wcspos[lat],
-	      maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_PPMX:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s ppmx -c %s %s -r %16g -lm %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s ppmx -c %s %s -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		degtosexal(wcspos[lng], salpha), degtosexde(wcspos[lat], sdelta),
-		maxradius*DEG/ARCMIN);
-      break;
-    case ASTREFCAT_CMC14:
-      if (maglimflag)
-        sprintf(cmdline, "%s %s%s cmc14 -c %f12,%+f12 -r %16g -lm %f,%f -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN,
-		prefs.astref_maglim[0],
-		prefs.astref_maglim[1]);
-      else
-        sprintf(cmdline, "%s %s%s cmc14 -c %f12,%+f12 -r %16g -m 10000000",
-		prefs.cdsclient_path,
-		prefs.ref_server[0],
-		sport,
-		wcspos[lng], wcspos[lat],
-		maxradius*DEG/ARCMIN);
-      break;
-    default:
-      return NULL;
-    }
+/* Prepare mag limit section of the command line */
+  if (prefs.astref_maglim[0]>-99.0 || prefs.astref_maglim[1]<99.0)
+    sprintf(maglimcmd, "-lm%s %f,%f -m 10000000",
+	cdsbandname, prefs.astref_maglim[0],prefs.astref_maglim[1]);
+  else
+    strcpy(maglimcmd, "-m 10000000");
 
-  strcat(cmdline, " 2>/dev/null");
+  sprintf(cmdline, "%s %s%s %s -c %f12%+f12 -r %16g %s",
+	prefs.cdsclient_path,
+	prefs.ref_server[0],
+	sport,
+	astrefcat[(int)refcat].cdsname,
+	wcspos[lng], wcspos[lat],
+	maxradius*DEG/ARCMIN,
+	maglimcmd);
+
   sprintf(str,"Querying %s at %s for astrometric reference stars...",
 	catname,
 	prefs.ref_server[0]);
@@ -1041,6 +666,29 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           magerr[4] = atof(astref_strncpy(col, str+146, 5));
           break;
 
+        case ASTREFCAT_SDSSR9:
+/*-------- Avoid missing or poor observations, and secondary detections */
+          smode = str[0];
+          nobs = atoi(astref_strncpy(col, str+69, 1));
+          if (nobs<2 || nobs>3 || smode=='2')
+            continue;
+          alpha = atof(astref_strncpy(col, str+26, 10));
+          delta = atof(astref_strncpy(col, str+36, 10));
+          poserr[lng] = atof(astref_strncpy(col, str+47, 5))*ARCSEC/DEG;
+          poserr[lat] = atof(astref_strncpy(col, str+53, 5))*ARCSEC/DEG;
+          epoch = atof(astref_strncpy(col, str+59, 9));
+          mag[0] = atof(astref_strncpy(col, str+71, 6));
+          magerr[0] = atof(astref_strncpy(col, str+78, 5));
+          mag[1] = atof(astref_strncpy(col, str+84, 6));
+          magerr[1] = atof(astref_strncpy(col, str+91, 5));
+          mag[2] = atof(astref_strncpy(col, str+97, 6));
+          magerr[2] = atof(astref_strncpy(col, str+104, 5));
+          mag[3] = atof(astref_strncpy(col, str+110, 6));
+          magerr[3] = atof(astref_strncpy(col, str+117, 5));
+          mag[4] = atof(astref_strncpy(col, str+123, 6));
+          magerr[4] = atof(astref_strncpy(col, str+130, 5));
+          break;
+
         case ASTREFCAT_NOMAD1:
           alpha = atof(astref_strncpy(col, str+19, 11));
           delta = atof(astref_strncpy(col, str+30, 11));
@@ -1123,7 +771,31 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             else
               {
               mag[b] = atof(smag[b]);
-              magerr[b] = (b==0) ? atof(smagerr[b]) : TWOMASS_MAGERR;
+              magerr[b] = (b==0) ? atof(smagerr[b]) : DEFAULT_MAGERR;
+              }
+          break;
+        case ASTREFCAT_TYCHO2:
+          alpha = atof(astref_strncpy(col, str+24, 12));
+          delta = atof(astref_strncpy(col, str+37, 12));
+          prop[lng] = atof(astref_strncpy(col, str+50, 7))*MAS/DEG;
+          prop[lat] = atof(astref_strncpy(col, str+58, 7))*MAS/DEG;
+          poserr[lng] = atof(astref_strncpy(col, str+66, 3))*MAS/DEG;
+          poserr[lat] = atof(astref_strncpy(col, str+70, 3))*MAS/DEG;
+          properr[lng] = atof(astref_strncpy(col, str+74, 4))*MAS/DEG;
+          properr[lat] = atof(astref_strncpy(col, str+79, 4))*MAS/DEG;
+          strcpy(smag[0], astref_strncpy(col, str+123, 6));
+          strcpy(smagerr[0], astref_strncpy(col, str+130, 6));
+          strcpy(smag[1], astref_strncpy(col, str+137, 6));
+          strcpy(smagerr[0], astref_strncpy(col, str+144, 6));
+          epoch = 2000.0;
+          for (b=0; b<nband; b++)
+            if (smag[b][2] == ' ')
+              mag[b] = magerr[b] = 99.0;
+            else
+              {
+              mag[b] = atof(smag[b]);
+              magerr[b] = (smagerr[b][2] != ' ') ?
+			atof(smagerr[b]) : DEFAULT_MAGERR;
               }
           break;
         case ASTREFCAT_NONE:

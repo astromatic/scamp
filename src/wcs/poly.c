@@ -222,7 +222,7 @@ polystruct *poly_copy(polystruct *poly)
 
 /****** poly_func ************************************************************
 PROTO   double poly_func(polystruct *poly, double *pos)
-PURPOSE Evaluate a multidimensional polynom.
+PURPOSE Evaluate a multidimensional polynomial.
 INPUT   polystruct pointer,
         pointer to the 1D array of input vector data.
 OUTPUT  Polynom value.
@@ -291,6 +291,85 @@ double	poly_func(polystruct *poly, double *pos)
         *(expot++) = 0;
         *(xpolt++) = 1.0;
         post++;
+        }
+    }
+
+  return (double)val;
+  }
+
+
+/****** poly_cfunc ************************************************************
+PROTO   double poly_cfunc(polystruct *poly, double *pos)
+PURPOSE Evaluate a multidimensional Chebyshev polynomial.
+INPUT   polystruct pointer,
+        pointer to the 1D array of input vector data.
+OUTPUT  Polynom value.
+NOTES   Values of the basis functions are updated in poly->basis.
+AUTHOR  E. Bertin (IAP)
+VERSION 29/01/2013
+ ***/
+double	poly_cfunc(polystruct *poly, double *pos)
+  {
+   double	pol[POLY_MAXDIM*(POLY_MAXDEGREE+1)],
+	      	*polt, *post, *basis, *coeff, xval;
+   long double	val;
+   int		expo[POLY_MAXDIM+1], gexpo[POLY_MAXDIM+1];
+   int	       	*expot, *degree,*degreet, *group,*groupt, *gexpot,
+			d,d2,g,t, ndim;
+
+/* Prepare the vectors and counters */
+  ndim = poly->ndim;
+  basis = poly->basis;
+  coeff = poly->coeff;
+  group = poly->group;
+  degree = poly->degree;
+  if (ndim)
+    {
+    for (groupt=group, expot=expo, post=pos, d=0; d<ndim; d++)
+      {
+      *(expot++) = 0;
+      polt = pol + d*(POLY_MAXDEGREE+1);
+      *(polt++) = 1.0;
+      *(polt++) = xval = *(post++);
+      for (d2 = degree[*(groupt++)]; --d2 > 0; polt++)
+        *polt = 2.0*xval**(polt-1) - *(polt-2);
+      }
+    for (gexpot=gexpo, degreet=degree, g=poly->ngroup; g--;)
+      *(gexpot++) = *(degreet++);
+    if (gexpo[*group])
+      gexpo[*group]--;
+    }
+
+/* The constant term is handled separately */
+  val = *(coeff++);
+  *(basis++) = 1.0;
+  *expo = 1;
+
+/* Compute the rest of the polynom */
+  for (t=poly->ncoeff; --t; )
+    {
+    polt = pol;
+    expot = expo;
+/*-- xval contains the current product of the polynomials */
+    xval = 1.0;
+    for (d=ndim; d--; polt += POLY_MAXDEGREE+1)
+      xval *= polt[*(expot++)];
+    val += (*(basis++)=xval)**(coeff++);
+/*-- A complex recursion between terms of the polynom speeds up computations */
+/*-- Not too good for roundoff errors (prefer Horner's), but much easier for */
+/*-- multivariate polynomials: this is why we use a long double accumulator */
+    expot = expo;
+    groupt = group;
+    for (d=0; d<ndim; d++, groupt++)
+      if (gexpo[*groupt]--)
+        {
+        ++*(expot++);
+        break;
+        }
+      else
+        {
+        gexpo[*groupt] = *expot;
+        *(expot++) = 0;
         }
     }
 
@@ -733,7 +812,7 @@ void	poly_initortho(polystruct *poly, double *data, int ndata)
 /* Transpose orthonormalization matrix to speed up later use */
   deortho = poly->deorthomat;
   for (j=0; j<ncoeff; j++)
-    for (i=0; i<ncoeff; i++)
+    for (i=j; i<ncoeff; i++)
       {
       dval = deortho[j*ncoeff+i];
       deortho[j*ncoeff+i] = deortho[i*ncoeff+j];
@@ -745,7 +824,7 @@ void	poly_initortho(polystruct *poly, double *data, int ndata)
 
 
 /****** poly_ortho ************************************************************
-PROTO   void poly_ortho(polystruct *poly, double *datain, double *dataout)
+PROTO   double *poly_ortho(polystruct *poly, double *datain, double *dataout)
 PURPOSE Apply orthonormalization to the poly basis vector ("ket>").
 INPUT   polystruct pointer,
 	pointer to the input vector,

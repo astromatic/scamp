@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/11/2012
+*	Last modified:		18/02/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -52,6 +52,7 @@
 #define         GSC_MAGERR	0.20
 #define         UCAC_MAGERR     0.12		/* Just a default value */
 #define         TWOMASS_MAGERR  0.1		/* Just a default value */
+#define         DEFAULT_MAGERR  0.1		/* Just a default value */
 
 #define		ASTREF_ASSOCRADIUS	(0.2*ARCSEC/DEG)
 
@@ -62,13 +63,15 @@ typedef enum {ASTREFCAT_NONE, ASTREFCAT_FILE,
 		ASTREFCAT_2MASS, ASTREFCAT_DENIS3, ASTREFCAT_UCAC1,
 		ASTREFCAT_UCAC2, ASTREFCAT_UCAC3, ASTREFCAT_UCAC4,
 		ASTREFCAT_SDSSR3, ASTREFCAT_SDSSR5, ASTREFCAT_SDSSR6,
-		ASTREFCAT_SDSSR7, ASTREFCAT_SDSSR8,
-		ASTREFCAT_NOMAD1, ASTREFCAT_PPMX, ASTREFCAT_CMC14}
+		ASTREFCAT_SDSSR7, ASTREFCAT_SDSSR8, ASTREFCAT_SDSSR9,
+		ASTREFCAT_NOMAD1, ASTREFCAT_PPMX, ASTREFCAT_CMC14,
+		ASTREFCAT_TYCHO2}
 			astrefenum;
 
 typedef struct
   {
   char		name[16];		/* Catalog name */
+  char		cdsname[16];		/* Catalog name at CDS */
   int		nband;			/* Number of available bands */
   int		defband;		/* Default band */
   char		bandnames[MAX_BAND][32];/* Real names of available bands */

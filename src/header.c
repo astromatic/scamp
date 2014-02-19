@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/03/2013
+*	Last modified:		27/11/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -61,7 +61,7 @@ INPUT	Name of the ASCII file,
 OUTPUT	RETURN_OK if the file was found, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	14/03/2013
+VERSION	27/11/2013
  ***/
 int	read_aschead(char *filename, int frameno, tabstruct *tab)
   {
@@ -92,15 +92,26 @@ int	read_aschead(char *filename, int frameno, tabstruct *tab)
         ||!wstrncmp(keyword, "BZERO   ", 8))
         continue;
 /*---- Wipe out conflicting keywords */
-      if (!wstrncmp(keyword, "PV?_????", 8) && pvfirstflag)
+      if (pvfirstflag && !wstrncmp(keyword, "PV?_????", 8))
         {
         removekeywordfrom_head(tab, "PV?_????");
         pvfirstflag = 0;
         }
-      if (!wstrncmp(keyword, "CD?_????", 8) && cdfirstflag)
+      if (cdfirstflag)
         {
-        removekeywordfrom_head(tab, "CDELT???");
-        cdfirstflag = 0;
+        if (!wstrncmp(keyword, "PC0??0??", 8)
+		|| !wstrncmp(keyword, "PC?_????", 8))
+          {
+          removekeywordfrom_head(tab, "CD?_????");
+          cdfirstflag = 0;
+          }
+	else if (!wstrncmp(keyword, "CD?_????", 8))
+          {
+          removekeywordfrom_head(tab, "CDELT???");
+          removekeywordfrom_head(tab, "PC0??0??");
+          removekeywordfrom_head(tab, "PC?_????");
+          cdfirstflag = 0;
+          }
         }
       addkeywordto_head(tab, keyword, comment);
       fitswrite(tab->headbuf, keyword, data, htype, ttype);
