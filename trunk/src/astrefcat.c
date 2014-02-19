@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2014
+*	Last modified:		19/02/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -128,7 +128,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 18/02/2014
+VERSION 19/02/2014
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -237,7 +237,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 	maxradius*DEG/ARCMIN,
 	maglimcmd);
 
-  sprintf(str,"Querying %s at %s for astrometric reference stars...",
+  sprintf(str,"Querying %s from %s for astrometric reference stars...",
 	catname,
 	prefs.ref_server[0]);
   NFPRINTF(OUTPUT, str);
@@ -775,6 +775,9 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
               }
           break;
         case ASTREFCAT_TYCHO2:
+/*-------- Reject (fainter) sources without proper motions */
+          if (*astref_strncpy(col, str+27, 1) == ' ')
+            continue;
           alpha = atof(astref_strncpy(col, str+24, 12));
           delta = atof(astref_strncpy(col, str+37, 12));
           prop[lng] = atof(astref_strncpy(col, str+50, 7))*MAS/DEG;
