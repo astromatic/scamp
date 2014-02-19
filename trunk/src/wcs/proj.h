@@ -159,6 +159,8 @@ struct prjprm {
    int tnxrev(const double, const double, struct prjprm *, double *, double *);
    int raw_to_pv(struct prjprm *, double, double, double *, double *);
    int pv_to_raw(struct prjprm *, double, double, double *, double *);
+   int raw_to_cv(struct prjprm *, double, double, double *, double *);
+   int cv_to_raw(struct prjprm *, double, double, double *, double *);
 #else
    int azpset(), azpfwd(), azprev();
    int tanset(), tanfwd(), tanrev();

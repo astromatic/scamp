@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		18/02/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -47,8 +47,8 @@
 #endif
 
 #ifdef HAVE_LAPACKE
-#include LAPACKE_H
-#define MATSTORAGE_PACKED 1
+ #include LAPACKE_H
+ #define MATSTORAGE_PACKED 1
 #endif
 
 #include <sys/mman.h>
@@ -109,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	17/04/2013
+VERSION	18/02/2014
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -119,11 +119,13 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
    samplestruct		*samp;
    polystruct		*poly, *poly2;
    char			str[64],
-			**contextname;
+			**contextname,
+			lap_equed;
    double		cmin[MAXCONTEXT],cmax[MAXCONTEXT],
 			cscale[MAXCONTEXT], czero[MAXCONTEXT],
 			*alpha, *beta,
 			dval;
+   size_t		size;
    int			group2[NAXIS],
 			*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
 			c,cm,f,f2,g,g2,i,n,s,s2,sm, nfield,nfield2,
@@ -132,7 +134,10 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 			d, index, index2,
 			ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
 			startindex2, nmiss;
-size_t size;
+
+#if defined(HAVE_LAPACKE)
+   long long		*lap_ipiv;
+#endif
 
 #ifdef HAVE_MKL
 /* Set number of MKL threads (may be changed later in the code) */
@@ -270,7 +275,7 @@ size_t size;
   for (i=0; i<ninstru; i++)
     {
     if (prefs.stability_type[instru]!=STABILITY_PREDISTORTED)
-    findex2[i+1]--;	/* Remove first field (too many degrees of freedom) */
+      findex2[i+1]--;	/* Remove first field (too many degrees of freedom) */
 /*-- Set the extra exposure-dependent parameter flag */
     if (findex[i+1]>0)
       ncoefftot += ncoeff*findex[i+1];
@@ -298,6 +303,7 @@ size_t size;
       index2 = (field->index2 <0)? -1
 		: startindex2 + ncoeff2*(field->index2+findex2[instru]);
       field->index2 = index2;
+      field->ncoeff2 = ncoeff2;
       for (s=0; s<field->nset; s++)
         {
         set = field->set[s];
@@ -320,23 +326,24 @@ size_t size;
   QCALLOC(nconst, int, ncoefftot);
 
 #ifdef MATSTORAGE_PACKED
-  size=((size_t)(ncoefftot+1)*ncoefftot)/2*sizeof(double);
+  size = ((size_t)(ncoefftot+1)*ncoefftot)/2 * sizeof(double);
+#else
+  size= (size_t)ncoefftot*ncoefftot * sizeof(double);
+#endif
 
   if ((alpha = mmap(NULL, size,PROT_WRITE|PROT_READ,
- #ifdef MAP_ANONYMOUS
+#ifdef MAP_ANONYMOUS
 	MAP_PRIVATE|MAP_ANONYMOUS,	/* Linux */
- #else
+#else
 	MAP_PRIVATE|MAP_ANON,		/* BSD, OSX */
- #endif
+#endif
 	-1,0))==(void *)-1)
     {
     sprintf(gstr, "alpha ((ncoefftot+1)*ncoefftot)/2 =%lld bytes) "
 			"at line %d in module " __FILE__ " !", size, __LINE__);
     error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
     }
-#else
-  QCALLOC(alpha, double, (size_t)ncoefftot*ncoefftot);
-#endif
+
   QCALLOC(beta, double, ncoefftot);
 
 #ifdef USE_THREADS
@@ -411,7 +418,7 @@ size_t size;
 /*---------- Trim the matrices */
             shrink_mat(alpha,beta, ncoefftot, index+nconst[index], nmiss);
 /*---------- Shift all other indexes above */
-            nc = nconst+index+nconst[index];
+            nc = nconst + index + nconst[index];
             nc2 = nc + nmiss;
             for (i=ncoefftot-index-set->ncoeff; i--;)
 	      *(nc++) = *(nc2++);
@@ -427,16 +434,16 @@ size_t size;
                 for (s2=0; s2<field2->nset; s2++)
 	          {
                   set2 = field2->set[s2];
-                  if (set2->index2>=0)
-                    set2->index2 -= nmiss;
-                  if (set2->ncoeff && set2->index == index)
-                    set2->ncoeff -= nmiss;
                   if (set2->index > index)
                     set2->index -= nmiss;
+                  if (set2->ncoeff && set2->index == index)
+                    set2->ncoeff -= nmiss;
+                  if (set2->index2>=0)
+                    set2->index2 -= nmiss;
                   }
                 }
               }
-            ncoefftot -= nmiss;
+             ncoefftot -= nmiss;
             }
           }
         }
@@ -452,90 +459,60 @@ size_t size;
       {
       field = fields[f];
       index2 = field->index2;
-      if (index2 >= 0)
+      if (index2 >= 0 && nconst[index2] < field->ncoeff2)
         {
-        for (c=s=0; s<field->nset; s++)
-          {
-          set = field->set[s];
-          if (set->index >= 0 && set->ncoeff)
-            c += nconst[set->index] - set->ncoeff;
-          else
-            c += nconst[index2];
-          }
-        if (c < ncoeff2)
-          {
-          nmiss = ncoeff2;
-/*-------- Trim the matrices */
-          shrink_mat(alpha,beta, ncoefftot, index2, nmiss);
-/*-------- Shift all other indexes above */
-          nc = nconst+index2;
-          nc2 = nc + nmiss;
-          for (i=ncoefftot-nmiss-index2; i--;)
-            *(nc++) = *(nc2++);
-          for (g2=0; g2<nfgroup; g2++)
-            {    
-            nfield2 = fgroups[g2]->nfield;
-            fields2 = fgroups[g2]->field;
-            for (f2=0; f2<nfield2; f2++)
+        nmiss = field->ncoeff2 - nconst[index2];
+/*------ Trim the matrices */
+        shrink_mat(alpha,beta, ncoefftot, index2, nmiss);
+/*------ Shift all other indexes above */
+        nc = nconst + index2 + nconst[index2];
+        nc2 = nc + nmiss;
+        for (i=ncoefftot-index2-field->ncoeff2; i--;)
+          *(nc++) = *(nc2++);
+        for (g2=0; g2<nfgroup; g2++)
+          {    
+          nfield2 = fgroups[g2]->nfield;
+          fields2 = fgroups[g2]->field;
+          for (f2=0; f2<nfield2; f2++)
+            {
+            field2 = fields2[f2];
+            if (field2->index2>=0 && field2->index2 > index2)
               {
-              field2 = fields2[f2];
-              if (field2->index2>=0 && field2->index2 > index2)
-                field2->index2 -= nmiss;
+              field2->index2 -= nmiss;
               for (s2=0; s2<field2->nset; s2++)
                 {
                 set2 = field2->set[s2];
-                if (set2->index2 == index2)
-                  set2->index2 = -1;
-                else if (set2->index2 > index2)
+                if (set2->index2 > index2)
                   set2->index2 -= nmiss;
                 }
               }
-            }
-          ncoefftot -= nmiss;
-          field->index2 = -1;
-          }
-        else
-	  {
-          if (field->index>=0)
-            {
-/*---------- Remove ncoeff2 constraints in a "balanced" way */
-            for (n=ncoeff2; n-=naxis;)
-              {
-              for (sm=-1,cm=s=0; s<field->nset; s++)
-                {
-                set = field->set[s];
-                if (set->index>=0 && set->ncoeff
-			&& (c = nconst[set->index] - set->ncoeff) > cm)
-	          {
-                  cm = c;
-                  sm = s;
-                  }
-                }
-              if (sm<0)
-                error(EXIT_FAILURE, "*Internal Error*: mismatched d.o.f. in ",
-			"astrsolve_fgroups()");
-              if (set->index >=0 )
-                nconst[field->set[sm]->index] -= naxis;
-              }
+            if (field2->ncoeff2 && field2->index2 == index2)
+              field2->ncoeff2 -= nmiss;
             }
           }
+        ncoefftot -= nmiss;
         }
       }
     }
 
 /* Solve! */
   NFPRINTF(OUTPUT, "Solving the global astrometry matrix...");
-
   if (ncoefftot)
     {
 #if defined(HAVE_LAPACKE)
+    QMALLOC(lap_ipiv, long long, ncoefftot);
 
   #ifdef MATSTORAGE_PACKED
-    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, beta, ncoefftot) != 0)
+    if (LAPACKE_dspsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, lap_ipiv,
+		beta, ncoefftot) != 0)
+//    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
+//		beta, ncoefftot) !=0)
   #else
     if (LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
 		beta, ncoefftot) !=0)
   #endif
+    free(lap_ipiv);
+
 
 #else
     if (clapack_dposv(CblasRowMajor, CblasUpper,
@@ -587,11 +564,13 @@ INPUT	Ptr to the set structure,
 	ptr to the alpha matrix,
 	ptr to the beta matrix.
 	matrix size,
-	pointer to the polynomial structure (steady ;
+	pointer to the 1st polynomial (steady, instrument-dependent),
+	pointer to the 2nd polynomial (variable, exposure-dependent),
+	pointer to the number of constraints per chip/exposure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	07/12/2013
  ***/
 void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
 			int ncoefftot,
@@ -744,7 +723,7 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
             {
             if (!redflag)
               raw_to_red(set2->wcs, samp2->vrawpos, redpos);
-              poly_func(poly2, redpos);
+            poly_func(poly2, redpos);
             }
           }
 
@@ -1667,3 +1646,72 @@ void	astrweight_fgroups(fgroupstruct **fgroups, int nfgroup)
 
   return;
   }
+
+
+/****** astr_orthopoly ********************************************************
+PROTO	void astr_orthopoly(polystruct *poly)
+PURPOSE	Orthonormalize the polynomial basis over the range of possible contexts.
+INPUT	pointer to poly structure.
+OUTPUT  -.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 16/12/2013
+ ***/
+void	astr_orthopoly(polystruct *poly)
+  {
+   samplestruct	*sample;
+   double	pos[POLY_MAXDIM], posmin[POLY_MAXDIM],
+		*basis,*data,*datat,
+		norm, step;
+   int		count[POLY_MAXDIM],
+		c,d,i,n, ndim, ncoeff, ndata, nrange;
+
+  ncoeff = poly->ncoeff;
+  ndim = poly->ndim;
+  ndata = 1024;
+  nrange = (int)pow((double)ndata, 1.0/ndim);
+  step = 2.0 / (nrange - 1.0);
+  norm = 1.0/sqrt(ndata);
+
+/* Go through each sample */
+  ndata = 1; 
+  for (d=0; d<ndim; d++)
+    {
+    pos[d] = posmin[d] = -1.0;
+    ndata *= nrange;
+    count[d] = 0;
+    }
+
+  QMALLOC(data, double, ndata*ncoeff);
+
+  for (n=0; n<ndata; n++)
+    {
+/*-- Get the local context coordinates */
+    poly_func(poly, pos);
+    basis = poly->basis;
+    datat = data + n;
+/*-- Fill basis matrix as a series of row vectors */
+#pragma ivdep
+    for (c=ncoeff; c--; datat+=ndata)
+      *datat = *(basis++)*norm;
+    for (d=0; d<ndim; d++)
+      {
+     pos[d] += step;
+      if (++count[d]<nrange)
+        break;
+      else
+        {
+        count[d] = 0;       /* No need to initialize it to 0! */
+        pos[d] = posmin[d];
+        }
+      }
+    }
+
+  poly_initortho(poly, data, ndata);
+  free(data);
+
+  return;
+  }
+
+
+

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-**	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+**	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/09/2012
+*	Last modified:		07/12/2013
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -114,6 +114,7 @@ typedef struct field
   double	expotimemin,expotimemax;/* Min and max exposure time */
   int		index;			/* CONTEXT index */  
   int		index2;			/* field-dependent index */  
+  int		ncoeff2;		/* Number of fit coefficients kept */
 /* ---- checkplot parameters */
   int		cplot_colour;		/* PLPLOT specific colour */
   struct fgroup	*fgroup;		/* Field group to which field belongs*/

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/06/2013
+*	Last modified:		18/02/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -177,7 +177,7 @@ void	makeit(void)
       if (reffields[g])
         {
         NFPRINTF(OUTPUT, "");
-        QPRINTF(OUTPUT, " Group %2d: %8d standard%s found in %s (band %s)\n",
+        QPRINTF(OUTPUT, " Group %2d: %8d standard%s found in %s (%s band)\n",
 	  g+1, reffields[g]->nsample, reffields[g]->nsample>1?"s":"",
 	  astrefcat[prefs.astrefcat].name,
 	  astrefcat[prefs.astrefcat].bandname);

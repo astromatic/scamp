@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		18/02/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -76,8 +76,8 @@ pkeystruct key[] =
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
     "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3", "UCAC-4",
-    "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "SDSS-R8", "NOMAD-1",
-    "PPMX", "CMC-14", ""}},
+    "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "SDSS-R8", "SDSS-R9",
+    "NOMAD-1", "PPMX", "CMC-14", "TYCHO-2", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
@@ -228,9 +228,10 @@ char *default_prefs[] =
 "*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
 "ASTREF_CATALOG          2MASS          # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
 "                                       # GSC-1.3,GSC-2.2,GSC-2.3,",
-"                                       # UCAC-1,UCAC-2,UCAC-3,UCAC-4,",
+"                                       # TYCHO-2, UCAC-1,UCAC-2,UCAC-3,UCAC-4,",
 "                                       # NOMAD-1, PPMX, CMC-14, 2MASS, DENIS-3,",
-"                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,SDSS-R8",
+"                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,",
+"                                       # SDSS-R8, SDSS-R9",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
 "*ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",
