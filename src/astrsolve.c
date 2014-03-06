@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2013
+*	Last modified:		06/03/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -109,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	18/02/2014
+VERSION	06/03/2014
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -505,11 +505,19 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   #ifdef MATSTORAGE_PACKED
     if (LAPACKE_dspsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, lap_ipiv,
 		beta, ncoefftot) != 0)
-//    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
-//		beta, ncoefftot) !=0)
+      warning("Not a positive definite matrix", " in astrometry solver");
+/*
+    if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
+		beta, ncoefftot) !=0)
+*/
   #else
+    if (LAPACKE_dsysv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, lap_ipiv,
+		beta, ncoefftot) != 0)
+      warning("Not a positive definite matrix", " in astrometry solver");
+/*
     if (LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
 		beta, ncoefftot) !=0)
+*/
   #endif
     free(lap_ipiv);
 
@@ -517,8 +525,8 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 #else
     if (clapack_dposv(CblasRowMajor, CblasUpper,
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot) != 0)
-#endif
       warning("Not a positive definite matrix", " in astrometry solver");
+#endif
 
 #ifdef HAVE_MKL
    mkl_free_buffers();	/* Avoid MKL memory leaks */
