@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/11/2013
+*	Last modified:		06/03/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -135,7 +135,7 @@ INPUT	Name of the ASCII file,
 OUTPUT	RETURN_OK if the file was found, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2012
+VERSION	06/03/2014
  ***/
 int	write_aschead(char *filename, fieldstruct *field)
   {
@@ -158,12 +158,6 @@ int	write_aschead(char *filename, fieldstruct *field)
 	field->filename);
   naxis = fgroup->naxis;
 
-  sprintf(str, "HISTORY   Astrometric solution by %s version %s (%s)",
-		BANNER,MYVERSION,DATE);
-  fprintf(file, "%.79s\n", str); 
-  sprintf(str, "COMMENT   (c) %s", COPYRIGHT);
-  fprintf(file, "%.79s\n", str); 
-  fprintf(file, "COMMENT   \n");
   for (s=0; s<field->nset; s++)
     {
     tab = new_tab("");
@@ -214,6 +208,12 @@ int	write_aschead(char *filename, fieldstruct *field)
         addkeywordto_head(tab,"PHOTLINK",
 		"True if linked to a photometric field");
         fitswrite(tab->headbuf,"PHOTLINK", &field->photomlink, H_BOOL, T_LONG);
+        sprintf(str, "HISTORY   Astrometric solution by %s version %s (%s)",
+		BANNER,MYVERSION,DATE);
+        fprintf(file, "%.79s\n", str); 
+        sprintf(str, "COMMENT   (c) %s", COPYRIGHT);
+        fprintf(file, "%.79s\n", str); 
+        fprintf(file, "COMMENT   \n");
         for (i=0; *wcskey[i]; i++)
           for (ptr=tab->headbuf; (n=fitsfind(ptr, wcskey[i])) != RETURN_ERROR;
 		ptr+=80)
