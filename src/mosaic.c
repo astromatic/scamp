@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/12/2011
+*	Last modified:		14/05/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -278,7 +278,7 @@ INPUT	ptr to the WCS structure,
 OUTPUT	-.
 NOTES	The updated WCS is an approximation of the exact one.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/02/2005
+VERSION	14/05/2014
  ***/
 void	crval_to_crpix(wcsstruct *wcs, double *wcspos)
   {
@@ -298,13 +298,13 @@ void	crval_to_crpix(wcsstruct *wcs, double *wcspos)
 /*-- Compute the angle difference towards the north pole induced by the shift*/
     dlng = wcspos[lng] - wcs->crval[lng];
     dlat = wcspos[lat] - wcs->crval[lat];
-    angle = (dlng!=0.0 && dlat!= 0.0) ?
-	(atan2(sin(dlng*DEG),
-	cos(wcspos[lat]*DEG)*tan(wcs->crval[lat]*DEG)
-	- sin(wcspos[lat]*DEG)*cos(dlng*DEG))
-	+ atan2(sin(dlng*DEG),
-	cos(wcs->crval[lat]*DEG)*tan(wcspos[lat]*DEG)
-	- sin(wcs->crval[lat]*DEG)*cos(dlng*DEG)))/DEG - 180.0
+    angle = (fabs(dlng)>1e-10) ?
+	(atan2(sin(wcspos[lat]*DEG)*cos(dlng*DEG)
+			- cos(wcspos[lat]*DEG)*tan(wcs->crval[lat]*DEG),
+		sin(dlng*DEG))
+	+ atan2(sin(wcs->crval[lat]*DEG)*cos(dlng*DEG)
+			- cos(wcs->crval[lat]*DEG)*tan(wcspos[lat]*DEG),
+		sin(dlng*DEG)))/DEG
 	: 0.0;
 /*-- A = B*C */
     c = wcs->cd;
