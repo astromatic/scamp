@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		06/03/2014
+*	Last modified:		19/06/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -109,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	06/03/2014
+VERSION	19/06/2014
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -434,10 +434,10 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
                 for (s2=0; s2<field2->nset; s2++)
 	          {
                   set2 = field2->set[s2];
-                  if (set2->index > index)
-                    set2->index -= nmiss;
                   if (set2->ncoeff && set2->index == index)
                     set2->ncoeff -= nmiss;
+                  if (set2->index > index)
+                    set2->index -= nmiss;
                   if (set2->index2>=0)
                     set2->index2 -= nmiss;
                   }
@@ -476,6 +476,8 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
           for (f2=0; f2<nfield2; f2++)
             {
             field2 = fields2[f2];
+            if (field2->ncoeff2 && field2->index2 == index2)
+              field2->ncoeff2 -= nmiss;
             if (field2->index2>=0 && field2->index2 > index2)
               {
               field2->index2 -= nmiss;
@@ -486,8 +488,6 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
                   set2->index2 -= nmiss;
                 }
               }
-            if (field2->ncoeff2 && field2->index2 == index2)
-              field2->ncoeff2 -= nmiss;
             }
           }
         ncoefftot -= nmiss;
