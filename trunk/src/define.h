@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/10/2013
+*	Last modified:		09/07/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -112,7 +112,7 @@
 #define	QCALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)calloc((size_t)(nel),sizeof(typ)))) \
 		   { \
-		   sprintf(gstr, #ptr " (" #nel "=%lld bytes) " \
+		   sprintf(gstr, #ptr " (" #nel "=%ld bytes) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
@@ -122,7 +122,7 @@
 #define	QMALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)malloc((size_t)(nel)*sizeof(typ)))) \
 		   { \
-		   sprintf(gstr, #ptr " (" #nel "=%lld bytes) " \
+		   sprintf(gstr, #ptr " (" #nel "=%ld bytes) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
@@ -132,7 +132,7 @@
 #define	QREALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)realloc(ptr, (size_t)(nel)*sizeof(typ))))\
 		   { \
-		   sprintf(gstr, #ptr " (" #nel "=%lld bytes) " \
+		   sprintf(gstr, #ptr " (" #nel "=%ld bytes) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
@@ -143,7 +143,7 @@
 		{if (ptrin) \
                   {if (!(ptrout = (typ *)malloc((size_t)(nel)*sizeof(typ)))) \
 		     { \
-		     sprintf(gstr, #ptrout " (" #nel "=%lld bytes) " \
+		     sprintf(gstr, #ptrout " (" #nel "=%ld bytes) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		     error(EXIT_FAILURE,"Could not allocate memory for ",gstr);\

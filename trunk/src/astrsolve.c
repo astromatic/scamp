@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/06/2014
+*	Last modified:		09/07/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -109,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	19/06/2014
+VERSION	09/07/2014
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -339,7 +339,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 #endif
 	-1,0))==(void *)-1)
     {
-    sprintf(gstr, "alpha ((ncoefftot+1)*ncoefftot)/2 =%lld bytes) "
+    sprintf(gstr, "alpha ((ncoefftot+1)*ncoefftot)/2 =%ld bytes) "
 			"at line %d in module " __FILE__ " !", size, __LINE__);
     error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
     }
