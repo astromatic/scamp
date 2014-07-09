@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		09/07/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -65,7 +65,7 @@ INPUT	Pointer to the array of field groups,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	09/07/2014
  ***/
 int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
   {
@@ -101,7 +101,7 @@ int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
 /* Draw meridians and parallels */
   plfont(2);
   plschr(0.0, 0.3);
-  plwid(0);
+  CPLOT_PLWID(0);
   plcol0(7);
   mark[0] = 500;
   space[0] = 500;
@@ -148,7 +148,7 @@ int	cplot_allsky(fgroupstruct **fgroups, int ngroup)
 
 /* Plot fields */
   pllsty(1);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   for (g=0; g<ngroup; g++)
     {
     field = fgroups[g]->field;
@@ -345,7 +345,7 @@ INPUT	Pointer to the WCS projection structure,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/10/2005
+VERSION	09/07/2014
  ***/
 int	cplot_drawcoordgrid(wcsstruct *wcs, double xmin, double xmax,
 				double ymin, double ymax)
@@ -464,7 +464,7 @@ int	cplot_drawcoordgrid(wcsstruct *wcs, double xmin, double xmax,
 
 /* Draw meridians */
   plschr(0.0, 0.33);
-  plwid(0);
+  CPLOT_PLWID(0);
   pllsty(2);
   xmd = xmu = xdo = -0.5;
   ymd = ymu = ydo = -0.5;
@@ -557,7 +557,7 @@ INPUT	Pointer to the WCS projection structure,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/11/2010
+VERSION	09/07/2014
  ***/
 int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
 				double ymin, double ymax)
@@ -679,7 +679,7 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
 
 /* Draw meridians */
   plschr(0.0, 0.33);
-  plwid(0);
+  CPLOT_PLWID(0);
   pllsty(2);
   xmd = xmu = xdo = -0.5;
   ymd = ymu = ydo = -0.5;
@@ -770,7 +770,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	09/07/2014
  ***/
 int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -832,7 +832,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   plcol0(15);
   plschr(0.0, 0.67);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uGroup ##%d: detections", fgroup->no);
   pllab("","", str);
@@ -865,7 +865,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
       }
     }
   plssym(0.0, psize);
-  plwid(lsize);
+  CPLOT_PLWID(lsize);
   plcol0(3);
   plpoin((PLINT)npoint, x,y, 11);
   plcol0(1);
@@ -902,7 +902,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
             *(xt++) = (PLFLT)samp->projpos[lng];
             *(yt++) = (PLFLT)samp->projpos[lat];
             }
-        plwid(lsize);
+        CPLOT_PLWID(lsize);
         plcol0(8);
         if (lsize)
           plpoin((PLINT)(xt-x), x,y, 17);
@@ -913,7 +913,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
         free(x);
         free(y);
         }
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       if (field->cplot_colour==15)
         {
         plcol0(15);
@@ -928,7 +928,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     field = fgroup->field[f];
     if (field->cplot_colour!=15)
       {
-      plwid(3*lwid);
+      CPLOT_PLWID(3*lwid);
       plcol0(field->cplot_colour);
       for (s=0; s<field->nset; s++)
         {
@@ -939,7 +939,7 @@ int	cplot_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     }
 
   plcol0(7);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   cplot_drawcoordgrid(wcs, xmin, xmax, ymin, ymax);
   plflush();
 
@@ -995,7 +995,7 @@ INPUT	Pointer to the field.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/08/2012
+VERSION	09/07/2014
  ***/
 int	cplot_distort(fieldstruct *field)
   {
@@ -1041,13 +1041,13 @@ int	cplot_distort(fieldstruct *field)
   ymin = 0.5;
   ymax = 100.5;
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plfont(2);
   plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uInstrument A%d: distortion map", field->astromlabel+1);
   pllab("","", str);
-  plwid(0);
+  CPLOT_PLWID(0);
   plcol0(7);
   cplot_drawloccoordgrid(wcs, xmin, xmax, ymin, ymax);
 
@@ -1128,11 +1128,11 @@ int	cplot_distort(fieldstruct *field)
              ystep/2.0+0.5, set->wcs->naxisn[lat]-ystep/2.0+0.5,
 	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 0, distort_map, &distort);
 /*
-    plwid(0);
+    CPLOT_PLWID(0);
     cplot_drawfgrids(set->wcs, wcs);
 */
     plcol0(7);
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     cplot_drawbounds(set->wcs, wcs);
     }
 
@@ -1190,7 +1190,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -1326,14 +1326,14 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   ymin = 0.5;
   ymax = 100.5;
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plfont(2);
   plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uInstrument A%d: map of astrometric systematics (internal)", 
 	field0->astromlabel+1);
   pllab("","", str);
-  plwid(0);
+  CPLOT_PLWID(0);
   plcol0(7);
   cplot_drawloccoordgrid(wcs0, xmin, xmax, ymin, ymax);
   y[0] = y[1] = 3.0;
@@ -1341,9 +1341,9 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   x[1] = x[0] + scalel;
   pllsty(1);
   plcol0(15);
-  plwid(lwid*3);
+  CPLOT_PLWID(lwid*3);
   plline(2,x,y);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plschr(0.0, 0.5);
   plptex((x[0] + x[1]) / 2.0, y[0] + 2.5, 1.0, 0.0, 0.5, dispunit);
   x[0] = x[1] = 7.0;
@@ -1480,12 +1480,12 @@ int	cplot_astintsysmap(fgroupstruct **fgroups, int ngroup, int instru,
           x[1] = vecpos2[lng] + minscale*(vecpos2[lng] - vecpos[lng]);
           y[0] = vecpos[lat];
           y[1] = vecpos2[lat] + minscale*(vecpos2[lat] - vecpos[lat]);
-          plwid(lwid*2);
+          CPLOT_PLWID(lwid*2);
           plcol0(3);
           plline(2, x,y);
           plcol0(15);
           plpoin(1,x,y,1);
-          plwid(lwid);
+          CPLOT_PLWID(lwid);
           }
       }
     }
@@ -1512,7 +1512,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
 			double hsn_thresh)
@@ -1647,7 +1647,7 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   ymin = 0.5;
   ymax = 100.5;
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plfont(2);
   plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
@@ -1655,7 +1655,7 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   sprintf(str, "#uInstrument A%d: map of astrometric systematics (reference)",
 	field0->astromlabel+1);
   pllab("","", str);
-  plwid(0);
+  CPLOT_PLWID(0);
   plcol0(7);
   cplot_drawloccoordgrid(wcs0, xmin, xmax, ymin, ymax);
   y[0] = y[1] = 3.0;
@@ -1663,9 +1663,9 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
   x[1] = x[0] + scalel;
   pllsty(1);
   plcol0(15);
-  plwid(lwid*3);
+  CPLOT_PLWID(lwid*3);
   plline(2,x,y);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plschr(0.0, 0.5);
   plptex((x[0] + x[1]) / 2.0, y[0] + 2.5, 1.0, 0.0, 0.5, dispunit);
   x[0] = x[1] = 7.0;
@@ -1791,12 +1791,12 @@ int	cplot_astrefsysmap(fgroupstruct **fgroups, int ngroup, int instru,
           x[1] = vecpos2[lng] + minscale*(vecpos2[lng] - vecpos[lng]);
           y[0] = vecpos[lat];
           y[1] = vecpos2[lat] + minscale*(vecpos2[lat] - vecpos[lat]);
-          plwid(lwid*2);
+          CPLOT_PLWID(lwid*2);
           plcol0(1);
           plline(2, x,y);
           plcol0(15);
           plpoin(1,x,y,1);
-          plwid(lwid);
+          CPLOT_PLWID(lwid);
           }
       }
     }
@@ -1821,7 +1821,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrstats_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	09/07/2014
  ***/
 int	cplot_chi2(fgroupstruct *fgroup)
   {
@@ -1869,7 +1869,7 @@ int	cplot_chi2(fgroupstruct *fgroup)
   plcol0(15);
   plschr(0.0,0.5);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv(0.0, nfield + 1.0, ymin, ymax, 0, 0);
   sprintf(xlabel, "Field ##");
   sprintf(ylabel, "#gx#u2#d / d.o.f.");
@@ -1890,7 +1890,7 @@ int	cplot_chi2(fgroupstruct *fgroup)
   pllsty(1);
 /* Reference chi2/d.o.f. */
   plschr(0.0,0.5);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv(0.0, nfield + 1.0, ymin2, ymax2, 0, 0);
   sprintf(xlabel, "Field ##");
   sprintf(ylabel, "#gx#u2#d / d.o.f.");
@@ -1927,7 +1927,7 @@ INPUT	Pointer to the array of field groups,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrstats_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	09/07/2014
  ***/
 int	cplot_shear(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -2007,7 +2007,7 @@ int	cplot_shear(fgroupstruct **fgroups, int ngroup, int instru)
   plcol0(15);
   plschr(0.0,0.5);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv(airmassmin, airmassmax, shearmin, shearmax, 0, 0);
   sprintf(xlabel, "Airmass");
   sprintf(ylabel, "Contraction (%%)");
@@ -2065,7 +2065,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2245,7 +2245,7 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
         cuty_hsn[d3][i] = fgroup->projposmin[d2] - margin
 			+ cuty_hsn[d3][i]/cutymax_hsn[d3] * 0.9*margin;
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plenv(fgroup->projposmin[d2]-margin, fgroup->projposmax[d2],
 		-maxlim, maxlim, 0, -2);
 /* Use a non-linear shade level distribution */
@@ -2283,13 +2283,13 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /* 1D histograms */
       plcol0(3);
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       plline(CPLOT_NADERRHISTBIN, cuty[d3], cutbin);
       plcol0(7);
       plline(CPLOT_NADERRHISTBIN, cuty_hsn[d3], cutbin);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plcol0(15);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       xl[0] = fgroup->projposmin[d2] - margin;
       xl[1] = fgroup->projposmax[d2];
       yl[0] = yl[1] = 0.0;
@@ -2334,7 +2334,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2494,7 +2494,7 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
     }
 
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv(-maxlim, maxlim, -maxlim, maxlim, 1, -2);
 
 /* Use a non-linear shade level distribution */
@@ -2540,13 +2540,13 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   pllsty(1);
 /* 1D histograms */
   plcol0(3);
-  plwid(2*lwid);
+  CPLOT_PLWID(2*lwid);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx);
   plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
   plcol0(7);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx_hsn);
   plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plcol0(15);
   plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
   sprintf(str, "Group ##%d: 2D internal astrometric errors", fgroup->no);
@@ -2592,7 +2592,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2767,7 +2767,7 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
         cuty_hsn[d3][i] = fgroup->projposmin[d2] - margin
 			+ cuty_hsn[d3][i]/cutymax_hsn[d3] * 0.9*margin;
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plenv(fgroup->projposmin[d2] - margin, fgroup->projposmax[d2],
 		-maxlim, maxlim, 0, -2);
 /*---- Use a non-linear shade level distribution */
@@ -2806,13 +2806,13 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
       sprintf(ylabel, "#gDAXIS%d [\"]", d+1);
 /*---- 1D histograms */
       plcol0(1);
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       plline(CPLOT_NREFERRHISTBIN, cuty[d3], cutbin);
       plcol0(7);
       plline(CPLOT_NREFERRHISTBIN, cuty_hsn[d3], cutbin);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plcol0(15);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       xl[0] = fgroup->projposmin[d2] - margin;
       xl[1] = fgroup->projposmax[d2];
       yl[0] = yl[1] = 0.0;
@@ -2859,7 +2859,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -3014,7 +3014,7 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     }
 
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv(-maxlim, maxlim, -maxlim, maxlim, 1, -2);
 
 /* Use a non-linear shade level distribution */
@@ -3058,13 +3058,13 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
   pllsty(1);
 /* 1D histograms */
   plcol0(1);
-  plwid(2*lwid);
+  CPLOT_PLWID(2*lwid);
   plline(CPLOT_NREFERRHISTBIN, cutbin, cutx);
   plline(CPLOT_NREFERRHISTBIN, cuty, cutbin);
   plcol0(7);
   plline(CPLOT_NREFERRHISTBIN, cutbin, cutx_hsn);
   plline(CPLOT_NREFERRHISTBIN, cuty_hsn, cutbin);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plcol0(15);
   plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
   sprintf(str, "Group ##%d: 2D reference astrometric errors", fgroup->no);
@@ -3112,7 +3112,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3367,7 +3367,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         cuty_hsn[d3][i] = 0.5 - margin
 			+ cuty_hsn[d3][i]/cutymax_hsn[d3] * 0.9*margin;
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plenv(-0.5-margin, maxwidth, -maxlim, maxlim, 0, -2);
 /* Use a non-linear shade level distribution */
       if (zmax[d3]>=1.0)
@@ -3406,7 +3406,7 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /* 1D histograms */
       plcol0(3);
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       plline(CPLOT_NPIXERRHISTBIN, cuty[d3], cutbin);
       plcol0(7);
       plline(CPLOT_NPIXERRHISTBIN, cuty_hsn[d3], cutbin);
@@ -3416,16 +3416,16 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         for (i=0; i<CPLOT_PIXERR1DNX+1; i++)
           if (weight[d3][i]>0.0)
             line[d3][i] /= weight[d3][i];
-        plwid(6*lwid);
+        CPLOT_PLWID(6*lwid);
         plcol0(15);
         plline(CPLOT_PIXERR1DNX+1, cutx, line[d3]);
-        plwid(3*lwid);
+        CPLOT_PLWID(3*lwid);
         plcol0(3);
         plline(CPLOT_PIXERR1DNX+1, cutx, line[d3]);
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plcol0(15);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       xl[0] = 0.5 - margin;
       xl[1] = maxwidth;
       yl[0] = yl[1] = 0.0;
@@ -3479,7 +3479,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3717,7 +3717,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
         cuty_hsn[d3][i] = -0.5 - margin
 			+ cuty_hsn[d3][i]/cutymax_hsn[d3] * 0.9*margin;
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plenv(-0.5-margin, 0.5, -maxlim, maxlim, 0, -2);
 /* Use a non-linear shade level distribution */
       if (zmax[d3]>=1.0)
@@ -3757,7 +3757,7 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /* 1D histograms */
       plcol0(3);
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       plline(CPLOT_NSUBPIXERRHISTBIN, cuty[d3], cutbin);
       plcol0(7);
       plline(CPLOT_NSUBPIXERRHISTBIN, cuty_hsn[d3], cutbin);
@@ -3768,16 +3768,16 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
           if (weight[d3][i]>0.0)
             line[d3][i] /= weight[d3][i];
         line[d3][CPLOT_SUBPIXERR1DNX] = line[d3][0];
-        plwid(6*lwid);
+        CPLOT_PLWID(6*lwid);
         plcol0(15);
         plline(CPLOT_SUBPIXERR1DNX+1, cutx, line[d3]);
-        plwid(3*lwid);
+        CPLOT_PLWID(3*lwid);
         plcol0(3);
         plline(CPLOT_SUBPIXERR1DNX+1, cutx, line[d3]);
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plcol0(15);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       xl[0] = -0.5 - margin;
       xl[1] = 0.5;
       yl[0] = yl[1] = 0.0;
@@ -3827,7 +3827,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4060,7 +4060,7 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
           cuty_hsn[d][i] = dmagmin - margin
 			+ cuty_hsn[d][i]/cutymax_hsn[d] * 0.9*margin;
           }
-        plwid(lwid);
+        CPLOT_PLWID(lwid);
         gra = instru2 + (instru1*naxis + d)*ninstru;
         if (gra)
           pladv(gra);
@@ -4100,13 +4100,13 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
         plscol0(15, 0,0,0);	/* Force the foreground colour to black */
 /*------ 1D histograms */
         plcol0(13);
-        plwid(2*lwid);
+        CPLOT_PLWID(2*lwid);
         plline(CPLOT_NADERRHISTBIN, cuty[d], cutbin);
         plcol0(7);
         plline(CPLOT_NADERRHISTBIN, cuty_hsn[d], cutbin);
-        plwid(lwid);
+        CPLOT_PLWID(lwid);
         plcol0(15);
-        plwid(lwid);
+        CPLOT_PLWID(lwid);
         xl[0] = dmagmin;
         xl[1] = dmagmax;
         ymin = ymax = 0.0;
@@ -4175,7 +4175,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4305,7 +4305,7 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
   plschr(0.0,0.5);
   for (d=0; d<2; d++)
     {
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     pladv(1);
     plvpas(0.07+d*0.5,0.48+d*0.5,0.1,0.9,1.0);
     plwind(-maxlim,maxlim,-maxlim,maxlim);
@@ -4388,7 +4388,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	03/06/2013
+VERSION	09/07/2014
  ***/
 int	cplot_astrepoch3d(fgroupstruct *fgroup)
   {
@@ -4520,7 +4520,7 @@ int	cplot_astrepoch3d(fgroupstruct *fgroup)
   yl[0] = yl[1] = 0.0;
   plcol0(15);
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   pladv(0);
   plvpor(0.0, 1.0, 0.0, 0.95);
   plwind(-0.75, 0.75, -0.6, 1.1);
@@ -4554,13 +4554,13 @@ int	cplot_astrepoch3d(fgroupstruct *fgroup)
     plfill3(5, focplanet->x, focplanet->y, focplanet->z);
     if (focplanet->colour!=15)
       {
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       plcol0(focplanet->colour);
       }
     else
       plcol0(15);
     plline3(5, focplanet->x, focplanet->y, focplanet->z); 
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
 /*-- Find the point with highest projpos[lng] and lowest projpos[lat] */
     if (focplanet->str)
       {
@@ -4610,7 +4610,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	28/01/2013
+VERSION	09/07/2014
  ***/
 int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4753,7 +4753,7 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
     }
 
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plenv(-maxlim, maxlim, -maxlim, maxlim, 1, -2);
 
 /* Use a non-linear shade level distribution */
@@ -4799,13 +4799,13 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   pllsty(1);
 /* 1D histograms */
   plcol0(13);
-  plwid(2*lwid);
+  CPLOT_PLWID(2*lwid);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx);
   plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
   plcol0(7);
   plline(CPLOT_NADERRHISTBIN, cutbin, cutx_hsn);
   plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plcol0(15);
   plbox("bcnst", 0.0, 0.0, "bcnst", 0.0, 0.0);
   sprintf(str, "Group ##%d: 2D proper motions", fgroup->no);
@@ -4851,7 +4851,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -4945,14 +4945,14 @@ int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   ymin = 0.5;
   ymax = 100.5;
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plfont(2);
   plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uInstrument A%d: pixel coordinate residuals (x)",
 	field->astromlabel+1);
   pllab("","", str);
-  plwid(0);
+  CPLOT_PLWID(0);
   plcol0(7);
   cplot_drawloccoordgrid(wcs, xmin, xmax, ymin, ymax);
 
@@ -5063,7 +5063,7 @@ int	cplot_xpixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
              ystep/2.0+0.5, wcs0->naxisn[1]-ystep/2.0+0.5,
 	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 0, distort_map, &distort);
     plcol0(7);
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     cplot_drawbounds(wcs0, wcs);
     }
 
@@ -5115,7 +5115,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   {
@@ -5210,14 +5210,14 @@ int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
   ymin = 0.5;
   ymax = 100.5;
   lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-  plwid(lwid);
+  CPLOT_PLWID(lwid);
   plfont(2);
   plcol0(15);
   plenv((PLFLT)xmin, (PLFLT)xmax, (PLFLT)ymin, (PLFLT)ymax, 1, -1);
   sprintf(str, "#uInstrument A%d: pixel coordinate residuals (y)",
 	field->astromlabel+1);
   pllab("","", str);
-  plwid(0);
+  CPLOT_PLWID(0);
   plcol0(7);
   cplot_drawloccoordgrid(wcs, xmin, xmax, ymin, ymax);
 
@@ -5328,7 +5328,7 @@ int	cplot_ypixerrhisto2d(fgroupstruct **fgroups, int ngroup, int instru)
              ystep/2.0+0.5, wcs0->naxisn[1]-ystep/2.0+0.5,
 	     clevel, CPLOT_NSHADES, 1, 0, 0, plfill, 0, distort_map, &distort);
     plcol0(7);
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     cplot_drawbounds(wcs0, wcs);
     }
 

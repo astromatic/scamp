@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		09/07/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -130,7 +130,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	29/11/2011
+VERSION	09/07/2014
  ***/
 int	cplot_photzp(fgroupstruct *fgroup)
   {
@@ -197,7 +197,7 @@ int	cplot_photzp(fgroupstruct *fgroup)
     plcol0(15);
     plschr(0.0,0.5);
     lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     plenv(0.0, npointmax + 1.0, ymin, ymax, 0, 0);
     sprintf(xlabel, "Field ##");
     sprintf(ylabel, "#gDZP [mag]");
@@ -254,7 +254,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -452,7 +452,7 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
         cuty_hsn[d][i] = fgroup->projposmin[d] - margin
 			+ cuty_hsn[d][i]/cutymax_hsn[d] * 0.9*margin;
         }
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plenv(fgroup->projposmin[d] - margin, fgroup->projposmax[d],
 		-maxlim, maxlim, 0, -2); 
 /* Use a non-linear shade level distribution */
@@ -488,11 +488,11 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
       plscolbg(255,255,255);	/* Force the background colour to white */
       plscol0(15, 0,0,0);	/* Force the foreground colour to black */
       plcol0(9);
-      plwid(2*lwid);
+      CPLOT_PLWID(2*lwid);
       plline(CPLOT_NADERRHISTBIN, cuty[d], cutbin);
       plcol0(7);
       plline(CPLOT_NADERRHISTBIN, cuty_hsn[d], cutbin);
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
       plcol0(15);
       xl[0] = fgroup->projposmin[d] - margin;
       xl[1] = fgroup->projposmax[d];
@@ -543,7 +543,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP), C. MARMO (IAP)
-VERSION	12/11/2013
+VERSION	09/07/2014
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -747,7 +747,7 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
       cuty[i] = xoffset - margin + cuty[i]/cutymax * 0.9*margin;
       cuty_hsn[i] = xoffset - margin + cuty_hsn[i]/cutymax_hsn * 0.9*margin;
       }
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     plenv(xoffset - margin, magmax, -maxlim, maxlim, 0, -2);
 /* Use a non-linear shade level distribution */
     if (zmax>=1.0)
@@ -781,11 +781,11 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
     plscolbg(255,255,255);	/* Force the background colour to white */
     plscol0(15, 0,0,0);	/* Force the foreground colour to black */
     plcol0(9);
-    plwid(2*lwid);
+    CPLOT_PLWID(2*lwid);
     plline(CPLOT_NADERRHISTBIN, cuty, cutbin);
     plcol0(7);
     plline(CPLOT_NADERRHISTBIN, cuty_hsn, cutbin);
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     plcol0(15);
     xl[0] = xoffset - margin;
     xl[1] = magmax;
@@ -823,7 +823,7 @@ INPUT	Pointer to the field group.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	03/06/2013
+VERSION	09/07/2014
  ***/
 int	cplot_photzp3d(fgroupstruct *fgroup)
   {
@@ -972,7 +972,7 @@ int	cplot_photzp3d(fgroupstruct *fgroup)
     yl[0] = yl[1] = 0.0;
     plcol0(15);
     lwid = plotaaflag? ((CPLOT_AAFAC+1)/2) : 1;
-    plwid(lwid);
+    CPLOT_PLWID(lwid);
     pladv(0);
     plvpor(0.0, 1.0, 0.0, 0.95);
     plwind(-0.75, 0.75, -0.6, 1.1);
@@ -1006,13 +1006,13 @@ int	cplot_photzp3d(fgroupstruct *fgroup)
       plfill3(5, focplanet->x, focplanet->y, focplanet->z);
       if (focplanet->colour!=15)
         {
-        plwid(2*lwid);
+        CPLOT_PLWID(2*lwid);
         plcol0(focplanet->colour);
         }
       else
         plcol0(15);
       plline3(5, focplanet->x, focplanet->y, focplanet->z); 
-      plwid(lwid);
+      CPLOT_PLWID(lwid);
 /*---- Find the point with highest projpos[lng] and lowest projpos[lat] */
       if (focplanet->str)
         {

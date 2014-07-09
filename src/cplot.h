@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/09/2012
+*	Last modified:		09/07/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -87,6 +87,24 @@
 
 /*---------------------------- return messages ------------------------------*/
 /*-------------------------------- macros -----------------------------------*/
+// Work-around to emulate the plwid() function replaced in later versions of
+// the PLPlot library.
+#ifdef HAVE_PLPLOT
+ #ifndef __PLPLOT_H__
+  #include	PLPLOT_H
+ #endif
+
+ #ifndef __PLPLOTP_H__
+  #include	PLPLOTP_H
+  #endif
+
+ #ifdef plwidth
+  #define	CPLOT_PLWID(wid)	plwidth((PLFLT)(wid))
+ #else
+  #define	CPLOT_PLWID		plwid
+ #endif
+#endif
+
 /*--------------------------------- typedefs --------------------------------*/
 typedef enum {CPLOT_NONE, CPLOT_ALLSKY, CPLOT_FGROUPS, CPLOT_PHOTOM,
 	CPLOT_ADERROR1D, CPLOT_REFERROR1D, CPLOT_PIXERROR1D,

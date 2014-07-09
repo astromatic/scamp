@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		15/02/2013
+*	Last modified:		09/07/2014
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -126,7 +126,7 @@ extern int	bswapflag;		/* != 0 if bytes are swapped/IEEE */
 #define	QCALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)calloc((size_t)(nel),sizeof(typ)))) \
 		   { \
-		   sprintf(gstr, #ptr " (" #nel "=%lld elements) " \
+		   sprintf(gstr, #ptr " (" #nel "=%ld elements) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
@@ -136,7 +136,7 @@ extern int	bswapflag;		/* != 0 if bytes are swapped/IEEE */
 #define	QMALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)malloc((size_t)(nel)*sizeof(typ)))) \
 		   { \
-		   sprintf(gstr, #ptr " (" #nel "=%lld elements) " \
+		   sprintf(gstr, #ptr " (" #nel "=%ld elements) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
@@ -146,7 +146,7 @@ extern int	bswapflag;		/* != 0 if bytes are swapped/IEEE */
 #define	QREALLOC(ptr, typ, nel) \
 		{if (!(ptr = (typ *)realloc(ptr, (size_t)(nel)*sizeof(typ))))\
 		   { \
-		   sprintf(gstr, #ptr " (" #nel "=%lld elements) " \
+		   sprintf(gstr, #ptr " (" #nel "=%ld elements) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		   error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
@@ -157,7 +157,7 @@ extern int	bswapflag;		/* != 0 if bytes are swapped/IEEE */
 		{if (ptrin) \
                   {if (!(ptrout = (typ *)malloc((size_t)(nel)*sizeof(typ)))) \
 		     { \
-		     sprintf(gstr, #ptrout " (" #nel "=%lld elements) " \
+		     sprintf(gstr, #ptrout " (" #nel "=%ld elements) " \
 			"at line %d in module " __FILE__ " !", \
 			(size_t)(nel)*sizeof(typ), __LINE__); \
 		     error(EXIT_FAILURE,"Could not allocate memory for ",gstr);\
