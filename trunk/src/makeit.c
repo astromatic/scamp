@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2014
+*	Last modified:		20/01/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -46,6 +46,7 @@
 #include "catout.h"
 #include "cplot.h"
 #include "crossid.h"
+#include "dgeomap.h"
 #include "fft.h"
 #include "fgroup.h"
 #include "field.h"
@@ -566,9 +567,10 @@ void	makeit(void)
   for (g=0; g<ngroup; g++)
     cplot_photerrhistomag(fgroups[g], reffields[g], prefs.sn_thresh[1]);
 
-  NFPRINTF(OUTPUT, "Generating proper-motion plots...");
+  NFPRINTF(OUTPUT, "Generating color shift plots...");
   for (g=0; g<ngroup; g++)
     cplot_astrcolshift1d(fgroups[g], prefs.sn_thresh[1]);
+  NFPRINTF(OUTPUT, "Generating proper-motion plots...");
   for (g=0; g<ngroup; g++)
     cplot_astrefprop(fgroups[g], reffields[g], prefs.sn_thresh[1]);
   for (g=0; g<ngroup; g++)
@@ -606,6 +608,21 @@ void	makeit(void)
       writemergedcat_fgroup(filename, fgroups[g]);
       }
     }
+
+  if (prefs.dgeomap_flag) {
+/*-- Compute and write differential geometry vector maps */
+    NFPRINTF(OUTPUT, "Generating differential geometry vector maps ...");
+    for (i=0; i<prefs.nastrinstrustr; i++) {
+      strcpy(filename, prefs.dgeomap_name);
+      if (!(pstr = strrchr(filename, '.'))) {
+        pstr = filename+strlen(filename);
+        extension[0] = (char)'\0';
+      } else
+        strcpy(extension, pstr);
+      sprintf(pstr, "_%0d%s", i+1, extension);
+      dgeomap_instru(fields, nfield, i, filename);
+    }
+  }
 
 /* Save full catalogs */
   if (prefs.fullcat_type != CAT_NONE)

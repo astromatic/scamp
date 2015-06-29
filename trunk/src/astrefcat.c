@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/02/2014
+*	Last modified:		03/06/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -43,11 +43,12 @@
 #include "globals.h"
 #include "fits/fitscat.h"
 #include "fitswcs.h"
+#include "astrefcat.h"
 #include "field.h"
 #include "key.h"
 #include "prefs.h"
-#include "astrefcat.h"
 #include "samples.h"
+#include "url.h"
 
 samplestruct	refsample;
 keystruct       refkey[] = {
@@ -86,6 +87,7 @@ astrefstruct	astrefcat[] =
   {"UCAC-2", "ucac2", 1, 0, {"R",""}, {"R",""}},
   {"UCAC-3", "ucac3", 1, 0, {"R",""}, {"R",""}},
   {"UCAC-4", "ucac4", 1, 0, {"R",""}, {"R",""}},
+  {"URAT-1", "urat1", 1, 0, {"R",""}, {"R",""}},
   {"SDSS-R3", "sdss3", 5, 2, {"u", "g", "r", "i", "z",""},
 			{"u", "g", "r", "i", "z",""}},
   {"SDSS-R5", "sdss5", 5, 2, {"u", "g", "r", "i", "z",""},
@@ -128,7 +130,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 19/02/2014
+VERSION 03/06/2015
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -136,10 +138,10 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    fieldstruct	*field,*tfield;
    setstruct	*set;
    samplestruct	*sample;
-   FILE		*file;
+   URL_FILE	*file;
    char		*ctype[NAXIS],
-		cmdline[MAXCHAR], maglimcmd[80],
-		col[80], str[MAXCHAR], sport[16],
+		url[MAXCHAR], maglimcmd[128],
+		col[80], str[MAXCHAR],
 		smag[MAX_BAND][32],smagerr[MAX_BAND][32],
 		sprop[NAXIS][32],sproperr[NAXIS][32], sflag[4],
 		*bandname, *cdsbandname, *catname,
@@ -147,16 +149,11 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    double	poserr[NAXIS],prop[NAXIS],properr[NAXIS],
 		mag[MAX_BAND],magerr[MAX_BAND], epoch,epocha,epochd,
 		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt, temp;
-   int		b,c,d,i,n, nsample,nsamplemax, nobs, class, band, nband;
+   int		b,c,d,i,n,s, nsample,nsamplemax, nobs, class, band, nband;
 
 /* One needs 2 angular coordinates here! */
   if (naxis<2)
     return NULL;
-
-  if (prefs.ref_port[0]==80 || prefs.ref_port[0]==0)
-    sprintf(sport,"");
-  else
-    sprintf(sport, " %d", prefs.ref_port[0]);
 
 /* If these are not angular coordinates, file mode becomes mandatory */
   if (lng == lat && refcat!=ASTREFCAT_FILE)
@@ -223,34 +220,45 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
 /* Prepare mag limit section of the command line */
   if (prefs.astref_maglim[0]>-99.0 || prefs.astref_maglim[1]<99.0)
-    sprintf(maglimcmd, "-lm%s %f,%f -m 10000000",
+    sprintf(maglimcmd, "-lm%s&%f,%f&-m&10000000",
 	cdsbandname, prefs.astref_maglim[0],prefs.astref_maglim[1]);
   else
-    strcpy(maglimcmd, "-m 10000000");
+    strcpy(maglimcmd, "-m&10000000");
 
-  sprintf(cmdline, "%s %s%s %s -c %f12%+f12 -r %16g %s",
-	prefs.cdsclient_path,
-	prefs.ref_server[0],
-	sport,
+/// Test all provided servers until one replies
+  for (s=0; s<prefs.nref_server; s++) {
+    sprintf(url,
+	"http://%s/viz-bin/aserver.cgi?%s&-c&%f12%+f12&-r&%.8g&%s",
+	prefs.ref_server[s],
 	astrefcat[(int)refcat].cdsname,
 	wcspos[lng], wcspos[lat],
 	maxradius*DEG/ARCMIN,
 	maglimcmd);
 
-  sprintf(str,"Querying %s from %s for astrometric reference stars...",
+    sprintf(str,"Querying %s from %s for astrometric reference stars...",
 	catname,
-	prefs.ref_server[0]);
-  NFPRINTF(OUTPUT, str);
-  QPOPEN(file, cmdline, "r");		/* popen() is POSIX.2 compliant */
-  for (i=2; i--;)			/* Skip the first 2 lines */
-    fgets(str, MAXCHAR, file);
+	prefs.ref_server[s]);
+    NFPRINTF(OUTPUT, str);
+    file = url_fopen(url, (long)prefs.ref_timeout[s]);
+    // Test and skip the two first lines
+    if (url_fgets(str, MAXCHAR, file) && url_fgets(str, MAXCHAR, file))
+      break;
+    else {
+      url_fclose(file);
+      if (s == prefs.nref_server-1)
+        error(EXIT_FAILURE,"*Error*: No reply from catalog server ",
+		prefs.ref_server[s]);
+      else
+        warning(prefs.ref_server[s], " connection timed out");
+    }
+  }
 
   set = init_set();
   prop[lng] = prop[lat] = properr[lng] = properr[lat] = 0.0;
   n = nsample = nsamplemax = 0;
 
 /* Now examine each entry */
-  while (fgets(str, MAXCHAR, file))
+  while (url_fgets(str, MAXCHAR, file))
     if (*str != '#')
       {
       switch(refcat)
@@ -576,6 +584,24 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             }
           break;
 
+        case ASTREFCAT_URAT1:
+/*-------- Avoid poor observations */
+          nobs = atoi(astref_strncpy(col, str+42, 2));
+          if (nobs<2)
+            continue;
+          alpha = atof(astref_strncpy(col, str+11, 11));
+          delta = atof(astref_strncpy(col, str+22, 11));
+          poserr[lng] = atof(astref_strncpy(col,str+34,3)) * MAS/DEG;
+          poserr[lat] = atof(astref_strncpy(col,str+38,3)) * MAS/DEG;
+          epoch = atof(astref_strncpy(col, str+48, 8));
+          mag[0] = atof(astref_strncpy(col, str+57, 6));
+          magerr[0] = atof(astref_strncpy(col, str+64, 5));
+          prop[lng] = atof(astref_strncpy(col, str+91, 8)) * MAS/DEG;
+          prop[lat] = atof(astref_strncpy(col, str+100, 8)) * MAS/DEG;
+          properr[lng] = properr[lat] = atof(astref_strncpy(col, str+109, 4))
+					* MAS/DEG;
+          break;
+
         case ASTREFCAT_SDSSR3:
 /*-------- Avoid missing or poor observations */
           nobs = atoi(astref_strncpy(col, str+56,1));
@@ -881,7 +907,7 @@ epoch, sample->mag, sample->magerr);
       n++;
       }
 
-  pclose(file);
+  url_fclose(file);
 
 /* Escape here if no source returned */
   if (!nsample)

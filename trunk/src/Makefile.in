@@ -23,7 +23,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2015 IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -38,7 +38,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		04/04/2013
+#	Last modified:		02/06/2015
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -85,7 +85,7 @@ DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/autoconf/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acx_atlas.m4 \
-	$(top_srcdir)/acx_cdsclient.m4 $(top_srcdir)/acx_fftw.m4 \
+	$(top_srcdir)/acx_curl.m4 $(top_srcdir)/acx_fftw.m4 \
 	$(top_srcdir)/acx_mkl.m4 $(top_srcdir)/acx_plplot.m4 \
 	$(top_srcdir)/acx_prog_cc_optim.m4 \
 	$(top_srcdir)/acx_pthread.m4 \
@@ -101,24 +101,27 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__scamp_SOURCES_DIST = astrefcat.c astrsolve.c astrstats.c catout.c \
 	check.c colour.c astrcplot.c cplot.c photcplot.c crossid.c \
-	fft.c fgroup.c field.c fitswcs.c header.c main.c makeit.c \
-	match.c merge.c misc.c mosaic.c photsolve.c prefs.c proper.c \
-	samples.c threads.c xml.c astrefcat.h astrsolve.h astrstats.h \
-	cathead.h catout.h check.h colour.h cplot.h crossid.h define.h \
-	fft.h fgroup.h field.h fitswcs.h globals.h header.h key.h \
-	match.h merge.h misc.h mosaic.h photsolve.h preflist.h prefs.h \
-	proper.h samples.h threads.h types.h wcscelsys.h xml.h
+	dgeomap.c fft.c fgroup.c field.c fitswcs.c header.c main.c \
+	makeit.c match.c merge.c misc.c mosaic.c photsolve.c pqueue.c \
+	prefs.c proper.c quadtree.c samples.c threads.c url.c xml.c \
+	astrefcat.h astrsolve.h astrstats.h cathead.h catout.h check.h \
+	colour.h cplot.h crossid.h define.h dgeomap.h fft.h fgroup.h \
+	field.h fitswcs.h globals.h header.h key.h match.h merge.h \
+	misc.h mosaic.h photsolve.h preflist.h prefs.h proper.h \
+	pqueue.h quadtree.h samples.h threads.h types.h url.h \
+	wcscelsys.h xml.h
 @USE_PLPLOT_TRUE@am__objects_1 = astrcplot.$(OBJEXT) cplot.$(OBJEXT) \
 @USE_PLPLOT_TRUE@	photcplot.$(OBJEXT)
 am_scamp_OBJECTS = astrefcat.$(OBJEXT) astrsolve.$(OBJEXT) \
 	astrstats.$(OBJEXT) catout.$(OBJEXT) check.$(OBJEXT) \
 	colour.$(OBJEXT) $(am__objects_1) crossid.$(OBJEXT) \
-	fft.$(OBJEXT) fgroup.$(OBJEXT) field.$(OBJEXT) \
-	fitswcs.$(OBJEXT) header.$(OBJEXT) main.$(OBJEXT) \
-	makeit.$(OBJEXT) match.$(OBJEXT) merge.$(OBJEXT) \
-	misc.$(OBJEXT) mosaic.$(OBJEXT) photsolve.$(OBJEXT) \
-	prefs.$(OBJEXT) proper.$(OBJEXT) samples.$(OBJEXT) \
-	threads.$(OBJEXT) xml.$(OBJEXT)
+	dgeomap.$(OBJEXT) fft.$(OBJEXT) fgroup.$(OBJEXT) \
+	field.$(OBJEXT) fitswcs.$(OBJEXT) header.$(OBJEXT) \
+	main.$(OBJEXT) makeit.$(OBJEXT) match.$(OBJEXT) \
+	merge.$(OBJEXT) misc.$(OBJEXT) mosaic.$(OBJEXT) \
+	photsolve.$(OBJEXT) pqueue.$(OBJEXT) prefs.$(OBJEXT) \
+	proper.$(OBJEXT) quadtree.$(OBJEXT) samples.$(OBJEXT) \
+	threads.$(OBJEXT) url.$(OBJEXT) xml.$(OBJEXT)
 scamp_OBJECTS = $(am_scamp_OBJECTS)
 scamp_DEPENDENCIES = $(srcdir)/fits/libfits.a $(srcdir)/wcs/libwcs_c.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -199,10 +202,11 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CDSCLIENT = @CDSCLIENT@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CURL_CFLAGS = @CURL_CFLAGS@
+CURL_LIBS = @CURL_LIBS@
 CYGPATH_W = @CYGPATH_W@
 DATE2 = @DATE2@
 DATE3 = @DATE3@
@@ -274,7 +278,7 @@ abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-acx_cdsclient_ok = @acx_cdsclient_ok@
+acx_curlconfig_ok = @acx_curlconfig_ok@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@
@@ -323,15 +327,16 @@ top_srcdir = @top_srcdir@
 SUBDIRS = fits wcs
 @USE_PLPLOT_TRUE@CPLOTSOURCE = astrcplot.c cplot.c photcplot.c
 scamp_SOURCES = astrefcat.c astrsolve.c astrstats.c catout.c check.c \
-		  colour.c $(CPLOTSOURCE) crossid.c fft.c fgroup.c field.c \
-		  fitswcs.c header.c main.c makeit.c match.c merge.c misc.c \
-		  mosaic.c photsolve.c prefs.c proper.c samples.c threads.c \
-		  xml.c \
+		  colour.c $(CPLOTSOURCE) crossid.c dgeomap.c fft.c fgroup.c \
+		  field.c fitswcs.c header.c main.c makeit.c match.c merge.c \
+		  misc.c mosaic.c photsolve.c pqueue.c prefs.c proper.c \
+		  quadtree.c samples.c threads.c url.c xml.c \
 		  astrefcat.h astrsolve.h astrstats.h cathead.h catout.h \
-		  check.h colour.h cplot.h crossid.h define.h fft.h fgroup.h \
-		  field.h fitswcs.h globals.h header.h key.h match.h merge.h \
-		  misc.h mosaic.h photsolve.h preflist.h prefs.h proper.h \
-		  samples.h threads.h types.h wcscelsys.h xml.h
+		  check.h colour.h cplot.h crossid.h define.h dgeomap.h fft.h \
+		  fgroup.h field.h fitswcs.h globals.h header.h key.h match.h \
+		  merge.h misc.h mosaic.h photsolve.h preflist.h prefs.h \
+		  proper.h pqueue.h quadtree.h samples.h threads.h types.h \
+		  url.h wcscelsys.h xml.h
 
 scamp_LDADD = $(srcdir)/fits/libfits.a \
 		  $(srcdir)/wcs/libwcs_c.a
@@ -436,6 +441,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/colour.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cplot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crossid.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dgeomap.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fft.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fgroup.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/field.Po@am__quote@
@@ -449,10 +455,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mosaic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/photcplot.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/photsolve.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pqueue.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prefs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quadtree.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/samples.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threads.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/url.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml.Po@am__quote@
 
 .c.o:

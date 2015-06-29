@@ -6,8 +6,8 @@
 /* CLAPACK header filename. */
 #undef ATLAS_LAPACK_H
 
-/* CDSclient executable */
-#undef CDSCLIENT
+/* cURL header filename. */
+#undef CURL_H
 
 /* Archive creation date */
 #undef DATE
@@ -33,11 +33,11 @@
 /* Define to 1 if you have the <cblas.h> header file. */
 #undef HAVE_CBLAS_H
 
-/* Define if you have the CDSclient tools installed. */
-#undef HAVE_CDSCLIENT
-
 /* Define to 1 if you have the <clapack.h> header file. */
 #undef HAVE_CLAPACK_H
+
+/* Define if you have the cURL libraries and header files. */
+#undef HAVE_CURL
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
@@ -77,14 +77,8 @@
 /* Define if you have the LAPACKe libraries. */
 #undef HAVE_LAPACKE
 
-/* Define to 1 if you have the `cblas' library (-lcblas). */
-#undef HAVE_LIBCBLAS
-
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
-
-/* Define to 1 if you have the `plplotd' library (-lplplotd). */
-#undef HAVE_LIBPLPLOTD
 
 /* Define to 1 if the system has the type `long long int'. */
 #undef HAVE_LONG_LONG_INT

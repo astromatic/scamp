@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		03/06/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -97,8 +97,10 @@ typedef struct
   astrefenum	astrefcat;		/* Reference catalog */
   char		*(ref_server[MAX_SERVER]);/* IP addresses of ref cat servers */
   int           nref_server;		/* nb of params */
-  int		ref_port[MAX_SERVER];	/* Port of ref. cat. servers */
-  int           nref_port;		/* nb of params */
+  int		ref_ntries[MAX_SERVER];	/* nb of tries per server */
+  int           nref_ntries;		/* nb of params */
+  int		ref_timeout[MAX_SERVER];/* Timeout of ref. cat. servers */
+  int           nref_timeout;		/* nb of params */
   char		*(astref_name[MAXNGROUP]);/* Astrometric ref. cat. filenames */
   int           nastref_name;		/* nb of params */
   char		astref_bandname[MAXCHAR];/* Astrometric ref. band name */
@@ -124,6 +126,12 @@ typedef struct
   cattypenum	fullcat_type;		/* Output catalog type */
   int		fullcatpipe_flag;	/* Pipe output catalogs? */
   int		spread_flag;		/* SPREAD_MODEL in input catalog(s)? */
+
+/* Differential geometry maps */
+  int		dgeomap_flag;		/* Compute and save Diff. Geom. maps? */
+  char		dgeomap_name[MAXCHAR];	/* Output filename */
+  int		dgeomap_nnearest;	/* Number of nearest neighbours */
+  int		dgeomap_step;		/* Map sampling step */
 
 /* Pattern-matching */
   int		match_flag;		/* Compute pattern-matching? */
@@ -230,7 +238,6 @@ typedef struct
 /* Multithreading */
   int		nthreads;			/* Number of active threads */
 /* Misc */
-  char		cdsclient_path[MAXCHAR];	/* Path for CDSclient execs */
   enum {QUIET, NORM, LOG, FULL} verbose_type;	/* display type */
   int		xml_flag;			/* Write XML file? */
   char		xml_name[MAXCHAR];		/* XML file name */
