@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/07/2014
+*	Last modified:		13/02/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -3827,7 +3827,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/02/2015
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4065,6 +4065,14 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
         if (gra)
           pladv(gra);
         plenv(dmagmin - margin, dmagmax, -maxlim, maxlim, 0, -2);
+/*------ Pass if the colour shifts measurements have not been done */
+        if (!fgroup->intcolshiftzero[0])
+          {
+          plcol0(1);
+          plptex((PLFLT)mdmag, maxlim/2.0, 1.0, 0.0, 0.5,
+		"CORRECT_COLOURSHIFT option is inactive");
+          continue;
+          }
 /*------ Use a non-linear shade level distribution */
         if (zmax[d]>=1.0)
           {

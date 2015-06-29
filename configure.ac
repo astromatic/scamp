@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2015 IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		09/07/2014
+#	Last modified:		02/06/2015
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,8 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[2.0.4],[bertin@iap.fr])
+AC_INIT([scamp],[2.2.0],[bertin@iap.fr])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_HEADERS(config.h)
@@ -46,7 +47,7 @@ AC_SUBST(DATE3, "$date3")
 
 # Include macros
 sinclude(acx_atlas.m4)
-sinclude(acx_cdsclient.m4)
+sinclude(acx_curl.m4)
 sinclude(acx_fftw.m4)
 sinclude(acx_mkl.m4)
 sinclude(acx_plplot.m4)
@@ -128,19 +129,10 @@ AC_CHECK_FUNC([isnan], AC_DEFINE_UNQUOTED([HAVE_ISNAN2], 1,
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-# Provide special options for PLPlot
-AC_MSG_CHECKING([whether we should use PLPlot])
-AC_ARG_ENABLE(plplot,
-	[AS_HELP_STRING([--enable-plplot],
-	[Activate PLPlot library (default = yes)])],
-	AC_MSG_RESULT([yes]),
-	AC_MSG_RESULT([no]))
-AC_ARG_WITH(plplot-libdir,
-	[AS_HELP_STRING([--with-plplot-libdir=<PLPlot library path>],
-	[Provide an alternative path to the PLPlot library])])
-AC_ARG_WITH(plplot-incdir,
-	[AS_HELP_STRING([--with-plplot-incdir=<PLPlot include dir>],
-	[Provide an alternative path to the PLPlot include directory])])
+# Provide special options for the MKL library
+AC_ARG_WITH(mkl-dir,
+        [AS_HELP_STRING([--with-mkl-dir=<MKL path>],
+        [Provide an alternative path to the MKL library])])
 
 # Provide special options for ATLAS
 AC_ARG_WITH(atlas-libdir,
@@ -158,15 +150,27 @@ AC_ARG_WITH(fftw-incdir,
         [AS_HELP_STRING([--with-fftw-incdir=<FFTW include dir>],
 	[Alternative directory for FFTW include files])])
 
-# Provide special options for the MKL library
-AC_ARG_WITH(mkl-dir,
-        [AS_HELP_STRING([--with-mkl-dir=<MKL path>],
-        [Provide an alternative path to the MKL library])])
+# Provide special options for cURL
+AC_ARG_WITH(curl-libdir,
+        [AS_HELP_STRING([--with-curl-libdir=<cURL library path>],
+	[Alternative directory for the cURL library])])
+AC_ARG_WITH(curl-incdir,
+        [AS_HELP_STRING([--with-atlas-incdir=<cURL include dir>],
+	[Alternative directory for cURL include files])])
 
-# Provide a special option for CDSClient
-AC_ARG_WITH(cdsclient-dir,
-	[AS_HELP_STRING([--with-cdsclient-dir=<aclient execution path>],
-	[Alternative default to the aclient execution path])])
+# Provide special options for PLPlot
+AC_MSG_CHECKING([whether we should use PLPlot])
+AC_ARG_ENABLE(plplot,
+	[AS_HELP_STRING([--enable-plplot],
+	[Activate PLPlot library (default = yes)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no]))
+AC_ARG_WITH(plplot-libdir,
+	[AS_HELP_STRING([--with-plplot-libdir=<PLPlot library path>],
+	[Provide an alternative path to the PLPlot library])])
+AC_ARG_WITH(plplot-incdir,
+	[AS_HELP_STRING([--with-plplot-incdir=<PLPlot include dir>],
+	[Provide an alternative path to the PLPlot include directory])])
 
 # Provide a special option for the default XSLT URL
 with_xsl_url="file://"$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_NAME/$PACKAGE_NAME.xsl"
@@ -261,20 +265,13 @@ else
 fi
 AM_CONDITIONAL(USE_PLPLOT, test "$use_plplot" = "yes")
 
-
-################# handle the CDSclient package (CDS queries) #################
-ACX_CDSCLIENT($with_cdsclient_dir,
-	if test "$with_cdsclient_dir" = ""; then
-	  cdsclient="aclient_cgi"
-	else
-	  cdsclient="$with_cdsclient_dir/aclient_cgi"
+################# handle the ATLAS library (linear algebra) ##################
+ACX_CURL($with_curl_libdir,$with_curl_incdir,
+	[LIBS="$CURL_LIBS $LIBS"]
+	if test "$CURL_WARN" != ""; then
+	  AC_MSG_WARN([$CURL_WARN])
 	fi,
-	AC_MSG_ERROR([$cdsclient not found. exiting.]
-	["aclient_cgi" from the CDSclient package is required to use SCAMP:]
-	[1. Install the CDSclient package: http://cdsweb.u-strasbg.fr/doc/cdsclient.html]
-	[2. Use the --with-cdsclient-dir=<aclient_path> configure option
-	if aclient_cgi is not in your execution PATH.]))
-AC_DEFINE_UNQUOTED(CDSCLIENT, "$cdsclient", [CDSclient executable])
+	AC_MSG_ERROR([$CURL_ERROR Exiting.]))
 
 # Compile with profiling option
 if test "$enable_profiling" = "yes"; then

@@ -83,7 +83,7 @@ DIST_COMMON = $(dist_man_MANS) $(srcdir)/Makefile.am \
 	$(top_srcdir)/autoconf/mkinstalldirs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acx_atlas.m4 \
-	$(top_srcdir)/acx_cdsclient.m4 $(top_srcdir)/acx_fftw.m4 \
+	$(top_srcdir)/acx_curl.m4 $(top_srcdir)/acx_fftw.m4 \
 	$(top_srcdir)/acx_mkl.m4 $(top_srcdir)/acx_plplot.m4 \
 	$(top_srcdir)/acx_prog_cc_optim.m4 \
 	$(top_srcdir)/acx_pthread.m4 \
@@ -152,10 +152,11 @@ AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
-CDSCLIENT = @CDSCLIENT@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CURL_CFLAGS = @CURL_CFLAGS@
+CURL_LIBS = @CURL_LIBS@
 CYGPATH_W = @CYGPATH_W@
 DATE2 = @DATE2@
 DATE3 = @DATE3@
@@ -227,7 +228,7 @@ abs_top_srcdir = @abs_top_srcdir@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
-acx_cdsclient_ok = @acx_cdsclient_ok@
+acx_curlconfig_ok = @acx_curlconfig_ok@
 am__include = @am__include@
 am__leading_dot = @am__leading_dot@
 am__quote = @am__quote@

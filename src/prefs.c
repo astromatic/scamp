@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		11/07/2012
+*	Last modified:		27/05/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -481,24 +481,26 @@ void	useprefs(void)
 /* Override INTEL CPU detection routine to help performance on 3rd-party CPUs */
 #if defined(__INTEL_COMPILER) && defined (USE_CPUREDISPATCH)
   __get_cpuid(1, &eax, &ebx, &ecx, &edx);
-  if (ecx&bit_AVX)
+  if (ebx&bit_AVX2)
+    __intel_cpu_indicator = 0x40000;
+  else if (ecx&bit_AVX)
     __intel_cpu_indicator = 0x20000;
   else if (ecx&bit_SSE4_2)
-    __intel_cpu_indicator = 0x8000;
+    __intel_cpu_indicator = 0x08000;
   else if (ecx&bit_SSE4_1)
-    __intel_cpu_indicator = 0x2000;
+    __intel_cpu_indicator = 0x02000;
   else if (ecx&bit_SSSE3)
-    __intel_cpu_indicator = 0x1000;
+    __intel_cpu_indicator = 0x01000;
   else if (ecx&bit_SSE3)
-    __intel_cpu_indicator = 0x0800;
+    __intel_cpu_indicator = 0x00800;
   else if (edx&bit_SSE2)
-    __intel_cpu_indicator = 0x0200;
+    __intel_cpu_indicator = 0x00200;
   else if (edx&bit_SSE)
-    __intel_cpu_indicator = 0x0080;
+    __intel_cpu_indicator = 0x00080;
   else if (edx&bit_MMX)
-    __intel_cpu_indicator = 0x0008;
+    __intel_cpu_indicator = 0x00008;
   else
-    __intel_cpu_indicator = 0x0001;
+    __intel_cpu_indicator = 0x00001;
 #endif
 
 /* Deactivate virtual memory mapping */
@@ -538,8 +540,10 @@ void	useprefs(void)
   prefs.match_resol *= ARCSEC/DEG;		/* convert arcsec to degrees */
 
 /* Reference catalog servers */
-  for (i=prefs.nref_port; i<prefs.nref_server; i++)
-    prefs.ref_port[i] = prefs.ref_port[prefs.nref_port-1];
+  for (i=prefs.nref_ntries; i<prefs.nref_server; i++)
+    prefs.ref_ntries[i] = prefs.ref_ntries[prefs.nref_ntries-1];
+  for (i=prefs.nref_timeout; i<prefs.nref_server; i++)
+    prefs.ref_timeout[i] = prefs.ref_timeout[prefs.nref_timeout-1];
 
 /* Astrometric matching */
   for (i=prefs.nmosaic_type; i<MAXASTRINSTRU; i++)

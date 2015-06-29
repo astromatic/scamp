@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/02/2014
+*	Last modified:		03/06/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -38,6 +38,10 @@
 
 #ifndef _CHECK_H_
 #include "check.h"
+#endif
+
+#ifndef _DGEOMAP_H_
+#include "dgeomap.h"
 #endif
 
 #ifndef _FGROUP_H_
@@ -75,7 +79,8 @@ pkeystruct key[] =
   {"ASTREF_BAND", P_STRING, prefs.astref_bandname},
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A1", "USNO-A2", "USNO-B1", "GSC-1.3", "GSC-2.2",
-    "GSC-2.3", "2MASS", "DENIS-3", "UCAC-1", "UCAC-2", "UCAC-3", "UCAC-4",
+    "GSC-2.3", "2MASS", "DENIS-3",
+    "UCAC-1", "UCAC-2", "UCAC-3", "UCAC-4", "URAT-1",
     "SDSS-R3", "SDSS-R5", "SDSS-R6", "SDSS-R7", "SDSS-R8", "SDSS-R9",
     "NOMAD-1", "PPMX", "CMC-14", "TYCHO-2", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
@@ -92,7 +97,6 @@ pkeystruct key[] =
     {""}, 2, 2, &prefs.nastref_maglim},
   {"ASTRINSTRU_KEY", P_STRINGLIST, prefs.astrinstru_key, 0,0, 0.0,0.0,
    {""}, 0, 35, &prefs.nastrinstru_key},
-  {"CDSCLIENT_EXEC", P_STRING, &prefs.cdsclient_path},
   {"CENTROID_KEYS", P_STRINGLIST, prefs.centroid_key, 0,0,0.0,0.0,
     {""}, 2, NAXIS, &prefs.ncentroid_key},
   {"CENTROIDERR_KEYS", P_STRINGLIST, prefs.centroiderr_key, 0,0,0.0,0.0,
@@ -127,6 +131,10 @@ pkeystruct key[] =
   {"CORRECT_COLOURSHIFTS", P_BOOL, &prefs.colourshiftcorr_flag},
 //  {"CORRECT_PROPERMOTIONS", P_BOOL, &prefs.propmotioncorr_flag},
   {"CROSSID_RADIUS", P_FLOAT, &prefs.crossid_radius, 0,0, 0.0,1e31},
+  {"DGEOMAP_NAME", P_STRING, prefs.dgeomap_name},
+  {"DGEOMAP_NNEAREST", P_INT, &prefs.dgeomap_nnearest,
+	1, DGEOMAP_NNEIGHBOURMAX},
+  {"DGEOMAP_STEP", P_INT, &prefs.dgeomap_step, 1, 262144},
   {"DISTORT_KEYS", P_STRINGLIST, prefs.context_name, 0,0,0.0,0.0,
     {""}, 0, MAXCONTEXT, &prefs.ncontext_name},
   {"DISTORT_GROUPS", P_INTLIST, prefs.context_group, 1,MAXCONTEXT,0.0,0.0,
@@ -189,9 +197,10 @@ pkeystruct key[] =
   {"REFOUT_CATPATH", P_STRING, prefs.outref_path},
   {"REF_SERVER", P_STRINGLIST, prefs.ref_server, 0,0, 0.0,0.0,
    {""}, 0, MAX_SERVER, &prefs.nref_server},
-  {"REF_PORT", P_INTLIST, prefs.ref_port, 0,65535, 0.0,0.0,
-   {""}, 0, MAX_SERVER, &prefs.nref_port},
+  {"REF_TIMEOUT", P_INTLIST, prefs.ref_timeout, 0,3600, 0.0,0.0,
+   {""}, 0, MAX_SERVER, &prefs.nref_timeout},
   {"SAVE_REFCATALOG", P_BOOL, &prefs.outrefcat_flag},
+  {"SAVE_DGEOMAP", P_BOOL, &prefs.dgeomap_flag},
   {"SN_THRESHOLDS", P_FLOATLIST, prefs.sn_thresh, 0,0, 0.0,1e30,
     {""}, 2, 2, &prefs.nsn_thresh},
   {"SOLVE_ASTROM", P_BOOL, &prefs.solvastrom_flag},
@@ -224,11 +233,10 @@ char *default_prefs[] =
 "#---------------------------- Reference catalogs ------------------------------",
 " ",
 "REF_SERVER         cocat1.u-strasbg.fr # Internet addresses of catalog servers",
-"*REF_PORT               80              # Ports to connect to catalog servers",
-"*CDSCLIENT_EXEC         " CDSCLIENT "         # CDSclient executable",
-"ASTREF_CATALOG          2MASS          # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
-"                                       # GSC-1.3,GSC-2.2,GSC-2.3,",
-"                                       # TYCHO-2, UCAC-1,UCAC-2,UCAC-3,UCAC-4,",
+"*REF_TIMEOUT            20              # Catalog server timeouts (s) 0=none",
+"ASTREF_CATALOG         2MASS           # NONE, FILE, USNO-A1,USNO-A2,USNO-B1,",
+"                                       # GSC-1.3,GSC-2.2,GSC-2.3, TYCHO-2,",
+"                                       # UCAC-1,UCAC-2,UCAC-3,UCAC-4, URAT-1,",
 "                                       # NOMAD-1, PPMX, CMC-14, 2MASS, DENIS-3,",
 "                                       # SDSS-R3,SDSS-R5,SDSS-R6,SDSS-R7,",
 "                                       # SDSS-R8, SDSS-R9",
@@ -250,6 +258,13 @@ char *default_prefs[] =
 "MERGEDOUTCAT_TYPE      NONE            # NONE, ASCII_HEAD, ASCII, FITS_LDAC",
 "MERGEDOUTCAT_NAME      merged.cat      # Merged output catalog filename",
 " ",
+"*#------------------------ Differential geometry maps --------------------------",
+"* ",
+"*SAVE_DGEOMAP           N               # Save differential geometry maps (Y/N)?",
+"*DGEOMAP_NAME           dgeo.fits       # Differential geometry map filename",
+"*DGEOMAP_STEP           2               # Map sampling step",
+"*DGEOMAP_NNEAREST       21              # Number of nearest neighbors",
+"* ",
 "#--------------------------- Full output catalogs ---------------------------",
 " ",
 "FULLOUTCAT_TYPE        NONE            # NONE, ASCII_HEAD, ASCII, FITS_LDAC",
