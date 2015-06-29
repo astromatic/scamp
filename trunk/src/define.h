@@ -37,7 +37,7 @@
 
 #define         BANNER		"SCAMP"
 #define         MYVERSION       VERSION
-#define         COPYRIGHT       "2010-2013 IAP/CNRS/UPMC"
+#define         COPYRIGHT       "2010-2015 IAP/CNRS/UPMC"
 #define		DISCLAIMER	BANNER " comes with ABSOLUTELY NO WARRANTY\n" \
 		"You may redistribute copies of " BANNER "\n" \
 		"under the terms of the GNU General Public License."
