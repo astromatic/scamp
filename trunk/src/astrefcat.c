@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/06/2015
+*	Last modified:		30/06/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -130,7 +130,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 29/06/2015
+VERSION 30/06/2015
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -228,13 +228,12 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 /// Test all provided servers until one replies
   for (s=0; s<prefs.nref_server; s++) {
     sprintf(url,
-	"http://%s/viz-bin/aserver.cgi?%s&-c&%12f%+12f&-r&%.8g&%s",
+	"http://%s/viz-bin/aserver.cgi?%s&-c&%.7f%+.7f&-r&%.8g&%s",
 	prefs.ref_server[s],
 	astrefcat[(int)refcat].cdsname,
 	wcspos[lng], wcspos[lat],
 	maxradius*DEG/ARCMIN,
 	maglimcmd);
-
     sprintf(str,"Querying %s from %s for astrometric reference stars...",
 	catname,
 	prefs.ref_server[s]);
