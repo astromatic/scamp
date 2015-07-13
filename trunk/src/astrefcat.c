@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		30/06/2015
+*	Last modified:		13/07/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -130,7 +130,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 30/06/2015
+VERSION 13/07/2015
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -228,16 +228,19 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 /// Test all provided servers until one replies
   for (s=0; s<prefs.nref_server; s++) {
     sprintf(url,
-	"http://%s/viz-bin/aserver.cgi?%s&-c&%.7f%+.7f&-r&%.8g&%s",
+	"http://%s/viz-bin/aserver.cgi?%s&-c&%.7f%s%.7f&-r&%.8g&%s",
 	prefs.ref_server[s],
 	astrefcat[(int)refcat].cdsname,
-	wcspos[lng], wcspos[lat],
+	wcspos[lng],
+	wcspos[lat]>=0.0? "%2b" : "-",
+	fabs(wcspos[lat]),
 	maxradius*DEG/ARCMIN,
 	maglimcmd);
     sprintf(str,"Querying %s from %s for astrometric reference stars...",
 	catname,
 	prefs.ref_server[s]);
     NFPRINTF(OUTPUT, str);
+    FPRINTF(OUTPUT, "Querying url %s \n", url);
     file = url_fopen(url, (long)prefs.ref_timeout[s]);
     // Test and skip the two first lines
     if (url_fgets(str, MAXCHAR, file) && url_fgets(str, MAXCHAR, file))
