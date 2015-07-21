@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		02/06/2015
+dnl	Last modified:		15/07/2015
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -46,9 +46,8 @@ AC_REQUIRE([AC_CANONICAL_HOST])
 CURL_LIBS=""
 OLIBS="$LIBS"
 LIBS=""
-
 acx_curl_ok=yes
-acx_curlpkg_ok=no
+acx_curlconfig_ok=no
 if test x$2 = x && test x$1 = x; then
   AC_CHECK_PROG(acx_curlconfig_ok, [curl-config], [yes], [no])
   if test x"$acx_curlconfig_ok" = xyes; then
@@ -91,6 +90,10 @@ if test x$acx_curlconfig_ok = xno; then
     AC_SEARCH_LIBS(curl_easy_init, [curl],
 		[CURL_LIBS="$ac_cv_search_curl_easy_init"],
 		[acx_curl_ok=no])
+  else
+    AC_SEARCH_LIBS(curl_easy_init, [curl],
+		[CURL_LIBS="-L$1 $ac_cv_search_curl_easy_init"],
+		[acx_curl_ok=no], [-L$1])
   fi
 fi
 

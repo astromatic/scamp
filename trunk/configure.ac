@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		30/06/2015
+#	Last modified:		17/07/2015
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[2.2.3],[bertin@iap.fr])
+AC_INIT([scamp],[2.2.5],[bertin@iap.fr])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
@@ -155,7 +155,7 @@ AC_ARG_WITH(curl-libdir,
         [AS_HELP_STRING([--with-curl-libdir=<cURL library path>],
 	[Alternative directory for the cURL library])])
 AC_ARG_WITH(curl-incdir,
-        [AS_HELP_STRING([--with-atlas-incdir=<cURL include dir>],
+        [AS_HELP_STRING([--with-curl-incdir=<cURL include dir>],
 	[Alternative directory for cURL include files])])
 
 # Provide special options for PLPlot
@@ -210,6 +210,7 @@ AC_ARG_ENABLE(best-link,
 	[AS_HELP_STRING([--enable-best-link],
 	[Choose the right combination of static and dynamic linking to make \
 the executable as portable as possible (off by default)])])
+AC_MSG_RESULT([done])
 
 ################# Actions to complete in case of multhreading ################
 AC_DEFINE_UNQUOTED(THREADS_NMAX, $n_pthreads,[Maximum number of POSIX threads])
@@ -227,9 +228,13 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
 ############ handle the INTEL MKL library (FFTW + LAPACKe) ###########
 if test "$enable_mkl" = "yes"; then
+  AC_MSG_CHECKING([for INTEL's MKL library])
   convlibs="${srcdir}/wcs/libwcs_c.a"
   ACX_MKL($with_mkl_dir,yes,$enable_best_link,$convlibs)
-  if test "$MKL_WARN" != ""; then
+  if test "$MKL_WARN" == ""; then
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
     AC_MSG_WARN([$MKL_WARN])
   fi
   AM_CFLAGS="$AM_CFLAGS $MKL_CFLAGS "
@@ -237,19 +242,31 @@ if test "$enable_mkl" = "yes"; then
   LIBS="$LIBS $MKL_LIBS"
 else
 ################ handle the FFTW library (Fourier transforms) ################
+  AC_MSG_CHECKING([for the FFTW library])
   ACX_FFTW($with_fftw_libdir,$with_fftw_incdir,$use_pthreads,yes,
 	[LIBS="$FFTW_LIBS $LIBS"]
-	if test "$FFTW_WARN" != ""; then
+	if test "$FFTW_WARN" == ""; then
+          AC_MSG_RESULT([yes])
+        else
+          AC_MSG_RESULT([no])
 	  AC_MSG_WARN([$FFTW_WARN])
 	fi,
+        AC_MSG_RESULT([no])
 	AC_MSG_ERROR([$FFTW_ERROR Exiting.]))
+
 ################# handle the ATLAS library (linear algebra) ##################
+  AC_MSG_CHECKING([for the ATLAS library])
   ACX_ATLAS($with_atlas_libdir,$with_atlas_incdir,$use_pthreads,
 	[LIBS="$ATLAS_LIBS $LIBS"]
-	if test "$ATLAS_WARN" != ""; then
+	if test "$ATLAS_WARN" == ""; then
+          AC_MSG_RESULT([yes])
+        else
+          AC_MSG_RESULT([no])
 	  AC_MSG_WARN([$ATLAS_WARN])
 	fi,
+        AC_MSG_RESULT([no])
 	AC_MSG_ERROR([$ATLAS_ERROR Exiting.]))
+  AC_MSG_RESULT([done])
 fi													
 
 ################# handle the PLPlot library (graphic plots) ##################
@@ -265,8 +282,9 @@ else
 fi
 AM_CONDITIONAL(USE_PLPLOT, test "$use_plplot" = "yes")
 
-################# handle the ATLAS library (linear algebra) ##################
+################# handle the cURL library (HTTP queries) ##################
 ACX_CURL($with_curl_libdir,$with_curl_incdir,
+	[AM_CPPFLAGS="$AM_CPPFLAGS $CURL_CFLAGS"]
 	[LIBS="$CURL_LIBS $LIBS"]
 	if test "$CURL_WARN" != ""; then
 	  AC_MSG_WARN([$CURL_WARN])
