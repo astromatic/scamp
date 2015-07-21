@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/07/2015
+*	Last modified:		21/07/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -130,7 +130,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 13/07/2015
+VERSION 21/07/2015
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -589,8 +589,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         case ASTREFCAT_URAT1:
 /*-------- Avoid poor observations */
           nobs = atoi(astref_strncpy(col, str+42, 2));
-          if (nobs<2)
-            continue;
+//          if (nobs<2)
+//            continue;
           alpha = atof(astref_strncpy(col, str+11, 11));
           delta = atof(astref_strncpy(col, str+22, 11));
           poserr[lng] = atof(astref_strncpy(col,str+34,3)) * MAS/DEG;
