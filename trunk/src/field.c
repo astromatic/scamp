@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/11/2012
+*	Last modified:		31/07/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,7 +69,7 @@ OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used. The function is not reentrant because
 	of static variables (prefs structure members are updated).
 AUTHOR  E. Bertin (IAP)
-VERSION 20/11/2012
+VERSION 31/07/2015
 */
 fieldstruct	*load_field(char *filename, int fieldindex)
   {
@@ -254,6 +254,11 @@ fieldstruct	*load_field(char *filename, int fieldindex)
     QMEMCPY(astrombuf, prefs.astrinstrustr[prefs.nastrinstrustr], char,FBSIZE);
     prefs.nastrinstruext[prefs.nastrinstrustr] = field->nset;
     field->astromlabel = prefs.nastrinstrustr++;
+    if (prefs.nastrinstrustr > MAXASTRINSTRU)
+      {
+      sprintf(str, "%d", prefs.nastrinstrustr);
+      error(EXIT_FAILURE,"*Error*: Too many astrometric instruments: ", str);
+      }
     }
   free(astrombuf);
 
@@ -275,6 +280,11 @@ fieldstruct	*load_field(char *filename, int fieldindex)
     {
     QMEMCPY(photombuf, prefs.photinstrustr[prefs.nphotinstrustr], char, FBSIZE);
     field->photomlabel = prefs.nphotinstrustr++;
+    if (prefs.nphotinstrustr > MAXPHOTINSTRU)
+      {
+      sprintf(str, "%d", prefs.nphotinstrustr);
+      error(EXIT_FAILURE,"*Error*: Too many photometric instruments: ", str);
+      }
     }
   free(photombuf);
 #ifdef USE_THREADS

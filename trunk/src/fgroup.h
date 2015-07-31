@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/01/2013
+*	Last modified:		31/07/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -38,8 +38,8 @@
 #define _FGROUP_H_
 
 /*----------------------------- Internal constants --------------------------*/
-#define		MAXASTRINSTRU	256	/* Max. number of astrom. instruments*/
-#define		MAXPHOTINSTRU	256	/* Max. number of photom. instruments*/
+#define		MAXASTRINSTRU	2048	/* Max. number of astrom. instruments*/
+#define		MAXPHOTINSTRU	2048	/* Max. number of photom. instruments*/
 #define		MAXNGROUP	65536	/* Max. number of groups (arbitrary) */
 
 /*--------------------------------- typedefs --------------------------------*/
