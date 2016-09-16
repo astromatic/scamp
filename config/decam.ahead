@@ -1,0 +1,562 @@
+COMMENT   1st order focal-plane model for DECam@Blanco (62 x 2040x4088 trimmed CCDs)
+COMMENT   derived by SCAMP version 2.0 (2010-11-13)
+COMMENT   (c) Emmanuel BERTIN <bertin@iap.fr>
+COMMENT   
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.342300624313E+04 / Reference pixel on this axis                  
+CRPIX2  =   6.305328340563E+03 / Reference pixel on this axis                  
+CD1_1   =  -7.467712183299E-08 / Linear projection matrix                      
+CD1_2   =   7.304841402892E-05 / Linear projection matrix                      
+CD2_1   =  -7.288614625473E-05 / Linear projection matrix                      
+CD2_2   =   5.906517598699E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.342422243255E+04 / Reference pixel on this axis                  
+CRPIX2  =   2.067867201975E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.399146181349E-07 / Linear projection matrix                      
+CD1_2   =   7.307827736536E-05 / Linear projection matrix                      
+CD2_1   =  -7.284216418907E-05 / Linear projection matrix                      
+CD2_2   =  -1.453753193608E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.342993420032E+04 / Reference pixel on this axis                  
+CRPIX2  =  -2.218985050292E+03 / Reference pixel on this axis                  
+CD1_1   =   4.971896184778E-08 / Linear projection matrix                      
+CD1_2   =   7.303854806068E-05 / Linear projection matrix                      
+CD2_1   =  -7.284936220395E-05 / Linear projection matrix                      
+CD2_2   =  -7.553986742710E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.117245906501E+04 / Reference pixel on this axis                  
+CRPIX2  =   8.441071102484E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.392243054227E-07 / Linear projection matrix                      
+CD1_2   =   7.303541760840E-05 / Linear projection matrix                      
+CD2_1   =  -7.291158449795E-05 / Linear projection matrix                      
+CD2_2   =   9.573892191049E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.117430572952E+04 / Reference pixel on this axis                  
+CRPIX2  =   4.172999085701E+03 / Reference pixel on this axis                  
+CD1_1   =  -4.597167844482E-08 / Linear projection matrix                      
+CD1_2   =   7.311089972120E-05 / Linear projection matrix                      
+CD2_1   =  -7.289613841655E-05 / Linear projection matrix                      
+CD2_2   =   7.582053862665E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.117305154252E+04 / Reference pixel on this axis                  
+CRPIX2  =  -8.501055188029E+01 / Reference pixel on this axis                  
+CD1_1   =   1.047325089560E-08 / Linear projection matrix                      
+CD1_2   =   7.311300825137E-05 / Linear projection matrix                      
+CD2_1   =  -7.289888474629E-05 / Linear projection matrix                      
+CD2_2   =  -8.144225400590E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   1.117014634030E+04 / Reference pixel on this axis                  
+CRPIX2  =  -4.353109637872E+03 / Reference pixel on this axis                  
+CD1_1   =   1.091776823736E-07 / Linear projection matrix                      
+CD1_2   =   7.301938795449E-05 / Linear projection matrix                      
+CD2_1   =  -7.293548659468E-05 / Linear projection matrix                      
+CD2_2   =  -1.207928409609E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   8.918602280922E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.056760584692E+04 / Reference pixel on this axis                  
+CD1_1   =  -1.054917302556E-07 / Linear projection matrix                      
+CD1_2   =   7.297070475981E-05 / Linear projection matrix                      
+CD2_1   =  -7.297989043853E-05 / Linear projection matrix                      
+CD2_2   =   1.464018329390E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   8.909844470521E+03 / Reference pixel on this axis                  
+CRPIX2  =   6.312678031310E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.612322642223E-07 / Linear projection matrix                      
+CD1_2   =   7.310212375646E-05 / Linear projection matrix                      
+CD2_1   =  -7.299226115807E-05 / Linear projection matrix                      
+CD2_2   =   3.133377003610E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   8.906335994501E+03 / Reference pixel on this axis                  
+CRPIX2  =   2.042788207404E+03 / Reference pixel on this axis                  
+CD1_1   =  -2.522372414230E-09 / Linear projection matrix                      
+CD1_2   =   7.317901043997E-05 / Linear projection matrix                      
+CD2_1   =  -7.301462808393E-05 / Linear projection matrix                      
+CD2_2   =  -6.673536709156E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   8.912668498085E+03 / Reference pixel on this axis                  
+CRPIX2  =  -2.216227589037E+03 / Reference pixel on this axis                  
+CD1_1   =   6.572811681468E-08 / Linear projection matrix                      
+CD1_2   =   7.310145215552E-05 / Linear projection matrix                      
+CD2_1   =  -7.299142474896E-05 / Linear projection matrix                      
+CD2_2   =  -1.059452275922E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   8.915468192191E+03 / Reference pixel on this axis                  
+CRPIX2  =  -6.479735724088E+03 / Reference pixel on this axis                  
+CD1_1   =   8.445645216271E-08 / Linear projection matrix                      
+CD1_2   =   7.297954054977E-05 / Linear projection matrix                      
+CD2_1   =  -7.299826553372E-05 / Linear projection matrix                      
+CD2_2   =  -1.522847143438E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   6.653353633573E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.270403508059E+04 / Reference pixel on this axis                  
+CD1_1   =  -1.090676371819E-07 / Linear projection matrix                      
+CD1_2   =   7.289668537480E-05 / Linear projection matrix                      
+CD2_1   =  -7.302782643348E-05 / Linear projection matrix                      
+CD2_2   =   7.552216257440E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   6.652123966925E+03 / Reference pixel on this axis                  
+CRPIX2  =   8.438484817449E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.242678840698E-07 / Linear projection matrix                      
+CD1_2   =   7.306158348400E-05 / Linear projection matrix                      
+CD2_1   =  -7.309888066882E-05 / Linear projection matrix                      
+CD2_2   =   7.625081182375E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   6.648001657005E+03 / Reference pixel on this axis                  
+CRPIX2  =   4.171985013886E+03 / Reference pixel on this axis                  
+CD1_1   =  -4.276166540594E-08 / Linear projection matrix                      
+CD1_2   =   7.319964760759E-05 / Linear projection matrix                      
+CD2_1   =  -7.313308572459E-05 / Linear projection matrix                      
+CD2_2   =   2.109406527937E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   6.643889243262E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.427036384948E+01 / Reference pixel on this axis                  
+CD1_1   =   3.100062128351E-08 / Linear projection matrix                      
+CD1_2   =   7.320335368196E-05 / Linear projection matrix                      
+CD2_1   =  -7.314440886694E-05 / Linear projection matrix                      
+CD2_2   =  -3.226655972005E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   6.655811800024E+03 / Reference pixel on this axis                  
+CRPIX2  =  -4.345412305261E+03 / Reference pixel on this axis                  
+CD1_1   =   5.177745527844E-08 / Linear projection matrix                      
+CD1_2   =   7.305213712484E-05 / Linear projection matrix                      
+CD2_1   =  -7.310058607726E-05 / Linear projection matrix                      
+CD2_2   =  -1.337538898614E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   6.652695408504E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.620538452569E+03 / Reference pixel on this axis                  
+CD1_1   =   1.145420282123E-07 / Linear projection matrix                      
+CD1_2   =   7.290103645688E-05 / Linear projection matrix                      
+CD2_1   =  -7.304262225661E-05 / Linear projection matrix                      
+CD2_2   =  -8.167187632660E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   4.401483652396E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.270189543687E+04 / Reference pixel on this axis                  
+CD1_1   =  -5.775875001677E-08 / Linear projection matrix                      
+CD1_2   =   7.288101830937E-05 / Linear projection matrix                      
+CD2_1   =  -7.307644242960E-05 / Linear projection matrix                      
+CD2_2   =   5.698287257568E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   4.392163038425E+03 / Reference pixel on this axis                  
+CRPIX2  =   8.433861707940E+03 / Reference pixel on this axis                  
+CD1_1   =  -8.351052042426E-08 / Linear projection matrix                      
+CD1_2   =   7.307375742065E-05 / Linear projection matrix                      
+CD2_1   =  -7.317765631437E-05 / Linear projection matrix                      
+CD2_2   =   3.413205301532E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   4.391836359446E+03 / Reference pixel on this axis                  
+CRPIX2  =   4.171416336624E+03 / Reference pixel on this axis                  
+CD1_1   =  -3.323409038624E-08 / Linear projection matrix                      
+CD1_2   =   7.323124747014E-05 / Linear projection matrix                      
+CD2_1   =  -7.322957226469E-05 / Linear projection matrix                      
+CD2_2   =   1.720573117489E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   4.393509109313E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.068368844001E+01 / Reference pixel on this axis                  
+CD1_1   =  -2.171376437544E-08 / Linear projection matrix                      
+CD1_2   =   7.322223282816E-05 / Linear projection matrix                      
+CD2_1   =  -7.322584367803E-05 / Linear projection matrix                      
+CD2_2   =  -6.600548407535E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   4.398212509009E+03 / Reference pixel on this axis                  
+CRPIX2  =  -4.345935692458E+03 / Reference pixel on this axis                  
+CD1_1   =   5.205740244740E-08 / Linear projection matrix                      
+CD1_2   =   7.308185113242E-05 / Linear projection matrix                      
+CD2_1   =  -7.313894665016E-05 / Linear projection matrix                      
+CD2_2   =  -7.494954605823E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   4.401335428358E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.614367645719E+03 / Reference pixel on this axis                  
+CD1_1   =   4.732637395510E-08 / Linear projection matrix                      
+CD1_2   =   7.290362088394E-05 / Linear projection matrix                      
+CD2_1   =  -7.309449649383E-05 / Linear projection matrix                      
+CD2_2   =  -8.781806193919E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.141587714478E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.483252858491E+04 / Reference pixel on this axis                  
+CD1_1   =  -2.489760039900E-08 / Linear projection matrix                      
+CD1_2   =   7.285940531560E-05 / Linear projection matrix                      
+CD2_1   =  -7.307357380526E-05 / Linear projection matrix                      
+CD2_2   =   1.524918936329E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.142586531539E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.056578078023E+04 / Reference pixel on this axis                  
+CD1_1   =  -3.805039942189E-08 / Linear projection matrix                      
+CD1_2   =   7.298545047877E-05 / Linear projection matrix                      
+CD2_1   =  -7.316595725734E-05 / Linear projection matrix                      
+CD2_2   =   1.282198393689E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.137463415692E+03 / Reference pixel on this axis                  
+CRPIX2  =   6.297732596495E+03 / Reference pixel on this axis                  
+CD1_1   =  -3.783413831513E-08 / Linear projection matrix                      
+CD1_2   =   7.318418571052E-05 / Linear projection matrix                      
+CD2_1   =  -7.323431492701E-05 / Linear projection matrix                      
+CD2_2   =  -1.445248715603E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.140056035628E+03 / Reference pixel on this axis                  
+CRPIX2  =   2.040744399374E+03 / Reference pixel on this axis                  
+CD1_1   =  -6.194107959217E-09 / Linear projection matrix                      
+CD1_2   =   7.326748034033E-05 / Linear projection matrix                      
+CD2_1   =  -7.326219653048E-05 / Linear projection matrix                      
+CD2_2   =   2.141571723179E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.138349621631E+03 / Reference pixel on this axis                  
+CRPIX2  =  -2.210016581608E+03 / Reference pixel on this axis                  
+CD1_1   =   2.933896650595E-08 / Linear projection matrix                      
+CD1_2   =   7.318264646127E-05 / Linear projection matrix                      
+CD2_1   =  -7.319908648669E-05 / Linear projection matrix                      
+CD2_2   =  -7.567176472819E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.139523542334E+03 / Reference pixel on this axis                  
+CRPIX2  =  -6.480154343411E+03 / Reference pixel on this axis                  
+CD1_1   =   2.009920001662E-08 / Linear projection matrix                      
+CD1_2   =   7.299236215106E-05 / Linear projection matrix                      
+CD2_1   =  -7.316722964912E-05 / Linear projection matrix                      
+CD2_2   =  -1.803814096307E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =   2.140846916709E+03 / Reference pixel on this axis                  
+CRPIX2  =  -1.074637366622E+04 / Reference pixel on this axis                  
+CD1_1   =   4.445254197267E-08 / Linear projection matrix                      
+CD1_2   =   7.286227081097E-05 / Linear projection matrix                      
+CD2_1   =  -7.306486090467E-05 / Linear projection matrix                      
+CD2_2   =  -6.816415402776E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.240964735031E+02 / Reference pixel on this axis                  
+CRPIX2  =   1.483340037234E+04 / Reference pixel on this axis                  
+CD1_1   =  -2.936934132016E-08 / Linear projection matrix                      
+CD1_2   =   7.286267479404E-05 / Linear projection matrix                      
+CD2_1   =  -7.309619339603E-05 / Linear projection matrix                      
+CD2_2   =  -8.131748351429E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.148457328781E+02 / Reference pixel on this axis                  
+CRPIX2  =   1.056692373571E+04 / Reference pixel on this axis                  
+CD1_1   =  -5.374923207369E-09 / Linear projection matrix                      
+CD1_2   =   7.298244858715E-05 / Linear projection matrix                      
+CD2_1   =  -7.315106158754E-05 / Linear projection matrix                      
+CD2_2   =  -3.762931688976E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.114720345681E+02 / Reference pixel on this axis                  
+CRPIX2  =   6.299454742168E+03 / Reference pixel on this axis                  
+CD1_1   =   2.151931833091E-08 / Linear projection matrix                      
+CD1_2   =   7.318103177738E-05 / Linear projection matrix                      
+CD2_1   =  -7.323489738520E-05 / Linear projection matrix                      
+CD2_2   =  -1.086714728130E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.108216937669E+02 / Reference pixel on this axis                  
+CRPIX2  =   2.045071461886E+03 / Reference pixel on this axis                  
+CD1_1   =  -2.107393545853E-08 / Linear projection matrix                      
+CD1_2   =   7.327285897535E-05 / Linear projection matrix                      
+CD2_1   =  -7.326712631242E-05 / Linear projection matrix                      
+CD2_2   =  -3.227196416667E-10 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.151721951797E+02 / Reference pixel on this axis                  
+CRPIX2  =  -2.204397605142E+03 / Reference pixel on this axis                  
+CD1_1   =   2.461636157872E-08 / Linear projection matrix                      
+CD1_2   =   7.319936785722E-05 / Linear projection matrix                      
+CD2_1   =  -7.323282069432E-05 / Linear projection matrix                      
+CD2_2   =   5.687840868544E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.132223414621E+02 / Reference pixel on this axis                  
+CRPIX2  =  -6.474955663289E+03 / Reference pixel on this axis                  
+CD1_1   =  -4.504743067846E-08 / Linear projection matrix                      
+CD1_2   =   7.299049105724E-05 / Linear projection matrix                      
+CD2_1   =  -7.316082967508E-05 / Linear projection matrix                      
+CD2_2   =   2.145746134536E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.117287906032E+02 / Reference pixel on this axis                  
+CRPIX2  =  -1.074203905825E+04 / Reference pixel on this axis                  
+CD1_1   =  -6.233898634667E-08 / Linear projection matrix                      
+CD1_2   =   7.287397316008E-05 / Linear projection matrix                      
+CD2_1   =  -7.307723187448E-05 / Linear projection matrix                      
+CD2_2   =  -6.191534044665E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -2.369230119768E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.270715944887E+04 / Reference pixel on this axis                  
+CD1_1   =   7.571386210107E-08 / Linear projection matrix                      
+CD1_2   =   7.288766835112E-05 / Linear projection matrix                      
+CD2_1   =  -7.306850996903E-05 / Linear projection matrix                      
+CD2_2   =  -4.796607032873E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -2.364753886081E+03 / Reference pixel on this axis                  
+CRPIX2  =   8.434405719519E+03 / Reference pixel on this axis                  
+CD1_1   =   6.247451451349E-08 / Linear projection matrix                      
+CD1_2   =   7.308875527173E-05 / Linear projection matrix                      
+CD2_1   =  -7.316218868284E-05 / Linear projection matrix                      
+CD2_2   =  -3.433550218632E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -2.361051573203E+03 / Reference pixel on this axis                  
+CRPIX2  =   4.173234668156E+03 / Reference pixel on this axis                  
+CD1_1   =   4.862769205167E-08 / Linear projection matrix                      
+CD1_2   =   7.322523132203E-05 / Linear projection matrix                      
+CD2_1   =  -7.319805935305E-05 / Linear projection matrix                      
+CD2_2   =  -3.411075918198E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -2.363048940812E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.156238455902E+01 / Reference pixel on this axis                  
+CD1_1   =  -1.506660449079E-08 / Linear projection matrix                      
+CD1_2   =   7.323535416165E-05 / Linear projection matrix                      
+CD2_1   =  -7.320999423846E-05 / Linear projection matrix                      
+CD2_2   =   8.754414626932E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -2.368373551650E+03 / Reference pixel on this axis                  
+CRPIX2  =  -4.344269479854E+03 / Reference pixel on this axis                  
+CD1_1   =  -6.417914590998E-08 / Linear projection matrix                      
+CD1_2   =   7.307291720773E-05 / Linear projection matrix                      
+CD2_1   =  -7.316314386281E-05 / Linear projection matrix                      
+CD2_2   =   6.405100034630E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -2.371570333003E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.614668511326E+03 / Reference pixel on this axis                  
+CD1_1   =  -7.280433992907E-08 / Linear projection matrix                      
+CD1_2   =   7.289027107734E-05 / Linear projection matrix                      
+CD2_1   =  -7.308917317682E-05 / Linear projection matrix                      
+CD2_2   =   5.856159978177E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -4.622116920839E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.270927148700E+04 / Reference pixel on this axis                  
+CD1_1   =   1.149003632585E-07 / Linear projection matrix                      
+CD1_2   =   7.289887672714E-05 / Linear projection matrix                      
+CD2_1   =  -7.303031666067E-05 / Linear projection matrix                      
+CD2_2   =  -6.668081528498E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -4.620639657135E+03 / Reference pixel on this axis                  
+CRPIX2  =   8.442551717733E+03 / Reference pixel on this axis                  
+CD1_1   =   1.020564634139E-07 / Linear projection matrix                      
+CD1_2   =   7.306462393233E-05 / Linear projection matrix                      
+CD2_1   =  -7.309289251641E-05 / Linear projection matrix                      
+CD2_2   =  -7.127457837110E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -4.616735102898E+03 / Reference pixel on this axis                  
+CRPIX2  =   4.171905604865E+03 / Reference pixel on this axis                  
+CD1_1   =   4.509217176843E-09 / Linear projection matrix                      
+CD1_2   =   7.320498049820E-05 / Linear projection matrix                      
+CD2_1   =  -7.314609574887E-05 / Linear projection matrix                      
+CD2_2   =  -6.150189857572E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -4.619621644695E+03 / Reference pixel on this axis                  
+CRPIX2  =  -7.662538183283E+01 / Reference pixel on this axis                  
+CD1_1   =  -7.594350503680E-09 / Linear projection matrix                      
+CD1_2   =   7.320732110312E-05 / Linear projection matrix                      
+CD2_1   =  -7.312274045989E-05 / Linear projection matrix                      
+CD2_2   =   4.758891806365E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -4.624576076720E+03 / Reference pixel on this axis                  
+CRPIX2  =  -4.349138634908E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.200712237791E-07 / Linear projection matrix                      
+CD1_2   =   7.305474906647E-05 / Linear projection matrix                      
+CD2_1   =  -7.308746210781E-05 / Linear projection matrix                      
+CD2_2   =   9.167123726429E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -4.627085307368E+03 / Reference pixel on this axis                  
+CRPIX2  =  -8.614424290020E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.044995243465E-07 / Linear projection matrix                      
+CD1_2   =   7.290724134975E-05 / Linear projection matrix                      
+CD2_1   =  -7.303546410110E-05 / Linear projection matrix                      
+CD2_2   =   8.830077467757E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -6.889831254104E+03 / Reference pixel on this axis                  
+CRPIX2  =   1.056987602437E+04 / Reference pixel on this axis                  
+CD1_1   =   8.373089447663E-08 / Linear projection matrix                      
+CD1_2   =   7.297400372224E-05 / Linear projection matrix                      
+CD2_1   =  -7.298564414103E-05 / Linear projection matrix                      
+CD2_2   =  -1.573619426477E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -6.880463246393E+03 / Reference pixel on this axis                  
+CRPIX2  =   6.308872582161E+03 / Reference pixel on this axis                  
+CD1_1   =   8.825433432880E-08 / Linear projection matrix                      
+CD1_2   =   7.311342472986E-05 / Linear projection matrix                      
+CD2_1   =  -7.299769209914E-05 / Linear projection matrix                      
+CD2_2   =  -8.942770884980E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -6.875310798414E+03 / Reference pixel on this axis                  
+CRPIX2  =   2.042208733437E+03 / Reference pixel on this axis                  
+CD1_1   =  -2.487640424090E-08 / Linear projection matrix                      
+CD1_2   =   7.316748992731E-05 / Linear projection matrix                      
+CD2_1   =  -7.301735655914E-05 / Linear projection matrix                      
+CD2_2   =  -1.961702159247E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -6.882162606600E+03 / Reference pixel on this axis                  
+CRPIX2  =  -2.218031030907E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.149774682994E-07 / Linear projection matrix                      
+CD1_2   =   7.311822065167E-05 / Linear projection matrix                      
+CD2_1   =  -7.299435164747E-05 / Linear projection matrix                      
+CD2_2   =   5.480093454697E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -6.888310632984E+03 / Reference pixel on this axis                  
+CRPIX2  =  -6.481448702277E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.180142407186E-07 / Linear projection matrix                      
+CD1_2   =   7.296629605824E-05 / Linear projection matrix                      
+CD2_1   =  -7.296281922684E-05 / Linear projection matrix                      
+CD2_2   =   1.162329307793E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -9.144396289032E+03 / Reference pixel on this axis                  
+CRPIX2  =   8.440420352392E+03 / Reference pixel on this axis                  
+CD1_1   =   9.469871855184E-08 / Linear projection matrix                      
+CD1_2   =   7.302062380297E-05 / Linear projection matrix                      
+CD2_1   =  -7.291021919466E-05 / Linear projection matrix                      
+CD2_2   =  -1.270968858836E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -9.137588604933E+03 / Reference pixel on this axis                  
+CRPIX2  =   4.176467955955E+03 / Reference pixel on this axis                  
+CD1_1   =   1.750560780010E-08 / Linear projection matrix                      
+CD1_2   =   7.312539237713E-05 / Linear projection matrix                      
+CD2_1   =  -7.292299878001E-05 / Linear projection matrix                      
+CD2_2   =  -4.451256163197E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -9.144409341115E+03 / Reference pixel on this axis                  
+CRPIX2  =  -7.990309949289E+01 / Reference pixel on this axis                  
+CD1_1   =  -1.276636009304E-08 / Linear projection matrix                      
+CD1_2   =   7.310918607651E-05 / Linear projection matrix                      
+CD2_1   =  -7.289003309060E-05 / Linear projection matrix                      
+CD2_2   =   8.993635429060E-08 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -9.146748949606E+03 / Reference pixel on this axis                  
+CRPIX2  =  -4.347806977339E+03 / Reference pixel on this axis                  
+CD1_1   =  -1.045579125865E-07 / Linear projection matrix                      
+CD1_2   =   7.301532933541E-05 / Linear projection matrix                      
+CD2_1   =  -7.290169550404E-05 / Linear projection matrix                      
+CD2_2   =   1.347096574510E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.139838177210E+04 / Reference pixel on this axis                  
+CRPIX2  =   6.303262623996E+03 / Reference pixel on this axis                  
+CD1_1   =   2.880948262781E-08 / Linear projection matrix                      
+CD1_2   =   7.304780017114E-05 / Linear projection matrix                      
+CD2_1   =  -7.287466974104E-05 / Linear projection matrix                      
+CD2_2   =  -1.155034199426E-07 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.140119321317E+04 / Reference pixel on this axis                  
+CRPIX2  =   2.042393897115E+03 / Reference pixel on this axis                  
+CD1_1   =  -3.169377375824E-08 / Linear projection matrix                      
+CD1_2   =   7.307059923074E-05 / Linear projection matrix                      
+CD2_1   =  -7.282492914549E-05 / Linear projection matrix                      
+CD2_2   =  -1.170986072517E-09 / Linear projection matrix                      
+END     
+CTYPE1  = 'RA---TAN'
+CTYPE2  = 'DEC--TAN'
+CRPIX1  =  -1.139647504684E+04 / Reference pixel on this axis                  
+CRPIX2  =  -2.220584781967E+03 / Reference pixel on this axis                  
+CD1_1   =  -9.587928599483E-08 / Linear projection matrix                      
+CD1_2   =   7.305559434735E-05 / Linear projection matrix                      
+CD2_1   =  -7.285793784985E-05 / Linear projection matrix                      
+CD2_2   =   1.609995618826E-08 / Linear projection matrix                      
+END     

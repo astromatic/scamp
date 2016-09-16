@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -24,7 +24,7 @@
 *	This file incorporates work covered by the copyright and permission
 *	notice below.
 *
-*	Last modified:		03/06/2015
+*	Last modified:		31/03/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*****************************************************************************
@@ -73,7 +73,7 @@ typedef struct fcurl_data {
 }	URL_FILE;
 
 /*------------------------------- functions ---------------------------------*/
-URL_FILE	*url_fopen(const char *url, long timeout);
+URL_FILE	*url_fopen(const char *url, double timeout);
 
 int		url_fclose(URL_FILE *file),
 		url_feof(URL_FILE *file);

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/06/2015
+*	Last modified:		14/09/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -40,47 +40,48 @@
 /*----------------------------- Internal constants --------------------------*/
 #define		MAX_SERVER	16
 #define		MAX_BAND	16	/* Maximum number of bands */
+#define		MAX_COLUMN	32	/* Maximum number of columns */
+#define		COLUMN_SIZE	32	/* Number of characters per column */
 #define		DENIS3_POSERR	(0.20*ARCSEC/DEG)
-#define		SDSSR3_POSERR	(0.10*ARCSEC/DEG)
-#define		USNOA1_POSERR	(0.25*ARCSEC/DEG)
 #define		USNOA2_POSERR	(0.25*ARCSEC/DEG)
 #define		USNOB1_POSERR	(0.25*ARCSEC/DEG)	/* if not given */
-#define		USNOA1_BMAGERR	0.40
+#define		CMC15_POSERR	(0.10*ARCSEC/DEG)	/* if not given */
+#define		XPM_PROPERR	(10*MAS/DEG)
 #define		USNOA2_BMAGERR	0.40
 #define		USNOB1_BMAGERR	0.40
 #define         NOMAD1_MAGERR   0.30
 #define         GSC_MAGERR	0.20
-#define         UCAC_MAGERR     0.12		/* Just a default value */
 #define         TWOMASS_MAGERR  0.1		/* Just a default value */
+#define         UCAC_MAGERR     0.12		/* Just a default value */
 #define         DEFAULT_MAGERR  0.1		/* Just a default value */
 
 #define		ASTREF_ASSOCRADIUS	(0.2*ARCSEC/DEG)
 
 /*--------------------------------- typedefs --------------------------------*/
 typedef enum {ASTREFCAT_NONE, ASTREFCAT_FILE,
-		ASTREFCAT_USNOA1, ASTREFCAT_USNOA2, ASTREFCAT_USNOB1,
-		ASTREFCAT_GSC1, ASTREFCAT_GSC22, ASTREFCAT_GSC23,
-		ASTREFCAT_2MASS, ASTREFCAT_DENIS3, ASTREFCAT_UCAC1,
-		ASTREFCAT_UCAC2, ASTREFCAT_UCAC3, ASTREFCAT_UCAC4,
-		ASTREFCAT_URAT1, ASTREFCAT_SDSSR3, ASTREFCAT_SDSSR5,
-		ASTREFCAT_SDSSR6, ASTREFCAT_SDSSR7, ASTREFCAT_SDSSR8,
-		ASTREFCAT_SDSSR9, ASTREFCAT_NOMAD1, ASTREFCAT_PPMX,
-		ASTREFCAT_CMC14, ASTREFCAT_TYCHO2}
+		ASTREFCAT_USNOA2, ASTREFCAT_USNOB1, ASTREFCAT_GSC23,
+		ASTREFCAT_2MASS, ASTREFCAT_DENIS3, ASTREFCAT_UCAC4,
+		ASTREFCAT_URAT1, ASTREFCAT_SDSSR9, ASTREFCAT_NOMAD1,
+		ASTREFCAT_PPMX, ASTREFCAT_CMC15, ASTREFCAT_TYCHO2,
+		ASTREFCAT_IGSL, ASTREFCAT_ALLWISE, ASTREFCAT_GAIADR1}
 			astrefenum;
 
 typedef struct
   {
   char		name[16];		/* Catalog name */
-  char		cdsname[16];		/* Catalog name at CDS */
+  char		viziername[32];		/* Vizier catalog name */
+  char		viziercolumns[MAX_COLUMN][COLUMN_SIZE];
+					/* List of Vizier column names */
+  char		vizierbandnames[MAX_BAND][32];
+					/* Vizier names of available bands */
+  char		bandnames[MAX_BAND][32];/* Real names of available bands */
   int		nband;			/* Number of available bands */
   int		defband;		/* Default band */
-  char		bandnames[MAX_BAND][32];/* Real names of available bands */
-  char		cdsbandnames[MAX_BAND][32];/* CDS names of available bands */
   int		band;			/* Chosen band */
   char		*bandname;		/* Name of chosen band */
   }	astrefstruct;
 
-extern astrefstruct   astrefcat[];
+extern astrefstruct   astrefcats[];
 
 /*------------------------------- functions ---------------------------------*/
 

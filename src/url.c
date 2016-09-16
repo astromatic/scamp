@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 Emmanuel Bertin -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -24,7 +24,7 @@
 *	This file incorporates work covered by the copyright and permission
 *	notice below.
 *
-*	Last modified:		03/06/2015
+*	Last modified:		31/03/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*****************************************************************************
@@ -236,7 +236,7 @@ static int use_buffer(URL_FILE *file,int want)
 /****** url_fopen ****************************************************//**
 Check for URL and set up handle
  ***/
-URL_FILE *url_fopen(const char *url, long timeout)
+URL_FILE *url_fopen(const char *url, double timeout)
 {
   URL_FILE *file;
 
@@ -252,7 +252,8 @@ URL_FILE *url_fopen(const char *url, long timeout)
   curl_easy_setopt(file->curl, CURLOPT_VERBOSE, 0L);
   curl_easy_setopt(file->curl, CURLOPT_WRITEFUNCTION, write_callback);
   if (timeout > 0)
-    curl_easy_setopt(file->curl, CURLOPT_CONNECTTIMEOUT, timeout);
+    curl_easy_setopt(file->curl, CURLOPT_CONNECTTIMEOUT_MS,
+	(long)(timeout * 1000.0));
 
   if(!multi_handle)
     multi_handle = curl_multi_init();

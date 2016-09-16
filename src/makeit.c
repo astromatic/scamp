@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/01/2015
+*	Last modified:		05/04/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -41,6 +41,7 @@
 
 #include "define.h"
 #include "globals.h"
+#include "astrefcat.h"
 #include "astrsolve.h"
 #include "astrstats.h"
 #include "catout.h"
@@ -57,7 +58,6 @@
 #include "photsolve.h"
 #include "prefs.h"
 #include "proper.h"
-#include "astrefcat.h"
 #ifdef USE_THREADS
 #include "threads.h"
 #endif
@@ -135,7 +135,7 @@ void	makeit(void)
   for (f=0; f<nfield; f++)
     {
 /*-- Load catalogs */
-    fields[f] = load_field(prefs.file_name[f], f);
+    fields[f] = load_field(prefs.file_name[f], f, prefs.ahead_name[f]);
     NFPRINTF(OUTPUT, "");
 /*-- Compute basic field astrometric features (center, field size,...) */
     locate_field(fields[f]);
@@ -180,8 +180,8 @@ void	makeit(void)
         NFPRINTF(OUTPUT, "");
         QPRINTF(OUTPUT, " Group %2d: %8d standard%s found in %s (%s band)\n",
 	  g+1, reffields[g]->nsample, reffields[g]->nsample>1?"s":"",
-	  astrefcat[prefs.astrefcat].name,
-	  astrefcat[prefs.astrefcat].bandname);
+	  astrefcats[prefs.astrefcat].name,
+	  astrefcats[prefs.astrefcat].bandname);
 /*------ Save reference catalog (on request) */
         if (prefs.astrefcat != ASTREFCAT_FILE && prefs.outrefcat_flag)
           {
@@ -195,7 +195,7 @@ void	makeit(void)
           dm = (int)(60.0*(delta - dd));
           sprintf(str, "%s/%s_%02d%02d%c%02d%02d_r%-.0f.cat",
 		prefs.outref_path,
-		astrefcat[prefs.astrefcat].name,
+		astrefcats[prefs.astrefcat].name,
 		hh,mm,sign,dd,dm, reffields[g]->maxradius*DEG/ARCMIN);
           save_astreffield(str, reffields[g]);
           }
@@ -222,8 +222,8 @@ void	makeit(void)
       NFPRINTF(OUTPUT, "");
       QPRINTF(OUTPUT, " Group %2d: %8d standard%s in %s (band %s)\n",
 	g+1, reffields[g]->nsample, reffields[g]->nsample>1?"s":"",
-	astrefcat[prefs.astrefcat].name,
-	astrefcat[prefs.astrefcat].bandname);
+	astrefcats[prefs.astrefcat].name,
+	astrefcats[prefs.astrefcat].bandname);
       QIPRINTF(OUTPUT, "              instruments  pos.angle   scale    "
 		"cont.        shift        cont.");
       if (reffields[g])
@@ -498,15 +498,19 @@ void	makeit(void)
 
 /* Save headers */
   NFPRINTF(OUTPUT, "Saving image headers...");
-  for (f=0; f<nfield; f++)
-    {
-/*-- Create a file name with a "header" extension */
-    strcpy(filename, fields[f]->filename);
-    if (!(pstr = strrchr(filename, '.')))
-      pstr = filename+strlen(filename);
-    sprintf(pstr, "%s", prefs.head_suffix);
-    write_aschead(filename, fields[f]);
+  for (f=0; f<nfield; f++) {
+/*---- Check if a header filename is provided */
+    if (prefs.head_name[f] && *(prefs.head_name[f]))
+      strcpy(filename, prefs.head_name[f]);
+    else { 
+/*---- Create a file name with a "header" extension */
+      strcpy(filename, fields[f]->filename);
+      if (!(pstr = strrchr(filename, '.')))
+        pstr = filename+strlen(filename);
+      sprintf(pstr, "%s", prefs.head_suffix);
     }
+    write_aschead(filename, fields[f]);
+  }
 
 #ifdef HAVE_PLPLOT
 

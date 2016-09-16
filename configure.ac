@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2015 IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		17/07/2015
+#	Last modified:		14/09/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard Bertin source code...
-AC_INIT([scamp],[2.2.6],[bertin@iap.fr])
+AC_INIT([scamp],[2.4.3],[bertin@iap.fr])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
@@ -304,7 +304,7 @@ fi
 # "Best" linking option
 if test "$enable_best_link" = "yes"; then
   if test "$enable_icc" = "yes"; then
-    AM_LDFLAGS="-static-intel -openmp-link static -shared-libgcc \
+    AM_LDFLAGS="-static-intel -qopenmp-link static -shared-libgcc \
 	-static-libtool-libs -no-intel-extensions -avoid-version $AM_LDFLAGS"
   else
     AM_LDFLAGS="-shared-libgcc -static-libtool-libs -avoid-version $AM_LDFLAGS"

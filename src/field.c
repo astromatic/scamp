@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/07/2015
+*	Last modified:		23/03/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -62,16 +62,17 @@
 
 
 /****** load_field ***********************************************************
-PROTO   fieldstruct *load_field(char *filename)
+PROTO   fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
 PURPOSE Read catalog(s) and load field data.
 INPUT   Character string that contains the file name.
 OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used. The function is not reentrant because
-	of static variables (prefs structure members are updated).
+	of static variables (prefs structure members are updated),
+	FITS header filename (null=none).
 AUTHOR  E. Bertin (IAP)
-VERSION 31/07/2015
+VERSION 23/03/2016
 */
-fieldstruct	*load_field(char *filename, int fieldindex)
+fieldstruct	*load_field(char *filename, int fieldindex, char *hfilename)
   {
    wcsstruct	*wcs;
    catstruct	*cat;
@@ -104,11 +105,16 @@ fieldstruct	*load_field(char *filename, int fieldindex)
   strcpy (field->filename, filename);
   field->rfilename = rfilename;
 
-/* Create a file name with a "header" extension */
-  strcpy(field->hfilename, filename);
-  if (!(pstr = strrchr(field->hfilename, '.')))
-    pstr = field->hfilename+strlen(field->hfilename);
-  sprintf(pstr, "%s", prefs.ahead_suffix);
+/*-- Check if a "aheader" filename is provided */
+  if (hfilename && *hfilename)
+    strcpy(field->hfilename, hfilename);
+  else { 
+/*-- Create a file name with a "aheader" extension */
+    strcpy(field->hfilename, filename);
+    if (!(pstr = strrchr(field->hfilename, '.')))
+      pstr = field->hfilename+strlen(field->hfilename);
+    sprintf(pstr, "%s", prefs.ahead_suffix);
+  }
 
 /* Extract the path from the filename */
 #ifdef HAVE_GETENV
@@ -639,7 +645,7 @@ INPUT   Pointer to the thread number.
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 12/04/2012
+VERSION 23/03/2016
  ***/
 void    *pthread_load_field(void *arg)
   {
@@ -662,7 +668,8 @@ void    *pthread_load_field(void *arg)
       findex = pthread_findex++;
       QPTHREAD_MUTEX_UNLOCK(&readmutex);
 /*---- Load catalogs */
-      pthread_fields[findex] = load_field(prefs.file_name[findex], findex);
+      pthread_fields[findex] = load_field(prefs.file_name[findex], findex,
+				prefs.ahead_name[findex]);
 /*---- Compute basic field astrometric features (center, field size,...) */
       locate_field(pthread_fields[findex]);
       }

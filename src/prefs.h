@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 -- IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/06/2015
+*	Last modified:		31/03/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,7 +68,8 @@
 /*----------------------------- Internal constants --------------------------*/
 
 #define		MAXCHARL	16384	/* max. nb of chars in a string list */
-#define		MAXLIST		256	/* max. nb of list members */
+#define		MAXLIST		(MAXFILE)	/* max. nb of list members */
+#define		MAXLISTSIZE	(100*MAXLIST)	/* max size of list */
 
 /*--------------------------------- typedefs --------------------------------*/
 
@@ -81,7 +82,11 @@ typedef struct
   char		*(file_name[MAXFILE]);	/* Filename(s) of input images */
   int		nfile;			/* Number of input images */
   char		ahead_global[MAXCHAR];	/* Global input FITS header filename */
+  char		*(ahead_name[MAXFILE]);	/* Filename(s) of input FITS headers */
+  int		nahead_name;		/* Number of input FITS headers */
   char		ahead_suffix[MAXCHAR];	/* Suffix for input FITS headers */
+  char		*(head_name[MAXFILE]);	/* Filename(s) of output FITS headers */
+  int		nhead_name;		/* Number of output FITS headers */
   char		head_suffix[MAXCHAR];	/* Suffix for output FITS headers */
   enum {NORMAL, FOCAL_PLANE}	header_type;	/* Output header type */
   double	sn_thresh[2];		/* S/N thresholds */
@@ -99,7 +104,7 @@ typedef struct
   int           nref_server;		/* nb of params */
   int		ref_ntries[MAX_SERVER];	/* nb of tries per server */
   int           nref_ntries;		/* nb of params */
-  int		ref_timeout[MAX_SERVER];/* Timeout of ref. cat. servers */
+  double	ref_timeout[MAX_SERVER];/* Timeout of ref. cat. servers in s */
   int           nref_timeout;		/* nb of params */
   char		*(astref_name[MAXNGROUP]);/* Astrometric ref. cat. filenames */
   int           nastref_name;		/* nb of params */
@@ -253,6 +258,8 @@ typedef struct
 prefstruct	prefs;
 
 /*-------------------------------- protos -----------------------------------*/
+extern char	*list_to_str(char *listname);
+
 extern int	cistrcmp(char *cs, char *ct, int mode);
 
 extern void	dumpprefs(int state),

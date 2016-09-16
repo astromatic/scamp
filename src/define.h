@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,14 +22,14 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/07/2014
+*	Last modified:		23/03/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 /* Check if we are using a configure script here */
 #ifndef HAVE_CONFIG_H
 #define         VERSION         "1.x"
-#define         DATE            "2005-12-16"
+#define         DATE            "2016-09-16"
 #define		THREADS_NMAX	1024              /* max. number of threads */
 #endif
 
@@ -37,7 +37,7 @@
 
 #define         BANNER		"SCAMP"
 #define         MYVERSION       VERSION
-#define         COPYRIGHT       "2010-2015 IAP/CNRS/UPMC"
+#define         COPYRIGHT       "2010-2016 IAP/CNRS/UPMC"
 #define		DISCLAIMER	BANNER " comes with ABSOLUTELY NO WARRANTY\n" \
 		"You may redistribute copies of " BANNER "\n" \
 		"under the terms of the GNU General Public License."
@@ -57,7 +57,7 @@
 #define		TINY		(1.0/BIG)	/* a small number */
 #define		OUTPUT		stderr		/* where all msgs are sent */
 #define		MAXCHAR		512		/* max. number of characters */
-#define		MAXFILE		32768		/* max number of input files */
+#define		MAXFILE		100000		/* max number of input files */
 
 /*------------ Set defines according to machine's specificities -------------*/
 

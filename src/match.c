@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/10/2013
+*	Last modified:		05/04/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1890,7 +1890,7 @@ INPUT   Pointer to the thread number.
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/12/2006
+VERSION 05/04/2016
  ***/
 void    *pthread_match_field(void *arg)
   {
@@ -1915,8 +1915,8 @@ void    *pthread_match_field(void *arg)
 		pthread_gviewindex+1,
 		pthread_reffields[pthread_gviewindex]->nsample,
 		pthread_reffields[pthread_gviewindex]->nsample>1?"s":"",
-		astrefcat[prefs.astrefcat].name,
-		astrefcat[prefs.astrefcat].bandname);
+		astrefcats[prefs.astrefcat].name,
+		astrefcats[prefs.astrefcat].bandname);
         QIPRINTF(OUTPUT, "              instruments  pos.angle   scale    "
 		"cont.        shift        cont.");
         }

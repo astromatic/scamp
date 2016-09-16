@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-**	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+**	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		07/12/2013
+*	Last modified:		23/03/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -125,11 +125,12 @@ typedef struct field
 /*------------------------------- functions ---------------------------------*/
 
 extern fieldstruct	*inherit_field(char *filename, fieldstruct *reffield,
-					int fflags),
+				int fflags),
 			*init_field(fieldstruct **infield,
 				fieldstruct **inwfield, int ninput,
 				char *filename),
-			*load_field(char *filename, int fieldindex);
+			*load_field(char *filename, int fieldindex,
+				char *hfilename);
 
 extern double		dhmedian(double *ra, int n);
 

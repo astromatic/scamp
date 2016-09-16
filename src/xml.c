@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		08/04/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -186,7 +186,7 @@ INPUT	Pointer to the output file (or stream),
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP) C. Marmo (IAP)
-VERSION	12/11/2013
+VERSION	08/04/2016
  ***/
 int	write_xml_meta(FILE *file, char *msgerror)
   {
@@ -714,9 +714,9 @@ int	write_xml_meta(FILE *file, char *msgerror)
       fprintf(file, " %.6g", fgroup->meanwcsscale[d]*deg2arcsec);
     fprintf(file, "</TD><TD>%.6g</TD>\n", fgroup->maxradius*deg2arcmin);
     fprintf(file, "     <TD>%s</TD><TD>%s</TD>\n",
-	astrefcat[(int)prefs.astrefcat].name,
-	astrefcat[(int)prefs.astrefcat].bandname ?
-		astrefcat[(int)prefs.astrefcat].bandname : "");
+	astrefcats[(int)prefs.astrefcat].name,
+	astrefcats[(int)prefs.astrefcat].bandname ?
+		astrefcats[(int)prefs.astrefcat].bandname : "");
     fprintf(file, "     <TD>%.6g", fgroup->sig_interr[0]*deg2arcsec);
     for (d=1; d<fgroup->naxis; d++)
       fprintf(file, " %.6g", fgroup->sig_interr[d]*deg2arcsec);
@@ -981,8 +981,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"phot.calib;obs.param","%.6g");
 /*-- Reference catalogs */
     write_xmlconfigparam(file, "Ref_Server", "", "meta.ref.url", "%s");
-    write_xmlconfigparam(file, "Ref_Port", "", "meta.ref.url", "%d");
-    write_xmlconfigparam(file, "CDSClient_Exec", "", "meta;meta.file", "%s");
+    write_xmlconfigparam(file, "Ref_TimeOut", "s",
+		"meta;time.duration", "%.2g");
     write_xmlconfigparam(file, "AstRef_Catalog", "",
 		"meta.code;meta.file", "%s");
     write_xmlconfigparam(file, "AstRef_Band", "", "instr.bandpass", "%s");
@@ -997,7 +997,7 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;phot.mag","%s");
     write_xmlconfigparam(file,"AstRefObsDate_Key", "",
 		"meta.id;time.epoch","%s");
-    write_xmlconfigparam(file, "AstRefMag_Limits", "",
+    write_xmlconfigparam(file, "AstRefMag_Limits", "mag",
 		"phot.mag;stat.min;stat.max;obs.param", "%.6g");
     write_xmlconfigparam(file,"Save_RefCatalog", "",
 		"meta.code","%c");
@@ -1008,6 +1008,15 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;meta.file;meta.dataset", "%s");
     write_xmlconfigparam(file, "MergedOutCat_Type", "",
 		"meta.code;meta.dataset", "%s");
+/*-- Differential Geometry Maps */
+    write_xmlconfigparam(file, "Save_DGeoMap", "",
+		"meta.code","%c");
+    write_xmlconfigparam(file, "DGeoMap_Name", "",
+		"meta.id;meta.file;meta.dataset", "%s");
+    write_xmlconfigparam(file, "DGeoMap_Step", "pix",
+		"meta.number", "%d");
+    write_xmlconfigparam(file, "DGeoMap_NNearest", "",
+		"meta.number", "%d");
 /*-- Full output catalogs */
     write_xmlconfigparam(file, "FullOutCat_Name", "",
 		"meta.id;meta.file;meta.dataset", "%s");
@@ -1038,6 +1047,8 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"pos.angDistance;stat.max", "%.6g");
 /*-- Astrometric solution */
     write_xmlconfigparam(file, "Solve_Astrom", "", "meta.code;obs.param","%c");
+    write_xmlconfigparam(file, "Projection_Type", "",
+		"instr.param;obs.param", "%s");
     write_xmlconfigparam(file,"AstrInstru_Key", "",
 		"meta.id;instr.setup;pos","%s");
     write_xmlconfigparam(file, "Stability_Type", "",
@@ -1105,6 +1116,25 @@ int	write_xml_meta(FILE *file, char *msgerror)
 		"meta.id;stat.param;phot", "%.6g");
     write_xmlconfigparam(file, "Phot_FlagsMask", "", "meta.code.qual", "%d");
     write_xmlconfigparam(file, "Phot_ImaFlagsMask", "", "meta.code.qual", "%d");
+/*-- Source selection */
+    write_xmlconfigparam(file, "SN_Thresholds", "",
+		"stat.snr;stat.min;phot.flux;obs.param", "%.6g");
+    write_xmlconfigparam(file, "FWHM_Thresholds", "",
+		"phys.size.diameter;stat.min;instr.det.psf;obs.param", "%.6g");
+    write_xmlconfigparam(file, "Ellipticity_Max", "",
+		"src.ellipticity;stat.max;obs.param", "%.6g");
+    write_xmlconfigparam(file, "Flags_Mask", "", "meta.code.qual", "%d");
+    write_xmlconfigparam(file, "WeightFlags_Mask", "", "meta.code.qual", "%d");
+    write_xmlconfigparam(file, "ImaFlags_Mask", "", "meta.code.qual", "%d");
+/*-- WCS headers */
+    write_xmlconfigparam(file, "AHeader_Global", "", "meta.id;meta.file","%s");
+    write_xmlconfigparam(file, "AHeader_Name", "", "meta.id;meta.file","%s");
+    write_xmlconfigparam(file, "AHeader_Suffix", "",
+		"meta.id.part;meta.file","%s");
+    write_xmlconfigparam(file, "Header_Name", "", "meta.id;meta.file","%s");
+    write_xmlconfigparam(file, "Header_Suffix", "",
+		"meta.id.part;meta.file","%s");
+    write_xmlconfigparam(file, "Header_Type", "", "meta.code;meta.file","%s");
 /*-- Check-plots */
     write_xmlconfigparam(file, "CheckPlot_CKey", "", "meta.id;meta.code", "%s");
     write_xmlconfigparam(file, "CheckPlot_Dev", "", "meta.code", "%s");
@@ -1112,25 +1142,14 @@ int	write_xml_meta(FILE *file, char *msgerror)
     write_xmlconfigparam(file, "CheckPlot_AntiAlias", "", "meta.code", "%c");
     write_xmlconfigparam(file, "CheckPlot_Type", "", "meta.code", "%s");
     write_xmlconfigparam(file, "CheckPlot_Name", "", "meta.id;meta.file", "%s");
+/*-- Check-images */
     write_xmlconfigparam(file, "CheckImage_Type", "", "meta.code", "%s");
     write_xmlconfigparam(file, "CheckImage_Name", "",
 		"meta.id;meta.file;meta.fits", "%s");
 /*-- Miscellaneous */
-    write_xmlconfigparam(file, "SN_Thresholds", "",
-		"stat.snr;stat.min;phot.flux;obs.param", "%.6g");
-    write_xmlconfigparam(file, "FWHM_Thresholds", "",
-		"phys.size.diameter;stat.min;instr.det.psf;obs.param", "%.6g");
-    write_xmlconfigparam(file, "Flags_Mask", "", "meta.code.qual", "%d");
-    write_xmlconfigparam(file, "WeightFlags_Mask", "", "meta.code.qual", "%d");
-    write_xmlconfigparam(file, "ImaFlags_Mask", "", "meta.code.qual", "%d");
-    write_xmlconfigparam(file, "AHeader_Global", "", "meta.id;meta.file","%s");
-    write_xmlconfigparam(file, "AHeader_Suffix", "",
-		"meta.id.part;meta.file","%s");
-    write_xmlconfigparam(file, "Header_Suffix", "",
-		"meta.id.part;meta.file","%s");
-    write_xmlconfigparam(file, "Header_Type", "", "meta.code;meta.file","%s");
     write_xmlconfigparam(file, "Verbose_Type", "", "meta.code","%s");
     write_xmlconfigparam(file, "Write_XML", "", "meta.code","%s");
+    write_xmlconfigparam(file, "XSL_URL", "", "meta.ref.url","%s");
     write_xmlconfigparam(file, "NThreads", "",
 		"meta.number;meta.software", "%d");
     }

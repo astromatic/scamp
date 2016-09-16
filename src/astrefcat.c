@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		21/07/2015
+*	Last modified:		14/09/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,47 +69,115 @@ keystruct       refkey[] = {
   {""},
   };
 
-astrefstruct	astrefcat[] = 
+astrefstruct	astrefcats[] = 
  {
-  {"NONE", "", 0, 0, {""}},
-  {"file", "", 12, 0, {"1","2","3","4","5","6","7","8","9","10","11","12",""}},
-  {"USNO-A1.0", "pmm1", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
-  {"USNO-A2.0", "pmm2", 2, 0, {"Bj", "Rf",""}, {"B", "R",""}},
-  {"USNO-B1.0", "usnob1", 3, 0, {"Bj", "Rf", "In",""}, {"B1", "R1", "I",""}},
-  {"GSC-1.3", "gsc1.3", 1, 0, {"V",""}, {"V",""}},
-  {"GSC-2.2", "gsc2.2", 4, 0, {"Bj", "V", "Rf", "In",""},
-			{"F", "J", "V", "N",""}},
-  {"GSC-2.3", "gsc2.3", 6, 2, {"U", "B", "Bj", "V", "Rf", "In", ""},
-			{"U", "B", "F", "J", "V", "N", ""}},
-  {"2MASS", "find2m", 3, 0, {"J", "H", "Ks",""}, {"J", "H", "K",""}},
-  {"DENIS-3", "denis3", 3, 0, {"i", "J", "Ks",""}, {"I", "J", "K",""}},
-  {"UCAC-1", "ucac1", 1, 0, {"R",""}, {"R",""}},
-  {"UCAC-2", "ucac2", 1, 0, {"R",""}, {"R",""}},
-  {"UCAC-3", "ucac3", 1, 0, {"R",""}, {"R",""}},
-  {"UCAC-4", "ucac4", 1, 0, {"R",""}, {"R",""}},
-  {"URAT-1", "urat1", 1, 0, {"R",""}, {"R",""}},
-  {"SDSS-R3", "sdss3", 5, 2, {"u", "g", "r", "i", "z",""},
-			{"u", "g", "r", "i", "z",""}},
-  {"SDSS-R5", "sdss5", 5, 2, {"u", "g", "r", "i", "z",""},
-			{"u", "g", "r", "i", "z",""}},
-  {"SDSS-R6", "sdss6", 5, 2, {"u", "g", "r", "i", "z",""},
-			{"u", "g", "r", "i", "z",""}},
-  {"SDSS-R7", "sdss7", 5, 2, {"u", "g", "r", "i", "z",""},
-			{"u", "g", "r", "i", "z",""}},
-  {"SDSS-R8", "sdss8", 5, 2, {"u", "g", "r", "i", "z",""},
-			{"u", "g", "r", "i", "z",""}},
-  {"SDSS-R9", "sdss9", 5, 2, {"u", "g", "r", "i", "z",""},
-			{"u", "g", "r", "i", "z",""}},
-  {"NOMAD-1.0", "nomad1", 6, 2, {"B", "V", "R", "J", "H", "Ks",""},
-			{"B", "V", "R", "J", "H", "K",""}},
-  {"PPMX", "ppmx", 7, 3, {"B", "V", "R", "Rf", "J", "H", "Ks",""},
-			{"B", "V", "R", "C", "J", "H", "K",""}},
-  {"CMC-14", "cmc14", 4, 0, {"r", "J", "H", "Ks",""}, {"r", "J", "H", "K",""}},
-  {"TYCHO-2", "tyc2", 2, 1, {"B", "V",""}, {"B", "V",""}},
+  {"NONE", "", {""}, {""}, {""}, 0, 0},
+
+  {"file", "", {""},
+	{"1","2","3","4","5","6","7","8","9","10","11","12",""},
+	{"1","2","3","4","5","6","7","8","9","10","11","12",""},
+	12, 0},
+
+  {"USNO-A2.0", "I/252", {"RAJ2000","DEJ2000","Epoch","Bmag","Rmag",""},
+	{"Bmag", "Rmag",""}, {"Bj", "Rf",""},
+	2, 0},
+
+  {"USNO-B1.0", "I/284", {"Flags","RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+			"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
+			"B1mag","B2mag","R1mag","R2mag","Imag",""},
+	{"B1mag", "R1mag", "Imag",""}, {"Bj", "Rf", "In",""},
+	3, 0},
+
+  {"GSC-2.3", "I/305", {"Class","RAJ2000","DEJ2000","e_RAdeg","e_DEdeg",
+			"Epoch","Umag","e_Umag","Bmag","e_Bmag","jmag","e_jmag",
+			"Vmag","e_Vmag",""},
+	{"Umag", "Bmag", "jmag", "Vmag", "Fmag", "Nmag", ""},
+	{"U", "B", "Bj", "V", "Rf", "In", ""},
+	6, 3},
+
+  {"2MASS", "II/246", {"Cflg","RAJ2000","DEJ2000","errMaj","errMin","errPA",
+		"JD","Jmag","e_Jmag","Hmag","e_Hmag","Kmag","e_Kmag",""},
+	{"Jmag", "Hmag", "Kmag",""},  {"J", "H", "Ks",""}, 
+	3, 0},
+
+  {"DENIS-3", "B/denis", {"RAJ2000","DEJ2000", "ObsJD",
+		"Imag","e_Imag","Jmag","e_Jmag","Kmag","e_Kmag",""},
+	{"Imag", "Jmag", "Kmag", ""}, {"i", "J", "Ks", ""},
+	3, 0},
+
+  {"UCAC-4", "I/322A",  {"Na", "RAJ2000","DEJ2000","ePos","EpRA","EpDE",
+		"pmRA","pmDE","e_pmRA","e_pmDE","f.mag","e_a.mag",""},
+	{"f.mag", ""}, {"R", ""},
+	1, 0},
+
+  {"URAT-1", "I/329", {"Ns","RAJ2000","DEJ2000","sigm","Epoch",
+		"pmRA","pmDE","e_pm","f.mag","e_f.mag",""},
+	{"f.mag", ""}, {"R", ""},
+	1, 0},
+
+  {"SDSS-R9", "V/139", {"mode","Q","RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+		"ObsDate", "umag","e_umag","gmag","e_gmag","rmag","e_rmag",
+		"imag","e_imag","zmag","e_zmag",""},
+	{"umag", "gmag", "rmag", "imag", "zmag", ""},
+	{"u", "g", "r", "i", "z", ""},
+	5, 2},
+
+  {"NOMAD-1.0", "I/297", {"RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+		"pmRA","pmDE","e_pmRA","e_pmDE",
+		"Bmag","Vmag","Rmag","Jmag","Hmag","Kmag",""},
+	{"Bmag", "Vmag", "Rmag", "Jmag", "Hmag", "Kmag",""},
+	{"B", "V", "R", "J", "H", "Ks", ""},
+	6, 2},
+
+  {"PPMX", "I/312", {"RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+		"pmRA","pmDE","e_pmRA","e_pmDE",
+		"Bmag","e_Bmag","Vmag","e_Vmag","Rmag","e_Rmag",
+		"Jmag","e_Jmag","Hmag","e_Hmag","Kmag","e_Kmag",""},
+	{"Bmag", "Vmag", "Rmag", "Cmag", "Jmag", "Hmag", "Kmag", ""},
+	{"B", "V", "R", "Rf", "J", "H", "Ks", ""},
+	7, 3},
+
+  {"CMC-15", "I/327", {"RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000","MJD-51263",
+		"r'mag","e_r'mag","Jmag","Hmag","Ksmag",""},
+	{"r'mag", "Jmag", "Hmag", "Ksmag",""}, {"r'", "J", "H", "Ks",""},
+	4, 0,},
+
+  {"TYCHO-2", "I/259/tyc2", {"pflag","RAmdeg","DEmdeg","e_RAmdeg","e_DEmdeg",
+		"pmRA","pmDE","e_pmRA","e_pmDE",
+		"BTmag","e_BTmag","VTmag","e_VTmag",""},
+	{"BTmag", "VTmag",""}, {"BT", "VT",""},
+	2, 1},
+
+  {"IGSL", "I/324", {"RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+		"alphaEpoch","deltaEpoch","pmRA","pmDE","e_pmRA","e_pmDE",
+		"magBJ","e_magBJ","magG","e_magG","magRF","e_magRF",
+		"magGrvs","e_magGrvs",""},
+	{"magBJ", "magG", "magRF", "magGrvs", ""},
+	{"Bj", "G", "Rf", "Grvs", ""},
+	7, 3},
+
+  {"ALLWISE", "II/328", {"ccf","RAJ2000","DEJ2000","eeMaj","eeMin","eePA",
+		"pmRA","pmDE","e_pmRA","e_pmDE",
+		"Jmag","e_Jmag","Hmag","e_Hmag","Kmag","e_Kmag",
+		"W1mag","e_W1mag","W2mag","e_W2mag","W3mag","e_W3mag",
+		"W4mag","e_W4mag",""},
+	{"Jmag", "Hmag", "Kmag", "W1mag", "W2mag", "W3mag", "W4mag", ""},
+	{"J", "H", "Ks", "W1", "W2", "W3", "W4", ""}, 
+	7, 3},
+
+  {"GAIA-DR1", "I/337", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
+		"<FG>","e_<FG>","<Gmag>",""},
+	{"<Gmag>", ""},
+	{"G", ""},
+	1, 0},
+
   {""}
  };
 
 static char	*astref_strncpy(char *dest, char *src, int n);
+static void	vizier_to_array(char *str, char (*cols)[COLUMN_SIZE]);
+
 const char	astref_ctype[NAXIS][8]= {"RA---STG", "DEC--STG"};
 
 const double	astref_crpix[NAXIS] = {8192.5, 8192.5},
@@ -130,26 +198,30 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 21/07/2015
+VERSION	14/09/2016
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
   {
+   astrefstruct	*astrefcat;
    fieldstruct	*field,*tfield;
    setstruct	*set;
    samplestruct	*sample;
    URL_FILE	*file;
-   char		*ctype[NAXIS],
+   char		cols[MAX_COLUMN][COLUMN_SIZE],
 		url[MAXCHAR], maglimcmd[128],
-		col[80], str[MAXCHAR],
-		smag[MAX_BAND][32],smagerr[MAX_BAND][32],
-		sprop[NAXIS][32],sproperr[NAXIS][32], sflag[4],
-		*bandname, *cdsbandname, *catname,
+		str[MAXCHAR],
+		*ctype[NAXIS],
+		*sepoch[NAXIS], *sprop[NAXIS], *sproperr[NAXIS],
+		*sflag, *smag, *smagerr,
+		*colname, *col,
+		*bandname, *vizierbandname, *catname,
 		flag1,flag2, smode;
-   double	poserr[NAXIS],prop[NAXIS],properr[NAXIS],
-		mag[MAX_BAND],magerr[MAX_BAND], epoch,epocha,epochd,
-		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt, temp;
-   int		b,c,d,i,n,s, nsample,nsamplemax, nobs, class, band, nband;
+   double	poserr[NAXIS], prop[NAXIS], properr[NAXIS],
+		mag[MAX_BAND], magerr[MAX_BAND], flux, fluxerr, epoch,
+		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt;
+   int		b,c,d,i,n,s,
+		nsample,nsamplemax, nobs, mode, qual, band, nband, cindex;
 
 /* One needs 2 angular coordinates here! */
   if (naxis<2)
@@ -163,16 +235,17 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     refcat = ASTREFCAT_FILE;
     }
 
-  catname = (char *)astrefcat[(int)refcat].name;
-  nband = astrefcat[(int)refcat].nband;
+  astrefcat = &astrefcats[(int)refcat];
+  catname = astrefcat->name;
+  nband = astrefcat->nband;
   if (!cistrcmp(prefs.astref_bandname, "DEFAULT", FIND_STRICT))
-    band = astrefcat[(int)refcat].defband;
+    band = astrefcat->defband;
   else if (!cistrcmp(prefs.astref_bandname, "BLUEST", FIND_STRICT))
     band = 0;
   else if (!cistrcmp(prefs.astref_bandname, "REDDEST", FIND_STRICT))
     band = nband-1;
   else if ((band=findkeys(prefs.astref_bandname,
-		astrefcat[(int)refcat].bandnames, FIND_STRICT))==RETURN_ERROR)
+		astrefcat->bandnames, FIND_STRICT))==RETURN_ERROR)
     {
     sprintf(str, "%s: no such band in astrometric reference catalog %s, use ",
 	prefs.astref_bandname, catname);
@@ -180,14 +253,14 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       {
       if (b)
         strcat(str, b==nband-1? " or " : ", ");
-      strcat(str, astrefcat[(int)refcat].bandnames[b]);
+      strcat(str, astrefcat->bandnames[b]);
       }
     error(EXIT_FAILURE, "*Error*: ", str);
     }
-  astrefcat[(int)refcat].band = band;
-  bandname = astrefcat[(int)refcat].bandname
-	= astrefcat[(int)refcat].bandnames[band];
-  cdsbandname = astrefcat[(int)refcat].cdsbandnames[band];
+  astrefcat->band = band;
+  bandname = astrefcat->bandname
+	= astrefcat->bandnames[band];
+  vizierbandname = astrefcat->vizierbandnames[band];
 
 /* Call the right catalog */
   if (refcat==ASTREFCAT_FILE)
@@ -220,38 +293,55 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
 /* Prepare mag limit section of the command line */
   if (prefs.astref_maglim[0]>-99.0 || prefs.astref_maglim[1]<99.0)
-    sprintf(maglimcmd, "-lm%s&%f,%f&-m&10000000",
-	cdsbandname, prefs.astref_maglim[0],prefs.astref_maglim[1]);
+    sprintf(maglimcmd, "%s=%f..%f&",
+	vizierbandname, prefs.astref_maglim[0],prefs.astref_maglim[1]);
   else
-    strcpy(maglimcmd, "-m&10000000");
+    strcpy(maglimcmd, "");
 
 /// Test all provided servers until one replies
   for (s=0; s<prefs.nref_server; s++) {
+    colname = astrefcat->viziercolumns[0];
     sprintf(url,
-	"http://%s/viz-bin/aserver.cgi?%s&-c&%.7f%s%.7f&-r&%.8g&%s",
+	"http://%s/viz-bin/asu-tsv?&-mime=csv&-source=%s&-out.max=10000000"
+	"&-out.meta=&%s-c=%.7f,%s%.7f&-c.rd=%.8g&-out=%s",
 	prefs.ref_server[s],
-	astrefcat[(int)refcat].cdsname,
+	astrefcat->viziername,
+	maglimcmd,
 	wcspos[lng],
 	wcspos[lat]>=0.0? "%2b" : "-",
 	fabs(wcspos[lat]),
-	maxradius*DEG/ARCMIN,
-	maglimcmd);
-    sprintf(str,"Querying %s from %s for astrometric reference stars...",
-	catname,
-	prefs.ref_server[s]);
+	maxradius,
+	colname);
+    while (*(colname += COLUMN_SIZE)) {
+      strcat(url, ",");
+      strcat(url, colname); 
+    }
+
+    sprintf(str,"Querying %s for %s astrometric reference stars...",
+	prefs.ref_server[s],
+	catname);
     NFPRINTF(OUTPUT, str);
     FPRINTF(OUTPUT, "Querying url %s \n", url);
-    file = url_fopen(url, (long)prefs.ref_timeout[s]);
-    // Test and skip the two first lines
-    if (url_fgets(str, MAXCHAR, file) && url_fgets(str, MAXCHAR, file))
+    file = url_fopen(url, prefs.ref_timeout[s]);
+    // Test and skip the first line
+    *str = '\0';
+    if (url_fgets(str, MAXCHAR, file) && *str == '#')
       break;
     else {
       url_fclose(file);
-      if (s == prefs.nref_server-1)
-        error(EXIT_FAILURE,"*Error*: No reply from catalog server ",
+      if (s == prefs.nref_server-1) {
+        if (*str)
+          error(EXIT_FAILURE, "*Error*: No VizieR server at ",
 		prefs.ref_server[s]);
-      else
-        warning(prefs.ref_server[s], " connection timed out");
+        else
+          error(EXIT_FAILURE, "*Error*: Connection timeout for ",
+		prefs.ref_server[s]);
+      } else {
+        if (*str)
+          warning("No VizieR server at ", prefs.ref_server[s]);
+        else
+          warning("Connection timeout for ", prefs.ref_server[s]);
+      }
     }
   }
 
@@ -261,574 +351,409 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
 /* Now examine each entry */
   while (url_fgets(str, MAXCHAR, file))
-    if (*str != '#')
+    if (*str != '#' && *str != '\n'  && *str != '-')
       {
+      memset(cols, 0, MAX_COLUMN*COLUMN_SIZE);
+      vizier_to_array(str, cols);
+      cindex = 0;
       switch(refcat)
         {
-        case ASTREFCAT_USNOA1:
         case ASTREFCAT_USNOA2:
-          alpha = atof(astref_strncpy(col, str+14, 10));
-          delta = atof(astref_strncpy(col, str+24, 10));
-          mag[0] = atof(astref_strncpy(col, str+37, 4));
-          mag[1] = atof(astref_strncpy(col, str+42, 4));
-          epoch = atof(astref_strncpy(col, str+47, 8));
-          poserr[lat] = poserr[lng] = (refcat==ASTREFCAT_USNOA1)?
-				USNOA1_POSERR : USNOA2_POSERR;
-          magerr[0] = magerr[1] = (refcat==ASTREFCAT_USNOA1)?
-			USNOA1_BMAGERR : USNOA2_BMAGERR;
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lat] = poserr[lng] = USNOA2_POSERR;
+          sepoch[lng] = cols[cindex++];
+          if (sepoch[lng][3] <= ' ')
+            continue;
+          epoch = atof(sepoch[lng]);
+          mag[0] = atof(cols[cindex++]);
+          mag[1] = atof(cols[cindex++]);
+          magerr[0] = magerr[1] = USNOA2_BMAGERR;
           break;
 
         case ASTREFCAT_USNOB1:
 /*-------- Avoid spikes */
-          strcpy(sflag, astref_strncpy(col, str+92, 3));
+          sflag = cols[cindex++];
           if (sflag[0]=='s' || sflag[1]=='s' || sflag[2]=='s')
             continue;
-          alpha = atof(astref_strncpy(col, str+26, 10));
-          delta = atof(astref_strncpy(col, str+36, 10));
-          poserr[lng] = atof(astref_strncpy(col, str+47, 3));
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++]);
           if (poserr[lng] != 999.0)
             poserr[lng] *= MAS/DEG;
           else
             poserr[lng] = USNOB1_POSERR;
-          poserr[lat] = atof(astref_strncpy(col, str+51, 3));
+          poserr[lat] = atof(cols[cindex++]);
           if (poserr[lat] != 999.0)
             poserr[lat] *= MAS/DEG;
           else
             poserr[lat] = USNOB1_POSERR;
-          epocha = epochd = atof(astref_strncpy(col, str+55, 6));
-          prop[lng] = atof(astref_strncpy(col, str+62, 6))*MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+69, 6))*MAS/DEG;
-          properr[lng] = atof(astref_strncpy(col, str+78, 3))*MAS/DEG;
-          properr[lat] = atof(astref_strncpy(col, str+82, 3))*MAS/DEG;
-          strcpy(smag[0], astref_strncpy(col, str+96, 6));
-          strcpy(smag[1], astref_strncpy(col, str+127, 6));
-          strcpy(smag[2], astref_strncpy(col, str+158, 6));
-          strcpy(smag[3], astref_strncpy(col, str+189, 6));
-          strcpy(smag[4], astref_strncpy(col, str+220, 6));
-          epoch = (properr[lng]==0.0 && properr[lat]==0.0)?
-		0.5*(epocha+epochd) : 2000.0;
-          for (b=0; b<5; b++)	/* 5, not nband!*/ 
-            if (smag[b][4] == '-')
+          epoch = atof(cols[cindex++]);
+          prop[lng] = atof(cols[cindex++])*MAS/DEG;
+          prop[lat] = atof(cols[cindex++])*MAS/DEG;
+          properr[lng] = atof(cols[cindex++])*MAS/DEG;
+          properr[lat] = atof(cols[cindex++])*MAS/DEG;
+          if (properr[lng]!=0.0 || properr[lat]!=0.0)
+            epoch = 2000.0;
+          for (b=0; b<5; b++) {			/* 5, not nband!*/ 
+            smag = cols[cindex++];
+            if (smag[4] <= ' ')
               mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
+            else {
+              mag[b] = atof(smag);
               magerr[b] = USNOB1_BMAGERR;
-	      }
+	    }
+          }
 /*-------- Merge B1 and B2, R1 and R2, shift In */
           if (mag[0] > 98.0)
-            mag[0] = mag[2];
-          if (mag[2] > 98.0)
-            mag[2] = mag[0];
-          mag[0] = (mag[0] + mag[2])*0.5;
-          if (magerr[0] > 98.0)
-            magerr[0] = magerr[2];
-          if (magerr[2] > 98.0)
-            magerr[2] = magerr[0];
-          magerr[0] = (magerr[0] + magerr[2])*0.5;
+            mag[0] = mag[1];
           if (mag[1] > 98.0)
-            mag[1] = mag[3];
-          if (mag[3] > 98.0)
-            mag[3] = mag[1];
-          mag[1] = (mag[1] + mag[3])*0.5;
+            mag[1] = mag[0];
+          mag[0] = (mag[0] + mag[1])*0.5;
+          if (magerr[0] > 98.0)
+            magerr[0] = magerr[1];
           if (magerr[1] > 98.0)
-            magerr[1] = magerr[3];
+            magerr[1] = magerr[0];
+          magerr[0] = (magerr[0] + magerr[1])*0.5;
+          if (mag[2] > 98.0)
+            mag[2] = mag[3];
+          if (mag[3] > 98.0)
+            mag[3] = mag[2];
+          mag[1] = (mag[2] + mag[3])*0.5;
+          if (magerr[2] > 98.0)
+            magerr[2] = magerr[3];
           if (magerr[3] > 98.0)
-            magerr[3] = magerr[1];
-          magerr[1] = (magerr[1] + magerr[3])*0.5;
+            magerr[3] = magerr[2];
+          magerr[1] = (magerr[2] + magerr[3])*0.5;
           mag[2] = mag[4];
           magerr[2] = magerr[4];
           break;
 
-        case ASTREFCAT_GSC1:
-          alpha = atof(astref_strncpy(col, str+11, 9));
-          delta = atof(astref_strncpy(col, str+21, 9));
-          poserr[lng] = atof(astref_strncpy(col, str+32, 4))*ARCSEC/DEG;
-          poserr[lat] = poserr[lng];
-          mag[0] = atof(astref_strncpy(col, str+37, 5));
-          magerr[0] = atof(astref_strncpy(col, str+43, 4));
-          epoch = 1960.0;
-          break;
-
-        case ASTREFCAT_GSC22:
-          class = atoi(astref_strncpy(col, str+106,4));
-          if (class==5)
-            continue;
-          alpha = atof(astref_strncpy(col, str+15, 10));
-          delta = atof(astref_strncpy(col, str+26, 10));
-          epoch = atof(astref_strncpy(col, str+37, 8));
-          poserr[lng] = atof(astref_strncpy(col, str+46, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+52, 5))*ARCSEC/DEG;
-          strcpy(smag[0], astref_strncpy(col, str+58, 5));
-          strcpy(smagerr[0], astref_strncpy(col, str+65, 4));
-          strcpy(smag[1], astref_strncpy(col, str+70, 5));
-          strcpy(smagerr[1], astref_strncpy(col, str+77, 4));
-          strcpy(smag[2], astref_strncpy(col, str+82, 5));
-          strcpy(smagerr[2], astref_strncpy(col, str+89, 4));
-          strcpy(smag[3], astref_strncpy(col, str+94, 5));
-          strcpy(smagerr[3], astref_strncpy(col, str+101, 4));
-          for (b=0; b<nband; b++)
-            if (smag[b][4] == '-')
-              mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = atof(smagerr[b]);
-              }
-/*-------- Swap Bj with Rf and Rf with V to sort passbands by lambda */
-          temp=mag[0];mag[0]=mag[1];mag[1]=temp;
-          temp=magerr[0];magerr[0]=magerr[1];magerr[1]=temp;
-          temp=mag[1];mag[1]=mag[2];mag[2]=temp;
-          temp=magerr[1];magerr[1]=magerr[2];magerr[2]=temp;
-          break;
-
         case ASTREFCAT_GSC23:
-          class = atoi(astref_strncpy(col, str+172,2));
-          if (class==5)
+          if (atoi(cols[cindex++])==5)
             continue;
-          alpha = atof(astref_strncpy(col, str+33, 10));
-          delta = atof(astref_strncpy(col, str+43, 10));
-          poserr[lng] = atof(astref_strncpy(col, str+54, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+60, 5))*ARCSEC/DEG;
-          epoch = atof(astref_strncpy(col, str+66, 8));
-          strcpy(smag[0], astref_strncpy(col, str+76, 5));
-          strcpy(smagerr[0], astref_strncpy(col, str+83, 4));
-          strcpy(smag[1], astref_strncpy(col, str+92, 5));
-          strcpy(smagerr[1], astref_strncpy(col, str+99, 4));
-          strcpy(smag[2], astref_strncpy(col, str+108, 5));
-          strcpy(smagerr[2], astref_strncpy(col, str+115, 4));
-          strcpy(smag[3], astref_strncpy(col, str+124, 5));
-          strcpy(smagerr[3], astref_strncpy(col, str+131, 4));
-          strcpy(smag[4], astref_strncpy(col, str+140, 5));
-          strcpy(smagerr[4], astref_strncpy(col, str+147, 4));
-          strcpy(smag[5], astref_strncpy(col, str+156, 5));
-          strcpy(smagerr[5], astref_strncpy(col, str+163, 4));
-          for (b=0; b<nband; b++)
-            if (smag[b][4] == '-')
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*ARCSEC/DEG;
+          poserr[lat] = atof(cols[cindex++])*ARCSEC/DEG;
+          epoch = atof(cols[cindex++]);
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[4] <= ' ')
               mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = atof(smagerr[b]);
-              }
-/*-------- Swap to sort passbands by lambda */
-          temp=mag[0];mag[0]=mag[4];mag[4]=temp;
-          temp=magerr[0];magerr[0]=magerr[4];magerr[4]=temp;
-          temp=mag[1];mag[1]=mag[5];mag[5]=temp;
-          temp=magerr[1];magerr[1]=magerr[5];magerr[5]=temp;
-          temp=mag[3];mag[3]=mag[5];mag[5]=temp;
-          temp=magerr[3];magerr[3]=magerr[5];magerr[5]=temp;
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = atof(smagerr);
+            }
+          }
           break;
 
         case ASTREFCAT_2MASS:
 /*-------- Avoid contaminated observations */
-          strcpy(sflag, astref_strncpy(col, str+156, 3));
-          if (sflag[0]!='0' || sflag[1]!='0' || sflag[2]!='0')
+          sflag = cols[cindex++];
+          if (sflag[0]!='0' ||sflag[1]!='0' || sflag[2]!='0')
             continue;
-          alpha = atof(astref_strncpy(col, str+0, 10));
-          delta = atof(astref_strncpy(col, str+11, 10));
-          poserra = atof(astref_strncpy(col, str+22, 4));
-          poserrb = atof(astref_strncpy(col, str+27, 4));
-          poserrtheta = atof(astref_strncpy(col, str+32, 3));
-          strcpy(smag[0], astref_strncpy(col, str+54, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+67, 5));
-          strcpy(smag[1], astref_strncpy(col, str+84, 6));
-          strcpy(smagerr[1], astref_strncpy(col, str+97, 5));
-          strcpy(smag[2], astref_strncpy(col, str+114, 6));
-          strcpy(smagerr[2], astref_strncpy(col, str+127, 5));
-          epoch = atof(astref_strncpy(col, str+243, 12));
-          for (b=0; b<nband; b++)
-            if (smag[b][4] == '-' || smagerr[b][4] == '-')
-              mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = atof(smagerr[b]);
-              }
-/*--------- Projet uncertainties on alpha and delta axes */
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserra = atof(cols[cindex++]);
+          poserrb = atof(cols[cindex++]);
+          poserrtheta = atof(cols[cindex++]);
+/*-------- Project uncertainties on alpha and delta axes */
           cpt = cos(poserrtheta*DEG);
           spt = sin(poserrtheta*DEG);
           poserr[lng] = sqrt(spt*spt*poserra*poserra+cpt*cpt*poserrb*poserrb)
 				*ARCSEC/DEG;
           poserr[lat] = sqrt(cpt*cpt*poserra*poserra+spt*spt*poserrb*poserrb)
 				*ARCSEC/DEG;
-
 /*-------- Convert JDs to epoch */
-          epoch = 2000.0 + (epoch - JD2000)/365.25;
+          epoch = 2000.0 + (atof(cols[cindex++]) - JD2000)/365.25;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[4] <= ' ' || smagerr[4] <= ' ')
+              mag[b] = magerr[b] = 99.0;
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = atof(smagerr);
+            }
+          }
           break;
 
         case ASTREFCAT_DENIS3:
-          alpha = atof(astref_strncpy(col, str+31, 10));
-          delta = atof(astref_strncpy(col, str+42, 10));
-          strcpy(smag[0], astref_strncpy(col, str+53, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+60, 5));
-          strcpy(smag[1], astref_strncpy(col, str+66, 6));
-          strcpy(smagerr[1], astref_strncpy(col, str+73, 5));
-          strcpy(smag[2], astref_strncpy(col, str+79, 6));
-          strcpy(smagerr[2], astref_strncpy(col, str+86, 5));
-          epoch = atof(astref_strncpy(col, str+448, 14));
-          for (b=0; b<nband; b++)
-            if (smag[b][2] == ' ' || smagerr[b][2] == ' ')
-              mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = atof(smagerr[b]);
-              }
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
           poserr[lat] = poserr[lng] = DENIS3_POSERR;
 /*-------- Convert JDs to epoch */
-          epoch = 2000.0 + (epoch - JD2000)/365.25;
-          break;
-
-        case ASTREFCAT_UCAC1:
-/*-------- Avoid poor observations */
-          nobs = atoi(astref_strncpy(col, str+46, 2));
-          if (nobs<2)
-            continue;
-          alpha = atof(astref_strncpy(col, str+9, 11));
-          delta = atof(astref_strncpy(col, str+20, 11));
-          poserr[lng] = atof(astref_strncpy(col, str+32, 3))*MAS/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+36, 3))*MAS/DEG;
-          mag[0] = atof(astref_strncpy(col, str+40, 5));
-          magerr[0] = UCAC_MAGERR;
-          epoch = atof(astref_strncpy(col, str+49, 8));
-          prop[lng] = atof(astref_strncpy(col, str+58, 8))*MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+67, 8))*MAS/DEG;
-          properr[lng] = atof(astref_strncpy(col, str+76, 4))*MAS/DEG;
-          properr[lat] = atof(astref_strncpy(col, str+81, 4))*MAS/DEG;
-          break;
-
-        case ASTREFCAT_UCAC2:
-/*-------- Avoid poor observations */
-          nobs = atoi(astref_strncpy(col, str+50, 2));
-          if (nobs<2)
-            continue;
-          alpha = atof(astref_strncpy(col, str+9, 11));
-          delta = atof(astref_strncpy(col, str+20, 11));
-          poserr[lng] = atof(astref_strncpy(col, str+32, 3))*MAS/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+36, 3))*MAS/DEG;
-          mag[0] = atof(astref_strncpy(col, str+44, 5));
-          magerr[0] = UCAC_MAGERR;
-          epocha = atof(astref_strncpy(col, str+60, 8));
-          epochd = atof(astref_strncpy(col, str+69, 8));
-          epoch = 2000.0;
-          prop[lng] = atof(astref_strncpy(col, str+78, 8))*MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+87, 8))*MAS/DEG;
-          properr[lng] = atof(astref_strncpy(col, str+96, 4))*MAS/DEG;
-          properr[lat] = atof(astref_strncpy(col, str+101, 4))*MAS/DEG;
-          break;
-
-        case ASTREFCAT_UCAC3:
-/*-------- Avoid poor observations */
-          nobs = atoi(astref_strncpy(col, str+88,3));
-          if (nobs<2)
-            continue;
-          alpha = atof(astref_strncpy(col, str+11, 11));
-          delta = atof(astref_strncpy(col, str+22, 11));
-          poserr[lng] = poserr[lat]=atof(astref_strncpy(col,str+42,4))*MAS/DEG;
-          epocha = atof(astref_strncpy(col, str+47, 7));
-          epochd = atof(astref_strncpy(col, str+55, 7));
-          mag[0] = atof(astref_strncpy(col, str+63, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+77, 5));
-          strcpy(sprop[lng], astref_strncpy(col, str+104, 8));
-          strcpy(sprop[lat], astref_strncpy(col, str+113, 8));
-          strcpy(sproperr[lng], astref_strncpy(col, str+122, 4));
-          strcpy(sproperr[lat], astref_strncpy(col, str+127, 4));
-          magerr[0] = (smagerr[0][2]=='-')? 0.9 : atof(smagerr[0]);
-          if (sprop[lng][6]== ' ' || sprop[lat][6]== ' ')
-            {
-            prop[lng] = prop[lat] = properr[lng] = properr[lat] = 0.0;
-            epoch = 0.5*(epocha+epochd);
+          epoch = 2000.0 + (atof(cols[cindex++]) - JD2000)/365.25;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[2] <= ' ' || smagerr[2] <= ' ')
+              mag[b] = magerr[b] = 99.0;
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = atof(smagerr);
             }
-          else
-            {
-            prop[lng] = atof(sprop[lng])*MAS/DEG;
-            prop[lat] = atof(sprop[lat])*MAS/DEG;
-            properr[lng] = (sproperr[lng][2]=='-'?
-				1000.0 : atof(sproperr[lng])) * MAS/DEG;
-            properr[lat] = (sproperr[lat][2]=='-'?
-				1000.0 : atof(sproperr[lat])) * MAS/DEG;
-            epoch = 2000.0;
-            }
+          }
           break;
 
         case ASTREFCAT_UCAC4:
 /*-------- Avoid poor observations */
-          nobs = atoi(astref_strncpy(col, str+89, 3));
-          if (nobs<2)
+          if (atoi(cols[cindex++])<2)
             continue;
-          alpha = atof(astref_strncpy(col, str+11, 11));
-          delta = atof(astref_strncpy(col, str+22, 11));
-          poserr[lng] = poserr[lat]=atof(astref_strncpy(col,str+42,4))*MAS/DEG;
-          epocha = atof(astref_strncpy(col, str+47, 7));
-          epochd = atof(astref_strncpy(col, str+55, 7));
-          mag[0] = atof(astref_strncpy(col, str+63, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+77, 4));
-          strcpy(sprop[lng], astref_strncpy(col, str+101, 8));
-          strcpy(sprop[lat], astref_strncpy(col, str+110, 8));
-          strcpy(sproperr[lng], astref_strncpy(col, str+119, 4));
-          strcpy(sproperr[lat], astref_strncpy(col, str+124, 4));
-          magerr[0] = (smagerr[0][2]=='-')? 0.9 : atof(smagerr[0]);
-          if (sprop[lng][6]== ' ' || sprop[lat][6]== ' ')
-            {
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = poserr[lat] = atof(cols[cindex++]) * MAS/DEG;
+          sepoch[lng] = cols[cindex++];
+          sepoch[lat] = cols[cindex++];
+          sprop[lng] = cols[cindex++];
+          sprop[lat] = cols[cindex++];
+          sproperr[lng] = cols[cindex++];
+          sproperr[lat] = cols[cindex++];
+          if (sprop[lng][6]<= ' ' || sprop[lat][6]<= ' ') {
             prop[lng] = prop[lat] = properr[lng] = properr[lat] = 0.0;
-            epoch = 0.5*(epocha+epochd);
-            }
-          else
-            {
+            epoch = 0.5*(atof(sepoch[lng]) + atof(sepoch[lat]));
+          } else {
             prop[lng] = atof(sprop[lng])*MAS/DEG;
             prop[lat] = atof(sprop[lat])*MAS/DEG;
-            properr[lng] = (sproperr[lng][2]=='-'?
+            properr[lng] = (sproperr[lng][2]==' '?
 				1000.0 : atof(sproperr[lng])) * MAS/DEG;
-            properr[lat] = (sproperr[lat][2]=='-'?
+            properr[lat] = (sproperr[lat][2]==' '?
 				1000.0 : atof(sproperr[lat])) * MAS/DEG;
             epoch = 2000.0;
-            }
+          }
+          smag = cols[cindex++];
+          smagerr = cols[cindex++];
+          mag[0] = atof(smag);
+          magerr[0] = (smagerr[2]==' ')? 0.9 : atof(smagerr);
           break;
 
         case ASTREFCAT_URAT1:
 /*-------- Avoid poor observations */
-          nobs = atoi(astref_strncpy(col, str+42, 2));
+          nobs = atoi(cols[cindex++]);
 //          if (nobs<2)
 //            continue;
-          alpha = atof(astref_strncpy(col, str+11, 11));
-          delta = atof(astref_strncpy(col, str+22, 11));
-          poserr[lng] = atof(astref_strncpy(col,str+34,3)) * MAS/DEG;
-          poserr[lat] = atof(astref_strncpy(col,str+38,3)) * MAS/DEG;
-          epoch = atof(astref_strncpy(col, str+48, 8));
-          mag[0] = atof(astref_strncpy(col, str+57, 6));
-          magerr[0] = atof(astref_strncpy(col, str+64, 5));
-          prop[lng] = atof(astref_strncpy(col, str+91, 8)) * MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+100, 8)) * MAS/DEG;
-          properr[lng] = properr[lat] = atof(astref_strncpy(col, str+109, 4))
-					* MAS/DEG;
-          break;
-
-        case ASTREFCAT_SDSSR3:
-/*-------- Avoid missing or poor observations */
-          nobs = atoi(astref_strncpy(col, str+56,1));
-          if (nobs<2 || nobs>3)
-            continue;
-          alpha = atof(astref_strncpy(col, str+25, 10));
-          delta = atof(astref_strncpy(col, str+35, 10));
-          epoch = atof(astref_strncpy(col, str+46, 9));
-          mag[0] = atof(astref_strncpy(col, str+58, 6));
-          magerr[0] = atof(astref_strncpy(col, str+65, 5));
-          mag[1] = atof(astref_strncpy(col, str+71, 6));
-          magerr[1] = atof(astref_strncpy(col, str+78, 5));
-          mag[2] = atof(astref_strncpy(col, str+84, 6));
-          magerr[2] = atof(astref_strncpy(col, str+91, 5));
-          mag[3] = atof(astref_strncpy(col, str+97, 6));
-          magerr[3] = atof(astref_strncpy(col, str+104, 5));
-          mag[4] = atof(astref_strncpy(col, str+110, 6));
-          magerr[4] = atof(astref_strncpy(col, str+117, 5));
-          poserr[lng] = poserr[lat] = SDSSR3_POSERR;
-          break;
-
-        case ASTREFCAT_SDSSR5:
-/*-------- Avoid missing or poor observations, and secondary detections */
-         smode = str[0];
-         nobs = atoi(astref_strncpy(col, str+76, 1));
-         if (nobs<2 || nobs>3 || smode=='2')
-            continue;
-          alpha = atof(astref_strncpy(col, str+27, 10));
-          delta = atof(astref_strncpy(col, str+37, 10));
-          poserr[lng] = atof(astref_strncpy(col, str+48, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+54, 5))*ARCSEC/DEG;
-          epoch = atof(astref_strncpy(col, str+66, 9));
-          mag[0] = atof(astref_strncpy(col, str+78, 6));
-          magerr[0] = atof(astref_strncpy(col, str+85, 5));
-          mag[1] = atof(astref_strncpy(col, str+91, 6));
-          magerr[1] = atof(astref_strncpy(col, str+98, 5));
-          mag[2] = atof(astref_strncpy(col, str+104, 6));
-          magerr[2] = atof(astref_strncpy(col, str+111, 5));
-          mag[3] = atof(astref_strncpy(col, str+117, 6));
-          magerr[3] = atof(astref_strncpy(col, str+124, 5));
-          mag[4] = atof(astref_strncpy(col, str+130, 6));
-          magerr[4] = atof(astref_strncpy(col, str+137, 5));
-          break;
-        case ASTREFCAT_SDSSR6:
-        case ASTREFCAT_SDSSR7:
-/*-------- Avoid missing or poor observations, and secondary detections */
-          smode = str[0];
-          nobs = atoi(astref_strncpy(col, str+76, 1));
-          if (nobs<2 || nobs>3 || smode=='2')
-            continue;
-          alpha = atof(astref_strncpy(col, str+27, 10));
-          delta = atof(astref_strncpy(col, str+37, 10));
-          poserr[lng] = atof(astref_strncpy(col, str+48, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+54, 5))*ARCSEC/DEG;
-          epoch = atof(astref_strncpy(col, str+66, 9));
-          mag[0] = atof(astref_strncpy(col, str+93, 6));
-          magerr[0] = atof(astref_strncpy(col, str+100, 5));
-          mag[1] = atof(astref_strncpy(col, str+106, 6));
-          magerr[1] = atof(astref_strncpy(col, str+113, 5));
-          mag[2] = atof(astref_strncpy(col, str+119, 6));
-          magerr[2] = atof(astref_strncpy(col, str+126, 5));
-          mag[3] = atof(astref_strncpy(col, str+132, 6));
-          magerr[3] = atof(astref_strncpy(col, str+139, 5));
-          mag[4] = atof(astref_strncpy(col, str+145, 6));
-          magerr[4] = atof(astref_strncpy(col, str+152, 5));
-          break;
-
-        case ASTREFCAT_SDSSR8:
-/*-------- Avoid missing or poor observations, and secondary detections */
-          smode = str[0];
-          nobs = atoi(astref_strncpy(col, str+70, 1));
-          if (nobs<2 || nobs>3 || smode=='2')
-            continue;
-          alpha = atof(astref_strncpy(col, str+27, 10));
-          delta = atof(astref_strncpy(col, str+37, 10));
-          poserr[lng] = atof(astref_strncpy(col, str+48, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+54, 5))*ARCSEC/DEG;
-          epoch = atof(astref_strncpy(col, str+60, 9));
-          mag[0] = atof(astref_strncpy(col, str+87, 6));
-          magerr[0] = atof(astref_strncpy(col, str+94, 5));
-          mag[1] = atof(astref_strncpy(col, str+100, 6));
-          magerr[1] = atof(astref_strncpy(col, str+107, 5));
-          mag[2] = atof(astref_strncpy(col, str+113, 6));
-          magerr[2] = atof(astref_strncpy(col, str+120, 5));
-          mag[3] = atof(astref_strncpy(col, str+126, 6));
-          magerr[3] = atof(astref_strncpy(col, str+133, 5));
-          mag[4] = atof(astref_strncpy(col, str+139, 6));
-          magerr[4] = atof(astref_strncpy(col, str+146, 5));
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = poserr[lat] = atof(cols[cindex++]) * MAS/DEG;
+          epoch = atof(cols[cindex++]);
+          prop[lng] = atof(cols[cindex++]) * MAS/DEG;
+          prop[lat] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lng] = properr[lat] = atof(cols[cindex++]) * MAS/DEG;
+          mag[0] = atof(cols[cindex++]);
+          magerr[0] = atof(cols[cindex++]);
           break;
 
         case ASTREFCAT_SDSSR9:
 /*-------- Avoid missing or poor observations, and secondary detections */
-          smode = str[0];
-          nobs = atoi(astref_strncpy(col, str+69, 1));
-          if (nobs<2 || nobs>3 || smode=='2')
+          mode = atoi(cols[cindex++]);
+          qual = atoi(cols[cindex++]);
+          if (mode==2 || qual<2 || qual>3)
             continue;
-          alpha = atof(astref_strncpy(col, str+26, 10));
-          delta = atof(astref_strncpy(col, str+36, 10));
-          poserr[lng] = atof(astref_strncpy(col, str+47, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+53, 5))*ARCSEC/DEG;
-          epoch = atof(astref_strncpy(col, str+59, 9));
-          mag[0] = atof(astref_strncpy(col, str+71, 6));
-          magerr[0] = atof(astref_strncpy(col, str+78, 5));
-          mag[1] = atof(astref_strncpy(col, str+84, 6));
-          magerr[1] = atof(astref_strncpy(col, str+91, 5));
-          mag[2] = atof(astref_strncpy(col, str+97, 6));
-          magerr[2] = atof(astref_strncpy(col, str+104, 5));
-          mag[3] = atof(astref_strncpy(col, str+110, 6));
-          magerr[3] = atof(astref_strncpy(col, str+117, 5));
-          mag[4] = atof(astref_strncpy(col, str+123, 6));
-          magerr[4] = atof(astref_strncpy(col, str+130, 5));
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*ARCSEC/DEG;
+          poserr[lat] = atof(cols[cindex++])*ARCSEC/DEG;
+          epoch = atof(cols[cindex++]);
+          for (b=0; b<nband; b++) {
+            mag[b] = atof(cols[cindex++]);
+            magerr[b] = atof(cols[cindex++]);
+          }
           break;
 
         case ASTREFCAT_NOMAD1:
-          alpha = atof(astref_strncpy(col, str+19, 11));
-          delta = atof(astref_strncpy(col, str+30, 11));
-          poserr[lng] = atof(astref_strncpy(col, str+44, 4))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+50, 4))*ARCSEC/DEG;
-          epocha = atof(astref_strncpy(col, str+54, 6));
-          epochd = atof(astref_strncpy(col, str+61, 6));
-          prop[lng] = atof(astref_strncpy(col, str+68, 8))*MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+77, 8))*MAS/DEG;
-          properr[lng] = atof(astref_strncpy(col, str+86, 5))*MAS/DEG;
-          properr[lat] = atof(astref_strncpy(col, str+92, 5))*MAS/DEG;
-          strcpy(smag[0], astref_strncpy(col, str+98, 6));
-          strcpy(smag[1], astref_strncpy(col, str+106, 6));
-          strcpy(smag[2], astref_strncpy(col, str+114, 6));
-          strcpy(smag[3], astref_strncpy(col, str+122, 6));
-          strcpy(smag[4], astref_strncpy(col, str+129, 6));
-          strcpy(smag[5], astref_strncpy(col, str+136, 6));
-          epoch = (properr[lng]==0.0 && properr[lat]==0.0)?
-		0.5*(epocha+epochd) : 2000.0;
-          for (b=0; b<nband; b++)
-            if (smag[b][2] == '-')
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*MAS/DEG;
+          if (poserr[lng] < TINY)
+            poserr[lng] = USNOB1_POSERR;
+          poserr[lat] = atof(cols[cindex++])*MAS/DEG;
+          if (poserr[lat] < TINY)
+            poserr[lat] = USNOB1_POSERR;
+          epoch = 2000.0;
+          prop[lng] = atof(cols[cindex++]) * MAS/DEG;
+          prop[lat] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lng] = atof(cols[cindex++])*MAS/DEG;
+          properr[lat] = atof(cols[cindex++])*MAS/DEG;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[2] <= ' ')
               mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
+            else {
+              mag[b] = atof(smag);
               magerr[b] = NOMAD1_MAGERR;
-              }
+            }
+          }
           break;
 
         case ASTREFCAT_PPMX:
-          alpha = atof(astref_strncpy(col, str+17, 10));
-          delta = atof(astref_strncpy(col, str+27, 10));
-          prop[lng] = atof(astref_strncpy(col, str+38, 8))*MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+47, 8))*MAS/DEG;
-          epocha = atof(astref_strncpy(col, str+56, 7));
-          epochd = atof(astref_strncpy(col, str+64, 7));
-          poserr[lng] = atof(astref_strncpy(col, str+72, 3))*MAS/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+76, 3))*MAS/DEG;
-          properr[lng] = atof(astref_strncpy(col, str+80, 4))*MAS/DEG;
-          properr[lat] = atof(astref_strncpy(col, str+85, 4))*MAS/DEG;
-          strcpy(smag[3], astref_strncpy(col, str+90, 6));
-          strcpy(smag[2], astref_strncpy(col, str+97, 6));
-          strcpy(smag[0], astref_strncpy(col, str+104, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+111, 3));
-          strcpy(smag[1], astref_strncpy(col, str+115, 6));
-          strcpy(smagerr[1], astref_strncpy(col, str+122, 3));
-          strcpy(smag[4], astref_strncpy(col, str+126, 6));
-          strcpy(smagerr[4], astref_strncpy(col, str+133, 3));
-          strcpy(smag[5], astref_strncpy(col, str+137, 6));
-          strcpy(smagerr[5], astref_strncpy(col, str+144, 3));
-          strcpy(smag[6], astref_strncpy(col, str+148, 6));
-          strcpy(smagerr[6], astref_strncpy(col, str+155, 3));
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*MAS/DEG;
+          poserr[lat] = atof(cols[cindex++])*MAS/DEG;
           epoch = 2000.0;
-          for (b=0; b<nband; b++)
-            if (smag[b][2] == '-')
+          prop[lng] = atof(cols[cindex++]) * MAS/DEG;
+          prop[lat] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lng] = atof(cols[cindex++])*MAS/DEG;
+          properr[lat] = atof(cols[cindex++])*MAS/DEG;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = (b!=2 && b!=3) ? cols[cindex++] : (char *)NULL;
+            if (smag[2] <= ' ')
               mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = (b!=2 && b!=3)? atof(smagerr[b])*0.001 : GSC_MAGERR;
-              }
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = smagerr? atof(smagerr)*0.001 : GSC_MAGERR;
+            }
+          }
           break;
 
-        case ASTREFCAT_CMC14:
-          alpha = sextodegal(astref_strncpy(col, str+17, 13));
-          delta = sextodegde(astref_strncpy(col, str+30, 13));
-          epoch = atof(astref_strncpy(col, str+44, 4));
-          strcpy(smag[0], astref_strncpy(col, str+49, 6));
-          poserr[lng] = atof(astref_strncpy(col, str+66, 5))*ARCSEC/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+72, 5))*ARCSEC/DEG;
-          strcpy(smagerr[0], astref_strncpy(col, str+78, 5));
-          strcpy(smag[1], astref_strncpy(col, str+84, 6));
-          strcpy(smag[2], astref_strncpy(col, str+91, 6));
-          strcpy(smag[3], astref_strncpy(col, str+98, 6));
-/*-------- Convert JDs to epoch */
-          epoch = 2000.0 + (epoch - (JD2000-2451263.5))/365.25;
-          for (b=0; b<nband; b++)
-            if (smag[b][2] == '-')
+        case ASTREFCAT_CMC15:
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*ARCSEC/DEG;
+          if (poserr[lng] < TINY)
+            poserr[lng] = CMC15_POSERR;
+          poserr[lat] = atof(cols[cindex++])*ARCSEC/DEG;
+          if (poserr[lat] < TINY)
+            poserr[lat] = CMC15_POSERR;
+          epoch = 2000.0 + (atof(cols[cindex++]) - (JD2000-2451263.5))/365.25;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = b==0 ? cols[cindex++] : (char *)NULL;
+            if (smag[2] <= ' ')
               mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = (b==0) ? atof(smagerr[b]) : DEFAULT_MAGERR;
-              }
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = smagerr? atof(smagerr) : DEFAULT_MAGERR;
+              if (magerr[b] == 0.0)
+                magerr[b] = DEFAULT_MAGERR;
+            }
+          }
           break;
+
         case ASTREFCAT_TYCHO2:
-/*-------- Reject (fainter) sources without proper motions */
-          if (*astref_strncpy(col, str+27, 1) == ' ')
+/*-------- Reject (fainter) sources without mean positions and proper motions */
+          sflag = cols[cindex++]; 
+          if (sflag[0]=='X')
             continue;
-          alpha = atof(astref_strncpy(col, str+24, 12));
-          delta = atof(astref_strncpy(col, str+37, 12));
-          prop[lng] = atof(astref_strncpy(col, str+50, 7))*MAS/DEG;
-          prop[lat] = atof(astref_strncpy(col, str+58, 7))*MAS/DEG;
-          poserr[lng] = atof(astref_strncpy(col, str+66, 3))*MAS/DEG;
-          poserr[lat] = atof(astref_strncpy(col, str+70, 3))*MAS/DEG;
-          properr[lng] = atof(astref_strncpy(col, str+74, 4))*MAS/DEG;
-          properr[lat] = atof(astref_strncpy(col, str+79, 4))*MAS/DEG;
-          strcpy(smag[0], astref_strncpy(col, str+123, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+130, 6));
-          strcpy(smag[1], astref_strncpy(col, str+137, 6));
-          strcpy(smagerr[0], astref_strncpy(col, str+144, 6));
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*MAS/DEG;
+          poserr[lat] = atof(cols[cindex++])*MAS/DEG;
           epoch = 2000.0;
-          for (b=0; b<nband; b++)
-            if (smag[b][2] == ' ')
+          prop[lng] = atof(cols[cindex++]) * MAS/DEG;
+          prop[lat] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lng] = atof(cols[cindex++])*MAS/DEG;
+          properr[lat] = atof(cols[cindex++])*MAS/DEG;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[2] <= ' ')
               mag[b] = magerr[b] = 99.0;
-            else
-              {
-              mag[b] = atof(smag[b]);
-              magerr[b] = (smagerr[b][2] != ' ') ?
-			atof(smagerr[b]) : DEFAULT_MAGERR;
-              }
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = smagerr[2] <= ' '? atof(smagerr): DEFAULT_MAGERR;
+            }
+          }
           break;
+
+        case ASTREFCAT_IGSL:
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*ARCSEC/DEG;
+          poserr[lat] = atof(cols[cindex++])*ARCSEC/DEG;
+          sepoch[lng] = cols[cindex++];
+          sepoch[lat] = cols[cindex++];
+          prop[lng] = atof(cols[cindex++]) * MAS/DEG;
+          prop[lat] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lng] = atof(cols[cindex++])*MAS/DEG;
+          properr[lat] = atof(cols[cindex++])*MAS/DEG;
+          epoch = 2000.0;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[2] <= ' ')
+              mag[b] = magerr[b] = 99.0;
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = smagerr[2] <= ' '? atof(smagerr): DEFAULT_MAGERR;
+            }
+          }
+          break;
+
+        case ASTREFCAT_ALLWISE:
+/*-------- Avoid contaminated observations */
+          sflag = cols[cindex++];
+          if (sflag[0]!='0' || sflag[1]!='0' || sflag[2]!='0' || sflag[3]!='0')
+            continue;
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserra = atof(cols[cindex++]);
+          poserrb = atof(cols[cindex++]);
+          poserrtheta = atof(cols[cindex++]);
+/*-------- Project uncertainties on alpha and delta axes */
+          cpt = cos(poserrtheta*DEG);
+          spt = sin(poserrtheta*DEG);
+          poserr[lng] = sqrt(spt*spt*poserra*poserra+cpt*cpt*poserrb*poserrb)
+				*ARCSEC/DEG;
+          poserr[lat] = sqrt(cpt*cpt*poserra*poserra+spt*spt*poserrb*poserrb)
+				*ARCSEC/DEG;
+          epoch = 2000.0;
+          prop[lng] = atof(cols[cindex++]) * MAS/DEG;
+          prop[lat] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lng] = atof(cols[cindex++]) * MAS/DEG;
+          properr[lat] = atof(cols[cindex++]) * MAS/DEG;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[4] <= ' ' || smagerr[4] <= ' ') {
+              mag[b] = magerr[b] = 99.0;
+}
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = atof(smagerr);
+            }
+          }
+          break;
+
+        case ASTREFCAT_GAIADR1:
+/*-------- Reject duplicated sources */
+          sflag = cols[cindex++];
+/*
+          if (sflag[0]!='0')
+            continue;
+*/
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*MAS/DEG;
+          poserr[lat] = atof(cols[cindex++])*MAS/DEG;
+          epoch = atof(cols[cindex++]);
+          sprop[lng] = cols[cindex++];
+          sprop[lat] = cols[cindex++];
+          sproperr[lng] = cols[cindex++];
+          sproperr[lat] = cols[cindex++];
+          if (sprop[lng][4]<= ' ' || sprop[lat][4]<= ' ') {
+            prop[lng] = prop[lat] = properr[lng] = properr[lat] = 0.0;
+          } else {
+            prop[lng] = atof(sprop[lng])*MAS/DEG;
+            prop[lat] = atof(sprop[lat])*MAS/DEG;
+            properr[lng] = (sproperr[lng][1]==' '?
+				1000.0 : atof(sproperr[lng])) * MAS/DEG;
+            properr[lat] = (sproperr[lat][1]==' '?
+				1000.0 : atof(sproperr[lat])) * MAS/DEG;
+          }
+          flux = atof(cols[cindex++]);
+          fluxerr = atof(cols[cindex++]);
+          mag[0] = atof(cols[cindex++]);
+          if (flux <= 0.0)
+            mag[0] = magerr[0] = 99.0;
+          else
+            magerr[0] = 1.0857 * fluxerr / flux;
+          break;
+
         case ASTREFCAT_NONE:
         default:
           break;
@@ -1440,6 +1365,33 @@ static char	*astref_strncpy(char *dest, char *src, int n)
   *destt = '\0';
 
   return dest;
+  }
+
+
+/***i** vizier_to_array ****************************************************
+PROTO	void vizier_to_array(char *str, char (*cols)[COLUMN_SIZE])
+PURPOSE	Copy columns from the Vizier output to an array of strings
+INPUT	Input Vizier string,
+	column array.
+OUTPUT  -.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 05/04/2016
+*/
+static void	vizier_to_array(char *str, char (*cols)[COLUMN_SIZE])
+
+  {
+   char		*col;
+
+  while (*str) {
+    col = *(cols++);
+    while (*str && *str != ';')
+      *(col++) = *(str++); 
+    *col = '\0';
+    str++;
+  }
+
+  return;
   }
 
 
