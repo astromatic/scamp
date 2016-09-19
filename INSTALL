@@ -1,84 +1,131 @@
-Copyright 1994, 1995, 1996, 1999, 2000, 2001, 2002 Free Software
-Foundation, Inc.
+Installing the software
+***********************
 
-   This file is free documentation; the Free Software Foundation gives
-unlimited permission to copy, distribute and modify it.
-
-Basic Installation
-==================
-The simplest way to compile this package is:
-
-  1. `cd' to the directory containing the package's source code and type
-     `./configure' to configure the package for your system.
-  2. Type `make' to compile the package.
-  3. Type `make install' to install the programs and any data files and
-     documentation.
-
-Optional Features
-=================
-By default a single-threaded version of the executable is built, which
-is fine for machines with a single processor core. If the machine the software
-will run on has multiple processors, you might prefer to take advantage
-of parallel processing by enabling multi-threading. For this you must run
-configure with the --enable-threads option:
-
-     ./configure --enable-threads
-
-This will allow the program to run with up to 16 simultaneous threads
-(tasks), at the expense of a small overhead and a slightly higher memory
-usage. If your machine has more than 16 processors, say, 40 (!),
-you may increase the maximum number of threads allowed by using instead
-
-     ./configure --enable-threads=40
-
-The configure script will try by default to link the code with the PLPlot
-library ( http://www.plplot.org ). PLPlot is used to produce all the
-diagnostic plots during processing (the so-called "CHECKPLOTs"). It is
-however by no means mandatory, and may be deactivated with
-
-     ./configure --without-plplot
-
-Alternatively, it might be necessary to link PLPlot may from some unusual
-directory <plplotdir>. Use in that case:
-
-     ./configure --with-plplot=<plplotdir>
-
-SCAMP requires the "aclient" executable from the CDSclient package
-(get it from http://cdsweb.u-strasbg.fr/doc/cdsclient.html).
-If aclient is not in your PATH, you can specify an alternative path (including
-the executable filename) with
-
-     ./configure --with-cdsclient_exec=<aclient_exec>
-
-Compilers and Options
+Hardware requirements
 =====================
 
-   Some systems require unusual options for compilation or linking that
-the `configure' script does not know about.  Run `./configure --help'
-for details on some of the pertinent environment variables.
+SCAMP runs in (ANSI) text-mode from a shell. A window system is
+not necessary for basic operation.
 
-   You can give `configure' initial values for variables by setting
-them in the environment.  You can do that on the command line like this:
+When it comes to memory usage, the amount required by SCAMP depends mostly
+on the size of the input catalogues and on the number of exposures and
+astrometric "contexts" (stable instruments) involved in the astrometric
+solution.  It is not uncommon to see memory usage amounting  to tens of 
+gigabytes when  millions of detections and tens of astrometric contexts
+are involved.
 
-     ./configure CC=c89 CFLAGS=-O2 LIBS=-lposix
+Note that SCAMP takes advantage of multiple CPU cores for most operations.
 
 
-Installation Names
-==================
+Obtaining SCAMP
+===============
 
-   By default, `make install' will install the package's files in
-`/usr/local/bin', `/usr/local/man', etc.  You can specify an
-installation prefix other than `/usr/local' by giving `configure' the
-option `--prefix=PATH'.
+For Linux users, the simplest way to have SCAMP up and running is
+to install the standard binary package the comes with your Linux
+distribution. Run, e.g., "apt-get scamp" (on Debian) or "dnf install scamp"
+(Fedora) and SCAMP, as well as all its dependencies, will
+automatically be installed. If you decided to install the package this
+way you may skip the following and move straight to the next section.
 
-   You can specify separate installation prefixes for
-architecture-specific files and architecture-independent files.  If you
-give `configure' the option `--exec-prefix=PATH', the package will use
-PATH as the prefix for installing programs and libraries.
-Documentation and other data files will still use the regular prefix.
+However if SCAMP is not available in your distribution, or to
+obtain the most recent version, the SCAMP source package can be
+downloaded from the official GitHub repository. One may choose one of
+the stable releases, or for the fearless, a copy of the current master
+development branch.
 
-   In addition, if you use an unusual directory layout you can give
-options like `--bindir=PATH' to specify different values for particular
-kinds of files.  Run `configure --help' for a list of the directories
-you can set and what kinds of files go in them.
+
+Software requirements
+=====================
+
+SCAMP has been developed on GNU/Linux machines and should compile
+on any POSIX-compliant system (this includes Apple OS X and Cygwin
+on Microsoft Windows, at the price of some difficulties with the
+configuration), provided that the development packages of the
+following libraries have been installed:
+
+* ATLAS V3.6 and above [2],
+
+* FFTw V3.0 and above [3],
+
+* PLPlot V5.9 and above.
+
+On Fedora/Redhat distributions for instance, the development packages
+above are available as "atlas-devel", "fftw-devel" and "plplot-devel".
+PLPlot is only required for producing diagnostic plots. Note that
+ATLAS and FFTw are not necessary if SCAMP is linked with
+Intel's MKL (Math Kernel Library) library.
+
+
+Installation
+============
+
+To install from the GitHub source package, you must first uncompress
+the archive:
+
+   $ unzip scamp-<version>.zip
+
+A new directory called "scamp-<version>" should now appear at the
+current location on your disk. Enter the directory and generate the
+files required by the autotools, which the package relies on:
+
+   $ cd scamp-<version>
+   $ sh autogen.sh
+
+A "configure" script is created. This script has many options, which
+may be listed with the "--help" option:
+
+   $ ./configure --help
+
+No options are required for compiling with the default GNU C compiler
+("gcc") if all the required libraries are installed at their default
+locations:
+
+   $ ./configure
+
+Compared to "gcc" and the librairies above, the combination of the
+Intel compiler ("icc") and the MKL (Math Kernel Library) libraries
+can give the SCAMP executable a significant boost in performance,
+thanks to better vectorized code, and reduced memory usage. If "icc"
+and the MKL (Math Kernel Library) are installed on your system [4],
+you can take advantage of those using instead
+
+   $ ./configure --enable-mkl
+
+Additionally, if the SCAMP binary is to be run on a different
+machine that does not have "icc" and the MKL (Math Kernel Library)
+installed (e.g., a cluster computing node), you must configure a
+partially statically linked executable using
+
+   $ ./configure --enable-mkl --enable-auto-flags --enable-best-link
+
+In all cases, SCAMP can now be compiled with
+
+   $ make -j
+
+An "src/scamp" executable is created. For system-wide installation,
+run the usual
+
+   $ sudo make install
+
+You may now check that the software is properly installed by simply
+typing in your shell:
+
+   $ scamp
+
+(note that some shells require the "rehash" command to be run before
+making a freshly installed executable accessible in the execution
+path).
+
+[1] Mac OS X ".dmg" packages should be available soon.
+
+[2] Use the "--with-atlas" and/or "--with-atlas-incdir" options of
+    the SCAMP "configure" script to specify the ATLAS library and
+    include paths if ATLAS files are installed at unusual locations.
+
+[3] Make sure that FFTw has been compiled with "configure"
+    options "--enable-threads --enable-float".
+
+[4] The Linux versions of the Intel compiler and MKL (Math
+    Kernel Library) are available for free to academic researchers,
+    students, educators and open source contributors.
 

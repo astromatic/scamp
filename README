@@ -1,7 +1,0 @@
-SCAMP computes astrometric and photometric solutions from SExtractor catalogs
-and stores them in header files. These headers files can be read by SWarp to
-coadd images.
-Please report any bug or strange behaviour to the SCAMP forum:
-http://astromatic.net/forum
-
-					Emmanuel Bertin <bertin@iap.fr>.

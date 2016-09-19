@@ -5,7 +5,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -20,9 +20,612 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		10/10/2010
+#	Last modified:		19/09/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+------------------------------------------------------------------------
+r345 | bertin | 2015-07-31 22:11:39 +0200 (Fri, 31 Jul 2015) | 3 lines
+
+Increased max number of astrometric and photometric instruments to 2048, and added an error if this number is exceeded (thanks to A.Donnarumma for reporting this issue).
+Pushed version number to 2.2.6.
+
+------------------------------------------------------------------------
+r342 | bertin | 2015-07-21 12:44:21 +0200 (Tue, 21 Jul 2015) | 5 lines
+
+Improved autoconf notifications.
+Fixed cURL configuration issues (thanks to H.J. McCracken for reporting this).
+Removed N_obs>=2 constraint for URAT-1 catalogue (suggestion by B.Stecklum).
+Pushed version number to 2.2.5.
+
+------------------------------------------------------------------------
+r340 | bertin | 2015-07-13 15:24:22 +0200 (Mon, 13 Jul 2015) | 3 lines
+
+Fixed URL encoding issue with NOMAD catalog (thanks to B. Stecklum for reporting this).
+Pushed version number to 2.2.3.
+
+------------------------------------------------------------------------
+r336 | bertin | 2015-06-30 11:20:03 +0200 (Tue, 30 Jun 2015) | 3 lines
+
+Fixed fatal regression with CDS query coordinates (thanks to B.Stecklum for reporting this issue).
+Pushed version number to 2.2.2.
+
+------------------------------------------------------------------------
+r335 | bertin | 2015-06-29 21:56:42 +0200 (Mon, 29 Jun 2015) | 2 lines
+
+Set correct year in copyright line.
+
+------------------------------------------------------------------------
+r334 | bertin | 2015-06-29 21:55:37 +0200 (Mon, 29 Jun 2015) | 3 lines
+
+Fixed query coordinate truncation issue (thanks to forum member olebole for spotting this).
+Pushed version number to 2.2.1.
+
+------------------------------------------------------------------------
+r332 | bertin | 2015-06-29 21:42:30 +0200 (Mon, 29 Jun 2015) | 2 lines
+
+Added missing url.c and url.h.
+
+------------------------------------------------------------------------
+r331 | bertin | 2015-06-29 21:39:22 +0200 (Mon, 29 Jun 2015) | 10 lines
+
+Added set of configuration options to generate differential geometry maps for every astrometric instrument.
+Refactored astrometric reference catalog download mechanism: does not require CDSclient	anymore, now relies on libcurl.
+Added support for multiple servers (queried in sequence after connection timeout exceeded).
+New REF_TIMEOUT parameter that sets the connection timeout for each server.
+Added support for URAT-1 astrometric reference catalog.
+Fixed library name issue with the latest version of PLPlot.
+Fixed autoconf issue with ATLAS custom installs on Debian.
+Pushed version number to 2.2.0.
+
+
+------------------------------------------------------------------------
+r328 | bertin | 2014-07-09 11:16:05 +0200 (Wed, 09 Jul 2014) | 4 lines
+
+Fixed issue with obsoleted PLPlot plwid() function removed from PLPlot v5.10+ (thanks to Christophe Ringeval and Leo Singer).
+Removed warnings with memory management macros.
+Pushed version number to 2.0.4. 
+
+------------------------------------------------------------------------
+r327 | bertin | 2014-06-19 18:45:10 +0200 (Thu, 19 Jun 2014) | 3 lines
+
+Fixed bug that would generate flat astrometric solutions for extension #n whenever extension #(n-1) has no source.
+Pushed version number to 2.0.3.
+
+------------------------------------------------------------------------
+r326 | bertin | 2014-05-14 12:38:22 +0200 (Wed, 14 May 2014) | 3 lines
+
+Fixed numerical stability issue with MATCHing in MOSAIC_TYPE LOOSE mode on some platforms (thanks to J.Kleyna for the fix).
+Pushed version number to 2.0.2.
+
+------------------------------------------------------------------------
+r324 | bertin | 2014-03-06 22:37:42 +0100 (Thu, 06 Mar 2014) | 4 lines
+
+Reverted back to one set of comments per extension in output headers (thanks to Brian Yanny and Michelle Gower).
+Fixed "Not a positive definite matrix" error message issue in astrometric solution with the MKL library.
+Pushed version number to 2.0.1.
+
+------------------------------------------------------------------------
+r323 | bertin | 2014-02-19 13:30:30 +0100 (Wed, 19 Feb 2014) | 2 lines
+
+Updated documentation.
+
+------------------------------------------------------------------------
+r322 | bertin | 2014-02-19 11:04:25 +0100 (Wed, 19 Feb 2014) | 2 lines
+
+Added filtering of Tycho-2 stars without proper motions.
+
+------------------------------------------------------------------------
+r321 | bertin | 2014-02-19 10:44:34 +0100 (Wed, 19 Feb 2014) | 9 lines
+
+Fixed issues with trimming of the normal equation matrix in astrometric solver.
+Replaced Lapacke function dppsv() with dspsv() which deals better with non positive-definite matrices in the MKL version of the astrometric solver.
+Added code for preliminary support of Chebyshev polynomials.
+Fixed issue with PCi_j variant of WCS (thanks to forum user jeffreyrdcs).
+Added support for Tycho-2 and SDSS-R9 astrometric reference catalogues (thanks to Francois Ochsenbein).
+Simplified the astrometric reference query routine.
+Generalized acx_atlas.m4 fix for debian distributions (thanks to Thomas Lehmann and Chiara Marmo).
+Pushed version number to 2.0.0.
+
+------------------------------------------------------------------------
+r320 | marmo | 2014-01-30 14:00:10 +0100 (Thu, 30 Jan 2014) | 1 line
+
+Testing linux distribution to link liblapack
+------------------------------------------------------------------------
+r319 | bertin | 2013-11-12 16:58:52 +0100 (Tue, 12 Nov 2013) | 4 lines
+
+Added FLAGS_IMA column to merged and full output catalogues.
+Added missing configuration keywords to XML metadata output/
+Pushed version number to 2.0b15.
+
+------------------------------------------------------------------------
+r318 | bertin | 2013-11-12 16:17:32 +0100 (Tue, 12 Nov 2013) | 3 lines
+
+Added new ASTR_IMAFLAGSMASK and PHOT_IMAFLAGSMASK configuration parameters to provide rejection masks specifically for astrometric and photometric operations. This is mostly for NOAO reduced images that feature overzealous bleed correction that makes it impossible to identify saturated stars from the images themselves.
+Pushed version number to 2.0b14.
+
+------------------------------------------------------------------------
+r317 | bertin | 2013-10-23 00:34:47 +0200 (Wed, 23 Oct 2013) | 4 lines
+
+Added clipping in automated MATCH resolution procedure to fix issues with excessively large error ellipses (thanks to H.Bouy).
+Added omegacam.ahead focal-plane model for Omegacam instrument on VST.
+Pushed version number to 2.0b13.
+
+------------------------------------------------------------------------
+r314 | bertin | 2013-06-25 17:17:00 +0200 (Tue, 25 Jun 2013) | 2 lines
+
+Fixed regression in astrometric reference catalog initialization.
+
+------------------------------------------------------------------------
+r313 | bertin | 2013-06-25 15:55:35 +0200 (Tue, 25 Jun 2013) | 5 lines
+
+Fixed inconsistencies between full and merged output catalogs.
+Fixed unitialized pixel coordinates for reference sources.
+Added flagging of detections rejected in proper motion fits.
+Pushed version number to 2.0b12.
+
+------------------------------------------------------------------------
+r312 | bertin | 2013-06-07 11:01:17 +0200 (Fri, 07 Jun 2013) | 3 lines
+
+Set COMPUTE_PROPERMOTIONS to N by default.
+Pushed version number to 2.0b11.
+
+------------------------------------------------------------------------
+r311 | bertin | 2013-06-03 16:02:21 +0200 (Mon, 03 Jun 2013) | 4 lines
+
+Fixed issue with PLPlot plP_* functions on Debian.
+Fixed broken configure --disable-plplot option
+Pushed version number to 2.0b10.
+
+------------------------------------------------------------------------
+r310 | bertin | 2013-05-21 13:13:30 +0200 (Tue, 21 May 2013) | 2 lines
+
+Fixed small issues with VOTable output.
+
+------------------------------------------------------------------------
+r309 | bertin | 2013-04-17 14:57:34 +0200 (Wed, 17 Apr 2013) | 5 lines
+
+Fixed mmap issue on OSX.
+Fixed MKL autoconfiguration issues on OSX.
+Added --with-mkl-dir=<dir> option to configure.
+Pushed version number to 2.0b9.
+
+------------------------------------------------------------------------
+r308 | bertin | 2013-04-16 11:35:42 +0200 (Tue, 16 Apr 2013) | 12 lines
+
+Updated WCS library (minor bug fixes).
+Updated FITS library (minor bug fixes).
+Updated MKL autoconfig script to allow static linking with recent versions of the MKL.
+Made dynamic linking with the INTEL compiler truly dynamic.
+Moved merged source astrometric parameters to a specific structure.
+Added Carlsberg Meridian Catalogue 14 ("CMC-14") as reference catalogue.
+Fixed index initialization issues in astrometric solver.
+Improved memory management for very large problems.
+Added code for proper motion correction.
+Fixed possible buffer overflow with reference catalogue pathnames (thanks to Jan Kleyna).
+Pushed version number to 2.0b8.
+
+------------------------------------------------------------------------
+r307 | bertin | 2012-12-18 14:11:26 +0100 (Tue, 18 Dec 2012) | 3 lines
+
+Removed warning with INTEL compiler.
+Pushed version number to 2.0b6.
+
+------------------------------------------------------------------------
+r306 | bertin | 2012-11-16 10:56:10 +0100 (Fri, 16 Nov 2012) | 20 lines
+
+Added support for pre-distorted WCS (TPV) input headers.
+Added new STABILITY_TYPE PRE-DISTORTED option to compute astrometric solutions limited to focal plane distortion polynomials from pre-distorted WCS (TPV) input headers.
+Rewrote astrometric reference catalog read routine.
+Added support for the UCAC-4 astrometric reference catalog through Vizier.
+Added new ASTR_XPIXERROR2D and YPIXERROR2D check-plots (world map of x and y pixel coordinate residuals).
+Added SPREAD_MODEL and SPREADERR_MODEL output in merged (weighted average) and full (original) catalog.
+Replaced ASTRACCURACY_TYPE SEEING-ARCSEC with TURBULENCE-ARCSEC, to allow fetching directly the relative astrometric motion amplitude in arcsec (e.g., 0.054 arcsec -- Han & Gatewood 1995).
+Added ASTR_FLAGSMASK and PHOT_FLAGSMASK configuration parameters for setting rejections masks on extraction flags in the astrometric and photometric routines, respectively (e.g., allow detections flagged as saturated or cropped to be included or not in astrometric and photometric solutions).
+Rewrote cross-matching routines for better consistency with moving sources and confused areas.
+Added MATCH N mode in XSL processing of metadata output.
+Removed redundant calls to locate_set() and refactored astrometric weight updates.
+Fixed detection weighting over-estimation, and reduced mitigation of tolerances for deblended and crowded detections.
+Fixed issue with very large proper motions.
+Fixed minor compatibility issues with XML VOTables and FITS-LDAC catalogues in output.
+Fixed exposure time bug.
+Added rejection of reference detections in pm computations.
+Pushed rejection maximum to 20% of detections in pm computations
+Pushed version number to 2.0b5.
+
+
+------------------------------------------------------------------------
+r305 | bertin | 2012-08-27 18:18:58 +0200 (Mon, 27 Aug 2012) | 6 lines
+
+Added INCLUDE_ASTREFCATALOG config option (default=Y) to include astrometric reference catalog in proper motion computations.
+Added astrometric ref catalogue in full output catalog.
+Replaced mean epoch in merged output with weighted average.
+Added MAGERR and DATEOBS columns in astrometric reference catalog input and output.
+Pushed version number to 1.19.0.
+
+------------------------------------------------------------------------
+r304 | bertin | 2012-08-23 16:54:14 +0200 (Thu, 23 Aug 2012) | 5 lines
+
+Added weighted average SPREAD_MODEL and SPREADERR_MODEL output in merged (and full) catalog.
+Added global proper motion clipping routines (not used yet).
+Fixed array overflow in ASTRASTR_PIXERROR2D checkplot routine.
+Pushed version number to 1.18.0.
+
+------------------------------------------------------------------------
+r303 | bertin | 2012-08-07 00:49:26 +0200 (Tue, 07 Aug 2012) | 3 lines
+
+Added new ASTR_PIXERROR2D check-plot.
+Pushed version number to 1.16.7.
+
+------------------------------------------------------------------------
+r302 | bertin | 2012-07-31 15:14:57 +0200 (Tue, 31 Jul 2012) | 2 lines
+
+Fixed regression in epochs written in the merged and full output catalogues.
+
+------------------------------------------------------------------------
+r301 | bertin | 2012-07-30 20:26:26 +0200 (Mon, 30 Jul 2012) | 3 lines
+
+Changed precision of epoch in merged and full output catalogues from simple to double.
+Pushed version number to 1.16.6.
+
+------------------------------------------------------------------------
+r300 | bertin | 2012-07-27 18:28:54 +0200 (Fri, 27 Jul 2012) | 5 lines
+
+Added experimental SPREAD_MODEL output in merged and full catalogues.
+Fixed minor compatibility issues with XML VOTables and FITS-LDAC catalogues in output.
+Rewrote management of observation dates.
+Pushed version number to 1.16.5.
+
+------------------------------------------------------------------------
+r299 | bertin | 2012-07-24 19:12:54 +0200 (Tue, 24 Jul 2012) | 4 lines
+
+Added support for X/YMODEL_IMAGE coordinates and coordinates specified in CENTROID_KEYS as explicit spatial contexts.
+Fixed regression about astromatic accuracy floor introduced with ASTRACCURACY_TYPE.
+Pushed version number to 1.16.4.
+
+------------------------------------------------------------------------
+r298 | bertin | 2012-07-23 19:20:38 +0200 (Mon, 23 Jul 2012) | 3 lines
+
+Fixed minor issue with non-initialized merged catalog entries.
+Pushed version number to 1.16.3.
+
+------------------------------------------------------------------------
+r297 | bertin | 2012-07-12 18:07:29 +0200 (Thu, 12 Jul 2012) | 2 lines
+
+Fixed confusing --with-cdsclient-dir error message in configure.
+
+------------------------------------------------------------------------
+r296 | bertin | 2012-07-12 11:32:00 +0200 (Thu, 12 Jul 2012) | 2 lines
+
+Replaced --enable-gprof configuration with --enable-profiling.
+
+------------------------------------------------------------------------
+r295 | bertin | 2012-07-11 18:52:40 +0200 (Wed, 11 Jul 2012) | 5 lines
+
+Fixed obsolete autoconf macros in configure.ac
+Added control of the number of threads in MKL calls.
+Added support for negative NTHREADS (= max number of threads).
+Pushed version number to 1.16.1.
+
+------------------------------------------------------------------------
+r294 | bertin | 2012-07-05 18:12:45 +0200 (Thu, 05 Jul 2012) | 5 lines
+
+Added ASTRACCURACY_TYPE to specify the astrometric uncertainty floor in pixels or arcsec, or using a dependency with seeing (very experimental).
+Added ASTRACCURACY_KEY to allow the astrometric uncertainty floor to vary with each extension header.
+Simplified (and made more portable) configure scripts for INTEL's MKL library linking option.
+Pushed version number to 1.16.0
+
+------------------------------------------------------------------------
+r293 | bertin | 2012-06-25 19:10:24 +0200 (Mon, 25 Jun 2012) | 5 lines
+
+Limited the number of catalogue reading threads on manycore systems.
+Deactivated memory-mapping on Linux systems using mallopt() to circumvent memory-mapping limitations on large problems.
+Overrided INTEL CPU detection routine to help performance on non-INTEL CPUs when using INTEL compiler.
+Pushed version number to 1.15.2.
+
+------------------------------------------------------------------------
+r292 | bertin | 2012-06-18 22:49:27 +0200 (Mon, 18 Jun 2012) | 2 lines
+
+Added support for MJDSTART FITS header keyword if MJD-OBS cannot be found.
+
+------------------------------------------------------------------------
+r291 | bertin | 2012-06-17 19:30:49 +0200 (Sun, 17 Jun 2012) | 4 lines
+
+Added exposure time in XML-VOTable metadata output.
+Removed astrometric shear and added exposure time and chi2s in XSLT.
+Pushed version number to 1.15.1.
+
+------------------------------------------------------------------------
+r290 | bertin | 2012-06-17 16:12:03 +0200 (Sun, 17 Jun 2012) | 5 lines
+
+Fixed issue with TPV CTYPEs.
+Increased accuracy of astrometric reverse mapping.
+Updated FITS library to latest version.
+Pushed version number to 1.15.0.
+
+------------------------------------------------------------------------
+r289 | bertin | 2012-05-25 18:31:18 +0200 (Fri, 25 May 2012) | 3 lines
+
+Added astrstats module (as a consequence of code refactoring in astrsolve module).
+Laid the ground for future fgroups maps.
+
+------------------------------------------------------------------------
+r288 | bertin | 2012-05-23 14:56:22 +0200 (Wed, 23 May 2012) | 3 lines
+
+Fixed incomplete file update for support of TPV distortions.
+Pushed version number to 1.14.2.
+
+------------------------------------------------------------------------
+r287 | bertin | 2012-05-22 21:15:20 +0200 (Tue, 22 May 2012) | 3 lines
+
+Introduced experimental filtering of 2MASS astrometric reference sources.
+Pushed version number to 1.14.1.
+
+------------------------------------------------------------------------
+r286 | bertin | 2012-05-19 10:57:33 +0200 (Sat, 19 May 2012) | 2 lines
+
+Fixed issue with SDSS-R8.
+
+------------------------------------------------------------------------
+r285 | bertin | 2012-05-18 17:42:08 +0200 (Fri, 18 May 2012) | 4 lines
+
+Added FOCDISTORT_DEGREE parameter to specify the degree of exposure-related distortion polynomial.
+Updated WCS convenience library to latest version.
+Pushed version number to 1.14.0.
+
+------------------------------------------------------------------------
+r284 | bertin | 2012-04-30 00:04:20 +0200 (Mon, 30 Apr 2012) | 7 lines
+
+Added support for WCS projection type "TPV" (both in input and output).
+Improved robust fit of PMs.
+Added chi2/dof to output merged catalogue.
+Added airmass info in XML output and XSLT stylesheet.
+Prepared support for SDSS-R8 reference catalogues (not yet functional).
+Pushed version number to 1.13.1.
+
+------------------------------------------------------------------------
+r283 | bertin | 2012-03-27 05:56:55 +0200 (Tue, 27 Mar 2012) | 3 lines
+
+Increased default maximum number of threads set by configure to 1024.
+Pushed version number to 1.12.2.
+
+------------------------------------------------------------------------
+r282 | bertin | 2012-03-27 05:42:43 +0200 (Tue, 27 Mar 2012) | 2 lines
+
+Pushed the maximum authorized number of threads to 1024.
+
+------------------------------------------------------------------------
+r281 | bertin | 2012-03-27 05:32:09 +0200 (Tue, 27 Mar 2012) | 3 lines
+
+Improved astrometric clipping, including clipping of references.
+Pushed version number to 1.12.1.
+
+------------------------------------------------------------------------
+r280 | bertin | 2012-03-25 13:21:43 +0200 (Sun, 25 Mar 2012) | 3 lines
+
+Added airmass info in XML output and XSLT stylesheet.
+Pushed version number to 1.12.0.
+
+------------------------------------------------------------------------
+r279 | bertin | 2012-01-09 13:39:37 +0100 (Mon, 09 Jan 2012) | 4 lines
+
+Fixed (once again :-)) pb with d.o.f. removal in packed matrices.
+Improved displayed info for memory allocation failures.
+Pushed version number to 1.11.3.
+
+------------------------------------------------------------------------
+r278 | bertin | 2012-01-06 13:50:19 +0100 (Fri, 06 Jan 2012) | 4 lines
+
+Fixed issue with d.o.f. removal in packed matrix: re-activated packed matrix mode with LAPACKe interface.
+Updated Copyright line (2012).
+Pushed version number to 1.11.2.
+
+------------------------------------------------------------------------
+r277 | bertin | 2011-12-29 22:26:40 +0100 (Thu, 29 Dec 2011) | 2 lines
+
+Fixed proper motion computing issue with the LAPACKe interface.
+
+------------------------------------------------------------------------
+r276 | bertin | 2011-12-29 22:04:34 +0100 (Thu, 29 Dec 2011) | 2 lines
+
+Re-generated Makefile.in files.
+
+------------------------------------------------------------------------
+r275 | bertin | 2011-12-29 21:50:06 +0100 (Thu, 29 Dec 2011) | 2 lines
+
+Fixed typos and missing bits in new autoconf scripts.
+
+------------------------------------------------------------------------
+r274 | bertin | 2011-12-29 19:25:15 +0100 (Thu, 29 Dec 2011) | 5 lines
+
+Removed warning about threading when linking with MKL.
+Fixed XSLT path configure error on FreeBSD (thanks to Michal Kocer).
+Added acx_search_incdir.m4 autoconf script to automatically search for various include directories.
+Rewrote ACX_MKL_LAPACKE and ACX_MKL_FFTW to make efficient use of the new ACX_SEARCH_LIBDIR and ACX_SEARCH_INCDIR autoconf functions.
+
+------------------------------------------------------------------------
+r273 | bertin | 2011-12-20 16:05:42 +0100 (Tue, 20 Dec 2011) | 2 lines
+
+Fixed typo (extra space) in configure.ac.
+
+------------------------------------------------------------------------
+r272 | bertin | 2011-12-20 15:38:35 +0100 (Tue, 20 Dec 2011) | 5 lines
+
+Fixed regression with PLPlot library path manual configurations.
+Added support for packed matrices in the LAPACKe version of the astrometric solver, saving close to 50% of memory usage in very large solutions.
+Fixed issue with the management of incoherent epoch triplets in proper motion measurement engine.
+Pushed version number to 1.11.1.
+
+------------------------------------------------------------------------
+r271 | bertin | 2011-12-17 00:44:02 +0100 (Sat, 17 Dec 2011) | 2 lines
+
+Fixed regression with very large matrices in astrsolve.c and photsolve.c.
+
+------------------------------------------------------------------------
+r270 | bertin | 2011-12-13 15:23:10 +0100 (Tue, 13 Dec 2011) | 2 lines
+
+Fixed regressions in acx_mkl_fftw.m4 and acx_mkl_lapacke.m4.
+
+------------------------------------------------------------------------
+r269 | bertin | 2011-12-13 15:18:35 +0100 (Tue, 13 Dec 2011) | 2 lines
+
+Added ACX_SEARCH_LIBDIR configure macro to simplify custom library searches. 
+
+------------------------------------------------------------------------
+r268 | bertin | 2011-12-13 11:44:30 +0100 (Tue, 13 Dec 2011) | 6 lines
+
+Re-factored configure options: replaced --with-xxx by --with-xxx-libdir.
+Replaced --without-plplot with --disable-plplot option
+Added support for the INTEL MKL library in place of ATLAS and FFTW (configure --enable-mkl option) to solve the problem with large astrometric solutions.
+Fixed regression with configure --with-cds-client option.
+Pushed version number to 1.11.0.
+
+------------------------------------------------------------------------
+r267 | bertin | 2011-11-29 16:38:19 +0100 (Tue, 29 Nov 2011) | 2 lines
+
+Fixed regression with cdsclient configure option introduced in the previous commit.
+
+------------------------------------------------------------------------
+r266 | bertin | 2011-11-29 16:22:53 +0100 (Tue, 29 Nov 2011) | 3 lines
+
+Replaced broken --with-cdsclient_exec configure option with --with-cdsclient
+Pushed version number to 1.10.7.
+
+------------------------------------------------------------------------
+r265 | bertin | 2011-11-28 17:30:34 +0100 (Mon, 28 Nov 2011) | 6 lines
+
+Fixed issue when distortion polynomials with a very high degree (>7) would be re
+quested.
+Updated FITS library to the latest version.
+Fixed typo in XML output (thanks to J.-B. Marquette for reporting).
+Pushed version number to 1.10.6.
+
+------------------------------------------------------------------------
+r264 | bertin | 2011-08-26 20:48:23 +0200 (Fri, 26 Aug 2011) | 3 lines
+
+Added new refinement to the cross-id routine, with a better handling of neightbours.
+Pushed version number to 1.10.5.
+
+------------------------------------------------------------------------
+r263 | bertin | 2011-08-25 19:34:12 +0200 (Thu, 25 Aug 2011) | 2 lines
+
+Fixed SVN issue with missing proper.c.
+
+------------------------------------------------------------------------
+r262 | bertin | 2011-08-25 19:28:33 +0200 (Thu, 25 Aug 2011) | 2 lines
+
+Robust PM fitting now working. Tests are still ongoing.
+
+------------------------------------------------------------------------
+r261 | bertin | 2011-08-23 22:56:21 +0200 (Tue, 23 Aug 2011) | 2 lines
+
+More progress on robust fitting (not operational yet).
+
+------------------------------------------------------------------------
+r260 | bertin | 2011-08-22 18:26:37 +0200 (Mon, 22 Aug 2011) | 2 lines
+
+Preliminary commit of robust PM estimations (not operational yet).
+
+------------------------------------------------------------------------
+r259 | bertin | 2011-08-05 15:54:59 +0200 (Fri, 05 Aug 2011) | 2 lines
+
+Added missing README in src/wcs/ subdir.
+
+------------------------------------------------------------------------
+r258 | bertin | 2011-07-23 15:58:33 +0200 (Sat, 23 Jul 2011) | 3 lines
+
+Fixed issue with missing counterparts of saturated/cropped detections in astrometry stats and clipping functions.
+Pushed version number to 1.10.3.
+
+------------------------------------------------------------------------
+r257 | bertin | 2011-07-22 23:14:17 +0200 (Fri, 22 Jul 2011) | 7 lines
+
+Added support for RADESYS WCS keyword (non-standard RADECSYS still supported).
+Added single detections to full and merged catalogs.
+Fixed various issues with full catalog.
+Replaced NPOS with NPOS_TOTAL and NPOS_OK in merged catalog. Stats now exclude saturated/cropped detections.
+Added CATALOG_NUMBER index in XML output.
+Pushed version number to 1.10.2
+
+------------------------------------------------------------------------
+r256 | bertin | 2011-07-21 19:07:47 +0200 (Thu, 21 Jul 2011) | 4 lines
+
+Added FULLOUTCAT_TYPE and FULLOUTCAT_NAME to provide a full catalog output.
+Changed default MERGEDOUTCAT_NAME to merged.cat.
+Pushed version number to 1.10.0.
+
+------------------------------------------------------------------------
+r255 | bertin | 2011-05-02 15:31:12 +0200 (Mon, 02 May 2011) | 4 lines
+
+Added ELLIPTICITY_MAX selection criterion to discard highly elongated sources (based on the optional ELONGATION parameter in SExtractor catalogues).
+Fixed potential segmentation faults in some check-plots.
+Pushed version number to 1.9.5.
+
+------------------------------------------------------------------------
+r254 | bertin | 2011-02-28 13:56:02 +0100 (Mon, 28 Feb 2011) | 3 lines
+
+Added new ASTR_ACCURACY and PHOT_ACCURACY (advanced) configuration parameters for defining the uncertainty floor in astrometric and photometric measurements.
+Pushed version number to 1.9.4.
+
+------------------------------------------------------------------------
+r253 | bertin | 2011-02-25 17:38:35 +0100 (Fri, 25 Feb 2011) | 5 lines
+
+Removed clipping in merged catalog (once more!).
+Added (in quadrature) "floor values" to photometric and astrometric uncertainties. Built-in values: 0.1% for fluxes and 1e-3 pixel for positions.
+Implemented new, more efficient DCR correction scheme for proper motions.
+Fixed completeness pb for sources with some saturated images in proper motion calculations.
+
+------------------------------------------------------------------------
+r252 | bertin | 2011-02-18 18:52:21 +0100 (Fri, 18 Feb 2011) | 9 lines
+
+Fixed bug that would allow some "bad" detections to escape astrometric and photometric  clipping.
+Fixed various issues with proper motion estimations.
+Added new ASTR_INTPROPER2D check-plot type.
+Changed the way DCR correction works by using the principal component of measured colours as a "universal" colour index (new colour.c module).
+Added new COLOR column in the merged catalog, containing the "universal" colour index.
+Split FLAGS column in the merged catalog output into FLAGS_EXTRACTION and FLAGS_SCAMP.
+Made colour analysis and correction modules active only if necessary (if a merged catalogue or a proper motion/DCR check-plot is requested).
+Pushed version number to 1.9.3.
+
+------------------------------------------------------------------------
+r251 | bertin | 2011-02-06 00:29:30 +0100 (Sun, 06 Feb 2011) | 6 lines
+
+Added observation dates in XML output and XSLT filters.
+Added CHECKPLOT_TYPE ASTR_OBSDATE3D. 
+Fixed proper motion averaging bug in merged catalog.
+Removed clipping in merged catalog.
+Pushed version number to 1.9.2.
+
+------------------------------------------------------------------------
+r250 | bertin | 2010-11-23 18:02:08 +0100 (Tue, 23 Nov 2010) | 6 lines
+
+Fixed issue with multiple local reference catalogues (thanks to S.Desai for reporting this pb).
+Simplified real-time terminal display.
+Fixed array issue with ASTR_PIXERROR1D.
+Fixed alpha coordinates in focal plane check-plot maps.
+Pushed version number to 2.9.1.
+
+------------------------------------------------------------------------
+r249 | bertin | 2010-11-16 15:19:29 +0100 (Tue, 16 Nov 2010) | 5 lines
+
+Fixed uninitialized values in proper motion estimations (thanks to H.Bouy for reporting this pb).
+Fixed two memory leaks.
+Fixed issue with zero-sized columns in FITS binary tables,
+Fixed issue with invalid comment in XSL stylesheet.
+
+------------------------------------------------------------------------
+r248 | bertin | 2010-10-25 21:40:39 +0200 (Mon, 25 Oct 2010) | 2 lines
+
+Updated license info in file headers and documentation.
+
+------------------------------------------------------------------------
+r247 | bertin | 2010-10-10 23:17:04 +0200 (Sun, 10 Oct 2010) | 6 lines
+
+Moved back the code to GPL.
+Added more complete headers to all files.
+Clarified licensing issues.
+Updated FITS library.
+Version number pushed to 1.9.0.
 
 ------------------------------------------------------------------------
 r246 | bertin | 2010-08-30 00:30:25 +0200 (Mon, 30 Aug 2010) | 4 lines

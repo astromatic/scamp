@@ -2,7 +2,8 @@ Mark Calabretta <mcalabre@atnf.csiro.au>
         SCAMP makes extensive use of his nice WCS library
 
 Francois Ochsenbein <francois@astro.u-strasbg.fr>
-        The CDSClient tool provides on-line access to CDS reference catalogs.
+Gilles Landais <gilles.landais@unistra.fr>
+        astrometric reference catalogs are delivered by the Vizier service.
 
 Alan Irwin <irwin@beluga.phys.uvic.ca>
         SCAMP uses the PLPlot package maintained by Alan Irwin
@@ -32,6 +33,7 @@ Chiara Marmo <marmo@iap.fr>
 
 Eric Aubourg <Eric@aubourg.net>
 Wayne Barkhouse <wbark@astro.uiuc.edu>
+Hervé Bouy <herve.bouy@u-bordeaux.fr>
 Mireille Dantel-Fort <mireille.dantel@obspm.fr>
 Daniel Durand <Daniel.Durand@nrc.ca>
 Pascal Fouqué <pfouque@ast.obs-mip.fr>
@@ -41,9 +43,10 @@ John P. McFarland <mcfarland@astro.rug.nl>
 Shantanu Desai <shantanu@illinois.edu>
 Joe Mohr <jmohr@usm.lmu.de>
 Huan Lin <hlin@fnal.gov>
-Hervé Bouy <hbouy@cab.inta-csic.es>
         Help in discovering bugs or bringing suggestions
 
 TERAPIX project <http://terapix.iap.fr>
+Dark Energy Survey <http://darkenergysurvey.org>
+COSMIC-DANCe project <http://www.project-dance.com/>
 	Financial and technical support
 

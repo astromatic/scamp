@@ -1,23 +1,56 @@
-August 2010: 1.8.2
+Mar 2016: 2.4
+	- "Big catalog" interface queries replaced with VizieR queries
+	- More flexible header management
+
+Jun 2015: 2.2
+	- CDSclient interface replaced with direct HTML queries using libcURL
+
+Jan 2015: 2.1
+	- Differential Geometry Map creation
+
+Nov 2014: 2.0
+	- Pre-distorted solutions
+	- Atmospheric turbulence used in source weighting
+	- Improved cross-matching
+	- Improved catalogue output
+	- Specific rejection masks for astrometric and photometric solutions
+
+Aug 2012: 1.19
+	- Option for using astrometric reference catalogue in proper motions
+	- Support for SPREAD_MODEL and SPREADERR_MODEL in output
+	- Support for X/YMODEL in input catalogues
+
+May 2012: 1.14
+	- Support for high-order dynamic focal plane distortions
+	- Support for TPV projections
+	- Improved astrometric clipping
+	- Improved XML metadata output
+
+Dec 2011: 1.11
+	- Built-in support for the MKL library
+	- Full catalogue output
+
+Aug 2010: 1.8.2
 	- Proper motions in merged output
 
-June 2009: 1.5.7
+Jun 2009: 1.5.7
 	- Merged catalogue output
 
-January 2007: 1.3.3
+Jan 2007: 1.3.3
 	- Improved weighting scheme
 	- Support for different filters in astrometric reference catalogue.
 
-October 2006: 1.3.0
+Oct 2006: 1.3.0
 	- Bug fixes
 	- Improved MATCHing
 	- XML VOTable-compliant metadata output.
 
-March 2006: 1.2.11
+Mar 2006: 1.2.11
 	- First public release
 
-January 03: 0.2
+Jan 2003: 0.2
 	- Bug fixes.
 
-December 02: 0.1
+Dec 2002: 0.1
 	- First running version.
+
