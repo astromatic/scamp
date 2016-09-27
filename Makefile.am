@@ -28,9 +28,9 @@
 
 ACLOCAL_AMFLAGS		= -I m4
 AUTOMAKE_OPTIONS	= foreign no-dependencies
-SUBDIRS			= man src
+SUBDIRS			= src man doc
 dist_pkgdata_DATA	= config/*.ahead xsl/scamp.xsl
-EXTRA_DIST		= doc autogen.sh AUTHORS BUGS ChangeLog COPYRIGHT \
+EXTRA_DIST		= autogen.sh AUTHORS BUGS ChangeLog COPYRIGHT \
 			  HISTORY INSTALL LICENSE README.md THANKS
 RPM_ROOTDIR		= `rpmbuild --nobuild -E %_topdir`
 RPM_SRCDIR		= $(RPM_ROOTDIR)/SOURCES
@@ -49,13 +49,4 @@ rpm-best:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
 	USE_BEST="1" rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
 
-doc-html:
-	cd doc
-	make clean
-	make html
-
-doc-pdf:
-	cd doc
-	make clean
-	make latexpdf
 
