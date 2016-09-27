@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2015 IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -22,18 +22,16 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		02/06/2015
+#	Last modified:		27/09/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+ACLOCAL_AMFLAGS		= -I m4
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= man src
 dist_pkgdata_DATA	= config/*.ahead xsl/scamp.xsl
-EXTRA_DIST		= doc AUTHORS BUGS ChangeLog COPYRIGHT \
-			  HISTORY INSTALL LICENSE README THANKS \
-			  acx_pthread.m4 acx_prog_cc_optim.m4 \
-			  acx_atlas.m4 acx_curl.m4 acx_fftw.m4 \
-			  acx_mkl.m4 acx_plplot.m4 acx_urbi_resolve_dir.m4
+EXTRA_DIST		= doc autogen.sh AUTHORS BUGS ChangeLog COPYRIGHT \
+			  HISTORY INSTALL LICENSE README.md THANKS
 RPM_ROOTDIR		= `rpmbuild --nobuild -E %_topdir`
 RPM_SRCDIR		= $(RPM_ROOTDIR)/SOURCES
 dist-hook:
@@ -51,4 +49,13 @@ rpm-best:	dist
 	cp -f $(PACKAGE_NAME)-$(PACKAGE_VERSION).tar.gz $(RPM_SRCDIR)
 	USE_BEST="1" rpmbuild -ba --clean --nodeps $(PACKAGE_NAME).spec
 
+doc-html:
+	cd doc
+	make clean
+	make html
+
+doc-pdf:
+	cd doc
+	make clean
+	make latexpdf
 

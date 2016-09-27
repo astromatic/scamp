@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		12/06/2015
+#	Last modified:		27/09/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -72,7 +72,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%doc AUTHORS BUGS ChangeLog COPYRIGHT HISTORY INSTALL LICENSE README THANKS doc/scamp.pdf
+%doc config AUTHORS BUGS ChangeLog COPYRIGHT HISTORY INSTALL LICENSE README.md THANKS
 %{_bindir}/@PACKAGE_NAME@
 %{_mandir}/man1/@PACKAGE_NAME@.1*
 %{_mandir}/manx/@PACKAGE_NAME@.x*

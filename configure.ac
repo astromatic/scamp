@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		14/09/2016
+#	Last modified:		27/09/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -30,11 +30,12 @@
 define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
-# This is your standard Bertin source code...
-AC_INIT([scamp],[2.4.3],[bertin@iap.fr])
+# This is your standard AstrOmatic source code...
+AC_INIT(SCAMP, 2.5.0, [https://github.com/astromatic/scamp],
+	scamp, [http://astromatic.net/software/psfex])
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_AUX_DIR(autoconf)
+AC_CONFIG_SRCDIR(src/makeit.c)
 AC_CONFIG_HEADERS(config.h)
 AM_INIT_AUTOMAKE
 date=`date +%Y-%m-%d`
@@ -324,10 +325,11 @@ AC_MSG_RESULT([***************************************************************])
 
 AC_CONFIG_FILES([
 Makefile
+scamp.spec
+doc/src/conf.py
 man/Makefile
+man/scamp.1
 src/Makefile
 src/fits/Makefile
-src/wcs/Makefile
-scamp.spec
-man/scamp.1])
+src/wcs/Makefile])
 AC_OUTPUT
