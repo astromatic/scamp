@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		27/09/2016
+#	Last modified:		03/10/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -48,8 +48,10 @@ AC_SUBST(DATE3, "$date3")
 
 # Include macros
 sinclude(acx_atlas.m4)
+sinclude(acx_blas.m4)
 sinclude(acx_curl.m4)
 sinclude(acx_fftw.m4)
+sinclude(acx_lapacke.m4)
 sinclude(acx_mkl.m4)
 sinclude(acx_plplot.m4)
 sinclude(acx_prog_cc_optim.m4)
@@ -59,27 +61,29 @@ sinclude(acx_urbi_resolve_dir.m4)
 # Display pakage and version number
 AC_MSG_RESULT([******** Configuring:  $PACKAGE_NAME $VERSION ($date) ********])
 
-AC_MSG_CHECKING([if compilation flags should be set automatically])
+# Provide special option for choosing automatically the compilation flags.
+AC_MSG_CHECKING([if compilation flags are set automatically])
 AC_ARG_ENABLE(auto-flags,
 	[AS_HELP_STRING([--enable-auto-flags],
-	[Let the configure script choose the compilation flags \
-(off by default)])])
+	[Let the configure script choose the compilation flags (default = no)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no]))
 
 # Provide special option for the Linux Intel C compiler
-AC_MSG_CHECKING([whether we should use the INTEL compiler])
+AC_MSG_CHECKING([whether the INTEL compiler is enabled])
 AC_ARG_ENABLE(icc,
 	[AS_HELP_STRING([--enable-icc],
-	[Use the Intel compiler (off by default)])],
+	[Use the Intel compiler (default = no)])],
         CC="icc"
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no]))
 
 # Provide special options for INTEL MKL
 # We force the use of icc
-AC_MSG_CHECKING([whether we should use INTEL's MKL])
+AC_MSG_CHECKING([whether INTEL's MKL is enabled])
 AC_ARG_ENABLE(mkl,
 	[AS_HELP_STRING([--enable-mkl],
-	[Use INTEL's MKL for solvers and FFTs (off by default)])],
+	[Use INTEL's MKL for solvers and FFTs (default = no)])],
         enable_icc="yes"
         CC="icc"
 	AC_MSG_RESULT([yes]),
@@ -102,7 +106,8 @@ AC_CHECK_LIB(m, sin)
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([dlfcn.h stdlib.h string.h sys/mman.h unistd.h])
+AC_CHECK_HEADERS([dlfcn.h fcntl.h limits.h malloc.h stdlib.h string.h \
+		sys/mman.h sys/types.h unistd.h])
 if test "$enable_icc" = "yes"; then
   AC_CHECK_HEADERS(mathimf.h)
 fi
@@ -130,26 +135,27 @@ AC_CHECK_FUNC([isnan], AC_DEFINE_UNQUOTED([HAVE_ISNAN2], 1,
 AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
-# Provide special options for the MKL library
-AC_ARG_WITH(mkl-dir,
-        [AS_HELP_STRING([--with-mkl-dir=<MKL path>],
-        [Provide an alternative path to the MKL library])])
-
 # Provide special options for ATLAS
+AC_MSG_CHECKING([whether ATLAS is enabled])
+AC_ARG_ENABLE(atlas,
+	[AS_HELP_STRING([--enable-atlas],
+	[Use the ATLAS library instead of BLAS+LAPACKe (default = no)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no]))
 AC_ARG_WITH(atlas-libdir,
-        [AS_HELP_STRING([--with-atlas-libdir=<ATLAS library path>],
-	[Alternative directory for the ATLAS library])])
+	[AS_HELP_STRING([--with-atlas-libdir=<ATLAS library path>],
+	[Provide an alternative path to the ATLAS library])])
 AC_ARG_WITH(atlas-incdir,
-        [AS_HELP_STRING([--with-atlas-incdir=<ATLAS include dir>],
-	[Alternative directory for ATLAS include files])])
+	[AS_HELP_STRING([--with-atlas-incdir=<ATLAS include dir>],
+	[Provide an alternative path to the ATLAS include directory])])
 
-# Provide special options for FFTW
-AC_ARG_WITH(fftw-libdir,
-        [AS_HELP_STRING([--with-fftw-libdir=<FFTW library path>],
-	[Alternative directory for the FFTW library])])
-AC_ARG_WITH(fftw-incdir,
-        [AS_HELP_STRING([--with-fftw-incdir=<FFTW include dir>],
-	[Alternative directory for FFTW include files])])
+# Provide special options for BLAS
+AC_ARG_WITH(blas-libdir,
+	[AS_HELP_STRING([--with-blas-libdir=<BLAS library path>],
+	[Provide an alternative path to the BLAS library])])
+AC_ARG_WITH(blas-incdir,
+	[AS_HELP_STRING([--with-blas-incdir=<BLAS include dir>],
+	[Provide an alternative path to the BLAS include directory])])
 
 # Provide special options for cURL
 AC_ARG_WITH(curl-libdir,
@@ -159,11 +165,32 @@ AC_ARG_WITH(curl-incdir,
         [AS_HELP_STRING([--with-curl-incdir=<cURL include dir>],
 	[Alternative directory for cURL include files])])
 
+# Provide special options for FFTW
+AC_ARG_WITH(fftw-libdir,
+	[AS_HELP_STRING([--with-fftw-libdir=<FFTW library path>],
+	[Provide an alternative path to the FFTW library])])
+AC_ARG_WITH(fftw-incdir,
+	[AS_HELP_STRING([--with-fftw-incdir=<FFTW include dir>],
+	[Provide an alternative path to the FFTW include directory])])
+
+# Provide special options for LAPACke
+AC_ARG_WITH(lapacke-libdir,
+	[AS_HELP_STRING([--with-lapacke-libdir=<LAPACKe library path>],
+	[Provide an alternative path to the LAPACKe library])])
+AC_ARG_WITH(lapacke-incdir,
+	[AS_HELP_STRING([--with-lapacke-incdir=<LAPACKe include dir>],
+	[Provide an alternative path to the LAPACKe include directory])])
+
+# Provide special options for the MKL library
+AC_ARG_WITH(mkl-dir,
+	[AS_HELP_STRING([--with-mkl-dir=<MKL path>],
+	[Provide an alternative path to the MKL library])])
+
 # Provide special options for PLPlot
-AC_MSG_CHECKING([whether we should use PLPlot])
+AC_MSG_CHECKING([whether PLPlot is enabled])
 AC_ARG_ENABLE(plplot,
 	[AS_HELP_STRING([--enable-plplot],
-	[Activate PLPlot library (default = yes)])],
+	[Use the PLPlot library (default = yes)])],
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no]))
 AC_ARG_WITH(plplot-libdir,
@@ -172,6 +199,7 @@ AC_ARG_WITH(plplot-libdir,
 AC_ARG_WITH(plplot-incdir,
 	[AS_HELP_STRING([--with-plplot-incdir=<PLPlot include dir>],
 	[Provide an alternative path to the PLPlot include directory])])
+
 
 # Provide a special option for the default XSLT URL
 with_xsl_url="file://"$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_NAME/$PACKAGE_NAME.xsl"
@@ -201,7 +229,7 @@ AC_ARG_ENABLE(threads,
 AC_MSG_CHECKING([for profiler mode])
 AC_ARG_ENABLE(profiling,
 	[AS_HELP_STRING([--enable-profiling],
-	[Enable special mode for profiling (off by default)])]
+	[Enable special mode for profiling (default = no)])]
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no]))
 
@@ -210,8 +238,9 @@ AC_MSG_CHECKING([best linking option])
 AC_ARG_ENABLE(best-link,
 	[AS_HELP_STRING([--enable-best-link],
 	[Choose the right combination of static and dynamic linking to make \
-the executable as portable as possible (off by default)])])
-AC_MSG_RESULT([done])
+the executable as portable as possible (default = no)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no]))
 
 ################# Actions to complete in case of multhreading ################
 AC_DEFINE_UNQUOTED(THREADS_NMAX, $n_pthreads,[Maximum number of POSIX threads])
@@ -229,7 +258,6 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
 ############ handle the INTEL MKL library (FFTW + LAPACKe) ###########
 if test "$enable_mkl" = "yes"; then
-  AC_MSG_CHECKING([for INTEL's MKL library])
   convlibs="${srcdir}/wcs/libwcs_c.a"
   ACX_MKL($with_mkl_dir,yes,$enable_best_link,$convlibs)
   if test "$MKL_WARN" == ""; then
@@ -243,32 +271,58 @@ if test "$enable_mkl" = "yes"; then
   LIBS="$LIBS $MKL_LIBS"
 else
 ################ handle the FFTW library (Fourier transforms) ################
-  AC_MSG_CHECKING([for the FFTW library])
-  ACX_FFTW($with_fftw_libdir,$with_fftw_incdir,$use_pthreads,yes,
-	[LIBS="$FFTW_LIBS $LIBS"]
-	if test "$FFTW_WARN" == ""; then
-          AC_MSG_RESULT([yes])
-        else
-          AC_MSG_RESULT([no])
-	  AC_MSG_WARN([$FFTW_WARN])
-	fi,
-        AC_MSG_RESULT([no])
-	AC_MSG_ERROR([$FFTW_ERROR Exiting.]))
+  ACX_FFTW($with_fftw_libdir, $with_fftw_incdir, $use_pthreads,yes,
+    [
+      [LIBS="$FFTW_LIBS $LIBS"]
+      if test "$FFTW_WARN" != ""; then
+        AC_MSG_WARN([$FFTW_WARN])
+      fi
+    ],
+    AC_MSG_ERROR([$FFTW_ERROR Exiting.])
+  )
 
+  if test "$enable_atlas" = "yes"; then
 ################# handle the ATLAS library (linear algebra) ##################
-  AC_MSG_CHECKING([for the ATLAS library])
-  ACX_ATLAS($with_atlas_libdir,$with_atlas_incdir,$use_pthreads,
-	[LIBS="$ATLAS_LIBS $LIBS"]
-	if test "$ATLAS_WARN" == ""; then
-          AC_MSG_RESULT([yes])
-        else
-          AC_MSG_RESULT([no])
+    ACX_ATLAS($with_atlas_libdir, $with_atlas_incdir, $use_pthreads,
+      [
+        [LIBS="$ATLAS_LIBS $LIBS"]
+        if test "$ATLAS_WARN" != ""; then
 	  AC_MSG_WARN([$ATLAS_WARN])
+	fi
+      ],
+      AC_MSG_ERROR([$ATLAS_ERROR Exiting.])
+    )
+
+  else
+######## Handle the BLAS and LAPACKe libraries (linear algebra) ##########
+    ACX_BLAS($with_blas_libdir, $with_blas_incdir, $use_pthreads, no,
+      [
+        if test "$BLAS_WARN" != ""; then
+          AC_MSG_WARN([$BLAS_WARN])
+        fi
+        ACX_LAPACKE($with_lapacke_libdir,$with_lapacke_incdir, [$BLAS_LIBS], no,
+          [
+            [LIBS="$LAPACKE_LIBS $LIBS"]
+            if test "$LAPACKE_WARN" != ""; then
+              AC_MSG_WARN([$LAPACKE_WARN])
+            fi
+          ],
+          AC_MSG_ERROR([$LAPACKE_ERROR Exiting.])
+        )
+      ],
+      AC_MSG_ERROR([$BLAS_ERROR Exiting.])
+    )
+  fi
+fi
+
+################# handle the cURL library (HTTP queries) ##################
+ACX_CURL($with_curl_libdir,$with_curl_incdir,
+	[AM_CPPFLAGS="$AM_CPPFLAGS $CURL_CFLAGS"]
+	[LIBS="$CURL_LIBS $LIBS"]
+	if test "$CURL_WARN" != ""; then
+	  AC_MSG_WARN([$CURL_WARN])
 	fi,
-        AC_MSG_RESULT([no])
-	AC_MSG_ERROR([$ATLAS_ERROR Exiting.]))
-  AC_MSG_RESULT([done])
-fi													
+	AC_MSG_ERROR([$CURL_ERROR Exiting.]))
 
 ################# handle the PLPlot library (graphic plots) ##################
 if test "$enable_plplot" != "no"; then
@@ -282,15 +336,6 @@ else
   AC_MSG_WARN([Plotting deactivated by user.])
 fi
 AM_CONDITIONAL(USE_PLPLOT, test "$use_plplot" = "yes")
-
-################# handle the cURL library (HTTP queries) ##################
-ACX_CURL($with_curl_libdir,$with_curl_incdir,
-	[AM_CPPFLAGS="$AM_CPPFLAGS $CURL_CFLAGS"]
-	[LIBS="$CURL_LIBS $LIBS"]
-	if test "$CURL_WARN" != ""; then
-	  AC_MSG_WARN([$CURL_WARN])
-	fi,
-	AC_MSG_ERROR([$CURL_ERROR Exiting.]))
 
 # Compile with profiling option
 if test "$enable_profiling" = "yes"; then
@@ -326,10 +371,12 @@ AC_MSG_RESULT([***************************************************************])
 AC_CONFIG_FILES([
 Makefile
 scamp.spec
+doc/Makefile
 doc/src/conf.py
 man/Makefile
 man/scamp.1
 src/Makefile
 src/fits/Makefile
-src/wcs/Makefile])
+src/wcs/Makefile
+])
 AC_OUTPUT

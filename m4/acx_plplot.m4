@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		02/06/2015
+dnl	Last modified:		19/05/2015
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -51,17 +51,17 @@ acx_plplot_ok=yes
 acx_plplotpkg_ok=no
 if test x$2 = x && test x$1 = x; then
   AC_MSG_CHECKING([for PLPlot pkg-config info])
-  if pkg-config --exists plplot; then
-    AC_MSG_RESULT([yes])
-    [PLPLOT_CFLAGS=`pkg-config --cflags plplot`]
-    [PLPLOT_LIBS=`pkg-config --libs plplot`]
-    AC_DEFINE(PLPLOT_H, "plplot.h", [PLPlot header filename.])
-    AC_DEFINE(PLPLOTP_H, "plplotP.h", [PLPlot private header filename.])
-    acx_plplotpkg_ok=yes
-  elif pkg-config --exists plplotd; then
+  if pkg-config --exists plplotd; then
     AC_MSG_RESULT([yes])
     [PLPLOT_CFLAGS=`pkg-config --cflags plplotd`]
     [PLPLOT_LIBS=`pkg-config --libs plplotd`]
+    AC_DEFINE(PLPLOT_H, "plplot.h", [PLPlot header filename.])
+    AC_DEFINE(PLPLOTP_H, "plplotP.h", [PLPlot private header filename.])
+    acx_plplotpkg_ok=yes
+  elif pkg-config --exists plplot; then
+    AC_MSG_RESULT([yes])
+    [PLPLOT_CFLAGS=`pkg-config --cflags plplot`]
+    [PLPLOT_LIBS=`pkg-config --libs plplot`]
     AC_DEFINE(PLPLOT_H, "plplot.h", [PLPlot header filename.])
     AC_DEFINE(PLPLOTP_H, "plplotP.h", [PLPlot private header filename.])
     acx_plplotpkg_ok=yes
