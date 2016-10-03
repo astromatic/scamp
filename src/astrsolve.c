@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/07/2014
+*	Last modified:		03/10/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -109,7 +109,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	03/10/2016
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -136,7 +136,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 			startindex2, nmiss;
 
 #if defined(HAVE_LAPACKE)
-   long long		*lap_ipiv;
+   lapack_int		*lap_ipiv;
 #endif
 
 #ifdef HAVE_MKL
@@ -500,7 +500,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   if (ncoefftot)
     {
 #if defined(HAVE_LAPACKE)
-    QMALLOC(lap_ipiv, long long, ncoefftot);
+    QMALLOC(lap_ipiv, lapack_int, ncoefftot);
 
   #ifdef MATSTORAGE_PACKED
     if (LAPACKE_dspsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, lap_ipiv,

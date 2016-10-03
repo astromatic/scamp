@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		30/09/2016
+dnl	Last modified:		03/10/2016
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -105,7 +105,7 @@ if test x$acx_lapacke_ok = xyes; then
   AC_SEARCH_LIBS(
         LAPACKE_dpotrf, [lapacke],
         [acx_lapacke_ok=yes],
-        [LAPACKE_ERROR="LAPACKe library files not found!"],
+        [LAPACKE_ERROR="LAPACK"$lapacke_suffix"/LAPACKe library files not found!"],
         $lapacke_libopt
   )
   LIBS="$OLIBS"

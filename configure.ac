@@ -295,12 +295,12 @@ else
 
   else
 ######## Handle the BLAS and LAPACKe libraries (linear algebra) ##########
-    ACX_BLAS($with_blas_libdir, $with_blas_incdir, $use_pthreads, no,
+    ACX_BLAS($with_blas_libdir, $with_blas_incdir, $use_pthreads, yes,
       [
         if test "$BLAS_WARN" != ""; then
           AC_MSG_WARN([$BLAS_WARN])
         fi
-        ACX_LAPACKE($with_lapacke_libdir,$with_lapacke_incdir, [$BLAS_LIBS], no,
+        ACX_LAPACKE($with_lapacke_libdir,$with_lapacke_incdir, [$BLAS_LIBS], yes,
           [
             [LIBS="$LAPACKE_LIBS $LIBS"]
             if test "$LAPACKE_WARN" != ""; then
