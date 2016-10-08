@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/10/2016
+*	Last modified:		06/10/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -49,6 +49,10 @@
 #ifdef HAVE_LAPACKE
  #include LAPACKE_H
  #define MATSTORAGE_PACKED 1
+#endif
+
+#ifdef HAVE_OPENBLASP
+ #include BLAS_H
 #endif
 
 #include <sys/mman.h>
@@ -139,9 +143,11 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
    lapack_int		*lap_ipiv;
 #endif
 
+/* Set number of threads (may be changed later in the code) */
 #ifdef HAVE_MKL
-/* Set number of MKL threads (may be changed later in the code) */
   mkl_set_num_threads(prefs.nthreads);
+#elif HAVE_OPENBLASP
+  openblas_set_num_threads(prefs.nthreads);
 #endif
 
 /* Compute weight factors for each set based on the relative number of */

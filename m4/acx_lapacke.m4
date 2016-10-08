@@ -1,5 +1,5 @@
 dnl
-dnl				acx_atlas.m4
+dnl				acx_lapacke.m4
 dnl
 dnl Figure out if the ATLAS library and header files are installed.
 dnl
@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		03/10/2016
+dnl	Last modified:		06/10/2016
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -41,72 +41,72 @@ dnl is a list of commands to run it if it is not found.
 AC_DEFUN([ACX_LAPACKE], [
 AC_REQUIRE([AC_CANONICAL_HOST])
 
-dnl --------------------
-dnl Search include files
-dnl --------------------
+dnl -----------------------
+dnl Search main header file
+dnl -----------------------
 
-acx_lapacke_ok=no
+LAPACKE_ERROR=""
 if test x$2 = x; then
+  [acx_lapacke_incdir="lapacke/"]
   AC_CHECK_HEADER(
-    [lapacke/lapacke.h],
+    ${acx_lapacke_incdir}lapacke.h,,
     [
-      [acx_lapacke_ok=yes]
-      AC_DEFINE_UNQUOTED(LAPACKE_H, ["lapacke/lapacke.h"],
-	[LAPACKe header filename.])
-    ],
-    [AC_CHECK_HEADER(
-      [lapacke.h],
-      [
-        [acx_lapacke_ok=yes]
-        AC_DEFINE_UNQUOTED(LAPACKE_H, ["lapacke.h"],
-		[LAPACKe header filename.])
-      ],
-      [LAPACKE_ERROR="LAPACKe include files not found!"]
-    )]
+      [acx_lapacke_incdir=""]
+      AC_CHECK_HEADER(
+        [lapacke.h],,
+        [LAPACKE_ERROR="LAPACKe header file not found!"]
+      )
+    ]
   )
 else
+  acx_lapacke_incdir="$2/"
   AC_CHECK_HEADER(
-    [$2/lapacke.h],
+    [${acx_lapacke_incdir}lapacke.h],,
     [
-      [acx_lapacke_ok=yes]
-      AC_DEFINE_UNQUOTED(LAPACKE_H, ["$2/lapacke.h"], [LAPACKe header filename.])
-    ],
-    [AC_CHECK_HEADER(
-      [$2/include/lapacke.h],
-      [
-        [acx_lapacke_ok=yes]
-        AC_DEFINE_UNQUOTED(LAPACKE_H, ["$2/include/lapacke.h"],
-		[LAPACKe header filename.])
-      ],
-      [LAPACKE_ERROR="LAPACKe include files not found in "$2"!"]
+      [acx_lapacke_incdir="$2/include/"]
+      AC_CHECK_HEADER(
+        [${acx_lapacke_incdir}lapacke.h],,
+        [LAPACKE_ERROR="LAPACKe header file not found in "$2"!"]
     )]
   )
 fi
+
+if test x$LAPACKE_ERROR = x; then
+  AC_DEFINE_UNQUOTED(LAPACKE_H, "${acx_lapacke_incdir}lapacke.h",
+	[LAPACKe header filename.])
+
+dnl ---------------------------
+dnl Search "config" header file
+dnl ---------------------------
+  AC_CHECK_HEADER(
+    ${acx_lapacke_incdir}lapacke_config.h,
+    AC_DEFINE(HAVE_LAPACK_CONFIG_H, 1,
+      [Define if you have the LAPACKe config header file.]
+    )
+  )
 
 dnl -------------------------
 dnl Search library files
 dnl -------------------------
 
-if test x$acx_lapacke_ok = xyes; then
-  acx_lapacke_ok=no
   OLIBS="$LIBS"
   LIBS=""
   if test x$4 = xyes; then
-    lapacke_suffix="64"
+    acx_lapacke_suffix="64"
+    LAPACKE_CFLAGS="-DLAPACK_ILP64"
   else
-    lapacke_suffix=""
+    acx_lapacke_suffix=""
+    LAPACKE_CFLAGS=""
   fi
   if test x$1 = x; then
-    lapacke_libopt="-llapack$lapacke_suffix $3"
+    acx_lapacke_libopt="-llapack$acx_lapacke_suffix $3"
   else
-    lapacke_libopt="-L$1 -llapack$lapacke_suffix $3"
+    acx_lapacke_libopt="-L$1 -llapack$acx_lapacke_suffix $3"
   fi
-
   AC_SEARCH_LIBS(
-        LAPACKE_dpotrf, [lapacke],
-        [acx_lapacke_ok=yes],
-        [LAPACKE_ERROR="LAPACK"$lapacke_suffix"/LAPACKe library files not found!"],
-        $lapacke_libopt
+        LAPACKE_dpotrf, [lapacke],,
+        [LAPACKE_ERROR="LAPACK"$acx_lapacke_suffix"/LAPACKe library files not found!"],
+        [$acx_lapacke_libopt]
   )
   LIBS="$OLIBS"
 fi
@@ -115,11 +115,12 @@ dnl -------------------------------------------------------------------------
 dnl Finally execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND
 dnl -------------------------------------------------------------------------
 
-if test x"$acx_lapacke_ok" = xyes; then
+if test x$LAPACKE_ERROR = x; then
   AC_DEFINE(HAVE_LAPACKE,1,
 	[Define if you have the LAPACKe libraries and header files.])
-  LAPACKE_LIBS="-llapacke $lapacke_libopt $ac_cv_search_clapack_dpotrf"
+  LAPACKE_LIBS="-llapacke $acx_lapacke_libopt $ac_cv_search_clapack_dpotrf"
   AC_SUBST(LAPACKE_CFLAGS)
+  AC_SUBST(LAPACKE_LDFLAGS, "")
   AC_SUBST(LAPACKE_LIBS)
   AC_SUBST(LAPACKE_WARN)
   $5

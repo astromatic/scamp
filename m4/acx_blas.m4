@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		30/09/2016
+dnl	Last modified:		08/10/2016
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -45,73 +45,65 @@ dnl --------------------
 dnl Search include files
 dnl --------------------
 
-acx_blas_ok=no
+BLAS_ERROR=""
 if test x$2 = x; then
 dnl We give our preference to OpenBLAS
+  [acx_blas_incdir="openblas/"]
   AC_CHECK_HEADER(
-    [openblas/cblas.h],
+    ${acx_blas_incdir}cblas.h,,
     [
-      [acx_blas_ok=yes]
-      AC_DEFINE_UNQUOTED(BLAS_H, ["openblas/cblas.h"], [cBLAS header filename.])
-    ],
-    [AC_CHECK_HEADER(
-      [cblas.h],
-      [
-        [acx_blas_ok=yes]
-        AC_DEFINE_UNQUOTED(BLAS_H, ["cblas.h"], [cBLAS header filename.])
-      ],
-      [BLAS_ERROR="cBLAS include files not found!"]
-    )]
+      [acx_blas_incdir=""]
+      AC_CHECK_HEADER(
+        [cblas.h],,
+        [BLAS_ERROR="BLAS header file not found!"]
+      )
+    ]
   )
 else
+  acx_blas_incdir="$2/"
   AC_CHECK_HEADER(
-    [$2/cblas.h],
+    [${acx_blas_incdir}cblas.h],,
     [
-      [acx_blas_ok=yes]
-      AC_DEFINE_UNQUOTED(BLAS_H, ["$2/cblas.h"], [cBLAS header filename.])
-    ],
-    [AC_CHECK_HEADER(
-      [$2/include/cblas.h],
-      [
-        [acx_blas_ok=yes]
-        AC_DEFINE_UNQUOTED(BLAS_H, ["$2/include/cblas.h"],
-		[cBLAS header filename.])
-      ],
-      [BLAS_ERROR="cBLAS include files not found in $2!"]
+      [acx_blas_incdir="$2/include/"]
+      AC_CHECK_HEADER(
+        [${acx_blas_incdir}cblas.h],,
+        [BLAS_ERROR="BLAS header file not found in "$2"!"]
     )]
   )
 fi
+
+if test x$BLAS_ERROR = x; then
+  AC_DEFINE_UNQUOTED(BLAS_H, "${acx_blas_incdir}cblas.h", [BLAS header filename.])
 
 dnl -------------------------
 dnl Search BLAS library files
 dnl -------------------------
 
-if test x$acx_blas_ok = xyes; then
-  acx_blas_ok=no
   OLIBS="$LIBS"
   LIBS=""
   if test x$4 = xyes; then
-    blas_suffix="64"
+    acx_blas_suffix="64"
+    BLAS_CFLAGS="-DOPENBLAS_USE64BITINT"
   else
-    blas_suffix=""
+    acx_blas_suffix=""
+    BLAS_CFLAGS=""
   fi
   if test x$1 = x; then
-    blas_libopt=""
+    acx_blas_libopt=""
   else
-    blas_libopt="-L$1"
+    acx_blas_libopt="-L$1"
   fi
-  if test x$3 = x; then
+  if test x$3 == xyes; then
     AC_SEARCH_LIBS(
       cblas_dgemm, ["openblasp"$blas_suffix],
-      [acx_blas_ok=yes],
+      AC_DEFINE(HAVE_OPENBLASP,1,
+		[Define if you have the OpenBLAS parallel libraries and header files.]),
       [AC_SEARCH_LIBS(
         cblas_dgemm, ["openblas"$blas_suffix],
-        [acx_blas_ok=yes]
-		[BLAS_WARN="parallel OpenBLAS"$blas_suffix" not found, reverting to scalar OpenBLAS"$blas_suffix"!"],
+	[BLAS_WARN="parallel OpenBLAS"$blas_suffix" not found, reverting to scalar OpenBLAS"$blas_suffix"!"],
         [AC_SEARCH_LIBS(
           cblas_dgemm, ["blas"$blas_suffix],
-          [acx_blas_ok=yes]
-		[BLAS_WARN="parallel OpenBLAS"$blas_suffix" not found, reverting to scalar BLAS"$blas_suffix"!"],
+	  [BLAS_WARN="parallel OpenBLAS"$blas_suffix" not found, reverting to scalar BLAS"$blas_suffix"!"],
           [BLAS_ERROR="CBLAS"$blas_suffix" library files not found!"],
           $blas_libopt
         )],
@@ -121,12 +113,10 @@ if test x$acx_blas_ok = xyes; then
     )
   else
     AC_SEARCH_LIBS(
-      cblas_dgemm, ["openblas"$blas_suffix],
-      [acx_blas_ok=yes],
+      cblas_dgemm, ["openblas"$blas_suffix],,
       [AC_SEARCH_LIBS(
         cblas_dgemm, ["blas"$blas_suffix],
-        [acx_blas_ok=yes]
-		[BLAS_WARN="OpenBLAS"$blas_suffix" not found, reverting to scalar BLAS"$blas_suffix"!"],
+	[BLAS_WARN="OpenBLAS"$blas_suffix" not found, reverting to regular BLAS"$blas_suffix"!"],
         [BLAS_ERROR="CBLAS"$blas_suffix" library files not found!"],
         $blas_libopt
       )],
@@ -140,10 +130,11 @@ dnl -------------------------------------------------------------------------
 dnl Finally execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND
 dnl -------------------------------------------------------------------------
 
-if test x"$acx_blas_ok" = xyes; then
+if test x$BLAS_ERROR = x; then
   AC_DEFINE(HAVE_BLAS,1, [Define if you have the BLAS libraries and header files.])
   BLAS_LIBS="$blas_libopt $ac_cv_search_cblas_dgemm"
   AC_SUBST(BLAS_CFLAGS)
+  AC_SUBST(BLAS_LDFLAGS, "")
   AC_SUBST(BLAS_LIBS)
   AC_SUBST(BLAS_WARN)
   $5

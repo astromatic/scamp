@@ -50,6 +50,9 @@
 #include LAPACKE_H
 #endif
 
+#ifdef HAVE_OPENBLASP
+ #include BLAS_H
+#endif
 
 #ifdef HAVE_MKL
  #include MKL_H

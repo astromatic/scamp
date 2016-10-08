@@ -7,7 +7,7 @@ dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
 dnl	This file part of:	AstrOmatic software
 dnl
-dnl	Copyright:		(C) 2003-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+dnl	Copyright:		(C) 2003-2016 IAP/CNRS/UPMC
 dnl
 dnl	License:		GNU General Public License
 dnl
@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		27/05/2015
+dnl	Last modified:		08/10/2016
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -44,206 +44,110 @@ dnl --------------------
 dnl Search include files
 dnl --------------------
 
-acx_atlas_ok=yes
+ATLAS_ERROR=""
 if test x$2 = x; then
-  if test x$1 = x; then
-    AC_CHECK_HEADERS([cblas.h clapack.h],,[acx_atlas_ok=no])
-    if test x$acx_atlas_ok = xyes; then
-      AC_DEFINE(ATLAS_BLAS_H, "cblas.h", [BLAS header filename.])
-      AC_DEFINE(ATLAS_LAPACK_H, "clapack.h", [CLAPACK header filename.])
-    else
-      acx_atlas_ok=yes
-      AC_CHECK_HEADERS([atlas/cblas.h atlas/clapack.h],,[acx_atlas_ok=no])
-      if test x$acx_atlas_ok = xyes; then
-        AC_DEFINE(ATLAS_BLAS_H, "atlas/cblas.h", [BLAS header filename.])
-        AC_DEFINE(ATLAS_LAPACK_H, "atlas/clapack.h", [CLAPACK header filename.])
-      else
-        acx_atlas_ok=yes
-        atlas_def=/usr/local/atlas
-        AC_CHECK_HEADERS(
-		[$atlas_def/include/cblas.h $atlas_def/include/clapack.h],,
-		[acx_atlas_ok=no])
-        if test x$acx_atlas_ok = xyes; then
-          AC_DEFINE_UNQUOTED(ATLAS_BLAS_H, "$atlas_def/include/cblas.h",
-		[BLAS header filename.])
-          AC_DEFINE_UNQUOTED(ATLAS_LAPACK_H, "$atlas_def/include/clapack.h",
-		[CLAPACK header filename.])
-        else
-          acx_atlas_ok=yes
-          atlas_def=/usr/atlas
-          AC_CHECK_HEADERS(
-		[$atlas_def/include/cblas.h $atlas_def/include/clapack.h],,
-		[acx_atlas_ok=no])
-          if test x$acx_atlas_ok = xyes; then
-            AC_DEFINE_UNQUOTED(ATLAS_BLAS_H, "$atlas_def/include/cblas.h",
-		[BLAS header filename.])
-            AC_DEFINE_UNQUOTED(ATLAS_LAPACK_H, "$atlas_def/include/clapack.h",
-		[CLAPACK header filename.])
-          else
-            ATLAS_ERROR="CBLAS/LAPack include files not found!"
-          fi
-        fi
-      fi
-    fi
+    acx_atlas_incdir=""
+    AC_CHECK_HEADERS([cblas.h clapack.h],,
+      [
+      acx_atlas_incdir="atlas/"
+      AC_CHECK_HEADERS([${acx_atlas_incdir}cblas.h ${acx_atlas_incdir}clapack.h],,
+        [ATLAS_ERROR="ATLAS header files not found!"])
+      ]
+    )
   else
-    AC_CHECK_HEADERS([$1/include/cblas.h $1/include/clapack.h],,
-		[acx_atlas_ok=no])
-    if test x$acx_atlas_ok = xyes; then
-      AC_DEFINE_UNQUOTED(ATLAS_BLAS_H, "$1/include/cblas.h",
-		[BLAS header filename.])
-      AC_DEFINE_UNQUOTED(ATLAS_LAPACK_H, "$1/include/clapack.h",
-		[CLAPACK header filename.])
-    else
-      acx_atlas_ok=yes
-      AC_CHECK_HEADERS([cblas.h clapack.h],, [acx_atlas_ok=no])
-      if test x$acx_atlas_ok = xyes; then
-        AC_DEFINE_UNQUOTED(ATLAS_BLAS_H, "cblas.h",
-		[BLAS header filename.])
-        AC_DEFINE_UNQUOTED(ATLAS_LAPACK_H, "clapack.h",
-		[CLAPACK header filename.])
-      else
-        ATLAS_ERROR="CBLAS/LAPack include files not found in $1/include!"
-      fi
-    fi
-  fi
-else
-  AC_CHECK_HEADERS([$2/cblas.h $2/clapack.h],, [acx_atlas_ok=no])
-  if test x$acx_atlas_ok = xyes; then
-    AC_DEFINE_UNQUOTED(ATLAS_BLAS_H, "$2/cblas.h",
-		[BLAS header filename.])
-    AC_DEFINE_UNQUOTED(ATLAS_LAPACK_H, "$2/clapack.h",
-		[CLAPACK header filename.])
-  else
-    ATLAS_ERROR="CBLAS/LAPack include files not found in $2!"
-  fi
+    acx_atlas_incdir="$2/"
+    AC_CHECK_HEADERS([${acx_atlas_incdir}cblas.h ${acx_atlas_incdir}clapack.h],,
+    [
+      [acx_atlas_incdir="$2/include/"]
+      AC_CHECK_HEADER(
+       [${acx_atlas_incdir}cblas.h ${acx_atlas_incdir}clapack.h],,
+        [ATLAS_ERROR="ATLAS header files not found in "$2"!"]
+      )
+    ]
+  )
 fi
+
+if test x$ATLAS_ERROR = x; then
+  AC_DEFINE_UNQUOTED(ATLAS_BLAS_H, "${acx_atlas_incdir}cblas.h", [BLAS header filename.])
+  AC_DEFINE_UNQUOTED(ATLAS_LAPACK_H, "${acx_atlas_incdir}clapack.h", [CLAPACK header filename.])
 
 dnl --------------------
 dnl Search library files
 dnl --------------------
 
-if test x$acx_atlas_ok = xyes; then
   OLIBS="$LIBS"
   LIBS=""
   if test x$1 = x; then
-    AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],, [acx_atlas_ok=no],
-		[-lcblas -latlas -lm])
-    AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no], [-latlas -lm])
-    if test x$acx_atlas_ok = xyes; then
-      ATLAS_LIBPATH=""
+    if test -d "/usr/lib64/atlas"; then
+      acx_atlas_libopt="-L/usr/lib64/atlas"
+    elif test -d "/usr/lib/atlas"; then
+      acx_atlas_libopt="-L/usr/lib/atlas"
     else
-      atlas_def=/usr/local/atlas
-      unset ac_cv_search_clapack_dpotrf
-      unset ac_cv_search_cblas_dgemm
-      acx_atlas_ok=yes
-      AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],,
-		[acx_atlas_ok=no], [-L$atlas_def/lib -lcblas -latlas -lm])
-      AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no],
-		[-L$atlas_def/lib -latlas -lm])
-      if test x$acx_atlas_ok = xyes; then
-        ATLAS_LIBPATH="-L$atlas_def/lib"
-      else
-        atlas_def=/usr/lib64/atlas
-        unset ac_cv_search_clapack_dpotrf
-        unset ac_cv_search_cblas_dgemm
-        acx_atlas_ok=yes
-        AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],,
-		[acx_atlas_ok=no], [-L$atlas_def -lcblas -latlas -lm])
-        AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no],
-		[-L$atlas_def -latlas -lm])
-        if test x$acx_atlas_ok = xyes; then
-          ATLAS_LIBPATH="-L$atlas_def"
-        else
-          atlas_def=/usr/lib/atlas
-          unset ac_cv_search_clapack_dpotrf
-          unset ac_cv_search_cblas_dgemm
-          acx_atlas_ok=yes
-          AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],,
-		[acx_atlas_ok=no], [-L$atlas_def -lcblas -latlas -lm])
-          AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no],
-		[-L$atlas_def -latlas -lm])
-          if test x$acx_atlas_ok = xyes; then
-            ATLAS_LIBPATH="-L$atlas_def"
-          else
-            atlas_def=/usr/atlas
-            unset ac_cv_search_clapack_dpotrf
-            unset ac_cv_search_cblas_dgemm
-            acx_atlas_ok=yes
-            AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],,
-		[acx_atlas_ok=no], [-L$atlas_def/lib -lcblas -latlas -lm])
-            AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no],
-		[-L$atlas_def/lib -latlas -lm])
-            if test x$acx_atlas_ok = xyes; then
-              ATLAS_LIBPATH="-L$atlas_def/lib"
-            else
-              ATLAS_ERROR="CBLAS/LAPack library files not found at usual locations!"
-            fi
-          fi
-        fi
-      fi
+      acx_atlas_libopt=""
     fi
   else
-    AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],, [acx_atlas_ok=no],
-		[-L$1 -lcblas -latlas -lm])
-    AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no], [-L$1 -latlas -lm])
-    if test x$acx_atlas_ok = xyes; then
-      ATLAS_LIBPATH="-L$1"
-    else
-      unset ac_cv_search_clapack_dpotrf
-      unset ac_cv_search_cblas_dgemm
-      acx_atlas_ok=yes
-      AC_SEARCH_LIBS([clapack_dpotrf], [lapack_atlas lapack],,
-		[acx_atlas_ok=no], [-L$1/lib -lcblas -latlas -lm])
-      AC_SEARCH_LIBS([cblas_dgemm], cblas,, [acx_atlas_ok=no],
-		[-L$1/lib -latlas -lm])
-      if test x$acx_atlas_ok = xyes; then
-        ATLAS_LIBPATH="-L$1/lib"
-      else
-        ATLAS_ERROR="CBLAS/LAPack library files not found in $1!"
-      fi
-    fi
+    acx_atlas_libopt="-L$1"
   fi
+  if test x$3 == xyes; then
+dnl Parallel ATLAS 3.10+
+    acx_atlas_newlibs="tatlas"
+dnl Older parallel ATLAS
+    acx_atlas_oldextralibs="-latlas -lptcblas -lcblas"
+  else
+dnl Serial ATLAS 3.10+
+    acx_atlas_newlibs="satlas"
+dnl Older serial ATLAS
+    acx_atlas_oldextralibs="-latlas -lcblas"
+  fi
+  acx_atlas_extralibs=""
+  AC_SEARCH_LIBS(
+    [clapack_dpotrf], [$acx_atlas_newlibs],,
+    [
+      acx_atlas_extralibs=$acx_atlas_oldextralibs
+      AC_SEARCH_LIBS(
+        [clapack_dpotrf], [lapack_atlas lapack],,
+        [
+          acx_atlas_extralibs=""
+          AC_SEARCH_LIBS(
+            [clapack_dpotrf], [atlas],
+            [ATLAS_WARN="Parallel ATLAS not found, reverting to serial!"],
+            [
+              acx_atlas_extralibs="-latlas -lcblas"
+              AC_SEARCH_LIBS(
+                [clapack_dpotrf], [lapack_atlas lapack],
+                [ATLAS_WARN="Parallel ATLAS not found, reverting to serial!"],
+                [ATLAS_ERROR="ATLAS library files not found!"],
+                ["$acx_atlas_libopt $acx_atlas_extralibs"]
+              )
+            ],
+            $acx_atlas_libopt
+          )
+        ],
+        ["$acx_atlas_libopt $acx_atlas_extralibs"]
+      )
+    ],
+    $acx_atlas_libopt
+  )
   LIBS="$OLIBS"
 fi
 
-AC_SUBST(ATLAS_LIBPATH)
-AC_SUBST(ATLAS_CFLAGS)
+dnl -------------------------------------------------------------------------
+dnl Finally execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND
+dnl -------------------------------------------------------------------------
 
-dnl -------------------------------------------------------------------------
-dnl Finally, check MP version and execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND
-dnl -------------------------------------------------------------------------
-if test x"$acx_atlas_ok" = xyes; then
+if test x$ATLAS_ERROR = x; then
   AC_DEFINE(HAVE_ATLAS,1,
 	[Define if you have the ATLAS libraries and header files.])
-  if test x$3 = xyes; then
-dnl Check whether the multithreaded version of ATLAS is there too:
-    unset ac_cv_search_cblas_dgemm
-    AC_SEARCH_LIBS([cblas_dgemm], ptcblas, [acx_atlast_ok=yes],
-	[acx_atlast_ok=no], [$ATLAS_LIBPATH -lcblas -latlas -lm])
-    if test x$acx_atlast_ok = xyes; then
-      ATLAS_LIBS="$ATLAS_LIBPATH $ac_cv_search_clapack_dpotrf -lptcblas -lcblas -latlas"
-      LIBS="$OLIBS"
-      AC_SUBST(ATLAS_LIBS)
-      AC_DEFINE(HAVE_ATLAS_MP,1,
-	[Define if you have the parallel ATLAS libraries.])
-      $4
-    else
-      ATLAS_LIBS="$ATLAS_LIBPATH $ac_cv_search_clapack_dpotrf -lcblas -latlas"
-      LIBS="$OLIBS"
-      AC_SUBST(ATLAS_LIBS)
-      ATLAS_WARN="CBLAS/LAPack was compiled without multithreading support!"
-      AC_SUBST(ATLAS_WARN)
-      $4         
-    fi
-  else
-    ATLAS_LIBS="$ATLAS_LIBPATH $ac_cv_search_clapack_dpotrf -lcblas -latlas"
-    LIBS="$OLIBS"
-    AC_SUBST(ATLAS_LIBS)
-    $4
-  fi
+  ATLAS_LIBS="$acx_atlas_libopt $ac_cv_search_clapack_dpotrf"
+  AC_SUBST(ATLAS_CFLAGS)
+  AC_SUBST(ATLAS_LDFLAGS, "")
+  AC_SUBST(ATLAS_LIBS)
+  AC_SUBST(ATLAS_WARN)
+  $4
 else
   AC_SUBST(ATLAS_ERROR)
   $5
 fi
 
 ])dnl ACX_ATLAS
+
