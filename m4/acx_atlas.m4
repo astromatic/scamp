@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		08/10/2016
+dnl	Last modified:		19/10/2016
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -103,27 +103,30 @@ dnl Older serial ATLAS
   AC_SEARCH_LIBS(
     [clapack_dpotrf], [$acx_atlas_newlibs],,
     [
+      unset ac_cv_search_clapack_dpotrf
       acx_atlas_extralibs=$acx_atlas_oldextralibs
       AC_SEARCH_LIBS(
         [clapack_dpotrf], [lapack_atlas lapack],,
         [
+          unset ac_cv_search_clapack_dpotrf
           acx_atlas_extralibs=""
           AC_SEARCH_LIBS(
             [clapack_dpotrf], [atlas],
             [ATLAS_WARN="Parallel ATLAS not found, reverting to serial!"],
             [
+              unset ac_cv_search_clapack_dpotrf
               acx_atlas_extralibs="-latlas -lcblas"
               AC_SEARCH_LIBS(
                 [clapack_dpotrf], [lapack_atlas lapack],
                 [ATLAS_WARN="Parallel ATLAS not found, reverting to serial!"],
                 [ATLAS_ERROR="ATLAS library files not found!"],
-                ["$acx_atlas_libopt $acx_atlas_extralibs"]
+                [$acx_atlas_libopt $acx_atlas_extralibs]
               )
             ],
             $acx_atlas_libopt
           )
         ],
-        ["$acx_atlas_libopt $acx_atlas_extralibs"]
+        [$acx_atlas_libopt $acx_atlas_extralibs]
       )
     ],
     $acx_atlas_libopt
@@ -135,7 +138,7 @@ dnl -------------------------------------------------------------------------
 dnl Finally execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND
 dnl -------------------------------------------------------------------------
 
-if test x$ATLAS_ERROR = x; then
+if test "x$ATLAS_ERROR" = "x"; then
   AC_DEFINE(HAVE_ATLAS,1,
 	[Define if you have the ATLAS libraries and header files.])
   ATLAS_LIBS="$acx_atlas_libopt $ac_cv_search_clapack_dpotrf"

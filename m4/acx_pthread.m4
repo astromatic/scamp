@@ -123,7 +123,7 @@ acx_pthread_flags="pthreads none -Kthread -kthread lthread pthread -pthread -pth
 # --thread-safe: KAI C++
 
 case "${host_cpu}-${host_os}" in
-       (*solaris*)
+        *solaris*)
 
         # On Solaris (at least, for some versions), libc contains stubbed
         # (non-functional) versions of the pthreads routines, so link-based
@@ -141,16 +141,16 @@ if test x"$acx_pthread_ok" = xno; then
 for flag in $acx_pthread_flags; do
 
         case $flag in
-                (none)
+                none)
                 AC_MSG_CHECKING([whether pthreads work without any flags])
                 ;;
 
-                (-*)
+                -*)
                 AC_MSG_CHECKING([whether pthreads work with $flag])
                 PTHREAD_CFLAGS="$flag"
                 ;;
 
-                (*)
+                *)
                 AC_MSG_CHECKING([for the pthreads library -l$flag])
                 PTHREAD_LIBS="-l$flag"
                 ;;
@@ -170,11 +170,11 @@ for flag in $acx_pthread_flags; do
         # pthread_cleanup_push because it is one of the few pthread
         # functions on Solaris that doesn't have a non-functional libc stub.
         # We try pthread_create on general principles.
-        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>]],
-		[[pthread_t th; pthread_join(th, 0);
-		pthread_attr_init(0); pthread_cleanup_push(0, 0);
-		pthread_create(0,0,0,0); pthread_cleanup_pop(0); ]])],
-		[acx_pthread_ok=yes],[])
+        AC_TRY_LINK([#include <pthread.h>],
+                    [pthread_t th; pthread_join(th, 0);
+                     pthread_attr_init(0); pthread_cleanup_push(0, 0);
+                     pthread_create(0,0,0,0); pthread_cleanup_pop(0); ],
+                    [acx_pthread_ok=yes])
 
         LIBS="$save_LIBS"
         CFLAGS="$save_CFLAGS"
@@ -199,15 +199,13 @@ if test "x$acx_pthread_ok" = xyes; then
         # Detect AIX lossage: threads are created detached by default
         # and the JOINABLE attribute has a nonstandard name (UNDETACHED).
         AC_MSG_CHECKING([for joinable pthread attribute])
-        AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>]],
-			[[int attr=PTHREAD_CREATE_JOINABLE;]])],
-			[ok=PTHREAD_CREATE_JOINABLE],
-			[ok=unknown])
+        AC_TRY_LINK([#include <pthread.h>],
+                    [int attr=PTHREAD_CREATE_JOINABLE;],
+                    ok=PTHREAD_CREATE_JOINABLE, ok=unknown)
         if test x"$ok" = xunknown; then
-                AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>]],
-			[[int attr=PTHREAD_CREATE_UNDETACHED;]])],
-			[ok=PTHREAD_CREATE_UNDETACHED],
-			[ok=unknown])
+                AC_TRY_LINK([#include <pthread.h>],
+                            [int attr=PTHREAD_CREATE_UNDETACHED;],
+                            ok=PTHREAD_CREATE_UNDETACHED, ok=unknown)
         fi
         if test x"$ok" != xPTHREAD_CREATE_JOINABLE; then
                 AC_DEFINE(PTHREAD_CREATE_JOINABLE, $ok,
@@ -222,8 +220,8 @@ if test "x$acx_pthread_ok" = xyes; then
         AC_MSG_CHECKING([if more special flags are required for pthreads])
         flag=no
         case "${host_cpu}-${host_os}" in
-                (*-aix* | *-freebsd*)     flag="-D_THREAD_SAFE";;
-                (*solaris* | alpha*-osf*) flag="-D_REENTRANT";;
+                *-aix* | *-freebsd*)     flag="-D_THREAD_SAFE";;
+                *solaris* | alpha*-osf*) flag="-D_REENTRANT";;
         esac
         AC_MSG_RESULT(${flag})
         if test "x$flag" != xno; then
@@ -245,13 +243,11 @@ AC_SUBST(PTHREAD_CC)
 
 # Finally, execute ACTION-IF-FOUND/ACTION-IF-NOT-FOUND:
 if test x"$acx_pthread_ok" = xyes; then
-        ifelse([$1],,
-		AC_DEFINE(HAVE_PTHREAD,1,
-		[Define if you have POSIX threads libraries and header files.]),
-		[$1])
+        ifelse([$1],,AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.]),[$1])
         :
 else
         acx_pthread_ok=no
         $2
 fi
-]) dnl ACX_PTHREAD
+
+])dnl ACX_PTHREAD

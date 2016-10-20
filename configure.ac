@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		03/10/2016
+#	Last modified:		20/10/2016
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -136,26 +136,12 @@ AC_SYS_LARGEFILE
 AC_FUNC_FSEEKO
 
 # Provide special options for ATLAS
-AC_MSG_CHECKING([whether ATLAS is enabled])
-AC_ARG_ENABLE(atlas,
-	[AS_HELP_STRING([--enable-atlas],
-	[Use the ATLAS library instead of BLAS+LAPACKe (default = no)])],
-	AC_MSG_RESULT([yes]),
-	AC_MSG_RESULT([no]))
 AC_ARG_WITH(atlas-libdir,
 	[AS_HELP_STRING([--with-atlas-libdir=<ATLAS library path>],
 	[Provide an alternative path to the ATLAS library])])
 AC_ARG_WITH(atlas-incdir,
 	[AS_HELP_STRING([--with-atlas-incdir=<ATLAS include dir>],
 	[Provide an alternative path to the ATLAS include directory])])
-
-# Provide special options for BLAS
-AC_ARG_WITH(blas-libdir,
-	[AS_HELP_STRING([--with-blas-libdir=<BLAS library path>],
-	[Provide an alternative path to the BLAS library])])
-AC_ARG_WITH(blas-incdir,
-	[AS_HELP_STRING([--with-blas-incdir=<BLAS include dir>],
-	[Provide an alternative path to the BLAS include directory])])
 
 # Provide special options for cURL
 AC_ARG_WITH(curl-libdir,
@@ -173,18 +159,24 @@ AC_ARG_WITH(fftw-incdir,
 	[AS_HELP_STRING([--with-fftw-incdir=<FFTW include dir>],
 	[Provide an alternative path to the FFTW include directory])])
 
-# Provide special options for LAPACke
-AC_ARG_WITH(lapacke-libdir,
-	[AS_HELP_STRING([--with-lapacke-libdir=<LAPACKe library path>],
-	[Provide an alternative path to the LAPACKe library])])
-AC_ARG_WITH(lapacke-incdir,
-	[AS_HELP_STRING([--with-lapacke-incdir=<LAPACKe include dir>],
-	[Provide an alternative path to the LAPACKe include directory])])
-
 # Provide special options for the MKL library
 AC_ARG_WITH(mkl-dir,
 	[AS_HELP_STRING([--with-mkl-dir=<MKL path>],
 	[Provide an alternative path to the MKL library])])
+
+# Provide special options for OpenBLAS
+AC_MSG_CHECKING([whether OpenBLAS is enabled])
+AC_ARG_ENABLE(openblas,
+	[AS_HELP_STRING([--enable-openblas],
+	[Use the OpenBLAS library instead of ATLAS (default = no)])],
+	AC_MSG_RESULT([yes]),
+	AC_MSG_RESULT([no]))
+AC_ARG_WITH(openblas-libdir,
+	[AS_HELP_STRING([--with-openblas-libdir=<OpenBLAS library path>],
+	[Provide an alternative path to the OpenBLAS library])])
+AC_ARG_WITH(openblas-incdir,
+	[AS_HELP_STRING([--with-openblas-incdir=<OpenBLAS header dir>],
+	[Provide an alternative path to the OpenBLAS header directory])])
 
 # Provide special options for PLPlot
 AC_MSG_CHECKING([whether PLPlot is enabled])
@@ -281,8 +273,22 @@ else
     AC_MSG_ERROR([$FFTW_ERROR Exiting.])
   )
 
-  if test "$enable_atlas" = "yes"; then
-################# handle the ATLAS library (linear algebra) ##################
+  if test "x$enable_openblas" = "xyes"; then
+######## Handle the OpenBLAS library (linear algebra: BLAS + LAPACKe) ########
+    ACX_OPENBLAS($with_openblas_libdir, $with_openblas_incdir, $use_pthreads, no,
+      [
+        AM_CFLAGS="$AM_CFLAGS $OPENBLAS_CFLAGS "
+        AM_LDFLAGS="$AM_LDFLAGS $OPENBLAS_LDFLAGS "
+        LIBS="$OPENBLAS_LIBS $LIBS"
+        if test "$OPENBLAS_WARN" != ""; then
+          AC_MSG_WARN([$OPENBLAS_WARN])
+        fi
+      ],
+      AC_MSG_ERROR([$OPENBLAS_ERROR Exiting.])
+    )
+
+  else
+######### handle the ATLAS library (linear algebra: BLAS + cLAPACK) ##########
     ACX_ATLAS($with_atlas_libdir, $with_atlas_incdir, $use_pthreads,
       [
         [LIBS="$ATLAS_LIBS $LIBS"]
@@ -291,30 +297,6 @@ else
 	fi
       ],
       AC_MSG_ERROR([$ATLAS_ERROR Exiting.])
-    )
-
-  else
-######## Handle the BLAS and LAPACKe libraries (linear algebra) ##########
-    ACX_BLAS($with_blas_libdir, $with_blas_incdir, $use_pthreads, no,
-      [
-        if test "$BLAS_WARN" != ""; then
-          AC_MSG_WARN([$BLAS_WARN])
-        fi
-        ACX_LAPACKE($with_lapacke_libdir,$with_lapacke_incdir, [$BLAS_LIBS], no,
-          [
-            [
-              AM_CFLAGS="$AM_CFLAGS $LAPACKE_CFLAGS "
-              AM_LDFLAGS="$AM_LDFLAGS $LAPACKE_LDFLAGS "
-              LIBS="$LAPACKE_LIBS $LIBS"
-            ]
-            if test "$LAPACKE_WARN" != ""; then
-              AC_MSG_WARN([$LAPACKE_WARN])
-            fi
-          ],
-          AC_MSG_ERROR([$LAPACKE_ERROR Exiting.])
-        )
-      ],
-      AC_MSG_ERROR([$BLAS_ERROR Exiting.])
     )
   fi
 fi
