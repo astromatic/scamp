@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/04/2016
+*	Last modified:		20/10/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,6 +45,7 @@
 #include "astrsolve.h"
 #include "astrstats.h"
 #include "catout.h"
+#include "colour.h"
 #include "cplot.h"
 #include "crossid.h"
 #include "dgeomap.h"
@@ -54,6 +55,7 @@
 #include "fits/fitscat.h"
 #include "header.h"
 #include "match.h"
+#include "merge.h"
 #include "mosaic.h"
 #include "photsolve.h"
 #include "prefs.h"
