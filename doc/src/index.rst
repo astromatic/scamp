@@ -15,6 +15,7 @@ Contents
    :maxdepth: 2
 
    Introduction
+   Using
 
 Indices and tables
 ------------------
