@@ -59,7 +59,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'SCAMP'
 filename = 'scamp'
-copyright = u'2016, E. Bertin, A. Moneti'
+copyright = u'2016, IAP/CNRS/UPMC'
 author = u'E. Bertin, A. Moneti'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -81,7 +81,7 @@ language = None
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
 #
-today = 'Thu Oct 20 2016'
+today = 'Wed Oct 26 2016'
 #
 # Else, today_fmt is used as the format for a strftime call.
 #

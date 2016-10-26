@@ -59,7 +59,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'@PACKAGE_NAME@'
 filename = '@PACKAGE_TARNAME@'
-copyright = u'2016, E. Bertin, A. Moneti'
+copyright = u'2016, IAP/CNRS/UPMC'
 author = u'E. Bertin, A. Moneti'
 
 # The version info for the project you're documenting, acts as replacement for

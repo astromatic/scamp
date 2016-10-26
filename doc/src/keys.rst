@@ -43,11 +43,17 @@
 .. |SWarp| replace:: :program:`SWarp`
 .. _SWarp: http://astromatic.net/software/swarp
 
+.. |TPV| replace:: ``TPV``
+.. _TPV: fits.gsfc.nasa.gov/registry/tpvwcs/tpv.html
+
 .. |VOTable| replace:: VOTable
 .. _VOTable: http://www.ivoa.net/documents/VOTable
 
 .. |WCS| replace:: WCS
 .. _WCS: http://www.atnf.csiro.au/people/mcalabre/WCS/index.html
+
+.. |WCSLIB| replace:: :program:`WCSLIB`
+.. _WCSLIB: http://www.atnf.csiro.au/people/mcalabre/WCS/wcslib
 
 .. |Windows| replace:: Microsoft Windows\ :sup:`®`\ 
 .. _Windows: http://www.microsoft.com/windows

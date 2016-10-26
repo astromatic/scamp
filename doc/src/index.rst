@@ -15,7 +15,9 @@ Contents
    :maxdepth: 2
 
    Introduction
+   Installing
    Using
+   references
 
 Indices and tables
 ------------------
