@@ -1,6 +1,5 @@
 .. File Output.rst
 
-.. _output:
 Output Catalogues
 =================
 
