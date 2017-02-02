@@ -10,6 +10,9 @@
 .. |FITS| replace:: :abbr:`FITS (Flexible Image Transport System)`
 .. _FITS: http://fits.gsfc.nasa.gov
 
+.. |fv| replace:: :program:`fv`
+.. _fv: http://heasarc.gsfc.nasa.gov/ftools/fv/
+
 .. |GitHub| replace:: GitHub
 .. _GitHub: https://github.com
 
@@ -45,6 +48,9 @@
 
 .. |TPV| replace:: ``TPV``
 .. _TPV: fits.gsfc.nasa.gov/registry/tpvwcs/tpv.html
+
+.. |TOPCAT| replace:: :program:`TOPCAT`
+.. _TOPCAT: http://www.star.bris.ac.uk/~mbt/topcat/
 
 .. |VOTable| replace:: VOTable
 .. _VOTable: http://www.ivoa.net/documents/VOTable
