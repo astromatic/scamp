@@ -41,108 +41,113 @@ The columns present in the file are:
 Full Catalogues
 ---------------
 
-Other catalogues which can be produced by |SCAMP| are the “merged” catalogues (one per field
+Other catalogues which can be produced by |SCAMP| are the “full” catalogues (one per field
 group). These catalogues contain the raw and calibrated coordinates and magnitudes of all
 individual detections that passed the |SCAMP| acceptation criteria. Each detection is linked to
 a parent source through to the ``SOURCE_NUMBER`` identifier, also present in the merged output
-catalogue.
+catalogue. The ``CATALOG_NUMBER`` identifier link the detected source to its catalogue (as |SCAMP|
+could receive more than one input catalogue), ``CATALOG_NUMBER`` set to 0 beeing reserved to the
+reference catalogue.
 The ``FULLOUTCAT_TYPE`` configuration parameter sets the format of the full catalogue; the choice
 of options is the same as for ``MERGEDOUTCAT_TYPE``.
 
 The columns present in the file are:
 
-:Name: ``SOURCE_NUMBER``\*
-:Content: Source ID
+:Name: ``SOURCE_NUMBER``
+:Content: Source ID, the same as in “merged” catalogue
 :Unit: -
 -----------------
-:Name: ``CATALOG_NUMBER``\*
-:Content: Catalogue ID
+:Name: ``CATALOG_NUMBER``
+:Content: Catalogue ID, 0 beeing reserved to the reference catalogue
 :Unit: -
 -----------------
-:Name: ``EXTENSION``\*
-:Content: FITS extension of the parent image
+:Name: ``EXTENSION``
+:Content: FITS extension of the parent image (always set to 1 for single extension images)
 :Unit: -
 -----------------
-:Name: ``ASTR_INSTRUM``\*
+:Name: ``ASTR_INSTRUM``
 :Content: Astrometric instrument (context) ID
 :Unit: -
 -----------------
-:Name: ``PHOT_INSTRUM``\*
+:Name: ``PHOT_INSTRUM``
 :Content: Photometric instrument (context) ID
 :Unit: -
 -----------------
-:Name: ``X_IMAGE``\*
+:Name: ``X_IMAGE``
 :Content: ``x`` pixel coordinate of centroid
-:Unit: -
+:Unit: pixel
 -----------------
-:Name: ``Y_IMAGE``\*
+:Name: ``Y_IMAGE``
 :Content: ``y`` pixel coordinate of centroid
-:Unit: -
+:Unit: pixel
 -----------------
-:Name: ``ERRA_IMAGE``\*
+:Name: ``ERRA_IMAGE``
 :Content: Position uncertainty (RMS) along major error ellipse axis
-:Unit: -
+:Unit: pixel
 -----------------
-:Name: ``ERRB_IMAGE``\*
+:Name: ``ERRB_IMAGE``
 :Content: Position uncertainty (RMS) along minor error ellipse axis
-:Unit: -
+:Unit: pixel
 -----------------
-:Name: ``ERRTHETA_IMAGE``\*
+:Name: ``ERRTHETA_IMAGE``
 :Content: Position angle of error ellipse (forced to 0 by current versions of
 SCAMP which ``isotropise`` input uncertainties.)
-:Unit: -
+:Unit: deg
 -----------------
-:Name: ``ALPHA_J2000``\*
+:Name: ``ALPHA_J2000``
 :Content: Calibrated Right-Ascension of centroid in the ICRS (at epoch of observation)
-:Unit: -
+:Unit: deg
 -----------------
-:Name: ``DELTA_J2000``\*
+:Name: ``DELTA_J2000``
 :Content: Calibrated Declination of centroid in the ICRS (at epoch of observation)
-:Unit: -
+:Unit: deg
 -----------------
-:Name: ``ERRA_WORLD``\*
+:Name: ``ERRA_WORLD``
 :Content: Position uncertainty (RMS) along major world axis
  (may include additional uncertainty computed by SCAMP)
+:Unit: deg
+-----------------
+:Name: ``ERRB_WORLD``
+:Content: Position uncertainty (RMS) along minor world axis
+ (may include additional uncertainty computed by SCAMP)
+:Unit: deg
+-----------------
+:Name: ``ERRTHETA_WORLD``
+:Content: Position angle of error ellipse (CCW/world-x)
+(The current estimation of error ellipse parameters is still done very crudely)
+:Unit: deg
+-----------------
+:Name: ``EPOCH``
+:Content: Julian date at start of observation
+:Unit: yr
+-----------------
+:Name: ``MAG``
+:Content: Calibrated magnitude
+:Unit: mag
+-----------------
+:Name: ``MAGERR``
+:Content: Magnitude uncertainty (may include additional uncertainty computed by
+SCAMP.)
+:Unit: mag
+-----------------
+:Name: ``MAG_DISP``
+:Content: Vector of measured magnitude dispersions (RMS)
+:Unit: mag
+-----------------
+:Name: ``SPREAD_MODEL``
+:Content: ``SPREAD_MODEL`` parameter
 :Unit: -
 -----------------
-:Name: ``ERRB_WORLD``\*
-:Content: FITS extension of the parent image
+:Name: ``SPREADERR_MODEL``
+:Content: ``SPREAD_MODEL`` uncertainty
 :Unit: -
 -----------------
-:Name: ``ERRTHETA_WORLD``\*
-:Content: FITS extension of the parent image
+:Name: ``FLAGS_EXTRACTION``
+:Content: SExtractor flags
 :Unit: -
 -----------------
-:Name: ``EPOCH``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``MAG``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``MAGERR``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``MAG_DISP``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``SPREAD_MODEL``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``SPREADERR_MODEL``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``FLAGS_EXTRACTION``\*
-:Content: FITS extension of the parent image
-:Unit: -
------------------
-:Name: ``FLAGS_SCAMP``\*
-:Content: FITS extension of the parent image
+:Name: ``FLAGS_SCAMP``
+:Content: SCAMP flags for this detection
 :Unit: -
 -----------------
 
