@@ -27,7 +27,7 @@ which is part of the |SExtractor| package.
 
 The columns present in the file are:
 
-:Name: ``BADPIXEL_FILTER``\*
+:Name: ``BADPIXEL_FILTER``
 :Content: ``N``
 :Unit: *Boolean*
 
