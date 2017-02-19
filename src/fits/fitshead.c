@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic FITS/LDAC library
 *
-*	Copyright:		(C) 1995-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 1995-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/08/2012
+*	Last modified:		19/02/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -100,8 +100,8 @@ PURPOSE	Read the current FITS header basic keywords.
 INPUT	pointer to catstruct.
 OUTPUT	-.
 NOTES	-.
-AUTHOR	E. Bertin (IAP)
-VERSION	03/06/2012
+AUTHORS	E. Bertin (IAP), M.Kuemmel (LMU)
+VERSION	19/02/2017
  ***/
 void	readbasic_head(tabstruct *tab)
 
@@ -109,13 +109,17 @@ void	readbasic_head(tabstruct *tab)
    char		str[88];
    char		key[12], name[16],
 		*filename;
-   int		i;
+   int		i, comptileflag;
    KINGSIZE_T	tabsize;
 
   filename = (tab->cat? tab->cat->filename : strcpy(name, "internal header"));
 
-  if (fitsread(tab->headbuf, "BITPIX  ", &tab->bitpix, H_INT, T_LONG)
-	==RETURN_ERROR)
+/* Tile-compressed binary tables*/
+  comptileflag = (fitsread(tab->headbuf, "ZIMAGE  ", str, H_STRING, T_STRING)
+	== RETURN_OK);
+
+  if (fitsread(tab->headbuf, comptileflag? "ZBITPIX " : "BITPIX  " ,
+	&tab->bitpix, H_INT, T_LONG) == RETURN_ERROR)
     error(EXIT_FAILURE, "*Error*: Corrupted FITS header in ", filename);
 
   tab->bytepix = tab->bitpix>0?(tab->bitpix/8):(-tab->bitpix/8);
@@ -133,7 +137,7 @@ void	readbasic_head(tabstruct *tab)
     tabsize = 1;
     for (i=0; i<tab->naxis && i<999; i++)
       {
-      sprintf(key,"NAXIS%-3d", i+1);
+      sprintf(key, comptileflag ? "ZNAXIS%-2d" : "NAXIS%-3d", i+1);
       if (fitsread(tab->headbuf, key, &tab->naxisn[i], H_INT, T_LONG)
 		==RETURN_ERROR)
         error(EXIT_FAILURE, "*Error*: incoherent FITS header in ", filename);
