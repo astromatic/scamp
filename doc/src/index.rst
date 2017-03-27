@@ -17,6 +17,7 @@ Contents
    Introduction
    Installing
    Using
+   Output
    references
 
 Indices and tables

@@ -120,9 +120,10 @@ although galactic and ecliptic coordinates are supported in input and output.
 Output catalogues
 ~~~~~~~~~~~~~~~~~
 
-|SCAMP| can save two kinds of catalogues: local copies of the reference
-catalogues downloaded from the Vizier server (see §[chap:astref]), and a
-“merged”, calibrated version of input catalogues (§[chap:mergedcat]).
+|SCAMP| can save three kinds of catalogues: local copies of the reference
+catalogues downloaded from the Vizier server (see §[chap:astref]), a
+“merged”, calibrated version of input catalogues (§[chap:mergedcat]),
+and a “full” calibrated version of input a reference catalogues (§[chap:fullcat]).
 
 Diagnostic files
 ~~~~~~~~~~~~~~~~
