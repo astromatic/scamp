@@ -948,25 +948,29 @@ static void add_alphamat(double *alpha, int naxis, int ncoefftot,
 		weight2;
    size_t	rowp;
    int		*cio,
-		d, p, q, lim;
+		d, p, q, lim, i1,i2;
 
   if (*ci < 0 || *ci2 < 0)
     return;
 
+  
   for (d=naxis; d--; ci2+=ncoeff2, cv2+=ncoeff2)
     for (p=ncoeff; p--; ci++, cv++)
       {
-      cio = ci2;
+      i1 = *ci;
+      i2 = *ci2;
       cvo = cv2;
       weight2 = weight**cv;
 #ifdef MATSTORAGE_PACKED
-      rowp = ((size_t)(2*ncoefftot-*ci-1)**ci)/2;
+      rowp = ((size_t)(2*ncoefftot-i1-1)*i1)/2 + (size_t)i2;
 #else
-      rowp = (size_t)ncoefftot**ci;
+      rowp = (size_t)ncoefftot*i1 + (size_t)i2;
 #endif
-      for (q=ncoeff2; q--; cio++,cvo++)
-        if (*cio>=*ci)
-          alpha[rowp+(size_t)*cio] += weight2**cvo;
+#pragma nounroll
+#pragma ivdep
+      for (q=ncoeff2; q--; rowp++,i2++,cvo++)
+        if (i2>=i1)
+          alpha[rowp] += weight2**cvo;
       }
 
   return;

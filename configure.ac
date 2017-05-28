@@ -194,7 +194,7 @@ AC_ARG_WITH(plplot-incdir,
 
 
 # Provide a special option for the default XSLT URL
-with_xsl_url="file://"$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_NAME/$PACKAGE_NAME.xsl"
+with_xsl_url="file://"$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_TARNAME/$PACKAGE_TARNAME.xsl"
 AC_ARG_WITH(xsl_url,
 	[AS_HELP_STRING([--with-xsl_url=<default URL for XSLT filter>],
 	[Provide an alternative default URL of the XSLT filter])])
