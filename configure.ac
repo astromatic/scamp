@@ -50,6 +50,7 @@ AC_SUBST(DATE3, "$date3")
 
 # Include macros
 sinclude(acx_atlas.m4)
+sinclude(acx_openblas.m4)
 sinclude(acx_curl.m4)
 sinclude(acx_fftw.m4)
 sinclude(acx_mkl.m4)
