@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/01/2013
+*	Last modified:		22/06/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -44,114 +44,92 @@
 #include "prefs.h"
 #include "samples.h"
 
+
 /****** group_fields ********************************************************
-PROTO   fgroupstruct	**group_fields(fieldstruct **field, int nfield,
+PROTO   fgroupstruct	**group_fields(fieldstruct **fields, int nfield,
 			int *nfgroup)
-PURPOSE	Group fields which are sufficiently close on the sky to share a common
-	projection.
+PURPOSE	Group fields that are likely to overlap.
 INPUT   Pointer to field structure pointers,
 	number of fields,
 	Pointer to the total number of groups found (filled by group_field()).
 OUTPUT  Pointer to the array of groups found.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 05/07/2004
+VERSION 22/06/2017
 */
-fgroupstruct	**group_fields(fieldstruct **field, int nfield, int *nfgroup)
-  {
-   fgroupstruct	**fgroup;
+fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
+
+   fgroupstruct	**fgroups;
+   wcsstruct	*wcs1;
+   fieldstruct	*field1, *field2;
    int		*gflag,
-		lng,lat, naxis, i, f1,f2, g,g2,g3,testflag, ngroup;
-   double	*pos1, *pos2,
-		dist,maxdist,dx;
+		f1,f2, g,g2,g3, s1,s2, nset1, nset2, testflag, ngroup;
 
   if (!nfield)
     return 0;
 
-  maxdist = prefs.group_radius;
-/* Set angular coordinates (we assume there are the same in all fields */
-  lng = field[0]->set[0]->wcs->lng;
-  lat = field[0]->set[0]->wcs->lat;
-  naxis = field[0]->set[0]->wcs->naxis;
   ngroup = 0;
 /* Allocate memory */
   QMALLOC(gflag, int, nfield);
-  QMALLOC(fgroup, fgroupstruct *, nfield);
-  for (f1=0; f1<nfield; f1++)
-    {
-    pos1 = field[f1]->meanwcspos;
-    testflag = 1;
+  QMALLOC(fgroups, fgroupstruct *, nfield);
+  for (f1 = 0; f1 < nfield; f1++) {
     if (ngroup)
       memset(gflag, 0, ngroup*sizeof(int));
-    for (g=0; g<ngroup; g++)
-      for (f2=0; f2<fgroup[g]->nfield && !gflag[g]; f2++)
-        {
-        pos2 = fgroup[g]->field[f2]->meanwcspos;
-        if (lng != lat)
-	  {
-          dist = sin(pos1[lat]*DEG)*sin(pos2[lat]*DEG)
-		+cos(pos1[lat]*DEG)*cos(pos2[lat]*DEG)
-			*cos((pos2[lng]-pos1[lng])*DEG);
-          dist = dist>-1.0? (dist<1.0 ? acos(dist)/DEG : 0.0) : 180.0;
+    testflag = 1;
+    field1 = fields[f1];
+    nset1 = field1->nset;
+    for (s1 = 0; s1 < nset1; s1++) {
+      wcs1 = field1->set[s1]->wcs;
+      for (g = 0; g < ngroup; g++)
+        for (f2 = 0; f2 < fgroups[g]->nfield && !gflag[g]; f2++) {
+          field2 = fields[f2];
+          nset2 = field2->nset;
+          for (s2 = 0; s2 < nset2; s2++) {
+            if (frame_wcs(wcs1, field2->set[s2]->wcs)) {
+              testflag = 0;
+              gflag[g] = 1;
+              break;
+  	    }
           }
-        else
-	  {
-          dist = 0.0;
-          for (i=0; i<naxis; i++)
-	    {
-            dx = pos2[i] - pos1[i];
-            dist += dx*dx;
-            }
-          dist = sqrt(dist);
-          }
-/*------ Check whether it is close enough */
-        if (dist<maxdist)
-	  {
-          testflag = 0;
-          gflag[g] = 1;
-	  }
-	}
+        }
+    }
 
-    if (testflag)
+    if (testflag) {
 /*---- field too far: Create a new group */
-      {
-      fgroup[ngroup] = new_fgroup();
-      addfield_fgroup(fgroup[ngroup], field[f1]);
+      fgroups[ngroup] = new_fgroup();
+      addfield_fgroup(fgroups[ngroup], fields[f1]);
       ngroup++;
-      }
-    else
-      {
+    } else {
 /*---- Add to an existing group */
       for (g=0; !gflag[g] && g<ngroup; g++);        
       g2 = g;
-      addfield_fgroup(fgroup[g], field[f1]);
+      addfield_fgroup(fgroups[g], fields[f1]);
 /*---- Check that the newcomer doesn't link groups together */
       for (g=g2+1; g<ngroup; g++)
-        if (gflag[g])
-	  {
+        if (gflag[g]) {
 /*-------- Fusion this group with the first one */          
-          addfgroup_fgroup(fgroup[g], fgroup[g2]);
-          end_fgroup(fgroup[g]);
+          addfgroup_fgroup(fgroups[g], fgroups[g2]);
+          end_fgroup(fgroups[g]);
           for (g3=g+1; g3<ngroup; g3++)
-            fgroup[g3-1] = fgroup[g3];
+            fgroups[g3-1] = fgroups[g3];
           ngroup--;
-          }
-      }
+        }
     }
+  }
   free(gflag);
-  QREALLOC(fgroup, fgroupstruct *, ngroup);
+  QREALLOC(fgroups, fgroupstruct *, ngroup);
 
 /* Number groups */
   for (g=0; g<ngroup; g++)
-    fgroup[g]->no = g+1;
+    fgroups[g]->no = g+1;
 
 /* Update astrometric stuff */
   for (g=0; g<ngroup; g++)
-    locate_fgroup(fgroup[g]);
+    locate_fgroup(fgroups[g]);
 
   *nfgroup = ngroup;
-  return fgroup;
-  }
+  return fgroups;
+}
 
 
 /****** locate_fgroup ********************************************************

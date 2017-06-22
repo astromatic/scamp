@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/07/2015
+*	Last modified:		22/06/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -105,7 +105,7 @@ typedef struct fgroup
 
 /*------------------------------- functions ---------------------------------*/
 
-extern fgroupstruct	**group_fields(fieldstruct **field, int nfield,
+extern fgroupstruct	**group_fields(fieldstruct **fields, int nfield,
 				int *nfgroup),
 			*new_fgroup(void);
 
