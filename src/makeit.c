@@ -154,6 +154,7 @@ void	makeit(void)
 
 /* Group fields on the sky */
   fgroups = group_fields(fields, nfield, &ngroup);
+  NFPRINTF(OUTPUT, "");
   print_instruinfo();
   print_fgroupinfo(fgroups, ngroup);
 

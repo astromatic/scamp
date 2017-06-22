@@ -62,9 +62,11 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
    fgroupstruct	**fgroups;
    wcsstruct	*wcs1;
    fieldstruct	*field1, *field2;
+   char		str[80];
    int		*gflag,
 		f1,f2, g,g2,g3, s1,s2, nset1, nset2, testflag, ngroup;
 
+  NFPRINTF(OUTPUT, "Grouping fields on the sky ...");
   if (!nfield)
     return 0;
 
@@ -73,6 +75,9 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
   QMALLOC(gflag, int, nfield);
   QMALLOC(fgroups, fgroupstruct *, nfield);
   for (f1 = 0; f1 < nfield; f1++) {
+    sprintf(str, "Grouping fields: field %d/%d, %d group%s",
+	f1+1, nfield, ngroup, ngroup? "s" : "");
+    NFPRINTF(OUTPUT, str);
     if (ngroup)
       memset(gflag, 0, ngroup*sizeof(int));
     testflag = 1;
@@ -82,7 +87,7 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
       wcs1 = field1->set[s1]->wcs;
       for (g = 0; g < ngroup; g++)
         for (f2 = 0; f2 < fgroups[g]->nfield && !gflag[g]; f2++) {
-          field2 = fields[f2];
+          field2 = fgroups[g]->field[f2];
           nset2 = field2->nset;
           for (s2 = 0; s2 < nset2; s2++) {
             if (frame_wcs(wcs1, field2->set[s2]->wcs)) {
@@ -90,7 +95,11 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
               gflag[g] = 1;
               break;
   	    }
+            if (gflag[g])
+              break;
           }
+          if (gflag[g])
+            break;
         }
     }
 
