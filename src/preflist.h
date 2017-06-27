@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/09/2016
+*	Last modified:		27/07/2016
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -144,7 +144,6 @@ pkeystruct key[] =
   {"ELLIPTICITY_MAX", P_FLOAT, &prefs.maxellip, 0,0, 0.0, 1.0},
   {"EXPOTIME_KEY", P_STRING, prefs.expotime_key},
   {"EXTINCT_KEY", P_STRING, prefs.extcoeff_key},
-  {"FGROUP_RADIUS", P_FLOAT, &prefs.group_radius, 0,0, 0.0,180.0},
   {"FIXFOCALPLANE_NMIN", P_INT, &prefs.fixfocalplane_nmin, 0, 65535, 0.0, 0.0},
   {"FLAGS_MASK", P_INT, &prefs.sexflags_mask, 0,0xff, 0.0,0.0},
   {"FOCDISTORT_DEGREE", P_INT, &prefs.focal_deg, 1,16,0.0,0.0},

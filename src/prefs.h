@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/03/2016
+*	Last modified:		27/07/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -140,7 +140,6 @@ typedef struct
 
 /* Pattern-matching */
   int		match_flag;		/* Compute pattern-matching? */
-  double	group_radius;	/* Max angular dist. between grouped fields */
   double	position_maxerr[NAXIS];	/* Maximum uncertainty along axes */
   int           nposition_maxerr;	/* nb of params */
   double	radius_maxerr;		/* Maximum radius uncertainty */

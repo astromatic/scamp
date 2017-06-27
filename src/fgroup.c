@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/06/2017
+*	Last modified:		27/06/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -44,6 +44,11 @@
 #include "prefs.h"
 #include "samples.h"
 
+static int	group_compfielddist(const void *field1, const void *field2);
+static int	group_compsetdist(const void *set1, const void *set2);
+static double	group_fielddist(fieldstruct *field1, fieldstruct *field2);
+static double	group_setdist(setstruct *set1, setstruct *set2);
+
 
 /****** group_fields ********************************************************
 PROTO   fgroupstruct	**group_fields(fieldstruct **fields, int nfield,
@@ -55,16 +60,19 @@ INPUT   Pointer to field structure pointers,
 OUTPUT  Pointer to the array of groups found.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 22/06/2017
+VERSION 27/06/2017
 */
 fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
 
    fgroupstruct	**fgroups;
    wcsstruct	*wcs1;
    fieldstruct	*field1, *field2;
+   setstruct	**set,
+		*set1, *set2;
    char		str[80];
    int		*gflag,
-		f1,f2, g,g2,g3, s1,s2, nset1, nset2, testflag, ngroup;
+		d, f1,f2, g,g2,g3, s1,s2, nset1, nset2,
+		testflag, ngroup;
 
   NFPRINTF(OUTPUT, "Grouping fields on the sky ...");
   if (!nfield)
@@ -74,32 +82,53 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
 /* Allocate memory */
   QMALLOC(gflag, int, nfield);
   QMALLOC(fgroups, fgroupstruct *, nfield);
+  QMALLOC(set, setstruct *, MAXSET);
   for (f1 = 0; f1 < nfield; f1++) {
     sprintf(str, "Grouping fields: field %d/%d, %d group%s",
-	f1+1, nfield, ngroup, ngroup? "s" : "");
+	f1+1, nfield, ngroup, ngroup > 1? "s" : "");
     NFPRINTF(OUTPUT, str);
     if (ngroup)
       memset(gflag, 0, ngroup*sizeof(int));
     testflag = 1;
     field1 = fields[f1];
+/*-- Sort group fields by increasing distance to current field */
+    for (g = 0; g < ngroup; g++) {
+      for (f2 = 0; f2 < fgroups[g]->nfield; f2++)
+        fgroups[g]->field[f2]->distance = group_fielddist(field1,
+		fgroups[g]->field[f2]);
+
+      qsort(fgroups[g]->field, fgroups[g]->nfield, sizeof(fieldstruct *),
+		group_compfielddist);
+    }
+
     nset1 = field1->nset;
     for (s1 = 0; s1 < nset1; s1++) {
-      wcs1 = field1->set[s1]->wcs;
+      set1 = field1->set[s1];
+      wcs1 = set1->wcs;      
       for (g = 0; g < ngroup; g++)
         for (f2 = 0; f2 < fgroups[g]->nfield && !gflag[g]; f2++) {
           field2 = fgroups[g]->field[f2];
+          if (field2->distance > field1->maxradius + field2->maxradius)
+            break;
           nset2 = field2->nset;
+          memcpy(set, field2->set, nset2 * sizeof(setstruct *));
           for (s2 = 0; s2 < nset2; s2++) {
-            if (frame_wcs(wcs1, field2->set[s2]->wcs)) {
+            set2 = set[s2];
+            set2->distance = group_setdist(set1, set2);
+          }
+
+          qsort(set, nset2, sizeof(setstruct *), group_compsetdist);
+
+          for (s2 = 0; s2 < nset2; s2++) {
+            set2 = set[s2];
+            if (set2->distance > set1->radius + set2->radius)
+              break;
+            if (frame_wcs(wcs1, set2->wcs)) {
               testflag = 0;
               gflag[g] = 1;
               break;
   	    }
-            if (gflag[g])
-              break;
           }
-          if (gflag[g])
-            break;
         }
     }
 
@@ -126,6 +155,8 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
     }
   }
   free(gflag);
+  free(set);
+
   QREALLOC(fgroups, fgroupstruct *, ngroup);
 
 /* Number groups */
@@ -138,6 +169,121 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
 
   *nfgroup = ngroup;
   return fgroups;
+}
+
+
+/****** group_fielddist ******************************************************
+PROTO   double	group_fielddist(fieldstruct *field1, fieldstruct *field2)
+PURPOSE	Returns the angular distance between the centers of two fields.
+INPUT   Pointer to first field,
+	Pointer to second field.
+OUTPUT	Distance between the center of both fields.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 26/06/2017
+*/
+static double	group_fielddist(fieldstruct *field1, fieldstruct *field2) {
+
+   double	*pos1, *pos2,
+		dx, dist;
+   int		d, lng, lat;
+
+  lng = field1->lng;
+  lat = field1->lat;
+  pos1 = field1->meanwcspos;
+  pos2 = field2->meanwcspos;
+  if (lng != lat) {
+    dist = sin(pos1[lat] * DEG) * sin(pos2[lat] * DEG)
+	+ cos(pos1[lat] * DEG) * cos(pos2[lat] * DEG)
+			* cos((pos2[lng] - pos1[lng]) * DEG);
+    return dist>-1.0? (dist<1.0 ? acos(dist)/DEG : 0.0) : 180.0;
+  } else {
+    dist = 0.0;
+    for (d = 0; d < field1->naxis; d++) {
+      dx = pos2[d] - pos1[d];
+      dist += dx*dx;
+    }
+    return sqrt(dist);
+  }
+}
+
+
+/****** group_setdist ******************************************************
+PROTO   double	group_setdist(setstruct *set1, setstruct *set2)
+PURPOSE	Returns the angular distance between the centers of two sets.
+INPUT   Pointer to first set,
+	Pointer to second set.
+OUTPUT	Distance between the center of both sets.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 27/06/2017
+*/
+static double	group_setdist(setstruct *set1, setstruct *set2) {
+
+   double	*pos1, *pos2,
+		dx, dist;
+   int		d, lng, lat;
+
+  lng = set1->lng;
+  lat = set1->lat;
+  pos1 = set1->wcspos;
+  pos2 = set2->wcspos;
+  if (lng != lat) {
+    dist = sin(pos1[lat] * DEG) * sin(pos2[lat] * DEG)
+	+ cos(pos1[lat] * DEG) * cos(pos2[lat] * DEG)
+			* cos((pos2[lng] - pos1[lng]) * DEG);
+    return dist>-1.0? (dist<1.0 ? acos(dist)/DEG : 0.0) : 180.0;
+  } else {
+    dist = 0.0;
+    for (d = 0; d < set1->naxis; d++) {
+      dx = pos2[d] - pos1[d];
+      dist += dx*dx;
+    }
+    return sqrt(dist);
+  }
+}
+
+
+/****** group_compfielddist **************************************************
+PROTO   int	group_compfielddist(void *field1, void *field2)
+PURPOSE	Return -1, 0, or 1 if the first field has a respectively smaller,
+	identical o larger distance than the second field (to another field).
+INPUT   Pointer to first field,
+	Pointer to second field.
+OUTPUT	-1, 0 or 1.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 26/06/2017
+*/
+static int	group_compfielddist(const void *field1, const void *field2) {
+
+   double dd;
+
+  dd = (*(fieldstruct **)field1)->distance
+	- (*(fieldstruct **)field2)->distance;
+
+  return dd > 0.0 ? 1 : (dd < 0.0 ? -1 : 0);
+}
+
+
+/****** group_compsetdist ****************************************************
+PROTO   int	group_compsetdist(void *set1, void *set2)
+PURPOSE	Return -1, 0, or 1 if the first field has a respectively smaller,
+	identical o larger distance than the second set (to another set).
+INPUT   Pointer to first set,
+	Pointer to second set.
+OUTPUT	-1, 0 or 1.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 26/06/2017
+*/
+static int	group_compsetdist(const void *set1, const void *set2) {
+
+   double dd;
+
+  dd = (*(setstruct **)set1)->distance - (*(setstruct **)set2)->distance;
+
+  return dd > 0.0 ? 1 : (dd < 0.0 ? -1 : 0);
 }
 
 

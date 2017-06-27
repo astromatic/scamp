@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-**	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+**	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/03/2016
+*	Last modified:		26/06/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -90,6 +90,7 @@ typedef struct field
   double	meanwcspos[NAXIS];	/* Mean pixel coordinate */
   double	meanwcsscale[NAXIS];	/* Mean pixel scale */
   double	maxradius;		/* Approximate radius of field (deg)*/
+  double	distance;		/* Distance to a given field */
   int		naxis;			/* Number of axes */
   int		lng, lat;		/* Longitude and latitude indices */
   double	offset_ref[NAXIS];	/* Mean offset with reference cat. */

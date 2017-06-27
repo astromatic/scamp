@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		26/06/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -111,6 +111,7 @@ typedef struct set
   double	wcspos[NAXIS];		/* Central pixel coordinate */
   double	wcsscale[NAXIS];	/* Central pixel scale */
   double	radius;			/* Approximate radius of set [deg] */
+  double	distance;		/* Dist. to a set from another field */
   double	projposmin[NAXIS];	/* Minimum projected position in set */
   double	projposmax[NAXIS];	/* Maximum projected position in set */
   int		naxis;			/* Number of axes */
