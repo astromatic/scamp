@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/07/2012
+*	Last modified:		17/07/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -41,7 +41,7 @@
 #define		MATCH_CONFPROB	0.01	/* Confusion probability in auto-resol*/
 #define		MATCH_MINCONT	2.0	/* Minimum constrast factor */
 #define		AS_NSOURCESTART	2000	/* Start source nb for auto AS match */
-#define		AS_NSOURCEMAX	8000	/* Max source nb for auto AS match */
+#define		AS_NSOURCEMAX	16000	/* Max source nb for auto AS match */
 #define		SCALE_RANGE	16.0	/* Initial scale search interval */
 #define		SCALE_ZERO	1.0	/* Initial scale zero-point */
 #define		SCALE_MAXSIZE	4096	/* Max resol. elements in scale */
