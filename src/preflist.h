@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/07/2016
+*	Last modified:		18/07/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -226,10 +226,6 @@ char *default_prefs[] =
 "# Default configuration file for " BANNER " " MYVERSION,
 "# EB " DATE,
 "#",
-" ",
-"#----------------------------- Field grouping ---------------------------------",
-" ",
-"FGROUP_RADIUS          1.0             # Max dist (deg) between field groups",
 " ",
 "#---------------------------- Reference catalogs ------------------------------",
 " ",
