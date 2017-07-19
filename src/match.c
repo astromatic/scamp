@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/04/2016
+*	Last modified:		19/07/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -919,44 +919,45 @@ INPUT	ptr to the histogram,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/10/2013
+VERSION	19/07/2017
  ***/
 void	putgauss(float *histo, int width, int height, double x, double y,
 		double flux, double xsig, double ysig)
   {
-   double	dx,dx0,dy, xalpha,yalpha;
-   float	sb,a;
+   float	*histoz,
+		dx, dx0, dy, xalpha, yalpha, sb, a, a0;
    int		i,j, vwidth,vheight, ix,ix0,iy;
 
 /* Prepare the vignet */
-  if (xsig<0.5)
-    xsig = 0.5;
-  else  if (xsig>GAUSS_MAXSIG)
-    {
+  if (xsig<0.5f)
+    xsig = 0.5f;
+  else  if (xsig > GAUSS_MAXSIG) {
     flux *= GAUSS_MAXSIG / xsig;
     xsig = GAUSS_MAXSIG;
-    }
+  }
   vwidth = (int)(2*GAUSS_MAXNSIG*xsig);
   if (!(vwidth&1))
    vwidth++;
 
-  if (ysig<0.5)
-    ysig = 0.5;
-  else if (ysig>GAUSS_MAXSIG)
-    {
+  if (vwidth<=0 || vwidth>width)
+    return;
+
+  if (ysig<0.5f)
+    ysig = 0.5f;
+  else if (ysig > GAUSS_MAXSIG) {
     flux *= GAUSS_MAXSIG / ysig;
     ysig = GAUSS_MAXSIG;
-    }
+  }
   vheight = (int)(2*GAUSS_MAXNSIG*ysig);
   if (!(vheight&1))
    vheight++;
 
-  if (vwidth<=0 || vwidth>width || vheight<=0 || vheight>height)
+  if (vheight<=0 || vheight>height)
     return;
 
 /* Generate the pseudo-Gaussian */
-  xalpha = 1.0/(xsig*xsig);
-  yalpha = 1.0/(ysig*ysig);
+  xalpha = 1.0f / (xsig*xsig);
+  yalpha = 1.0f / (ysig*ysig);
   ix = (int)(x-vwidth/2+0.5);
   iy = (int)(y-vheight/2+0.5);
   sb = flux/(xsig*ysig);
@@ -968,16 +969,22 @@ void	putgauss(float *histo, int width, int height, double x, double y,
   iy = iy%height;
   if (iy<0)
     iy += height;
-  for (j=vheight; j--; dy+=1.0, iy = (iy+1)%height)
-    {
+  for (j=vheight; j--;) {
     dx = dx0;
     ix = ix0;
-    for (i=vwidth; i--; dx+=1.0, ix++)
-      {
-      if ((a = (GAUSS_MAXNSIG*GAUSS_MAXNSIG - xalpha*dx*dx-yalpha*dy*dy)) > 0.0)
-        histo[iy*width+(ix%width)] += sb*a*a;
-      }
+    histoz = histo + iy * width;
+    a0 = GAUSS_MAXNSIG*GAUSS_MAXNSIG - yalpha * dy * dy;
+    for (i=vwidth; i--;) {
+      if ((a = a0 - xalpha * dx * dx) > 0.0f)
+        histoz[ix] += sb*a*a;
+      if (++ix == width)
+        ix = 0;
+      dx += 1.0f;
     }
+  if (++iy == height)
+    iy = 0;  
+  dy += 1.0f;
+  }
 
 
   return;
