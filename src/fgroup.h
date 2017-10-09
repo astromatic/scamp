@@ -101,6 +101,7 @@ typedef struct fgroup
   int		map_nmesh[NAXIS];	/* Meshes per axis for maps */
   int		map_step[NAXIS];	/* Mesh step per axis for maps */
   double	*sig_interr_map[NAXIS];	/* Map of Internal RMS measurements*/
+  int		flag;			/* Temporary flag used for grouping */
   }	fgroupstruct;
 
 /*------------------------------- functions ---------------------------------*/
