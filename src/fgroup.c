@@ -86,9 +86,11 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
     field1 = fields[f1];
 /*-- Sort group fields by increasing distance to current field */
     for (g = 0; g < ngroup; g++) {
-      for (f2 = 0; f2 < fgroups[g]->nfield; f2++)
-        fgroups[g]->field[f2]->distance = group_fielddist(field1,
-		fgroups[g]->field[f2]) - field1->maxradius - field2->maxradius;
+      for (f2 = 0; f2 < fgroups[g]->nfield; f2++) {
+        field2 = fgroups[g]->field[f2];
+        field2->distance = group_fielddist(field1, field2)
+			- field1->maxradius - field2->maxradius;
+      }
 
       qsort(fgroups[g]->field, fgroups[g]->nfield, sizeof(fieldstruct *),
 		group_compfielddist);
@@ -114,6 +116,7 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
             }
           }
         }
+
     }
 
     if (testflag) {
