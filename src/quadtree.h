@@ -24,12 +24,12 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _QUADTREE_H_
+#define _QUADTREE_H_
+
 #ifdef HAVE_CONFIG_H
 #include        "config.h"
 #endif
-
-#ifndef _QUADTREE_H_
-#define _QUADTREE_H_
 
 //-------------------------------- constants ----------------------------------
 
@@ -68,5 +68,4 @@ int		tree_distance(treenodestruct *node, unsigned int *index),
 
 void		tree_endtree(treestruct *tree);
 
-#endif
-
+#endif // _QUADTREE_H_

@@ -45,4 +45,4 @@
 double	colour_findpc(double *covmat, double *vec, int nmat);
 
 void	colour_fgroup(fgroupstruct **fgroups, int ngroup);
-#endif
+#endif // _COLOUR_H_

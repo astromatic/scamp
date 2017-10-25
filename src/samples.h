@@ -26,12 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FITSWCS_H_
-#include "fitswcs.h"
-#endif
-
 #ifndef _SAMPLES_H_
 #define _SAMPLES_H_
+
+#include "fitswcs.h"
 
 /*--------------------------------- constants -------------------------------*/
 
@@ -162,4 +160,4 @@ void		copy_samples(samplestruct *samplein, setstruct *set,
 		unlink_samples(setstruct *set),
 		update_samples(setstruct *set, double radius);
 
-#endif
+#endif // _SAMPLES_H_

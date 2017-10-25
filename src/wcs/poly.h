@@ -78,5 +78,4 @@ extern double		*poly_deortho(polystruct *poly, double *datain,
 extern void		poly_initortho(polystruct *poly, double *data,
 				int ndata);
 
-#endif
-
+#endif // _POLY_H_

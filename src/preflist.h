@@ -26,35 +26,20 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _PREFLIST_H_
+#define _PREFLIST_H_
+
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
 #endif
 
 #include "key.h"
-
-#ifndef _PREFS_H_
 #include "prefs.h"
-#endif
-
-#ifndef _CHECK_H_
 #include "check.h"
-#endif
-
-#ifndef _DGEOMAP_H_
 #include "dgeomap.h"
-#endif
-
-#ifndef _FGROUP_H_
 #include "fgroup.h"
-#endif
-
-#ifndef _MATCH_H_
 #include "match.h"
-#endif
-
-#ifndef _XML_H_
 #include "xml.h"
-#endif
 
 #ifdef	USE_THREADS
 #define	THREADS_PREFMAX THREADS_NMAX
@@ -390,7 +375,8 @@ char *default_prefs[] =
 "                                       # 0 = automatic",
 #else
 "NTHREADS               1               # 1 single thread",
-#endif
+#endif // USE_THREADS
 ""
  };
 
+#endif // _PREFLIST_H_

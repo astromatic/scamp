@@ -59,9 +59,7 @@
 #ifndef _URL_H_
 #define _URL_H_
 
-#ifndef __CURL_CURL_H
 #include CURL_H
-#endif
 
 /*--------------------------------- typedefs --------------------------------*/
 typedef struct fcurl_data {
@@ -84,4 +82,4 @@ char		*url_fgets(char *ptr, size_t size, URL_FILE *file);
 
 void		url_rewind(URL_FILE *file);
 
-#endif
+#endif // _URL_H_

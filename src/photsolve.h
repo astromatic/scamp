@@ -26,16 +26,12 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _SAMPLES_H_
-#include "samples.h"
-#endif
 
 #ifndef _PHOTSOLVE_H_
 #define _PHOTSOLVE_H_
+
+#include "field.h"
+#include "samples.h"
 
 /*----------------------------- Internal constants --------------------------*/
 #define	PHOTOM_MINMAGERR	0.001	/* Mag error floor for weighting */
@@ -50,5 +46,4 @@ extern void	avermags_fgroup(fgroupstruct *fgroup),
 		photstats_fgroup(fgroupstruct *fgroup, int instru,
 			double hsn_thresh);
 
-#endif
-
+#endif // _PHOTSOLVE_H_

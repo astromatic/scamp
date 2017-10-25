@@ -26,9 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FGROUP_H_
+#ifndef _CROSSID_H_
+#define _CROSSID_H_
+
 #include "fgroup.h"
-#endif
 
 /*---------------------------- Internal constants ---------------------------*/
 
@@ -41,3 +42,4 @@ extern int	check_fieldoverlap(fieldstruct *field1, fieldstruct *field2),
 extern void	crossid_fgroup(fgroupstruct *fgroup,
 				fieldstruct *reffield, double tolerance);
 
+#endif // _CROSSID_H_

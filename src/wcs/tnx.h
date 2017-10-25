@@ -69,5 +69,5 @@ double		raw_to_tnxaxis(tnxaxisstruct *axis, double x, double y);
 
 void		free_tnxaxis(tnxaxisstruct *axis);
 
-#endif
+#endif // _TNX_H_
 

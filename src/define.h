@@ -26,6 +26,8 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _DEFINE_H_
+#define _DEFINE_H_
 /* Check if we are using a configure script here */
 #ifndef HAVE_CONFIG_H
 #define         VERSION         "1.x"
@@ -177,3 +179,4 @@
 			else if (prefs.verbose_type == LOG) \
 				fprintf(w, "%s\n", x);}
 
+#endif // _DEFINE_H_

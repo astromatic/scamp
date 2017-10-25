@@ -26,24 +26,13 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _FGROUP_H_
-#include "fgroup.h"
-#endif
-
-#ifndef _POLY_H_
-#include "wcs/poly.h"
-#endif
-
-#ifndef _SAMPLES_H_
-#include "samples.h"
-#endif
-
 #ifndef _SOLVE_H_
 #define _SOLVE_H_
+
+#include "samples.h"
+#include "wcs/poly.h"
+#include "fgroup.h"
+#include "field.h"
 
 /*----------------------------- Internal constants --------------------------*/
 
@@ -63,5 +52,4 @@ extern void	astr_orthopoly(polystruct *poly),
 		shrink_mat(double *alpha, double *beta, int ncoefftot,
 				int index, int nmiss);
 
-#endif
-
+#endif // _SOLVE_H_

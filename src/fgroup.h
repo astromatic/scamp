@@ -26,16 +26,12 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FITSCAT_H_
-#include "fits/fitscat.h"
-#endif
-
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
 
 #ifndef _FGROUP_H_
 #define _FGROUP_H_
+
+#include "fits/fitscat.h"
+#include "field.h"
 
 /*----------------------------- Internal constants --------------------------*/
 #define		MAXASTRINSTRU	2048	/* Max. number of astrom. instruments*/
@@ -119,4 +115,4 @@ extern void		addfgroup_fgroup(fgroupstruct *fgroupin,
 			print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup),
 			print_instruinfo(void);
 
-#endif
+#endif // _FGROUP_H_

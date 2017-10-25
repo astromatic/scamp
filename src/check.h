@@ -26,12 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
 #ifndef _CHECK_H_
 #define _CHECK_H_
+
+#include "field.h"
 
 /*----------------------------- Internal constants --------------------------*/
 #define	MAXCHECK	64	/* max. # of CHECKimages */
@@ -46,4 +44,4 @@ typedef enum {CHECK_NONE, CHECK_ASPAIR, CHECK_ASREFPAIR, CHECK_ASXCORR,
 extern int	check_check(checkenum checktype);
 
 extern void	write_check(char *filename, float *pix, int width, int height);
-#endif
+#endif // _CHECK_H_

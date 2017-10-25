@@ -26,16 +26,11 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _SAMPLES_H_
-#include "samples.h"
-#endif
-
 #ifndef _ASTREFCAT_H_
 #define _ASTREFCAT_H_
+
+#include "field.h"
+#include "samples.h"
 
 /*----------------------------- Internal constants --------------------------*/
 #define		MAX_SERVER	16
@@ -101,4 +96,4 @@ extern setstruct	*read_astrefsamples(setstruct *set, tabstruct *tab,
 
 extern void		save_astreffield(char *filename, fieldstruct *reffield);
 
-#endif
+#endif // _ASTREFCAT_H_

@@ -35,4 +35,4 @@
 
 extern double fast_median(double *arr, int n);
 
-#endif
+#endif // _MISC_H_

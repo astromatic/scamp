@@ -30,6 +30,8 @@
 #ifndef _FITSWCS_H_
 #define _FITSWCS_H_
 
+#include "fits/fitscat.h"
+
 /*-------------------------------- macros -----------------------------------*/
 
 /*----------------------------- Internal constants --------------------------*/
@@ -167,4 +169,4 @@ extern void		b2j(double yearobs, double alphain, double deltain,
 			wipe_wcs(tabstruct *tab),
 			write_wcs(tabstruct *tab, wcsstruct *wcs);
 
-#endif
+#endif // _FITSWCS_H_

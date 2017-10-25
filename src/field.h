@@ -26,25 +26,16 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _FIELD_H_
+#define _FIELD_H_
+
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
 #endif
 
-#ifndef _FITSCAT_H_
 #include "fits/fitscat.h"
-#endif
-
-#ifndef _FITSWCS_H_
 #include "fitswcs.h"
-#endif
-
-#ifndef _SAMPLES_H_
 #include "samples.h"
-#endif
-
-#ifndef _FIELD_H_
-#define _FIELD_H_
-
 
 /*----------------------------- Internal constants --------------------------*/
 
@@ -143,5 +134,5 @@ extern void		end_field(fieldstruct *field),
 void			pthread_end_fields(fieldstruct **fields, int nfield),
 			*pthread_load_field(void *arg),
 			pthread_load_fields(fieldstruct **fields, int nfield);
-#endif
-#endif
+#endif // USE_THREADS
+#endif // _FIELD_H_

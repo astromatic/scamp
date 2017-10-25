@@ -26,9 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _CATOUT_H_
+#ifndef _CATHEAD_H_
+#define _CATHEAD_H_
+
 #include "catout.h"
-#endif
 
 /* Merged output catalog fields */
 
@@ -223,3 +224,5 @@ const char	skycathead[] = "QueryResult\n\n"
 
 const char	skycattail[] = "[EOD]";
 
+
+#endif // _CATHEAD_H_

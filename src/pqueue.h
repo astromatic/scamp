@@ -24,12 +24,13 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _PQUEUE_H_
+#define _PQUEUE_H_
+
 #ifdef HAVE_CONFIG_H
 #include        "config.h"
 #endif
 
-#ifndef _PQUEUE_H_
-#define _PQUEUE_H_
 
 //-------------------------------- constants ----------------------------------
 
@@ -59,5 +60,4 @@ int		pqueue_insertelement(pqueuestruct *queue,
 
 void		pqueue_end(pqueuestruct *queue);
 
-#endif
-
+#endif // _PQUEUE_H_

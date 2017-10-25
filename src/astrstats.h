@@ -26,16 +26,11 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _FGROUP_H_
-#include "fgroup.h"
-#endif
-
 #ifndef _ASTRSTAT_H_
 #define _ASTRSTAT_H_
+
+#include "field.h"
+#include "fgroup.h"
 
 /*----------------------------- Internal constants --------------------------*/
 /*--------------------------- structure definitions -------------------------*/
@@ -46,5 +41,4 @@ extern int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 extern void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh);
 
-#endif
-
+#endif // _ASTRSTAT_H_

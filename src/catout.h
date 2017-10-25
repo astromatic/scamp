@@ -26,12 +26,12 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FGROUP_H_
-#include "fgroup.h"
-#endif
 
 #ifndef _CATOUT_H_
 #define _CATOUT_H_
+
+#include "fgroup.h"
+
 /*--------------------------------- constants -------------------------------*/
 /*--------------------------------- typedefs --------------------------------*/
 
@@ -100,4 +100,4 @@ void		writefullcat_fgroup(char *filename, fgroupstruct *fgroup),
 		writemergedcat_fgroup(char *filename, fgroupstruct *fgroup),
 		write_vo_fields(FILE *file, tabstruct *objtab);
 
-#endif
+#endif // _CATOUT_H_

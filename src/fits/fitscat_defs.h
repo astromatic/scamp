@@ -27,6 +27,8 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _FITSCAT_DEFS_H_
+#define _FITSCAT_DEFS_H_
 /* Check if we are using a configure script here */
 #ifndef HAVE_CONFIG_H
 #define		VERSION		"2.0"
@@ -182,3 +184,5 @@ extern int	bswapflag;		/* != 0 if bytes are swapped/IEEE */
 	 dest = key->ptr;}
 
 #define MIN(a,b) (a<b?a:b)
+
+#endif // _FITSCAT_DEFS_H_

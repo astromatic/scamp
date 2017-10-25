@@ -26,25 +26,16 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _HEADER_H_
+#define _HEADER_H_
+
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
 #endif
 
-#ifndef _FITSCAT_H_
 #include "fits/fitscat.h"
-#endif
-
-#ifndef _FIELD_H_
 #include "field.h"
-#endif
-
-#ifndef _FITSWCS_H_
 #include "fitswcs.h"
-#endif
-
-#ifndef _HEADER_H_
-#define _HEADER_H_
-
 
 /*----------------------------- Internal constants --------------------------*/
 /*--------------------------------- typedefs --------------------------------*/
@@ -53,4 +44,4 @@
 extern int		read_aschead(char *filename, int frameno,
 				tabstruct *tab),
 			write_aschead(char *filename, fieldstruct *field);
-#endif
+#endif // _HEADER_H_

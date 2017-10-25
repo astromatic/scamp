@@ -26,7 +26,8 @@
 *	Last modified:		23/11/2015
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
-
+#ifndef _WCSCELSYS_H_
+#define _WCSCELSYS_H_
 /*-------------------------------- constants --------------------------------*/
 
 /* Equatorial coordinates of origin and pole and rotation sign of equatorial,*/
@@ -52,3 +53,4 @@ double	celsysorig[][2] = {	{0.0, 0.0},
 				 1.0,
 				 1.0};
 
+#endif // _WCSCELSYS_H_

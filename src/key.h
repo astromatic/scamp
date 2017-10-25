@@ -27,6 +27,8 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _KEY_H_
+#define _KEY_H_
 /*--------------------------------- constants -------------------------------*/
 
 #define         FIND_STRICT     0
@@ -53,3 +55,4 @@ typedef struct
 
 int	findkeys(char *str, char key[][32], int mode);
 
+#endif // _KEY_H_

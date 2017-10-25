@@ -335,4 +335,4 @@ extern  void	error(int, char *, char *),
 
 int		bswapflag;
 
-#endif
+#endif // _FITSCAT_H_

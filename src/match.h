@@ -26,16 +26,11 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _FGROUPS_H_
-#include "fgroup.h"
-#endif
-
 #ifndef _MATCH_H_
 #define _MATCH_H_
+
+#include "field.h"
+#include "fgroup.h"
 
 /*---------------------------- Internal constants ---------------------------*/
 #define		MATCH_CONFPROB	0.01	/* Confusion probability in auto-resol*/
@@ -102,5 +97,5 @@ extern void		compute_rawpos(wcsstruct *wcs, samplestruct *refsample,
 void			*pthread_match_field(void *arg),
 			pthread_match_fields(fgroupstruct **fgroups,
 				fieldstruct **reffields, int ngroup);
-#endif
-#endif
+#endif // USE_THREADS
+#endif // _MATCH_H_

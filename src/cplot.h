@@ -26,20 +26,16 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+
+#ifndef _CPLOT_H_
+#define _CPLOT_H_
+
 #ifdef HAVE_CONFIG_H
 #include        "config.h"
 #endif
 
-#ifndef _FGROUP_H_
 #include "fgroup.h"
-#endif
-
-#ifndef _FITSWCS_H_
 #include "fitswcs.h"
-#endif
-
-#ifndef _CPLOT_H_
-#define _CPLOT_H_
 
 /*------------------------------- constants ---------------------------------*/
 
@@ -188,5 +184,4 @@ extern int		cplot_aderrhisto1d(fgroupstruct *fgroup,
 
 char			*cplot_degtosexal(char *str, double alpha,double step),
 			*cplot_degtosexde(char *str, double delta,double step);
-#endif
-
+#endif // _CPLOT_H_

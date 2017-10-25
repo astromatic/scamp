@@ -26,9 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef FFTW3_H
+#ifndef _FFT_H_
+#define _FFT_H_
+
 #include FFTW_H
-#endif
 
 /*---------------------------- Internal constants ---------------------------*/
 #define		LOPASS_SLOPE	1000	/* Slope of the sigmoid filter */
@@ -69,3 +70,5 @@ extern void	fastcorr(float *data1, float *data2, int naxis, int *size,
 		fft_end(void),
 		fft_init(int nthreads),
 		shiftcube(float *data, int naxis, int *size);
+
+#endif // _FFT_H_

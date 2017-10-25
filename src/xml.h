@@ -26,17 +26,15 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _XML_H_
+#define _XML_H_
+
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
 #endif
 
-#ifndef _FIELD_H_
 #include "field.h"
-#endif
-
-#ifndef _FGROUP_H_
 #include "fgroup.h"
-#endif
 
 /*----------------------------- Internal constants --------------------------*/
 #ifndef XSL_URL
@@ -56,3 +54,4 @@ extern void	end_xml(void),
 				fgroupstruct **fgroups, int ngroup),
 		write_xmlerror(char *filename, char *msgerror);
 
+#endif // _XML_H_

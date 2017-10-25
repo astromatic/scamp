@@ -26,12 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FGROUP_H_
-#include "fgroup.h"
-#endif
-
 #ifndef _MERGE_H_
 #define _MERGE_H_
+
+#include "fgroup.h"
 
 /*--------------------------------- constants -------------------------------*/
 /*--------------------------------- typedefs --------------------------------*/
@@ -67,4 +65,4 @@ typedef struct msample
 msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield);
 ;
 
-#endif
+#endif // _MERGE_H_

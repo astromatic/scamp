@@ -26,12 +26,10 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FITSWCS_H_
-#include "fitswcs.h"
-#endif
-
 #ifndef _PROPER_H_
 #define _PROPER_H_
+
+#include "fitswcs.h"
 
 /*--------------------------------- constants -------------------------------*/
 
@@ -53,4 +51,4 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield),
 	astrconnect_fgroup(fgroupstruct *fgroup),
 	astrprop_fgroup(fgroupstruct *fgroup);
 
-#endif
+#endif // _PROPER_H_

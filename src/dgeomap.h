@@ -24,20 +24,16 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+
+#ifndef _DGEOMAP_H_
+#define _DGEOMAP_H_
+
 #ifdef HAVE_CONFIG_H
 #include        "config.h"
 #endif
 
-#ifndef _FGROUP_H_
 #include "fgroup.h"
-#endif
-
-#ifndef _FITSWCS_H_
 #include "fitswcs.h"
-#endif
-
-#ifndef _DGEOMAP_H_
-#define _DGEOMAP_H_
 
 //------------------------------- constants ----------------------------------
 
@@ -60,5 +56,4 @@ int	dgeomap_compdx(const void *dgeopoint1, const void *dgeopoint2),
 	dgeomap_instru(fieldstruct **fields, int nfield, int instru,
 			char *filename);
 
-#endif
-
+#endif // _DGEOMAP_H_

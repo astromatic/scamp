@@ -26,44 +26,18 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _CATOUT_H_
-#include "catout.h"
-#endif
-
-#ifndef _CHECK_H_
-#include "check.h"
-#endif
-
-#ifndef _CPLOT_H_
-#include "cplot.h"
-#endif
-
-#ifndef _FGROUP_H_
-#include "fgroup.h"
-#endif
-
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _FITSWCS_H_
-#include "fitswcs.h"
-#endif
-
-#ifndef _MATCH_H_
-#include "match.h"
-#endif
-
-#ifndef _ASTREFCAT_H_
-#include "astrefcat.h"
-#endif
-
-#ifndef _SAMPLES_H_
-#include "samples.h"
-#endif
-
 #ifndef _PREFS_H_
 #define _PREFS_H_
+
+#include "catout.h"
+#include "check.h"
+#include "cplot.h"
+#include "fgroup.h"
+#include "field.h"
+#include "fitswcs.h"
+#include "match.h"
+#include "astrefcat.h"
+#include "samples.h"
 
 /*----------------------------- Internal constants --------------------------*/
 
@@ -267,5 +241,4 @@ extern void	dumpprefs(int state),
 		useprefs(void);
 
 
-#endif
-
+#endif // _PREFS_H_

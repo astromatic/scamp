@@ -26,16 +26,12 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
-#ifndef _FIELD_H_
-#include "field.h"
-#endif
-
-#ifndef _FITSWCS_H_
-#include "fitswcs.h"
-#endif
 
 #ifndef _MOSAIC_H_
 #define _MOSAIC_H_
+
+#include "field.h"
+#include "fitswcs.h"
 
 /*------------------------------- functions ---------------------------------*/
 
@@ -45,5 +41,5 @@ extern void	adjust_mosaic(fieldstruct **fields, int nfield),
 #ifdef USE_THREADS
 void		*pthread_adjust_set(void *arg),
 		pthread_adjust_sets(fieldstruct **fields, int nfield, int l);
-#endif
-#endif
+#endif // USE_THREADS
+#endif // _MOSAIC_H_

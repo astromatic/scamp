@@ -26,6 +26,8 @@
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
+#ifndef _GLOBALS_H_
+#define _GLOBALS_H_
 #include	"types.h"
 
 /*----------------------- miscellaneous variables ---------------------------*/
@@ -34,3 +36,5 @@ char		gstr[MAXCHAR];
 /*------------------------------- functions ---------------------------------*/
 extern	void	makeit(void),
 		write_error(char *msg1, char *msg2);
+
+#endif //  _GLOBALS_H_
