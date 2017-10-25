@@ -20,6 +20,7 @@
 # configure generated files
 /Makefile
 /config.h
+/config.h.in~
 /config.log
 /config.status
 /debian/Makefile
@@ -35,6 +36,8 @@
 /src/wcs/.deps/
 /src/wcs/Makefile
 /stamp-h1
+/doc/src/conf.py
+/man/scamp.1
 
 # build objects and targets
 *.o
@@ -42,3 +45,4 @@
 /src/f
 /src/fits/libfits.a
 /src/wcs/libwcs_c.a
+
