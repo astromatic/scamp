@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		29/10/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,7 +69,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION  12/11/2013
+VERSION  29/10/2017
 */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -110,7 +110,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
   sxm = sym = NULL;
   minrad = (float)(dminrad = prefs.fwhm_thresh[0]/2.0);
   maxrad = (float)(dmaxrad = prefs.fwhm_thresh[1]/2.0);
-  maxelong = (float)(prefs.maxellip < 1.0?
+  maxelong = (float)(dmaxelong = prefs.maxellip < 1.0?
         (prefs.maxellip + 1.0)/(1.0 - prefs.maxellip)
         : 100.0);
 
