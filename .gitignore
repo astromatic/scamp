@@ -36,7 +36,6 @@
 /src/wcs/.deps/
 /src/wcs/Makefile
 /stamp-h1
-/doc/src/conf.py
 /man/scamp.1
 
 # build objects and targets
