@@ -29,17 +29,17 @@ The columns present in the file are:
 
 :Name: ``SOURCE_NUMBER``
 :Content: Source ID, the same as in “full” catalogue
-:Unit: -
+:Unit: 
 
 -----------------
 :Name: ``NPOS_TOTAL``
 :Content: Total number of overlapping positions
-:Unit: -
+:Unit: 
 
 -----------------
 :Name: ``NPOS_OK``
 :Content: Number of overlapping positions kept for astrometry
-:Unit: -
+:Unit: 
 
 -----------------
 :Name: ``ALPHA_J2000``
