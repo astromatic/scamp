@@ -30,121 +30,150 @@ The columns present in the file are:
 :Name: ``SOURCE_NUMBER``
 :Content: Source ID, the same as in “full” catalogue
 :Unit: -
+
 -----------------
 :Name: ``NPOS_TOTAL``
 :Content: Total number of overlapping positions
 :Unit: -
+
 -----------------
 :Name: ``NPOS_OK``
 :Content: Number of overlapping positions kept for astrometry
 :Unit: -
+
 -----------------
 :Name: ``ALPHA_J2000``
 :Content: (Weighted-)average Right-Ascension
 :Unit: deg
+
 -----------------
 :Name: ``DELTA_J2000``
 :Content: (Weighted-)average Declination
 :Unit: deg
+
 -----------------
 :Name: ``ERRA_WORLD``
 :Content: Position uncertainty (RMS) along major world axis
  (may include additional uncertainty computed by SCAMP)
 :Unit: deg
+
 -----------------
 :Name: ``ERRB_WORLD``
 :Content: Position uncertainty (RMS) along minor world axis
  (may include additional uncertainty computed by SCAMP)
 :Unit: deg
+
 -----------------
 :Name: ``ERRTHETA_WORLD``
 :Content: Position angle of error ellipse (CCW/world-x)
 (The current estimation of error ellipse parameters is still done very crudely)
 :Unit: deg
+
 -----------------
 :Name: ``DISPALPHA_J2000``
 :Content: Measured dispersion (RMS) of position along Right-Ascension
 :Unit: deg
+
 -----------------
 :Name: ``DISPDELTA_J2000``
 :Content: Measured dispersion (RMS) of position along Declination
 :Unit: deg
+
 -----------------
 :Name: ``PMALPHA_J2000``
 :Content: Apparent proper motion along Right-Ascension
 :Unit: mas/yr
+
 -----------------
 :Name: ``PMDELTA_J2000``
 :Content: Apparent proper motion along Declination
 :Unit: mas/yr
+
 -----------------
 :Name: ``PMALPHAERR_J2000``
 :Content: Proper motion uncertainty (RMS) along Right Ascension
 :Unit: mas/yr
+
 -----------------
 :Name: ``PMDELTAERR_J2000``
 :Content: Proper motion uncertainty (RMS) along Declination
 :Unit: mas/yr
+
 -----------------
 :Name: ``PARALLAX_WORLD``
 :Content: Trigonometric parallax
 :Unit: mas
+
 -----------------
 :Name: ``PARALLAXERR_WORLD``
 :Content: Trigonometric parallax uncertainty
 :Unit: mas
+
 -----------------
 :Name: ``CHI2_ASTROM``
 :Content: Reduced chi2 per d.o.f.  of the proper motion/parallax fit
 :Unit: -
+
 -----------------
 :Name: ``EPOCH``
 :Content: (Astrometrically-)weighted-average of observation dates
 :Unit: yr
+
 -----------------
 :Name: ``EPOCH_MIN``
 :Content: Earliest observation date
 :Unit: yr
+
 -----------------
 :Name: ``EPOCH_MAX``
 :Content: Latest observation date
 :Unit: yr
+
 -----------------
 :Name: ``NMAG``
 :Content: Number of magnitude measurements in each \photometric instrument"
 :Unit: -
+
 -----------------
 :Name: ``MAG``
 :Content: Vector of ( ux-weighted-)average magnitudes
 :Unit: mag
+
 -----------------
 :Name: ``MAGERR``
 :Content: Vector of magnitude uncertainties
 :Unit: mag
+
 -----------------
 :Name: ``MAG_DISP``
 :Content: Vector of measured magnitude dispersions (RMS)
 :Unit: mag
+
 -----------------
 :Name: ``COLOR``
 :Content: Composite colour index computed by SCAMP
 :Unit: mag
+
 -----------------
 :Name: ``SPREAD_MODEL``
 :Content: (Weighted-)average of ``SPREAD_MODEL``s
 :Unit: -
+
 -----------------
 :Name: ``SPREADERR_MODEL``
 :Content: ``SPREAD_MODEL`` uncertainty
 :Unit: -
+
 -----------------
 :Name: ``FLAGS_EXTRACTION``
 :Content: Arithmetic OR of SExtractor flags over overlapping detection
 :Unit: -
+
 -----------------
 :Name: ``FLAGS_SCAMP``
 :Content: SCAMP flags for this detection
 :Unit: -
+
 -----------------
 
 
