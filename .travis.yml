@@ -1,0 +1,43 @@
+language: c
+
+compiler:
+  - gcc
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "SuoeaZ/WK+2/Okiz0wetQRjQhKJT8AUcnRO0viHMUyH3hhLhL77EESraIZtefNaxi7/3kibH61Mu8GGoGpufVJojSxdwsjALoRQ/7r8xFMjHOmsFD8L5mpxgNo3LvJ0BkcfV0Z5XRbeDTqfTkfKXEgPjdH8VnfeIRhG8lGb+eYaWWIhd7XNdFm9tlzV6pTQR7AtugfbphEQP70wDxks4XyEvGkEt4oiW3j8WC4Y6WqXHxoBgOTYfDrtkbKd8ZVCti/HfmOuzCDnarZhlUFU1/BhXHLfOcMNPpmTUrRjhugrfW3hDR2e4tySeHPWdByVatuL5YXpztg6dw+JA5q8CsAYcuubI4HGyRyDbHVZqGC+R1/naMk+nEsYvUhWYkEl0OfJ3mWC3FO+g0pTUexBbwvLNWFvcwlvmWqNhNA8WZuM78gaFydnyY6wy7nLWnUv1HuTg7iLlRvC+xAIUJYBVu1DH5l07o6//ibqVzYtgdsqw6A3RtdAQ4ejGdCju5KOWJXcvVtBTR7Ofy6DE+gGIZz/Se6DTrV5gpmaTJ/ggLU2eYdgLDEp0XXdS939/Y9jpqKTy7R+BWd2gAD267zHrqoGIauHrfyRlMFtUU7Wqh2RevWPOK736RL1uCZJ1T4te42WWlI4nZMErJ3u/3euu7CNCUQVrR5Qcw23AZStAedA="
+
+before_install:
+      - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+before_install:
+  - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+  - sudo apt-get update
+  # Install dependencies required for configuration
+  - sudo apt-get install autoconf libtool pkg-config 
+  # Upgrade gcc
+  - gcc --version
+  # Install dependencies
+  - sudo apt-get install libatlas-base-dev libfftw3-dev libshp-dev libplplot-dev
+  
+install :
+  - sh autogen.sh
+  
+script :
+  - ./configure
+  - make
+
+addons:
+  coverity_scan:
+    project:
+      name: "astromatic/scamp"
+      description: "Build submitted via Travis CI"
+    notification_email: astromatic@iap.fr
+    build_command_prepend: "./configure; make clean"
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
+
+os : 
+  - linux
