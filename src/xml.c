@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		08/04/2016
+*	Last modified:		10/11/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -151,7 +151,7 @@ INPUT	file or stream pointer.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	Global preferences are used.
 AUTHOR	E. Bertin (IAP)
-VERSION	26/07/2012
+VERSION	10/11/2017
  ***/
 int	write_xml_header(FILE *file)
   {
@@ -161,7 +161,8 @@ int	write_xml_header(FILE *file)
 	prefs.xsl_name);
   fprintf(file, "<VOTABLE version=\"1.1\"\n"
 	" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-	" xsi:noNamespaceSchemaLocation=\"http://www.ivoa.net/xml/VOTable/v1.1\">\n");
+	" xmlns=\"http://www.ivoa.net/xml/VOTable/v1.1\"\n"
+	" xmlns:stc=\"http://www.ivoa.net/xml/STC/v1.10\">\n");
   fprintf(file, "<DESCRIPTION>produced by %s</DESCRIPTION>\n", BANNER);
   fprintf(file, "<!-- VOTable description at "
 	"http://www.ivoa.net/Documents/latest/VOT.html -->\n");
