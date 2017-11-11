@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/03/2016
+*	Last modified:		11/11/2017
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -137,9 +137,6 @@ fieldstruct	*load_field(char *filename, int fieldindex, char *hfilename)
     *pstr = '\0';
 
 /* Identify image headers in catalog  */
-  tab = cat->tab;
-  set = field->set;
-
 /* Complete primary HDU first */
   field->headflag |= !read_aschead(prefs.ahead_global, 0, cat->tab);
   field->headflag |= !read_aschead(field->hfilename, 0, cat->tab);
@@ -186,6 +183,8 @@ fieldstruct	*load_field(char *filename, int fieldindex, char *hfilename)
   n = 0;
 
 /* Now scan other HDUs */
+  tab = cat->tab;
+  set = field->set;
   for (i=cat->ntab; i--; tab=tab->nexttab)
     if ((!strcmp("LDAC_IMHEAD",tab->extname))
 	&& (key=read_key(tab, "Field Header Card")))
@@ -240,6 +239,10 @@ fieldstruct	*load_field(char *filename, int fieldindex, char *hfilename)
   if (!n)
     error(EXIT_FAILURE,"*Error*: No SExtractor FITS-LDAC header found in ",
 	rfilename);
+
+  /* Save some memory */
+  QREALLOC(field->set, setstruct *, field->nset);
+  set = field->set;
 
   if (field->cplot_colour<0 || field->cplot_colour>15)
     warning("CHECKPLOT field colour out of range, defaulted to ", "15");
@@ -356,7 +359,8 @@ fieldstruct	*load_field(char *filename, int fieldindex, char *hfilename)
       nsample += set[n]->nsample;
       free_tab(set[n]->imatab);
       set[n]->imatab = NULL;
-      set[n]->setindex = n++;
+      set[n]->setindex = n;
+      n++;
       }
 
   field->nsample = nsample;
@@ -380,7 +384,7 @@ INPUT   Pointer to field structure.
 OUTPUT  A pointer to the created field structure.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 29/09/2012
+VERSION 11/11/2017
 */
 void	locate_field(fieldstruct *field)
   {
@@ -408,9 +412,9 @@ void	locate_field(fieldstruct *field)
 
 /* Go through each set */
   pset = field->set;
-  set = *(pset++);
-  for (s=nset; s--; set=*(pset++))
+  for (s=nset; s--;)
     {
+    set = *(pset++);
     wcs = set->wcs;
     lng = wcs->lng;
     lat = wcs->lat;
@@ -454,9 +458,9 @@ void	locate_field(fieldstruct *field)
 				= -(airmassmin = expotimemin = epochmin = BIG);
   nairmass = nexpotime = nepoch = 0;
   pset = field->set;
-  set=*(pset++);
-  for (s=nset; s--; set=*(pset++))
+  for (s=nset; s--;)
     {
+    set=*(pset++);
 /*-- The distance is the distance to the center + the diagonal of the image */
     dist = wcs_dist(set->wcs, set->wcspos, field->meanwcspos) + set->radius;
     if (dist>maxradius)
