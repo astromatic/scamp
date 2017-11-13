@@ -23,11 +23,12 @@ before_install:
   - sudo apt-get install libatlas-base-dev libfftw3-dev libshp-dev libplplot-dev
   
 install :
+  - pip install -r tests/requirements.txt
   - sh autogen.sh
   
 script :
   - ./configure
-  - make
+  - make check
 
 addons:
   coverity_scan:

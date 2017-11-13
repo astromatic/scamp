@@ -46,8 +46,11 @@
 /src/wcs/libwcs_c.a
 /doc/build/
 
+# test output
 /tests/Makefile
 /tests/Makefile.in
 /tests/test-suite.log
 /tests/test01.py.log
 /tests/test01.py.trs
+/tests/*.head
+/tests/test01.xml
