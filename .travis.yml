@@ -28,7 +28,7 @@ install :
   
 script :
   - ./configure
-  - make check
+  - travis_wait 30 make check
 
 addons:
   coverity_scan:
