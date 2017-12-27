@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		09/10/2017
+#	Last modified:		27/12/2017
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard AstrOmatic source code...
-AC_INIT(SCAMP, 2.6.2, [astromatic@astromatic.net],
+AC_INIT(SCAMP, 2.6.3, [astromatic@astromatic.net],
 	scamp, [http://astromatic.net/software/scamp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR(autoconf)
@@ -59,8 +59,19 @@ sinclude(acx_prog_cc_optim.m4)
 sinclude(acx_pthread.m4)
 sinclude(acx_urbi_resolve_dir.m4)
 
+# Provide a special option for setting the package release number
+AC_ARG_WITH(release,
+	[AS_HELP_STRING([--with-release=<release number>],
+	[set the package release number (default = 1)])],
+	[],
+	[with_release="no"])
+if test "$with_release" = "no"; then
+  with_release=1
+fi
+AC_SUBST(PACKAGE_RELEASE, "$with_release")
+
 # Display pakage and version number
-AC_MSG_RESULT([******** Configuring:  $PACKAGE_NAME $VERSION ($date) ********])
+AC_MSG_RESULT([******** Configuring:  $PACKAGE_NAME $PACKAGE_VERSION - $PACKAGE_RELEASE ($date) ********])
 
 # Provide special option for choosing automatically the compilation flags.
 AC_MSG_CHECKING([if compilation flags are set automatically])
@@ -253,6 +264,7 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 if test "$enable_mkl" = "yes"; then
   convlibs="${srcdir}/wcs/libwcs_c.a"
   ACX_MKL($with_mkl_dir,yes,$enable_best_link,$convlibs)
+  AC_MSG_CHECKING([for the INTEL MKL])
   if test "$MKL_WARN" == ""; then
     AC_MSG_RESULT([yes])
   else

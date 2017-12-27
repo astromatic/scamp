@@ -22,13 +22,14 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		28/05/2017
+#	Last modified:		27/12/2017
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %define name @PACKAGE_TARNAME@
 %define version @PACKAGE_VERSION@
-%define release 1%{?dist}
+%define release @PACKAGE_RELEASE@%{?dist}
+%define debug_package %{nil}
 %undefine _missing_build_ids_terminate_build
 
 Summary: compute astrometric and photometric solutions from SExtractor catalogs
