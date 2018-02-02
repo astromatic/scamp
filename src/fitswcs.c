@@ -441,9 +441,9 @@ wcsstruct	*read_wcs(tabstruct *tab)
   if (!wcsset(wcs->naxis,(const char(*)[9])wcs->ctype, wcs->wcsprm)
 	&& wcs->wcsprm->flag<999)
     {
-     char	*pstr;
-     double	date;
-     int	biss, dpar[3];
+     char	*pstr, tstr[100];
+     double	date, dpar5, jdsec;
+     int	biss, dpar[5];
 
 /*-- Coordinate reference frame */
 /*-- Search for an observation date expressed in Julian days */
@@ -460,9 +460,11 @@ wcsstruct	*read_wcs(tabstruct *tab)
       FITSREADS(buf, "DATE-OBS", str, "");
       if (*str)
         {
-/*------ Decode DATE-OBS format: DD/MM/YY or YYYY-MM-DD */
-        for (l=0; l<3 && (pstr = strtok_r(l?NULL:str,"/- ", &ptr)); l++)
+/*------ Decode DATE-OBS format: DD/MM/YYThh:mm:ss[.sss] or YYYY-MM-DDThh:mm:ss[.sss] */
+        for (l=0; l<5 && (pstr = strtok_r(l?NULL:str,"/-T: ", &ptr)); l++)
           dpar[l] = atoi(pstr);
+        pstr = strtok_r(l?NULL:str,"/-T: ", &ptr);
+        dpar5 = atof(pstr);
         if (l<3 || !dpar[0] || !dpar[1] || !dpar[2])
           {
 /*-------- If DATE-OBS value corrupted or incomplete, assume 2000-1-1 */
@@ -478,9 +480,11 @@ wcsstruct	*read_wcs(tabstruct *tab)
 
         biss = (dpar[0]%4)?0:1;
 /*------ Convert date to MJD */
-        date = -678956 + (365*dpar[0]+dpar[0]/4) - biss
+        jdsec = (dpar5 + dpar[4] * 60. + dpar[3] * 3600.) / 86400.;
+        date = (-678956 + (365*dpar[0]+dpar[0]/4) - biss
 			+ ((dpar[1]>2?((int)((dpar[1]+1)*30.6)-63+biss)
-		:((dpar[1]-1)*(63+biss))/2) + dpar[2]);
+		:((dpar[1]-1)*(63+biss))/2) + dpar[2])) + jdsec;
+
         wcs->obsdate = 2000.0 - (MJD2000 - date)/365.25;
         }
       else
