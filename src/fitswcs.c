@@ -480,8 +480,8 @@ wcsstruct	*read_wcs(tabstruct *tab)
 
         biss = (dpar[0]%4)?0:1;
 /*------ Convert date to MJD */
-        jdsec = (dpar5 + dpar[4] * 60. + dpar[3] * 3600.) / 86400.;
-        date = (-678956 + (365*dpar[0]+dpar[0]/4) - biss
+        jdsec = (double)(dpar5 + dpar[4] * 60. + dpar[3] * 3600.) / 86400.;
+        date = (double)(-678956 + (365*dpar[0]+dpar[0]/4) - biss
 			+ ((dpar[1]>2?((int)((dpar[1]+1)*30.6)-63+biss)
 		:((dpar[1]-1)*(63+biss))/2) + dpar[2])) + jdsec;
 
