@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/07/2017
+*	Last modified:		18/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -430,7 +430,7 @@ NOTES	The output angle is expressed CCW in projected coordinates (not
 	pixel coordinates) for homogeneity reasons.
 	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	23/10/2013
+VERSION	18/02/2018
  ***/
 double	match_setas(setstruct *set, setstruct *refset, int nmax,
 			double matchresol, double *angle, double *scale)
@@ -503,9 +503,8 @@ double	match_setas(setstruct *set, setstruct *refset, int nmax,
   compute_rawpos(wcs, refsample, nrefsample);
 
 /* Compute maximum pair length (squared) */
-  dr2max = wcs->naxisn[lng]<wcs->naxisn[lat]?
-		wcs->naxisn[lng] : wcs->naxisn[lat]; 
-  dr2max *= dr2max;
+  dr2max = wcs->naxisn[lng] * wcs->naxisn[lng] +
+	wcs->naxisn[lat] * wcs->naxisn[lat]; 
   dr2mid =dr2max/1.3;
   dr2mid2 = dr2max/(SCALE_RANGE/2.0);
 /* First build histogram for the reference field */
