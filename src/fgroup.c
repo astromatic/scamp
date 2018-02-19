@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/10/2017
+*	Last modified:		19/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,6 +45,7 @@
 #include "samples.h"
 
 static int	group_compfielddist(const void *field1, const void *field2);
+static int	group_compfieldindex(const void *field1, const void *field2);
 static double	group_fielddist(fieldstruct *field1, fieldstruct *field2);
 static double	group_setdist(setstruct *set1, setstruct *set2);
 
@@ -150,6 +151,11 @@ fgroupstruct	**group_fields(fieldstruct **fields, int nfield, int *nfgroup) {
   for (g=0; g<ngroup; g++)
     fgroups[g]->no = g+1;
 
+/* Sort fields by field index within group */
+  for (g=0; g<ngroup; g++)
+    qsort(fgroups[g]->field, fgroups[g]->nfield, sizeof(fieldstruct *),
+		group_compfieldindex);
+
 /* Update astrometric stuff */
   for (g=0; g<ngroup; g++)
     locate_fgroup(fgroups[g]);
@@ -250,6 +256,28 @@ static int	group_compfielddist(const void *field1, const void *field2) {
 	- (*(fieldstruct **)field2)->distance;
 
   return dd > 0.0 ? 1 : (dd < 0.0 ? -1 : 0);
+}
+
+
+/****** group_compfieldindex *************************************************
+PROTO   int	group_compfieldindex(void *field1, void *field2)
+PURPOSE	Return -1, 0, or 1 if the first field index is respectively smaller,
+	identical o larger than the second field index.
+INPUT   Pointer to first field,
+	Pointer to second field.
+OUTPUT	-1, 0 or 1.
+NOTES   -.
+AUTHOR  E. Bertin (IAP)
+VERSION 19/02/2018
+*/
+static int	group_compfieldindex(const void *field1, const void *field2) {
+
+   int di;
+
+  di = (*(fieldstruct **)field1)->fieldindex
+	- (*(fieldstruct **)field2)->fieldindex;
+
+  return di > 0 ? 1 : (di < 0 ? -1 : 0);
 }
 
 
