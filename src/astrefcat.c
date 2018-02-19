@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/09/2016
+*	Last modified:		19/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1376,20 +1376,20 @@ INPUT	Input Vizier string,
 OUTPUT  -.
 NOTES   -.
 AUTHOR  E. Bertin (IAP)
-VERSION 05/04/2016
+VERSION 19/02/2018
 */
 static void	vizier_to_array(char *str, char (*cols)[COLUMN_SIZE])
 
   {
    char		*col;
 
-  while (*str) {
-    col = *(cols++);
-    while (*str && *str != ';')
-      *(col++) = *(str++); 
-    *col = '\0';
-    str++;
-  }
+  if (*str)
+    do {
+      col = *(cols++);
+      while (*str && *str != ';')
+        *(col++) = *(str++); 
+      *col = '\0';
+    } while (*(str++));
 
   return;
   }
