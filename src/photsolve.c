@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		19/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -708,7 +708,7 @@ INPUT	ptr to the group of fields.
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	11/09/2004
+VERSION	19/02/2018
  ***/
 void	compmags_fgroup(fgroupstruct *fgroup)
   {
@@ -724,9 +724,9 @@ void	compmags_fgroup(fgroupstruct *fgroup)
   for (f=0; f<nfield; f++)
     {
     pset = fields[f]->set;
-    set = *(pset++);
-    for (s=fields[f]->nset; s--; set=*(pset++))
+    for (s=fields[f]->nset; s--;)
       {
+      set = *(pset++);
       samp = set->sample;
       for (nsamp=set->nsample; nsamp--; samp++)
         if (samp->flux>0.0)

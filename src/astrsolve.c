@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		06/10/2016
+*	Last modified:		19/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1509,7 +1509,7 @@ INPUT	pointer to the group of fields,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	05/04/2013
+VERSION	19/02/2018
  ***/
 void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield, int propflag)
   {
@@ -1540,9 +1540,9 @@ void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield, int propflag)
   for (f=0; f<nfield; f++)
     {
     pset = field[f]->set;
-    set = *(pset++);
-    for (s=field[f]->nset; s--; set=*(pset++))
+    for (s=field[f]->nset; s--; pset++)
       {
+      set = *pset;
       lng = set->lng;
       lat = set->lat;
       samp = set->sample;

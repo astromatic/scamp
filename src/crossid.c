@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/09/2012
+*	Last modified:		19/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@ INPUT	ptr to the group of fields,
 OUTPUT	-.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/09/2012
+VERSION	19/02/2018
  ***/
 void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double tolerance)
@@ -96,10 +96,10 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
   for (f=0; f<nfield; f++)
     {
     pset = field[f]->set;
-    set = *(pset++);
     field[f]->prevfield = field[f]->nextfield = NULL;
-    for (s=field[f]->nset; s--; set=*(pset++))
+    for (s=field[f]->nset; s--;)
       {
+      set = *(pset++);
       sort_samples(set);
       unlink_samples(set);
       }
@@ -110,18 +110,18 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
     {
     field1 = field[f1];
     pset1 = field1->set;
-    set1 = *(pset1++);
     nset1 = field1->nset;
-    for (s1=nset1; s1--; set1=*(pset1++))
+    for (s1=nset1; s1--;)
       {
+      set1 = *(pset1++);
       for (f2=0; f2<f1; f2++)
         {
         field2 = field[f2];
         pset2 = field2->set;
-        set2 = *(pset2++);
         nset2 = field2->nset;
-        for (s2=nset2; s2--; set2=*(pset2++))
+        for (s2=nset2; s2--;)
 	  {
+          set2 = *(pset2++);
 /*-------- Exclude non-overlapping frames */
           if (lng != lat)
 	    {
@@ -264,10 +264,10 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
       {
       field2 = field[f2];
       pset2 = field2->set;
-      set2 = *(pset2++);
       nset2 = field2->nset;
-      for (s2=nset2; s2--; set2=*(pset2++))
+      for (s2=nset2; s2--;)
         {
+        set2 = *(pset2++);
 /*---------- Exclude non-overlapping frames */
         if (lng != lat)
           {
@@ -514,7 +514,7 @@ OUTPUT	Photometric code (1 for genuine, 2 for dummy) if it overlaps, 0
 	otherwise.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	25/02/2005
+VERSION	19/02/2018
  ***/
 int check_fieldphotomoverlap(fieldstruct *field, int instru)
 
@@ -525,9 +525,9 @@ int check_fieldphotomoverlap(fieldstruct *field, int instru)
    int		n,s;
 
   pset = field->set;
-  set = *(pset++);
-  for (s=field->nset; s--; set=*(pset++))
+  for (s=field->nset; s--;)
     {
+    set = *(pset++);
     samp = set->sample;
     for (n=set->nsample; n--; samp++)
       {
