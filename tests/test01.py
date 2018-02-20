@@ -1,5 +1,4 @@
 #! /usr/bin/python
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import math,os,subprocess,sys
 import numpy as np
@@ -46,7 +45,7 @@ fields = votable.get_table_by_id("Fields")
 # Get AS and XY contrasts
 contrast_as_min = np.amin(fields.array["AS_Contrast"])
 contrast_xy_min = np.amin(fields.array["XY_Contrast"])
-scamp_test("Minimum AS contrast", contrast_as_min > 23.10)
+scamp_test("Minimum AS contrast", contrast_as_min > 22.00)
 scamp_test("Minimum XY contrast", contrast_xy_min > 22.90)
 
 # FGroups table
@@ -66,7 +65,7 @@ scamp_test("Internal dispersion", sigma_int < 0.031)
 
 # Test mean reference RMS errors
 sigma_ref = scamp_meanrms(fgroups.array["AstromSigma_Reference_HighSN"][0])
-scamp_test("Reference dispersion", sigma_ref < 0.081)
+scamp_test("Reference dispersion", sigma_ref < 0.085)
 
 # Exit with status and message
 print "All OK." if status == 0 else "%d errors." %status
