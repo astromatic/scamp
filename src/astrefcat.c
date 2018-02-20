@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/02/2018
+*	Last modified:		20/02/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -198,7 +198,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	14/09/2016
+VERSION	20/02/2018
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -302,7 +302,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
   for (s=0; s<prefs.nref_server; s++) {
     colname = astrefcat->viziercolumns[0];
     sprintf(url,
-	"http://%s/viz-bin/asu-tsv?&-mime=csv&-source=%s&-out.max=10000000"
+	"http://%s/viz-bin/asu-tsv?&-mime=csv&-source=%s&-out.max=100000000"
 	"&-out.meta=&%s-c=%.7f,%s%.7f&-c.rd=%.8g&-out=%s",
 	prefs.ref_server[s],
 	astrefcat->viziername,
