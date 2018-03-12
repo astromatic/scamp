@@ -39,7 +39,7 @@ struct thread_args {
 };
 
 
-    void*
+static void*
 pthread_cross_pixel(void *args) 
 {
     struct thread_args *ta = (struct thread_args*) args;
@@ -56,7 +56,7 @@ pthread_cross_pixel(void *args)
 }
 
 
-    long
+long
 Crossmatch_crossSamples(
         PixelStore *pixstore,
         double  radius_arcsec,
@@ -152,7 +152,7 @@ Crossmatch_crossSamples(
  * rest of the run. So do not cross with me.
  *
  */
-    static void
+static void
 set_reserve_cross(HealPixel *a) 
 {
     int i, j;
@@ -182,7 +182,7 @@ set_reserve_cross(HealPixel *a)
 }
 
 
-    static long
+static long
 cross_pixel(HealPixel *pix, PixelStore *store, double radius) 
 {
 
@@ -279,14 +279,14 @@ cross_pixel(HealPixel *pix, PixelStore *store, double radius)
 }
 
 
-    int
+int
 get_iterate_count() 
 {
     return ntestmatches;
 }
 
 
-    static inline double
+static inline double
 dist(double *va, double *vb) 
 {
     double x = va[0] - vb[0];
@@ -297,7 +297,7 @@ dist(double *va, double *vb)
     return sqrt(x*x + y*y + z*z);
 }
 
-    static void
+static void
 crossmatch(struct sample *current_spl, struct sample *test_spl) 
 {
     ntestmatches++;
