@@ -22,6 +22,12 @@
 #include "globals.h"
 #include "samples.h"
 
+#define SC_PI 3.141592653589793238462643383279502884197                            
+#define SC_TWOPI 6.283185307179586476925286766559005768394                         
+#define HALFPI 1.570796326794896619231321691639751442099                        
+#define SC_INV_HALFPI 0.6366197723675813430755350534900574                         
+#define TO_RAD 0.0174532925199432957692369076848861271344
+
 typedef struct HealPixel HealPixel;
 /**
  * HealPixel store pointers to every samples of all fields, belonging to a

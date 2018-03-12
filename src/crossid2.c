@@ -19,9 +19,9 @@
 #include <pthread.h>
 
 #include "crossid2.h"
-#include "chealpixelstore.h"
+#include "chealpixstore.h"
 
-static void crossmatch(Sample*,Sample*);
+static void crossmatch(struct sample*,struct sample*);
 static long cross_pixel(HealPixel*,PixelStore*,double);
 
 static long ntestmatches;
@@ -31,101 +31,105 @@ static pthread_mutex_t CMUTEX = PTHREAD_MUTEX_INITIALIZER;
 #define NNEIGHBORS 8
 
 struct thread_args {
-	PixelStore 	*store;
-	int64_t 	*pixelindex;
-	int 		npixs;
-	double 		radius;
-	int 		*result;
+    PixelStore  *store;
+    int64_t  *pixelindex;
+    int   npixs;
+    double   radius;
+    int   *result;
 };
 
 
-void*
+    void*
 pthread_cross_pixel(void *args) 
 {
-	struct thread_args *ta = (struct thread_args*) args;
+    struct thread_args *ta = (struct thread_args*) args;
 
-	int i;
-	int nmatches = 0;
-	for (i=0; i<ta->npixs; i++) {
-		HealPixel *pix = PixelStore_get(ta->store, ta->pixelindex[i]);
-		nmatches += cross_pixel(pix, ta->store, ta->radius);
-	}
+    int i;
+    int nmatches = 0;
+    for (i=0; i<ta->npixs; i++) {
+        HealPixel *pix = PixelStore_get(ta->store, ta->pixelindex[i]);
+        nmatches += cross_pixel(pix, ta->store, ta->radius);
+    }
 
-	*(ta->result) = nmatches;
-	return NULL;
+    *(ta->result) = nmatches;
+    return NULL;
 }
 
 
-long
+    long
 Crossmatch_crossSamples(
-		PixelStore	*pixstore,
-		double		radius_arcsec,
-		int			nthreads)
+        PixelStore *pixstore,
+        double  radius_arcsec,
+        int   nthreads)
 {
-	int i;
+    int i;
 
-	/* arcsec to radiant */
-	double radius = radius_arcsec / 3600 * TO_RAD;
-	PixelStore_setMaxRadius(pixstore, radius);
-
-
-	/* allocate mem */
-	pthread_t *threads			= ALLOC(sizeof(pthread_t) * nthreads);
-	struct thread_args *args	= ALLOC(sizeof(struct thread_args) * nthreads);
-	int	*results				= ALLOC(sizeof(int) * nthreads);
-	int *npixs					= ALLOC(sizeof(int) * nthreads);
+    /* arcsec to radiant */
+    double radius = radius_arcsec / 3600 * TO_RAD;
+    PixelStore_setMaxRadius(pixstore, radius);
 
 
-	/* distribute work between threads */
-	int np = pixstore->npixels / nthreads;
-	for (i=0; i<nthreads; i++)
-		npixs[i] = np;
-	npixs[0] += pixstore->npixels % nthreads;
+    /* allocate mem */
+    pthread_t *threads; 
+    struct thread_args *args; 
+    int *results;    
+    int *npixs;
+    QMALLOC(threads, pthread_t, nthreads);
+    QMALLOC(args, struct thread_args, nthreads);
+    QMALLOC(results, int, nthreads);
+    QMALLOC(npixs, int, nthreads);
 
 
-	/* start threads */
-	int64_t *pixelindex = pixstore->pixelids;
-	for (i=0; i<nthreads; i++) {
-		
-		/* construct thread argument structure */
-		struct thread_args *arg = &args[i];
-		arg->store 		= pixstore;
-		arg->radius 	= radius;
-		arg->pixelindex = pixelindex;
-		arg->npixs 		= npixs[i];
-		arg->result 	= &results[i];
-
-		/* launch! */
-		pthread_create(&threads[i], NULL, pthread_cross_pixel, arg);
-
-		/* increment pixelindex for next thread */
-		pixelindex += npixs[i];
-
-	}
+    /* distribute work between threads */
+    int np = pixstore->npixels / nthreads;
+    for (i=0; i<nthreads; i++)
+        npixs[i] = np;
+    npixs[0] += pixstore->npixels % nthreads;
 
 
-	/* wait for joins */
-	for (i=0; i<nthreads; i++)
-		pthread_join(threads[i], NULL);
-	
+    /* start threads */
+    int64_t *pixelindex = pixstore->pixelids;
+    for (i=0; i<nthreads; i++) {
 
-	/* reduce */
-	long nmatches = 0;
-	for (i=0; i<nthreads; i++)
-		nmatches += results[i];
+        /* construct thread argument structure */
+        struct thread_args *arg = &args[i];
+        arg->store   = pixstore;
+        arg->radius  = radius;
+        arg->pixelindex = pixelindex;
+        arg->npixs   = npixs[i];
+        arg->result  = &results[i];
+
+        /* launch! */
+        pthread_create(&threads[i], NULL, pthread_cross_pixel, arg);
+
+        /* increment pixelindex for next thread */
+        pixelindex += npixs[i];
+
+    }
 
 
-	/* cleanup */
-	FREE(threads);
-	FREE(args);
-	FREE(npixs);
-	FREE(results);
+    /* wait for joins */
+    for (i=0; i<nthreads; i++)
+        pthread_join(threads[i], NULL);
 
 
-	Logger_log(LOGGER_NORMAL,
-			"Crossmatch end: %li matches for all pixels!\n", nmatches);
+    /* reduce */
+    long nmatches = 0;
+    for (i=0; i<nthreads; i++)
+        nmatches += results[i];
 
-	return nmatches;
+
+    /* cleanup */
+    free(threads);
+    free(args);
+    free(npixs);
+    free(results);
+
+
+    fprintf(stderr,
+            "Crossmatch end: %li matches for all pixels!\n", nmatches);
+
+    return nmatches;
 
 }
 
@@ -148,167 +152,173 @@ Crossmatch_crossSamples(
  * rest of the run. So do not cross with me.
  *
  */
-static void
+    static void
 set_reserve_cross(HealPixel *a) 
 {
-	int i, j;
-	HealPixel *b;
+    int i, j;
+    HealPixel *b;
 
-	pthread_mutex_lock(&CMUTEX);
+    pthread_mutex_lock(&CMUTEX);
 
-	for (i=0; i<NNEIGHBORS; i++) {
-		b = a->pneighbors[i];
-		/* 
-		 * test if b is not null and if my self test for this neighbor
-		 * is positive wich signifies that this "b" has reserved the
-		 * crossmatch from him to me ("a") 
-		 */
-		if (b && a->tneighbors[i] != true) {
-			for (j=0; j<NNEIGHBORS; j++) {
-				if (a == b->pneighbors[j]) {
-					b->tneighbors[j] = true;
-					break;
-				}
-			}
-		}
-	}
+    for (i=0; i<NNEIGHBORS; i++) {
+        b = a->pneighbors[i];
+        /* 
+         * test if b is not null and if my self test for this neighbor
+         * is positive wich signifies that this "b" has reserved the
+         * crossmatch from him to me ("a") 
+         */
+        if (b && a->tneighbors[i] != true) {
+            for (j=0; j<NNEIGHBORS; j++) {
+                if (a == b->pneighbors[j]) {
+                    b->tneighbors[j] = true;
+                    break;
+                }
+            }
+        }
+    }
 
-	pthread_mutex_unlock(&CMUTEX);
+    pthread_mutex_unlock(&CMUTEX);
 
 }
 
 
-static long
+    static long
 cross_pixel(HealPixel *pix, PixelStore *store, double radius) 
 {
 
-	set_reserve_cross(pix);
-	pthread_mutex_lock(&pix->mutex);
+    set_reserve_cross(pix);
+    pthread_mutex_lock(&pix->mutex);
 
-	long nbmatches = 0;
+    long nbmatches = 0;
 
-	/*
-	 * Iterate over HealPixel structure which old sample structures
-	 * belonging to him.
-	 */
-	long j, k, l;
+    /*
+     * Iterate over HealPixel structure which old sample structures
+     * belonging to him.
+     */
+    long j, k, l;
 
-	Sample *current_spl;
-	Sample *test_spl;
-
-
-	for (j=0; j<pix->nsamples; j++) {
-		current_spl = &pix->samples[j];
-
-		/*
-		 * First cross match with samples of the pixel between them
-		 */
-		for(k=0; k<j; k++) {
-			test_spl = &pix->samples[k];
-
-			if (current_spl->set->field == test_spl->set->field)
-				continue;
-
-			if (abs(current_spl->col - test_spl->col) > radius)
-				continue;
-
-			crossmatch(current_spl, test_spl);
-
-		}
-
-		/*
-		 * Then iterate against neighbors pixels
-		 */
-		HealPixel *test_pixel;
-		for (k=0; k<NNEIGHBORS; k++) {
-
-			/* Allready crossed by an neighbor ? */
-			if (pix->tneighbors[k] == true)
-				continue;
+    struct sample *current_spl;
+    struct sample *test_spl;
 
 
-			/*
-			 * Does the pixel exists? It may be a neighbor of current pixel,
-			 * but not be initialized because it does not contains
-			 * any samples.
-			 */
-			test_pixel = pix->pneighbors[k];
-			if (test_pixel == NULL)
-				continue;
+    for (j=0; j<pix->nsamples; j++) {
+        current_spl = pix->samples[j];
 
-			/*
-			 * Ok, then lock test pixel and iterate over samples.
-			 */
-			pthread_mutex_lock(&test_pixel->mutex);
+        /*
+         * First cross match with samples of the pixel between them
+         */
+        for(k=0; k<j; k++) {
+            test_spl = pix->samples[k];
 
-			for (l=0; l<test_pixel->nsamples; l++) {
-				test_spl = &test_pixel->samples[l];
+            if (current_spl->set->field == test_spl->set->field)
+                continue;
 
-				if (current_spl->set->field == test_spl->set->field)
-					continue;
+            /*
+            if (abs(current_spl->col - test_spl->col) > radius)
+                continue;
+                */
 
-				if (abs(current_spl->col - test_spl->col) > radius)
-					continue;
+            crossmatch(current_spl, test_spl);
 
-				crossmatch(current_spl, test_spl);
+        }
 
-			}
+        /*
+         * Then iterate against neighbors pixels
+         */
+        HealPixel *test_pixel;
+        for (k=0; k<NNEIGHBORS; k++) {
 
-			pthread_mutex_unlock(&test_pixel->mutex);
-		}
+            /* Allready crossed by an neighbor ? */
+            if (pix->tneighbors[k] == true)
+                continue;
 
-		if (current_spl->bestMatch != NULL) {
-			nbmatches++;
-		}
-	}
 
-	pthread_mutex_unlock(&pix->mutex);
+            /*
+             * Does the pixel exists? It may be a neighbor of current pixel,
+             * but not be initialized because it does not contains
+             * any samples.
+             */
+            test_pixel = pix->pneighbors[k];
+            if (test_pixel == NULL)
+                continue;
 
-	return nbmatches;
+            /*
+             * Ok, then lock test pixel and iterate over samples.
+             */
+            pthread_mutex_lock(&test_pixel->mutex);
+
+            for (l=0; l<test_pixel->nsamples; l++) {
+                test_spl = test_pixel->samples[l];
+
+                if (current_spl->set->field == test_spl->set->field)
+                    continue;
+
+                /*
+                if (abs(current_spl->col - test_spl->col) > radius)
+                    continue;
+                    */
+
+                crossmatch(current_spl, test_spl);
+
+            }
+
+            pthread_mutex_unlock(&test_pixel->mutex);
+        }
+
+        /*
+           if (current_spl->bestMatch != NULL) {
+           nbmatches++;
+           }
+         */
+    }
+
+    pthread_mutex_unlock(&pix->mutex);
+
+    return nbmatches;
 
 }
 
 
-int
+    int
 get_iterate_count() 
 {
-	return ntestmatches;
+    return ntestmatches;
 }
 
 
-static inline double
+    static inline double
 dist(double *va, double *vb) 
 {
-	double x = va[0] - vb[0];
-	double y = va[1] - vb[1];
-	double z = va[2] - vb[2];
+    double x = va[0] - vb[0];
+    double y = va[1] - vb[1];
+    double z = va[2] - vb[2];
 
-	/* return x*x + y*y + z*z; */
-	return sqrt(x*x + y*y + z*z);
+    /* TODO return x*x + y*y + z*z; */
+    return sqrt(x*x + y*y + z*z);
 }
 
-static void
-crossmatch(Sample *current_spl, Sample *test_spl) 
+    static void
+crossmatch(struct sample *current_spl, struct sample *test_spl) 
 {
-	ntestmatches++;
-	/*
-	 * Get distance between samples
-	 */
-	double distance = dist(current_spl->vector, test_spl->vector);
+    ntestmatches++;
+    /*
+     * Get distance between samples
+     */
+    double distance = dist(current_spl->vector, test_spl->vector);
 
-	/*
-	 * If distance is less than previous (or initial) update
-	 * best_distance and set test_spl to current_spl.bestMatch
+    /*
+     * If distance is less than previous (or initial) update
+     * best_distance and set test_spl to current_spl.bestMatch
      * TODO XXX another lock here?
-	 */
-	if (distance < current_spl->bestMatchDistance) {
-		current_spl->bestMatch = test_spl;			/* XXX false shared ! */
-		current_spl->bestMatchDistance = distance;	/* XXX false shared ! */
-	}
+     if (distance < current_spl->bestMatchDistance) {
+     current_spl->bestMatch = test_spl;   / XXX false shared ! /
+     current_spl->bestMatchDistance = distance; / XXX false shared ! /
+     }
 
-	if (distance < test_spl->bestMatchDistance) {
-		test_spl->bestMatch = current_spl;
-		test_spl->bestMatchDistance = distance;
-	}
+     if (distance < test_spl->bestMatchDistance) {
+     test_spl->bestMatch = current_spl;
+     test_spl->bestMatchDistance = distance;
+     }
+     */
 
 }
