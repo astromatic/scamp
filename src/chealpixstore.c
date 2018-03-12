@@ -145,7 +145,7 @@ static pixel_avl *pixelAvlBalance(pixel_avl *p) {
 /* Search the tree rooted at p for an entry with zId.  Return a pointer
  ** to the entry or return NULL.
  */
-pixel_avl *pixelAvlSearch(pixel_avl *p, const long zId) {
+static pixel_avl *pixelAvlSearch(pixel_avl *p, const long zId) {
     int c;
     while (p && (c = pixel_cmp(zId, p->pixel.id)) != 0) {
         p = (c < 0) ? p->pBefore : p->pAfter;
@@ -157,7 +157,7 @@ pixel_avl *pixelAvlSearch(pixel_avl *p, const long zId) {
  ** unique, then do not perform the insert but instead leave pNew unchanged
  ** and return a pointer to an existing node with the same key.
  */
-pixel_avl *pixelAvlInsert(pixel_avl **ppHead, pixel_avl *pNew) {
+static pixel_avl *pixelAvlInsert(pixel_avl **ppHead, pixel_avl *pNew) {
     int c;
     pixel_avl *p = *ppHead;
     if (p == 0) {
@@ -195,7 +195,7 @@ pixel_avl *pixelAvlInsert(pixel_avl **ppHead, pixel_avl *pNew) {
     return 0;
 }
 
-void pixelAvlFree(pixel_avl *pix) {
+static void pixelAvlFree(pixel_avl *pix) {
     if (pix == NULL)
         return;
 
@@ -206,7 +206,7 @@ void pixelAvlFree(pixel_avl *pix) {
     free(pix);
 }
 
-void pixelAvlLink(pixel_avl *root, pixel_avl *leaf) {
+static void pixelAvlLink(pixel_avl *root, pixel_avl *leaf) {
     if (leaf->pAfter)
         pixelAvlLink(root, leaf->pAfter);
     if (leaf->pBefore)
@@ -219,7 +219,7 @@ void pixelAvlLink(pixel_avl *root, pixel_avl *leaf) {
     }
 }
 
-void fix_pixel_neighbors(pixel_avl *root) {
+static void fix_pixel_neighbors(pixel_avl *root) {
     pixelAvlLink(root, root);
 }
 
@@ -277,7 +277,7 @@ static void amatchAvlRemove(amatch_avl **ppHead, amatch_avl *pOld){
  * 2 PRIVATE FUNCTIONS
  */
 #define SPL_BASE_SIZE 50
-    static void
+static void
 insert_sample_into_avltree_store(
         PixelStore *store, 
         struct sample spl, 
@@ -401,13 +401,13 @@ new_store(int64_t nsides) {
    }
  */
 
-    PixelStore*
+PixelStore*
 PixelStore_new(int64_t nsides) 
 {
     return new_store(nsides);
 }
 
-    void
+void
 PixelStore_add(
         PixelStore  *store, 
         struct sample spl, 
@@ -423,7 +423,7 @@ PixelStore_add(
 }
 
 
-    HealPixel*
+HealPixel*
 PixelStore_get(
         PixelStore *store, 
         int64_t  key) 
@@ -437,7 +437,7 @@ PixelStore_get(
 
 }
 
-    void
+void
 pixelAvlSetMaxRadius(
         pixel_avl *leaf, 
         double   radius) 
@@ -457,7 +457,7 @@ pixelAvlSetMaxRadius(
 }
 
 
-    void
+void
 PixelStore_setMaxRadius(
         PixelStore *store, 
         double   radius) 
@@ -477,7 +477,7 @@ PixelStore_setMaxRadius(
 }
 
 
-    void
+void
 PixelStore_free(PixelStore* store) 
 {
     pixelAvlFree((pixel_avl*) store->pixels);
