@@ -30,8 +30,7 @@ typedef struct HealPixel HealPixel;
 struct HealPixel {
 
     long id;            /* healpix id */
-    struct sample *samples;    /* our samples */
-    struct sample ***ext;       /* update ext if realloc is called */
+    struct sample **samples;    /* our samples */
     int nsamples;       /* number of samples belonging to this pixel */
     int size;           /* for reallocation if required */
     int64_t neighbors[8];  /* Neighbors indexes */
@@ -62,7 +61,7 @@ PixelStore_new(int64_t nsides);
  * updated automatically.
  */
 extern void
-PixelStore_add(PixelStore *store, struct sample spl, struct sample **ext);
+PixelStore_add(PixelStore *store, struct sample *spl);
 
 extern HealPixel*
 PixelStore_get(PixelStore *store, int64_t key);

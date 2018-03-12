@@ -22,6 +22,12 @@
 #include "chealpixstore.h"
 #include "chealpix.h"
 
+#define SC_PI 3.141592653589793238462643383279502884197                            
+#define SC_TWOPI 6.283185307179586476925286766559005768394                         
+#define HALFPI 1.570796326794896619231321691639751442099                        
+#define SC_INV_HALFPI 0.6366197723675813430755350534900574                         
+#define TO_RAD 0.0174532925199432957692369076848861271344
+
 /*****************************************************************************
  * 1 AVL Tree implementation
  *
@@ -280,61 +286,48 @@ static void amatchAvlRemove(amatch_avl **ppHead, amatch_avl *pOld){
 static void
 insert_sample_into_avltree_store(
         PixelStore *store, 
-        struct sample spl, 
-        struct sample **ext) 
+        struct sample *spl, 
+        int64_t pixnum) 
 {
 
     /* search for the pixel */
-    /*
     pixel_avl *avlpix =
-        pixelAvlSearch((pixel_avl*) store->pixels, spl.pix_nest);
+        pixelAvlSearch((pixel_avl*) store->pixels, pixnum);
 
     if (!avlpix) { // no such pixel
 
         int i;
-
-        avlpix = CALLOC(1, sizeof(pixel_avl));
-        avlpix->pixel.id = spl.pix_nest;
-        avlpix->pixel.samples = CALLOC(SPL_BASE_SIZE, sizeof(struct sample));
-        avlpix->pixel.ext = CALLOC(SPL_BASE_SIZE, sizeof(struct sample***));
-        avlpix->pixel.nsamples = 0;
+        QCALLOC(avlpix, pixel_avl, 1);
+        avlpix->pixel.id = pixnum;
+        QCALLOC(avlpix->pixel.samples, struct sample *, SPL_BASE_SIZE);
         avlpix->pixel.size = SPL_BASE_SIZE;
+        avlpix->pixel.nsamples = 0;
         pthread_mutex_init(&avlpix->pixel.mutex, NULL);
 
         for (i=0;i<8;i++)
             avlpix->pixel.tneighbors[i] = false;
-        neighbours_nest64(store->nsides, spl.pix_nest, avlpix->pixel.neighbors);
+        neighbours_nest64(store->nsides, pixnum, avlpix->pixel.neighbors);
 
         pixelAvlInsert((pixel_avl**) &store->pixels, avlpix);
 
         if (store->pixelids_size == store->npixels) {
-            store->pixelids = REALLOC(store->pixelids, 
-                    sizeof(long) * store->pixelids_size * 2);
+            QREALLOC(store->pixelids, 
+                 long, store->pixelids_size * 2);
             store->pixelids_size *= 2;
         }
-        store->pixelids[store->npixels] = spl.pix_nest;
+        store->pixelids[store->npixels] = pixnum;
         store->npixels++;
 
     }
 
     HealPixel *pix = &avlpix->pixel;
     if (pix->nsamples == pix->size) {
-        pix->samples = REALLOC(pix->samples, sizeof(struct sample) * pix->size * 2);
-        pix->ext  = REALLOC(pix->ext, sizeof(struct sample***)  * pix->size * 2);
-        int i;
-        for (i=0; i<pix->size; i++) {
-            struct sample **ext2  =  pix->ext[i];
-            *ext2    = &pix->samples[i];
-        }
+        QREALLOC(pix->samples, struct sample*, pix->size * 2);
         pix->size *= 2;
     }
 
     pix->samples[pix->nsamples] = spl;
-    *ext = &pix->samples[pix->nsamples];
-    pix->ext[pix->nsamples] = ext;
-    //printf("%li %li\n", pix->samples[pix->nsamples].id, (*pix->ext[pix->nsamples])->id);
     pix->nsamples++;
-        */
 
 }
 
@@ -365,42 +358,6 @@ new_store(int64_t nsides) {
  * PUBLIC FUNCTIONS
  */
 
-
-/*
-   PixelStore*
-   PixelStore_new(Field *fields, int nfields, int64_t nsides) {
-
-   PixelStore *store = new_store();
-
-   Field field;
-   Set set;
-   Sample *spl;
-
-   int i, j, k;
-   for (i = 0; i < nfields; i++) {
-   field = fields[i];
-
-   for (j = 0; j < field.nsets; j++) {
-   set = field.sets[j];
-
-   for (k = 0; k < set.nsamples; k++) {
-
-   spl = &set.samples[k];
-   spl->bestMatch = NULL;
-
-   ang2pix_nest64(nsides,spl->col, spl->lon, &spl->pix_nest);
-   ang2vec(spl->col, spl->lon, spl->vector);
-   insert_sample_into_avltree_store(store, spl, nsides);
-
-   }
-   }
-   }
-
-   fix_pixel_neighbors(store->pixels);
-   return store;
-   }
- */
-
 PixelStore*
 PixelStore_new(int64_t nsides) 
 {
@@ -409,17 +366,19 @@ PixelStore_new(int64_t nsides)
 
 void
 PixelStore_add(
-        PixelStore  *store, 
-        struct sample spl, 
-        struct sample **ext)
+        PixelStore      *store, 
+        struct sample   *spl)
 {
-    spl.prevsamp = spl.nextsamp = NULL;
-    /* XXX TODO get colatitude and longitude for healpix */
-    /*
-       ang2pix_nest64(store->nsides, spl.col, spl.lon, &spl.pix_nest);
-       ang2vec(spl.col, spl.lon, spl.vector);
-     */
-    insert_sample_into_avltree_store(store, spl, ext);
+    spl->prevsamp = spl->nextsamp = NULL;
+
+    double lon = spl->wcspos[0] * TO_RAD;
+    double col = HALFPI - spl->wcspos[1] * TO_RAD;
+    ang2vec(col, lon, spl->vector);
+
+    int64_t pixnum;
+    ang2pix_nest64(store->nsides, col, lon, &pixnum);
+
+    insert_sample_into_avltree_store(store, spl, pixnum);
 }
 
 

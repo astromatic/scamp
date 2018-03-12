@@ -65,6 +65,7 @@
 #endif
 #include "wcs/wcs.h"
 #include "xml.h"
+#include "chealpixstore.h"
 
 time_t thetime, thetime2;
 
@@ -74,6 +75,7 @@ void makeit(void)
     static char filename[MAXCHAR], extension[MAXCHAR], str[MAXCHAR];
     fgroupstruct **fgroups;
     fieldstruct **fields, **reffields;
+    setstruct *set;
     struct tm *tm;
     double alpha,delta;
     char *pstr,
@@ -244,7 +246,15 @@ void makeit(void)
     QPRINTF(OUTPUT, "\n");
 
     /* Initialize healpix values and stores */
-    for (g=0; g<ngroup; g++) {
+    int64_t nsides = pow(2, 23);
+    PixelStore *ps = PixelStore_new(nsides);
+    for (i=0; i<nfield; i++) {
+        for (f=0; f<fields[i]->nset; f++) {
+            set = fields[i]->set[f];
+            for (g=0; g>set->nsample;g++) {
+                PixelStore_add(ps, &set->sample[g]);
+            }
+        }
     }
 
 

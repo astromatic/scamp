@@ -539,8 +539,6 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
         {
             nsample = 0;
             nsamplemax = LSAMPLE_DEFSIZE;
-            /* XXX TODO store samples in pixelstore and keep a pointer to it
-               here */
             malloc_samples(set, nsamplemax);
         }
 
@@ -564,7 +562,6 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
         sample->mag = (sample->flux>0.0)? -2.5*log10(sample->flux) : 99.0;
         sample->rawpos[0] = x;
         sample->rawpos[1] = y;
-        /* XXX sample->wcspos not used until now ? */
         assert(raw_to_wcs(set->wcs, sample->rawpos, sample->wcspos) == 0);
 
         sample->epoch = set->epoch;
