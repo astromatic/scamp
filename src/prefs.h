@@ -29,6 +29,7 @@
 #ifndef _PREFS_H_
 #define _PREFS_H_
 
+#include "define.h"
 #include "catout.h"
 #include "check.h"
 #include "cplot.h"
