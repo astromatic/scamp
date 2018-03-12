@@ -34,6 +34,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "define.h"
 #include "globals.h"
@@ -538,6 +539,8 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
         {
             nsample = 0;
             nsamplemax = LSAMPLE_DEFSIZE;
+            /* XXX TODO store samples in pixelstore and keep a pointer to it
+               here */
             malloc_samples(set, nsamplemax);
         }
 
@@ -551,6 +554,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
         if (!sexflags)
             nnobjflag++;
+
         sample = set->sample + nsample;
         sample->set = set;
         sample->sexflags = sexflags;
@@ -560,19 +564,25 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
         sample->mag = (sample->flux>0.0)? -2.5*log10(sample->flux) : 99.0;
         sample->rawpos[0] = x;
         sample->rawpos[1] = y;
+        /* XXX sample->wcspos not used until now ? */
+        assert(raw_to_wcs(set->wcs, sample->rawpos, sample->wcspos) == 0);
+
         sample->epoch = set->epoch;
+
         if (fluxrad)
             sample->fwhm = 2.0**fluxrad;
         else if (dfluxrad)
             sample->fwhm = 2.0**dfluxrad;
         else
             sample->fwhm = 0.0;
+
         if (spread)
             sample->spread = *spread;
         else if (dspread)
             sample->spread = *dspread;
         else
             sample->spread = 0.0;
+
         if (spreaderr)
             sample->spreaderr = *spreaderr;
         else if (dspreaderr)
@@ -584,6 +594,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
             sample->imaflags = *imaflags;
 
         sample->rawposerr[0] = sample->rawposerr[1] = sqrt(0.5*(ea*ea+eb*eb));
+
         /*-- In case of a contamination, position errors are strongly degraded */
         if (flags)
         {
@@ -595,6 +606,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
                sample->rawposerr[0] = (sample->rawposerr[1] *= 3.0);
              */
         }
+
         for (i=0; i<set->ncontext; i++)
         {
             ttypeconv(context[i], &dval, contexttyp[i], T_DOUBLE);
@@ -605,6 +617,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
             if (dval>cmax[i])
                 cmax[i] = dval;
         }
+
         nsample++;
     }
 
@@ -619,6 +632,7 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
         free(cmin);
         free(cmax);
     }
+
     end_readobj(keytab, tab, buf);
     if (nsample && !nnobjflag)
         warning("All sources have non-zero flags in ", rfilename);
