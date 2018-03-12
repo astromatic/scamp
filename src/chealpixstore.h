@@ -12,8 +12,8 @@
  */
 
 
-#ifndef SRC_PIXELSTORE_H_
-#define SRC_PIXELSTORE_H_
+#ifndef _CHEALPIXSTORE_H_
+#define _CHEALPIXSTORE_H_
 
 #include <stdbool.h>
 #include <pthread.h>
@@ -71,4 +71,4 @@ PixelStore_free(PixelStore *store);
 
 extern void
 PixelStore_setMaxRadius(PixelStore *store, double radius);
-#endif /* SRC_PIXELSTORE_H_ */
+#endif /* _CHEALPIXSTORE_H_ */
