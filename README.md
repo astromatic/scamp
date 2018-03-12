@@ -1,7 +1,7 @@
 # SCAMP 
 
 [![Build Status](https://travis-ci.org/astromatic/scamp.svg?branch=master)](https://travis-ci.org/astromatic/scamp)
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/scamp/badge.svg)](https://scan.coverity.com/projects/scamp)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/scamp/badge.svg)](https://scan.coverity.com/projects/scamp  "Coverity Badge")
 [![Documentation Status](https://readthedocs.org/projects/scamp/badge/?version=latest)](http://scamp.readthedocs.io/en/latest/?badge=latest)
 
 a utility that computes astrometric solutions from [SExtractor] catalogs.
