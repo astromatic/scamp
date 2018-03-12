@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		12/03/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -62,7 +62,7 @@ int	main(int argc, char *argv[])
    char		liststr[MAXCHAR],
                 **argkey, **argval,
                 *str,*listname,*listbuf;
-   int		a, l, narg, nim, opt,opt2, bufpos, bufsize;
+   int		a, i, l, narg, nim, opt,opt2, bufpos, bufsize;
 
 #ifdef HAVE_SETLINEBUF
 /* flush output buffer at each line */
@@ -81,7 +81,7 @@ int	main(int argc, char *argv[])
 
 #ifdef HAVE_PLPLOT
   if (argc>2)
-    plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
+    plparseopts(&argc, (char **)argv, PL_PARSE_SKIP);
 #endif
 
   QMALLOC(argkey, char *, argc);
@@ -129,7 +129,7 @@ int	main(int argc, char *argv[])
             fprintf(OUTPUT, "\nSYNTAX: %s", SYNTAX);
 #ifdef HAVE_PLPLOT
             fprintf(OUTPUT, "\nPLPLOT-specific options:\n");
-            plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
+            plparseopts(&argc, (char **)argv, PL_PARSE_SKIP);
 #endif
             exit(EXIT_SUCCESS);
             break;
@@ -154,25 +154,29 @@ int	main(int argc, char *argv[])
           QMALLOC(listbuf, char, bufsize);
           }
         while (fgets(liststr,MAXCHAR,fp))
-          if (nim<MAXFILE)
-            {
-            str = strtok(liststr, "\n\r\t ");
-            if (!str)
-              continue;
-            l = strlen(str)+1;
-            if (bufpos+l > bufsize)
-              {
-              bufsize += MAXCHAR*1000;
-              QREALLOC(listbuf, char, bufsize);
-              }
-            prefs.file_name[nim] = strcpy(listbuf + bufpos, str);
-            bufpos += l;
-            nim++;
-            }
-          else
+          {
+          if (nim >= MAXFILE)
             error(EXIT_FAILURE, "*Error*: Too many input catalogs in ",
                         liststr);
+          str = strtok(liststr, "\n\r\t ");
+          if (!str)
+            continue;
+          l = strlen(str)+1;
+          if (bufpos+l > bufsize)
+            {
+            bufsize += MAXCHAR*1000;
+            QREALLOC(listbuf, char, bufsize);
+            }
+//-------- We copy addresses relative to the buffer start at this stage
+          prefs.file_name[nim] = (char *)(strcpy(listbuf + bufpos, str)
+				- listbuf);
+          bufpos += l;
+          nim++;
+          }
         fclose(fp);
+//------ Add the final start address of the buffer
+        for (i = 0; i < nim; i++)
+          prefs.file_name[i] = listbuf + (off_t)prefs.file_name[i];
         }
       else
         error(EXIT_FAILURE, "*Error*: Cannot open catalog list ", listname);
