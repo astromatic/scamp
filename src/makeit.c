@@ -66,6 +66,7 @@
 #include "wcs/wcs.h"
 #include "xml.h"
 #include "chealpixstore.h"
+#include "crossid2.h"
 
 time_t thetime, thetime2;
 
@@ -248,14 +249,30 @@ void makeit(void)
     /* Initialize healpix values and stores */
     int64_t nsides = pow(2, 23);
     PixelStore *ps = PixelStore_new(nsides);
+
+    sprintf(str, "Insert samples in healpixel store");
     for (i=0; i<nfield; i++) {
         for (f=0; f<fields[i]->nset; f++) {
             set = fields[i]->set[f];
-            for (g=0; g>set->nsample;g++) {
+            for (g=0; g < set->nsample;g++) {
                 PixelStore_add(ps, &set->sample[g]);
             }
         }
     }
+
+    if (prefs.astrefcat != ASTREFCAT_NONE) {
+        for (i=0; i<ngroup; i++) {
+            for (f=0; f<reffields[i]->nset; f++) {
+                set = reffields[i]->set[f];
+                for (g=0; g < set->nsample; g++) {
+                    PixelStore_add(ps, &set->sample[g]);
+                }
+            }
+        }
+    }
+
+    CrossId_crossSamples(ps, 2.0, 4);
+    PixelStore_free(ps);
 
 
     for (g=0; g<ngroup; g++)

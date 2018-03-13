@@ -206,21 +206,21 @@ static void pixelAvlFree(pixel_avl *pix) {
     free(pix);
 }
 
-static void pixelAvlLink(pixel_avl *root, pixel_avl *leaf) {
-    if (leaf->pAfter)
-        pixelAvlLink(root, leaf->pAfter);
-    if (leaf->pBefore)
-        pixelAvlLink(root, leaf->pBefore);
+static int compSamples(const void* a, const void *b) {
+    struct sample *sa, *sb;
+    sa = (struct sample*) a;
+    sb = (struct sample*) b;
+    return sa->epoch > sb->epoch;}
+static void pixelAvlSort(pixel_avl *pix) {
+    if (pix == NULL)
+        return;
+    pixelAvlSort(pix->pAfter);
+    pixelAvlSort(pix->pBefore);
+    qsort(pix->pixel.samples, 
+            pix->pixel.nsamples, 
+            sizeof(struct sample*),
+            compSamples);
 
-    int i;
-    for (i=0; i<8; i++) {
-        pixel_avl *f = pixelAvlSearch(root, leaf->pixel.neighbors[i]);
-        leaf->pixel.pneighbors[i] = &f->pixel;
-    }
-}
-
-static void fix_pixel_neighbors(pixel_avl *root) {
-    pixelAvlLink(root, root);
 }
 
 #if 0 /* NOT USED */
@@ -429,6 +429,12 @@ PixelStore_setMaxRadius(
 
 }
 
+
+void
+PixelStore_sort(PixelStore* store) 
+{
+    pixelAvlSort((pixel_avl*) store->pixels);
+}
 
 void
 PixelStore_free(PixelStore* store) 

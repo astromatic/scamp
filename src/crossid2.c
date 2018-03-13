@@ -57,12 +57,13 @@ pthread_cross_pixel(void *args)
 
 
 long
-Crossmatch_crossSamples(
+CrossId_crossSamples(
         PixelStore *pixstore,
         double  radius_arcsec,
         int   nthreads)
 {
     int i;
+    PixelStore_sort(pixstore);
 
     /* arcsec to radiant */
     double radius = radius_arcsec / 3600 * TO_RAD;

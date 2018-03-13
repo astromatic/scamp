@@ -15,6 +15,6 @@
 #include "chealpixstore.h"
 
 extern long
-Crossmatch_crossSamples(PixelStore *store, double radius_arcsec, int nthreads);
+CrossId_crossSamples(PixelStore *store, double radius_arcsec, int nthreads);
 
 #endif /* __CROSSID2_H__ */
