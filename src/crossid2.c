@@ -156,7 +156,8 @@ CrossId_crossSamples(
 /**
  * This function prevent dead locks.
  *
- * THIS is the trickiest part of this file. pneighbors are pointers,
+ * THIS is the trickiest part of this file (crossmatch is nice two). 
+ * pneighbors are pointers,
  * tneighbors are boolean values indicating that the cross identification
  * between two pixels must be considered as done.
  *
@@ -202,31 +203,13 @@ set_reserve_cross(HealPixel *a)
 }
 
 static struct sample* find_linked_sample_prev(struct sample *s, struct field *f) {
+    if (s == NULL) return NULL;
     if (s->set->field == f)  return s;
-    if (s->prevsamp == NULL) return NULL;
     return find_linked_sample_prev(s->prevsamp, f);}
 static struct sample* find_linked_sample_next(struct sample *s, struct field *f) {
+    if (s == NULL) return NULL;
     if (s->set->field == f)  return s;
-    if (s->nextsamp == NULL) return NULL;
     return find_linked_sample_next(s->nextsamp, f);}
-static struct sample*
-find_linked_sample(struct sample *s, struct field *f)
-{
-    struct sample *found;
-    if (s->prevsamp) {
-        found = find_linked_sample_prev(s->prevsamp,f);
-        if (found)
-            return found;
-    }
-
-    if (s->nextsamp) {
-        found = find_linked_sample_next(s->nextsamp,f);
-        if (found)
-            return found;
-    }
-    return NULL;
-}
-
 static inline void
 crossmatch(struct sample *a, struct sample *b, double radius)
 {
@@ -239,21 +222,27 @@ crossmatch(struct sample *a, struct sample *b, double radius)
     ntestmatches++;
     double a_b_distance = dist(a->vector, b->vector);
 
-
     /* If distance exceeds the limit, end here */
     if (a_b_distance > radius)
         return;
 
+    /* Maybe switch a and b to assert that link will be from 
+     * a->next to b->prev */
+    if (a->epoch > b->epoch) {
+        struct sample *a_tmp = a;
+        a = b;
+        b = a_tmp;
+    }
 
     /* 
      * Get the current best distance from "a" to a sample from the field "b"
      * (if it exists). If current bestdist_a_to_fb exist and is lower than 
      * a_b_distance, return. 
      */
-    struct sample *best_a_to_sfb = find_linked_sample(a, b->set->field);
+    struct sample *best_a_to_sfb = find_linked_sample_next(a->nextsamp, b->set->field);
     if (best_a_to_sfb) {
         double bestdist_a_to_sfb = dist(a->vector, best_a_to_sfb->vector);
-        if (bestdist_a_to_sfb < a_b_distance)
+        if (a_b_distance > bestdist_a_to_sfb)
             return;
     }
 
@@ -263,10 +252,10 @@ crossmatch(struct sample *a, struct sample *b, double radius)
      * field "a" (in an other, allready crossed pixel). If current 
      * bestdist_b_to_fa exist and is lower than  a_b_distance return. 
      */
-    struct sample *best_b_to_sfa = find_linked_sample(b, a->set->field);
+    struct sample *best_b_to_sfa = find_linked_sample_prev(b->prevsamp, a->set->field);
     if (best_b_to_sfa) {
         double bestdist_b_to_sfa = dist(b->vector, best_b_to_sfa->vector);
-        if (bestdist_b_to_sfa < a_b_distance)
+        if (a_b_distance > bestdist_b_to_sfa)
             return;
     }
 
@@ -275,8 +264,15 @@ crossmatch(struct sample *a, struct sample *b, double radius)
      * If we are here, we must link a->next with b->prev, and unlink previous
      * samples if they exist 
      */
+    if (best_a_to_sfb)
+        best_a_to_sfb->prevsamp = NULL;
+    b->prevsamp = a;
 
+    if (best_b_to_sfa)
+        best_b_to_sfa->nextsamp = NULL;
+    a->nextsamp = b;
 
+    fprintf(stderr, "link done!\n");
 }
 
 static long
