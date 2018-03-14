@@ -40,7 +40,7 @@ struct thread_args {
 
 
 static void*
-pthread_cross_pixel(void *args) 
+pthread_cross_pixel(void *args)
 {
     struct thread_args *ta = (struct thread_args*) args;
 
@@ -71,9 +71,9 @@ CrossId_crossSamples(
 
 
     /* allocate mem */
-    pthread_t *threads; 
-    struct thread_args *args; 
-    int *results;    
+    pthread_t *threads;
+    struct thread_args *args;
+    int *results;
     int *npixs;
     QMALLOC(threads, pthread_t, nthreads);
     QMALLOC(args, struct thread_args, nthreads);
@@ -137,16 +137,16 @@ CrossId_crossSamples(
 /**
  * This function prevent dead locks.
  *
- * THIS is the trickiest part of this file. pneighbors is are pointers,
+ * THIS is the trickiest part of this file. pneighbors are pointers,
  * tneighbors are boolean values indicating that the cross identification
- * between two pixels is done.
+ * between two pixels must be considered as done.
  *
  * When a pixel want to cross his neigbhors, he first execute this, setting
  * all neighbors "tneigbhors" value for himself to true. Neigbhors will then
- * state that they do not need to cross. This is done only if my 
+ * state that they do not need to cross. This is done only if my
  * "tneighbor" value for the foreign pixel is not true. If my "tneighbor" is
- * true, this would indicate that the neighbor has allready reserved the 
- * cross identification. I must not touch his "tnieghbor" then, or he will 
+ * true, this would indicate that the neighbor has allready reserved the
+ * cross identification. I must not touch his "tnieghbor" then, or he will
  * not cross it two, and the pixels would never been cross identified.
  *
  * Called by cross_pixel, to notify neighbors that I handle myself for the
@@ -154,7 +154,7 @@ CrossId_crossSamples(
  *
  */
 static void
-set_reserve_cross(HealPixel *a) 
+set_reserve_cross(HealPixel *a)
 {
     int i, j;
     HealPixel *b;
@@ -163,10 +163,10 @@ set_reserve_cross(HealPixel *a)
 
     for (i=0; i<NNEIGHBORS; i++) {
         b = a->pneighbors[i];
-        /* 
+        /*
          * test if b is not null and if my self test for this neighbor
          * is positive wich signifies that this "b" has reserved the
-         * crossmatch from him to me ("a") 
+         * crossmatch from him to me ("a")
          */
         if (b && a->tneighbors[i] != true) {
             for (j=0; j<NNEIGHBORS; j++) {
@@ -182,9 +182,96 @@ set_reserve_cross(HealPixel *a)
 
 }
 
+static inline double
+dist(double *va, double *vb)
+{
+    double x = va[0] - vb[0];
+    double y = va[1] - vb[1];
+    double z = va[2] - vb[2];
+
+    /* TODO return x*x + y*y + z*z; */
+    return sqrt(x*x + y*y + z*z);
+}
+
+static inline struct sample*
+find_sample_before(struct sample *s, struct field *f) {
+    if (s) {
+        if (s->set->field == f)
+            return s;
+        else {
+            find_sample_before(s->prevsamp, f);
+        }
+    } else {
+        return NULL;
+    }
+}
+
+static inline struct sample*
+find_sample_after(struct sample *s, struct field *f) {
+    if (s) {
+        if (s->set->field == f)
+            return s;
+        else {
+            find_sample_after(s->nextsamp, f);
+        }
+    } else {
+        return NULL;
+    }
+}
+
+static inline void
+merge_samples(struct sample *y, struct sample *z)
+{
+    double epochy = y->epoch;
+    struct sample *cs = z;
+    while (1) {
+        if (cs->nextsamp) {
+            if (cs->nextsamp->epoch < epochy) {
+
+            } else {
+                cs = cs->nextsamp;
+            }
+        }
+
+    }
+
+}
+
+static inline void
+link_samples(struct sample *y, struct sample *z) {
+    /* link y->(after) <-> (before)<-z */
+
+    /* first find if there is a sample on "z" before belonging to the same 
+       field than "y" */
+    struct sample *old_y = find_sample_before(z->prevsamp, y->set->field);
+    struct sample *old_z = find_sample_after(y->nextsamp,  z->set->field);
+
+    if (old_y == NULL && old_z == NULL) { /* nothing to do, link */
+        merge_samples(y, z);
+    }
+}
+
+
+static inline void
+crossmatch2(struct sample *a, struct sample *b)
+{
+    /* sample field do not tests */
+    if (a->set->field == b->set->field)
+        return;
+
+    /* get distance between two samples */
+    double distance = dist(a->vector, b->vector);
+
+    /* should I try to insert "b" before or after "a"? */
+    if (a->epoch > b->epoch) { /* before */
+        link_samples(b,a);
+    } else { /* after */
+        link_samples(a,b);
+    }
+}
 
 static long
-cross_pixel(HealPixel *pix, PixelStore *store, double radius) 
+cross_pixel(HealPixel *pix, PixelStore *store, double radius)
 {
 
     set_reserve_cross(pix);
@@ -211,15 +298,17 @@ cross_pixel(HealPixel *pix, PixelStore *store, double radius)
         for(k=0; k<j; k++) {
             test_spl = pix->samples[k];
 
+            crossmatch2(current_spl, test_spl);
+            /*
             if (current_spl->set->field == test_spl->set->field)
                 continue;
+             */
 
             /*
             if (abs(current_spl->col - test_spl->col) > radius)
                 continue;
-                */
+             */
 
-            crossmatch(current_spl, test_spl);
 
         }
 
@@ -281,25 +370,14 @@ cross_pixel(HealPixel *pix, PixelStore *store, double radius)
 
 
 int
-get_iterate_count() 
+get_iterate_count()
 {
     return ntestmatches;
 }
 
 
-static inline double
-dist(double *va, double *vb) 
-{
-    double x = va[0] - vb[0];
-    double y = va[1] - vb[1];
-    double z = va[2] - vb[2];
-
-    /* TODO return x*x + y*y + z*z; */
-    return sqrt(x*x + y*y + z*z);
-}
-
 static void
-crossmatch(struct sample *current_spl, struct sample *test_spl) 
+crossmatch(struct sample *current_spl, struct sample *test_spl)
 {
     ntestmatches++;
     /*
