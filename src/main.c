@@ -22,7 +22,11 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
+<<<<<<< HEAD
 *	Last modified:		14/03/2018
+=======
+*	Last modified:		12/03/2018
+>>>>>>> 8f1783245ce2eede12ee3e190f5efd85e6fa7107
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -80,7 +84,7 @@ int	main(int argc, char *argv[])
 
 #ifdef HAVE_PLPLOT
   if (argc>2)
-    plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
+    plparseopts(&argc, (char **)argv, PL_PARSE_SKIP);
 #endif
 
   QMALLOC(argkey, char *, argc);
@@ -126,7 +130,7 @@ int	main(int argc, char *argv[])
             fprintf(OUTPUT, "\nSYNTAX: %s", SYNTAX);
 #ifdef HAVE_PLPLOT
             fprintf(OUTPUT, "\nPLPLOT-specific options:\n");
-            plparseopts(&argc, (const char **)argv, PL_PARSE_SKIP);
+            plparseopts(&argc, (char **)argv, PL_PARSE_SKIP);
 #endif
             exit(EXIT_SUCCESS);
             break;
