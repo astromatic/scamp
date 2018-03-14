@@ -19,23 +19,35 @@
 #include <pthread.h>
 
 #include "crossid2.h"
+#include "chealpix.h"
 #include "chealpixstore.h"
 
-static void crossmatch(struct sample*,struct sample*);
+static void crossmatch(struct sample*,struct sample*, double radius);
 static long cross_pixel(HealPixel*,PixelStore*,double);
 
 static long ntestmatches;
 
 static pthread_mutex_t CMUTEX = PTHREAD_MUTEX_INITIALIZER;
 
+static inline double
+dist(double *va, double *vb)
+{
+    double x = va[0] - vb[0];
+    double y = va[1] - vb[1];
+    double z = va[2] - vb[2];
+
+    return x*x + y*y + z*z;
+}
+
+
 #define NNEIGHBORS 8
 
 struct thread_args {
     PixelStore  *store;
     int64_t  *pixelindex;
-    int   npixs;
-    double   radius;
-    int   *result;
+    int       npixs;
+    double    radius;
+    int      *result;
 };
 
 
@@ -67,7 +79,14 @@ CrossId_crossSamples(
 
     /* arcsec to radiant */
     double radius = radius_arcsec / 3600 * TO_RAD;
-    PixelStore_setMaxRadius(pixstore, radius);
+
+    /* radiant to vector */
+    double va[3], vb[3];
+    ang2vec(0,0,va);
+    ang2vec(radius,0,vb);
+
+    /* vector to euclidean distance */
+    radius = dist(va, vb);
 
 
     /* allocate mem */
@@ -182,92 +201,82 @@ set_reserve_cross(HealPixel *a)
 
 }
 
-static inline double
-dist(double *va, double *vb)
+static struct sample* find_linked_sample_prev(struct sample *s, struct field *f) {
+    if (s->set->field == f)  return s;
+    if (s->prevsamp == NULL) return NULL;
+    return find_linked_sample_prev(s->prevsamp, f);}
+static struct sample* find_linked_sample_next(struct sample *s, struct field *f) {
+    if (s->set->field == f)  return s;
+    if (s->nextsamp == NULL) return NULL;
+    return find_linked_sample_next(s->nextsamp, f);}
+static struct sample*
+find_linked_sample(struct sample *s, struct field *f)
 {
-    double x = va[0] - vb[0];
-    double y = va[1] - vb[1];
-    double z = va[2] - vb[2];
-
-    /* TODO return x*x + y*y + z*z; */
-    return sqrt(x*x + y*y + z*z);
-}
-
-static inline struct sample*
-find_sample_before(struct sample *s, struct field *f) {
-    if (s) {
-        if (s->set->field == f)
-            return s;
-        else {
-            find_sample_before(s->prevsamp, f);
-        }
-    } else {
-        return NULL;
+    struct sample *found;
+    if (s->prevsamp) {
+        found = find_linked_sample_prev(s->prevsamp,f);
+        if (found)
+            return found;
     }
-}
 
-static inline struct sample*
-find_sample_after(struct sample *s, struct field *f) {
-    if (s) {
-        if (s->set->field == f)
-            return s;
-        else {
-            find_sample_after(s->nextsamp, f);
-        }
-    } else {
-        return NULL;
+    if (s->nextsamp) {
+        found = find_linked_sample_next(s->nextsamp,f);
+        if (found)
+            return found;
     }
+    return NULL;
 }
 
 static inline void
-merge_samples(struct sample *y, struct sample *z)
+crossmatch(struct sample *a, struct sample *b, double radius)
 {
-    double epochy = y->epoch;
-    struct sample *cs = z;
-    while (1) {
-        if (cs->nextsamp) {
-            if (cs->nextsamp->epoch < epochy) {
 
-            } else {
-                cs = cs->nextsamp;
-            }
-        }
-
-    }
-
-}
-
-static inline void
-link_samples(struct sample *y, struct sample *z) {
-    /* link y->(after) <-> (before)<-z */
-
-    /* first find if there is a sample on "z" before belonging to the same 
-       field than "y" */
-    struct sample *old_y = find_sample_before(z->prevsamp, y->set->field);
-    struct sample *old_z = find_sample_after(y->nextsamp,  z->set->field);
-
-    if (old_y == NULL && old_z == NULL) { /* nothing to do, link */
-        merge_samples(y, z);
-    }
-}
-
-
-static inline void
-crossmatch2(struct sample *a, struct sample *b)
-{
-    /* sample field do not tests */
+    /* Sample of the same field */
     if (a->set->field == b->set->field)
         return;
 
-    /* get distance between two samples */
-    double distance = dist(a->vector, b->vector);
+    /* Get distance between two samples */
+    ntestmatches++;
+    double a_b_distance = dist(a->vector, b->vector);
 
-    /* should I try to insert "b" before or after "a"? */
-    if (a->epoch > b->epoch) { /* before */
-        link_samples(b,a);
-    } else { /* after */
-        link_samples(a,b);
+
+    /* If distance exceeds the limit, end here */
+    if (a_b_distance > radius)
+        return;
+
+
+    /* 
+     * Get the current best distance from "a" to a sample from the field "b"
+     * (if it exists). If current bestdist_a_to_fb exist and is lower than 
+     * a_b_distance, return. 
+     */
+    struct sample *best_a_to_sfb = find_linked_sample(a, b->set->field);
+    if (best_a_to_sfb) {
+        double bestdist_a_to_sfb = dist(a->vector, best_a_to_sfb->vector);
+        if (bestdist_a_to_sfb < a_b_distance)
+            return;
     }
+
+
+    /* 
+     * A would want to link to "b", but maybe "b" have a better match to 
+     * field "a" (in an other, allready crossed pixel). If current 
+     * bestdist_b_to_fa exist and is lower than  a_b_distance return. 
+     */
+    struct sample *best_b_to_sfa = find_linked_sample(b, a->set->field);
+    if (best_b_to_sfa) {
+        double bestdist_b_to_sfa = dist(b->vector, best_b_to_sfa->vector);
+        if (bestdist_b_to_sfa < a_b_distance)
+            return;
+    }
+
+
+    /* 
+     * If we are here, we must link a->next with b->prev, and unlink previous
+     * samples if they exist 
+     */
+
+
 }
 
 static long
@@ -298,17 +307,12 @@ cross_pixel(HealPixel *pix, PixelStore *store, double radius)
         for(k=0; k<j; k++) {
             test_spl = pix->samples[k];
 
-            crossmatch2(current_spl, test_spl);
-            /*
-            if (current_spl->set->field == test_spl->set->field)
-                continue;
-             */
-
             /*
             if (abs(current_spl->col - test_spl->col) > radius)
                 continue;
              */
 
+            crossmatch(current_spl, test_spl, radius);
 
         }
 
@@ -340,26 +344,18 @@ cross_pixel(HealPixel *pix, PixelStore *store, double radius)
             for (l=0; l<test_pixel->nsamples; l++) {
                 test_spl = test_pixel->samples[l];
 
-                if (current_spl->set->field == test_spl->set->field)
-                    continue;
-
                 /*
                 if (abs(current_spl->col - test_spl->col) > radius)
                     continue;
                     */
 
-                crossmatch(current_spl, test_spl);
+                crossmatch(current_spl, test_spl, radius);
 
             }
 
             pthread_mutex_unlock(&test_pixel->mutex);
         }
 
-        /*
-           if (current_spl->bestMatch != NULL) {
-           nbmatches++;
-           }
-         */
     }
 
     pthread_mutex_unlock(&pix->mutex);
@@ -373,31 +369,4 @@ int
 get_iterate_count()
 {
     return ntestmatches;
-}
-
-
-static void
-crossmatch(struct sample *current_spl, struct sample *test_spl)
-{
-    ntestmatches++;
-    /*
-     * Get distance between samples
-     */
-    double distance = dist(current_spl->vector, test_spl->vector);
-
-    /*
-     * If distance is less than previous (or initial) update
-     * best_distance and set test_spl to current_spl.bestMatch
-     * TODO XXX another lock here?
-     if (distance < current_spl->bestMatchDistance) {
-     current_spl->bestMatch = test_spl;   / XXX false shared ! /
-     current_spl->bestMatchDistance = distance; / XXX false shared ! /
-     }
-
-     if (distance < test_spl->bestMatchDistance) {
-     test_spl->bestMatch = current_spl;
-     test_spl->bestMatchDistance = distance;
-     }
-     */
-
 }

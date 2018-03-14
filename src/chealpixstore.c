@@ -391,46 +391,6 @@ PixelStore_get(
 }
 
 void
-pixelAvlSetMaxRadius(
-        pixel_avl *leaf, 
-        double   radius) 
-{
-    if (leaf->pAfter != NULL)
-        pixelAvlSetMaxRadius(leaf->pAfter, radius);
-    if (leaf->pBefore != NULL)
-        pixelAvlSetMaxRadius(leaf->pBefore, radius);
-
-    HealPixel *p = &leaf->pixel;
-    int i;
-    /*
-    for (i=0; i<p->nsamples; i++)
-        (&p->samples[i])->bestMatchDistance = radius;
-        */
-
-}
-
-
-void
-PixelStore_setMaxRadius(
-        PixelStore *store, 
-        double   radius) 
-{
-    pixel_avl *root = store->pixels;
-
-    /*
-     * get the euclidean distance for this radius
-     */
-    double va[3], vb[3], euclidean_dist;
-    ang2vec(0,0,va);
-    ang2vec(radius,0, vb);
-    euclidean_dist = euclidean_distance(va,vb);
-
-    pixelAvlSetMaxRadius(root, euclidean_dist);
-
-}
-
-
-void
 PixelStore_sort(PixelStore* store) 
 {
     pixelAvlSort((pixel_avl*) store->pixels);
