@@ -223,6 +223,25 @@ static void pixelAvlSort(pixel_avl *pix) {
 
 }
 
+static void updateSamplePos(pixel_avl *pix) {
+    if (pix == NULL)
+        return;
+
+    updateSamplePos(pix->pAfter);
+    updateSamplePos(pix->pBefore);
+
+    int i;
+    struct sample *s;
+    for (i=0; i<pix->pixel.nsamples; i++) {
+        s = pix->pixel.samples[i];
+        s->nextsamp = s->prevsamp = NULL;
+        double lon = s->wcspos[0] * TO_RAD;
+        double col = HALFPI - s->wcspos[1] * TO_RAD;
+        ang2vec(col, lon, s->vector);
+    }
+}
+
+
 #if 0 /* NOT USED */
 /* Remove node pOld from the tree.  pOld must be an element of the tree or
  ** the AVL tree will become corrupt.
@@ -341,7 +360,6 @@ new_store(int64_t nsides) {
     return store;
 }
 
-
 /**
  * PRIVATE FUNCTIONS END
  ******************************************************************************/
@@ -356,6 +374,12 @@ PixelStore*
 PixelStore_new(int64_t nsides) 
 {
     return new_store(nsides);
+}
+
+void
+PixelStore_pdateSamplePos(PixelStore *store)
+{
+
 }
 
 void
@@ -388,6 +412,11 @@ PixelStore_get(
         return (HealPixel*) NULL;
     return &match_avl->pixel;
 
+}
+
+void
+PixelStore_updateSamplePos(PixelStore* store) {
+    updateSamplePos(store->pixels);
 }
 
 void

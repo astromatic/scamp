@@ -264,13 +264,45 @@ crossmatch(struct sample *a, struct sample *b, double radius)
      * If we are here, we must link a->next with b->prev, and unlink previous
      * samples if they exist 
      */
-    if (best_a_to_sfb)
-        best_a_to_sfb->prevsamp = NULL;
-    b->prevsamp = a;
+    if (best_a_to_sfb && best_b_to_sfa) {
 
-    if (best_b_to_sfa)
-        best_b_to_sfa->nextsamp = NULL;
-    a->nextsamp = b;
+        if (best_a_to_sfb->nextsamp)
+            best_a_to_sfb->nextsamp->prevsamp = b;
+        best_a_to_sfb->prevsamp->nextsamp = b;
+
+        if (best_b_to_sfa->prevsamp)
+            best_b_to_sfa->prevsamp->nextsamp = a;
+        best_b_to_sfa->nextsamp->prevsamp = a;
+
+        return;
+    } else if (best_a_to_sfb) {
+        if (best_a_to_sfb->nextsamp)
+            best_a_to_sfb->nextsamp->prevsamp = b;
+        best_a_to_sfb->prevsamp->nextsamp = b;
+        struct sample *na = a;
+        while (1) {
+            if (na->nextsamp->epoch < b->epoch) {
+                na = na->nextsamp;
+            }
+        }
+        if (na->prevsamp->nextsamp)
+            na->prevsamp->nextsamp = NULL;
+        na->prevsamp = b;
+    } else if (best_b_to_sfa) {
+        if (best_b_to_sfa->prevsamp)
+            best_b_to_sfa->prevsamp->nextsamp = b;
+        best_b_to_sfa->nextsamp->prevsamp = b;
+        struct sample *nb = b;
+        while (1) {
+            if (nb->prevsamp->epoch > a->epoch) {
+                nb = nb->prevsamp;
+            }
+        }
+        if (nb->nextsamp->prevsamp)
+            nb->nextsamp->prevsamp = NULL;
+        nb->nextsamp = a;
+    }
+
 
     fprintf(stderr, "link done!\n");
 }

@@ -79,5 +79,8 @@ extern void
 PixelStore_setMaxRadius(PixelStore *store, double radius);
 
 extern void
+PixelStore_updateSamplePos(PixelStore *store);
+
+extern void
 PixelStore_sort(PixelStore *store);
 #endif /* _CHEALPIXSTORE_H_ */
