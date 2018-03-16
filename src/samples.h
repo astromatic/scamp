@@ -87,6 +87,7 @@ typedef struct sample
     short  scampflags;  /* SCAMP flags */  
     unsigned int imaflags;  /* Image flags */
     double vector[3];       /* 3d vector from world coordinates */
+    int id;
 } samplestruct;
 
 typedef struct set

@@ -237,6 +237,7 @@ static void updateSamplePos(pixel_avl *pix) {
         double lon = s->wcspos[0] * TO_RAD;
         double col = HALFPI - s->wcspos[1] * TO_RAD;
         ang2vec(col, lon, s->vector);
+        s->prevsamp = s->nextsamp = NULL;
     }
 }
 

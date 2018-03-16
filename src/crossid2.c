@@ -75,15 +75,15 @@ CrossId_crossSamples(
         int   nthreads)
 {
     int i;
-    PixelStore_sort(pixstore);
+    PixelStore_updateSamplePos(pixstore);
 
     /* arcsec to radiant */
-    double radius = radius_arcsec / 3600 * TO_RAD;
+    double radius = radius_arcsec * TO_RAD;
 
     /* radiant to vector */
     double va[3], vb[3];
     ang2vec(0,0,va);
-    ang2vec(radius,0,vb);
+    ang2vec(HALFPI - radius,0,vb);
 
     /* vector to euclidean distance */
     radius = dist(va, vb);
@@ -231,32 +231,45 @@ static void relink_sample_a(struct sample *bhead, struct sample *olda, struct sa
     }
     relink_sample_a(bhead->nextsamp, olda, newa);
 }
+
+/* b(s) come right after had a */
 static void insert_sample_b(struct sample *head, struct sample *s) {
-    if (head->epoch > s->epoch) {
-        head->prevsamp->nextsamp = s;
-        s->prevsamp = head->prevsamp;
-        head->prevsamp = NULL;
+    if (s->epoch > head->epoch) {
+        if (head->nextsamp)
+            head->nextsamp->prevsamp = NULL;
+        head->nextsamp = s;
+        if (s->prevsamp)
+            s->prevsamp->nextsamp = NULL;
+        s->prevsamp = head;
         return;
     }
     if (head->nextsamp)
         return insert_sample_b(head->nextsamp, s);
 
     head->nextsamp = s;
+    if (s->prevsamp)
+        s->prevsamp->nextsamp = NULL;
     s->prevsamp = head;
 }
 
+/* a(s) come right before b */
 static void insert_sample_a(struct sample *head, struct sample *s) {
     if (s->epoch > head->epoch) {
-       s->nextsamp = head;
-       if (head->prevsamp) {
-            head->prevsamp->nextsamp = NULL;
-       }
+       if (head->prevsamp)
+           head->prevsamp->nextsamp = NULL;
        head->prevsamp = s;
+       if (s->nextsamp)
+           s->nextsamp->prevsamp = NULL;
+       s->nextsamp = head;
     }
     if (head->nextsamp)
         return insert_sample_a(head->nextsamp, s);
 
+    if (head->prevsamp)
+        head->prevsamp->nextsamp = NULL;
     head->prevsamp = s;
+    if (s->nextsamp)
+        s->nextsamp->prevsamp = NULL;
     s->nextsamp = head;
 
 }
@@ -277,6 +290,36 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         fprintf(stderr, "over radius\n");
         return;
     }
+
+    struct sample *old_a = NULL;
+    if (a->prevsamp)
+        old_a = a->prevsamp;
+    else if (a->nextsamp)
+        old_a = a->nextsamp;
+
+    if (old_a)  {
+        double old_d = dist(a->vector, old_a->vector);
+        if (old_d < a_b_distance)
+            return;
+    }
+
+    struct sample *old_b = NULL;
+    if (b->prevsamp)
+        old_b = b->prevsamp;
+    else if (b->nextsamp)
+        old_b = b->nextsamp;
+
+    if (old_b) {
+        double old_e = dist(b->vector, old_b->vector);
+        if (old_e < a_b_distance)
+            return;
+    }
+
+    a->prevsamp = a->nextsamp = NULL;
+    b->prevsamp = b->nextsamp = NULL;
+    a->nextsamp = b;
+    b->prevsamp = a;
+    return;
 
     /* Maybe switch a and b to assert that link will be from 
      * a->next to b->prev */
@@ -316,7 +359,7 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         //relink_sample_b(a_head, b_from_a_old, b);
     } else {
         fprintf(stderr, "link done 3.2!\n");
-        //insert_sample_b(a_head, b);
+        insert_sample_b(a_head, b);
     }
 
     fprintf(stderr, "link done 4!\n");
@@ -325,7 +368,7 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         //relink_sample_a(b_head, a_from_b_old, a);
     } else {
         fprintf(stderr, "link done 4.2!\n");
-        //insert_sample_a(b_head, a);
+        insert_sample_a(b_head, a);
     }
 
     fprintf(stderr, "link done!\n");

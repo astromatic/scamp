@@ -255,6 +255,8 @@ void makeit(void)
         for (f=0; f<fields[i]->nset; f++) {
             set = fields[i]->set[f];
             for (g=0; g < set->nsample;g++) {
+                struct sample *s = &set->sample[g];
+                s->id = g;
                 PixelStore_add(ps, &set->sample[g]);
             }
         }
@@ -271,6 +273,8 @@ void makeit(void)
         }
     }
 
+    PixelStore_sort(ps);
+
 
     for (g=0; g<ngroup; g++)
     {
@@ -283,8 +287,41 @@ void makeit(void)
 
     }
     double raddd = 2.0;
-    CrossId_crossSamples(ps, raddd, 4);
+    CrossId_crossSamples(ps, raddd, 1);
 
+    int h,j,k, l;
+    for (g=0; g<ngroup; g++) {
+        fgroupstruct *s = fgroups[g];
+        for (h=0; h<s->nfield; h++) {
+            fieldstruct *f = s->field[h];
+            for (k=0; k<f->nset; k++) {
+                setstruct *s = f->set[k];
+                for  (l=0; l<s->nsample; l++) {
+                    samplestruct *sam = &s->sample[l];
+                    int nindex;
+                    int sindex;
+                    if (sam->prevsamp) {
+                        nindex = sam->prevsamp->set->setindex;
+                        sindex = sam->prevsamp->id;
+                    } else if (sam->nextsamp) {
+                        nindex = sam->nextsamp->set->setindex;
+                        sindex = sam->nextsamp->id;
+                    } else {
+                        printf("NOLINK_");
+                        continue;
+                    }
+
+                    if (nindex == sam->set->setindex) {
+                        if (sindex != sam->id) {
+                            printf("BADID_");
+                        }
+                    } else {
+                        printf("ERROR_");
+                    }
+                }
+            }
+        }
+    }
 
     if (prefs.solvastrom_flag)
     {
@@ -302,7 +339,6 @@ void makeit(void)
             NFPRINTF(OUTPUT, str);
         }
         fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
-        PixelStore_updateSamplePos(ps);
         CrossId_crossSamples(ps, raddd, 4);
         fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
         for (g=0; g<ngroup; g++) {
@@ -342,7 +378,6 @@ void makeit(void)
         sprintf(str, "Making cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
     }
-    PixelStore_updateSamplePos(ps);
     CrossId_crossSamples(ps, raddd, 4);
     for (g=0; g<ngroup; g++)
     {
@@ -498,7 +533,6 @@ void makeit(void)
         /*-- Re-do Cross-ID to recover possibly fast moving objects */
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        PixelStore_updateSamplePos(ps);
         CrossId_crossSamples(ps, raddd, 4);
         /*
         for (g=0; g<ngroup; g++)
@@ -518,7 +552,6 @@ void makeit(void)
             reproj_fgroup(fgroups[g], reffields[g], 1);
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        PixelStore_updateSamplePos(ps);
         CrossId_crossSamples(ps, raddd, 4);
         //for (g=0; g<ngroup; g++)
             //crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
@@ -541,7 +574,6 @@ void makeit(void)
             /*-- Re-do Cross-ID to recover possibly fast moving objects */
             NFPRINTF(OUTPUT, "Pairing detections...");
 
-            PixelStore_updateSamplePos(ps);
             CrossId_crossSamples(ps, raddd, 4);
             //for (g=0; g<ngroup; g++)
                 //crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
