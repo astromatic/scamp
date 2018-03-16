@@ -282,7 +282,8 @@ void makeit(void)
         //crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
 
     }
-    CrossId_crossSamples(ps, 20.0, 4);
+    double raddd = 2.0;
+    CrossId_crossSamples(ps, raddd, 4);
 
 
     if (prefs.solvastrom_flag)
@@ -300,13 +301,18 @@ void makeit(void)
             sprintf(str, "Making cross-identifications in group %d", g+1);
             NFPRINTF(OUTPUT, str);
         }
+        fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
         PixelStore_updateSamplePos(ps);
-        CrossId_crossSamples(ps, 20.0, 4);
+        CrossId_crossSamples(ps, raddd, 4);
+        fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
         for (g=0; g<ngroup; g++) {
+            fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
             //crossid_fgroup(fgroups[g], reffields[g],prefs.crossid_radius*ARCSEC/DEG);
             sprintf(str, "Computing astrometric stats for group %d", g+1);
             NFPRINTF(OUTPUT, str);
+            fprintf(stderr, "iiiiiiiiiiiiiiiiiiiiii\n\n");
             astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
+            fprintf(stderr, "jjjjjjjjjjjjjjjjjjjjji\n\n");
             sprintf(str, "Astrometric clipping in group %d", g+1);
             NFPRINTF(OUTPUT, str);
             nclip = astrclip_fgroup(fgroups[g], reffields[g], prefs.astrclip_nsig);
@@ -337,7 +343,7 @@ void makeit(void)
         NFPRINTF(OUTPUT, str);
     }
     PixelStore_updateSamplePos(ps);
-    CrossId_crossSamples(ps, 20.0, 4);
+    CrossId_crossSamples(ps, raddd, 4);
     for (g=0; g<ngroup; g++)
     {
         /*
@@ -493,7 +499,7 @@ void makeit(void)
         NFPRINTF(OUTPUT, "Pairing detections...");
 
         PixelStore_updateSamplePos(ps);
-        CrossId_crossSamples(ps, 20.0, 4);
+        CrossId_crossSamples(ps, raddd, 4);
         /*
         for (g=0; g<ngroup; g++)
             crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
@@ -513,7 +519,7 @@ void makeit(void)
         NFPRINTF(OUTPUT, "Pairing detections...");
 
         PixelStore_updateSamplePos(ps);
-        CrossId_crossSamples(ps, 20.0, 4);
+        CrossId_crossSamples(ps, raddd, 4);
         //for (g=0; g<ngroup; g++)
             //crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
         NFPRINTF(OUTPUT, "Merging detections...");
@@ -536,7 +542,7 @@ void makeit(void)
             NFPRINTF(OUTPUT, "Pairing detections...");
 
             PixelStore_updateSamplePos(ps);
-            CrossId_crossSamples(ps, 20.0, 4);
+            CrossId_crossSamples(ps, raddd, 4);
             //for (g=0; g<ngroup; g++)
                 //crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
             NFPRINTF(OUTPUT, "Merging detections...");

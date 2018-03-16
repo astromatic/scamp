@@ -1,33 +1,33 @@
 /*
- *				crossid.c
+ *    crossid.c
  *
  * Manage source cross-identifications.
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  *
- *	This file part of:	SCAMP
+ * This file part of: SCAMP
  *
- *	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+ * Copyright:  (C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
  *
- *	License:		GNU General Public License
+ * License:  GNU General Public License
  *
- *	SCAMP is free software: you can redistribute it and/or modify
- *	it under the terms of the GNU General Public License as published by
- *	the Free Software Foundation, either version 3 of the License, or
- * 	(at your option) any later version.
- *	SCAMP is distributed in the hope that it will be useful,
- *	but WITHOUT ANY WARRANTY; without even the implied warranty of
- *	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *	GNU General Public License for more details.
- *	You should have received a copy of the GNU General Public License
- *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
+ * SCAMP is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ * SCAMP is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		19/02/2018
+ * Last modified:  19/02/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifdef HAVE_CONFIG_H
-#include	"config.h"
+#include "config.h"
 #endif
 
 #include <math.h>
@@ -47,36 +47,36 @@
 #include "samples.h"
 
 /****** crossid_fgroup *******************************************************
-  PROTO	void crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
+  PROTO void crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
   double tolerance)
-  PURPOSE	Perform source cross-identifications in a group of fields.
-  INPUT	ptr to the group of fields,
+  PURPOSE Perform source cross-identifications in a group of fields.
+  INPUT ptr to the group of fields,
   ptr to the reference field,
   Tolerance (in deg. if angular coordinates).
-  OUTPUT	-.
-  NOTES	Uses the global preferences.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	19/02/2018
+  OUTPUT -.
+  NOTES Uses the global preferences.
+  AUTHOR E. Bertin (IAP)
+  VERSION 19/02/2018
  ***/
-void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
+void crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
         double tolerance)
 {
-    fieldstruct	**field, *field1, *field2;
-    wcsstruct	*wcs;
-    setstruct	**pset1,**pset2, **pset,
-                *set1,*set2, *set;
-    samplestruct	*samp1,*nexsamp1, *samp2,*samp2b,*samp2min,
-                    *prevsamp2,*nextsamp1,*nextsamp2;
-    double	projmin2[NAXIS], projmax2[NAXIS],
+    fieldstruct **field, *field1, *field2;
+    wcsstruct *wcs;
+    setstruct **pset1,**pset2, **pset,
+              *set1,*set2, *set;
+    samplestruct *samp1,*nexsamp1, *samp2,*samp2b,*samp2min,
+                 *prevsamp2,*nextsamp1,*nextsamp2;
+    double projmin2[NAXIS], projmax2[NAXIS],
     *proj1,
     lng1,lat1, latmin1,latmax1, lngmin2,lngmax2,latmin2,latmax2,
     dlng,dlat, dx, rlim,rlimmin,r2,r2n,r2p,r2min;
-    float	fmax;
-    int		i, f,f1,f2, s1,s2, nset1,nset2, nsamp, nsamp2,nsamp2b,
-            s, nfield, naxis, lng,lat, yaxis;
+    float fmax;
+    int  i, f,f1,f2, s1,s2, nset1,nset2, nsamp, nsamp2,nsamp2b,
+         s, nfield, naxis, lng,lat, yaxis;
 
-    field1 = NULL;	/* to avoid gcc -Wall warnings */
-    proj1 = NULL;		/* to avoid gcc -Wall warnings */
+    field1 = NULL; /* to avoid gcc -Wall warnings */
+    proj1 = NULL; /* to avoid gcc -Wall warnings */
     lng1 = lngmin2 = lngmax2 = latmin2 = latmax2 = 0.0;
     field = fgroup->field;
     nfield = fgroup->nfield;
@@ -382,24 +382,24 @@ void	crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 
 
 /****** recenter_fgroup *******************************************************
-  PROTO	void recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
-  PURPOSE	Perform field recentering with respect to a reference catalog in a
+  PROTO void recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
+  PURPOSE Perform field recentering with respect to a reference catalog in a
   group of fields.
-  INPUT	ptr to the group of fields,
+  INPUT ptr to the group of fields,
   ptr to the reference field.
-  OUTPUT	-.
-  NOTES	Uses the global preferences.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	09/06/2011
+  OUTPUT -.
+  NOTES Uses the global preferences.
+  AUTHOR E. Bertin (IAP)
+  VERSION 09/06/2011
  ***/
-void	recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
+void recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 {
-    fieldstruct	*field;
-    setstruct	**sets, *set;
-    samplestruct	*samp, *samp2;
-    double	*offsetbuf[NAXIS],
+    fieldstruct *field;
+    setstruct **sets, *set;
+    samplestruct *samp, *samp2;
+    double *offsetbuf[NAXIS],
     offset[NAXIS], rawpos[NAXIS], wcspos[NAXIS], dwcspos[NAXIS];  
-    int		d,f,s, naxis, nsamp, o,omax;
+    int  d,f,s, naxis, nsamp, o,omax;
 
     NFPRINTF(OUTPUT, "Re-centering fields...");
 
@@ -459,22 +459,22 @@ void	recenter_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 
 
 /****** check_fieldoverlap ****************************************************
-  PROTO	int check_fieldoverlap(fieldstruct *field1, fieldstruct *field2)
-  PURPOSE	Check if two fields overlap or not.
-  INPUT	ptr to the first field,
+  PROTO int check_fieldoverlap(fieldstruct *field1, fieldstruct *field2)
+  PURPOSE Check if two fields overlap or not.
+  INPUT ptr to the first field,
   ptr to the second field.
-  OUTPUT	1 if they overlap, 0 otherwise.
-  NOTES	-.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	07/02/2005
+  OUTPUT 1 if they overlap, 0 otherwise.
+  NOTES -.
+  AUTHOR E. Bertin (IAP)
+  VERSION 07/02/2005
  ***/
 int check_fieldoverlap(fieldstruct *field1, fieldstruct *field2)
 
 {
-    setstruct	**pset,
-                *set;
-    samplestruct	*samp,*samp2;
-    int		n,s;
+    setstruct **pset,
+              *set;
+    samplestruct *samp,*samp2;
+    int  n,s;
 
     pset = field1->set;
     set = *(pset++);
@@ -506,23 +506,23 @@ int check_fieldoverlap(fieldstruct *field1, fieldstruct *field2)
 
 
 /****** check_fieldphotomoverlap **********************************************
-  PROTO	int check_fieldphotomoverlap(fieldstruct *field, int instru)
-  PURPOSE	Check if a field overlaps a photometric field or not.
-  INPUT	ptr to the field to check,
+  PROTO int check_fieldphotomoverlap(fieldstruct *field, int instru)
+  PURPOSE Check if a field overlaps a photometric field or not.
+  INPUT ptr to the field to check,
   photometric instrument index.
-  OUTPUT	Photometric code (1 for genuine, 2 for dummy) if it overlaps, 0
+  OUTPUT Photometric code (1 for genuine, 2 for dummy) if it overlaps, 0
   otherwise.
-  NOTES	-.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	19/02/2018
+  NOTES -.
+  AUTHOR E. Bertin (IAP)
+  VERSION 19/02/2018
  ***/
 int check_fieldphotomoverlap(fieldstruct *field, int instru)
 
 {
-    setstruct	**pset,
-                *set;
-    samplestruct	*samp,*samp2;
-    int		n,s;
+    setstruct **pset,
+              *set;
+    samplestruct *samp,*samp2;
+    int  n,s;
 
     pset = field->set;
     for (s=field->nset; s--;)

@@ -234,7 +234,6 @@ static void updateSamplePos(pixel_avl *pix) {
     struct sample *s;
     for (i=0; i<pix->pixel.nsamples; i++) {
         s = pix->pixel.samples[i];
-        s->nextsamp = s->prevsamp = NULL;
         double lon = s->wcspos[0] * TO_RAD;
         double col = HALFPI - s->wcspos[1] * TO_RAD;
         ang2vec(col, lon, s->vector);
@@ -387,7 +386,8 @@ PixelStore_add(
         PixelStore      *store, 
         struct sample   *spl)
 {
-    spl->prevsamp = spl->nextsamp = NULL;
+
+    spl->nextsamp = spl->prevsamp = NULL;
 
     double lon = spl->wcspos[0] * TO_RAD;
     double col = HALFPI - spl->wcspos[1] * TO_RAD;

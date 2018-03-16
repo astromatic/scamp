@@ -202,14 +202,64 @@ set_reserve_cross(HealPixel *a)
 
 }
 
-static struct sample* find_linked_sample_prev(struct sample *s, struct field *f) {
-    if (s == NULL) return NULL;
-    if (s->set->field == f)  return s;
-    return find_linked_sample_prev(s->prevsamp, f);}
-static struct sample* find_linked_sample_next(struct sample *s, struct field *f) {
-    if (s == NULL) return NULL;
-    if (s->set->field == f)  return s;
-    return find_linked_sample_next(s->nextsamp, f);}
+static struct sample* get_sample_link_head(struct sample *s) {
+    if (s->prevsamp)
+        return get_sample_link_head(s->prevsamp);
+    return s;
+}
+static struct sample* get_field_member(struct sample *s, struct field *f) {
+    if (s == NULL)
+        return NULL;
+    if (s->set->field == f)
+        return s;
+    return get_field_member(s->nextsamp, f);
+}
+static void relink_sample_b(struct sample *ahead, struct sample *oldb, struct sample *newb) {
+    if (ahead == oldb) {
+        ahead->prevsamp->nextsamp = newb;
+        newb->prevsamp = ahead->prevsamp;
+        ahead->prevsamp = NULL;
+        return;
+    }
+    relink_sample_b(ahead->nextsamp, oldb, newb);
+}
+static void relink_sample_a(struct sample *bhead, struct sample *olda, struct sample *newa) {
+    if (bhead == olda) {
+        olda->nextsamp->prevsamp = newa;
+        newa->nextsamp = bhead->nextsamp;
+        bhead->nextsamp = NULL;
+    }
+    relink_sample_a(bhead->nextsamp, olda, newa);
+}
+static void insert_sample_b(struct sample *head, struct sample *s) {
+    if (head->epoch > s->epoch) {
+        head->prevsamp->nextsamp = s;
+        s->prevsamp = head->prevsamp;
+        head->prevsamp = NULL;
+        return;
+    }
+    if (head->nextsamp)
+        return insert_sample_b(head->nextsamp, s);
+
+    head->nextsamp = s;
+    s->prevsamp = head;
+}
+
+static void insert_sample_a(struct sample *head, struct sample *s) {
+    if (s->epoch > head->epoch) {
+       s->nextsamp = head;
+       if (head->prevsamp) {
+            head->prevsamp->nextsamp = NULL;
+       }
+       head->prevsamp = s;
+    }
+    if (head->nextsamp)
+        return insert_sample_a(head->nextsamp, s);
+
+    head->prevsamp = s;
+    s->nextsamp = head;
+
+}
 static inline void
 crossmatch(struct sample *a, struct sample *b, double radius)
 {
@@ -223,8 +273,10 @@ crossmatch(struct sample *a, struct sample *b, double radius)
     double a_b_distance = dist(a->vector, b->vector);
 
     /* If distance exceeds the limit, end here */
-    if (a_b_distance > radius)
+    if (a_b_distance > radius) {
+        fprintf(stderr, "over radius\n");
         return;
+    }
 
     /* Maybe switch a and b to assert that link will be from 
      * a->next to b->prev */
@@ -234,75 +286,47 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         b = a_tmp;
     }
 
+    fprintf(stderr, "link done 1!\n");
     /* 
      * Get the current best distance from "a" to a sample from the field "b"
      * (if it exists). If current bestdist_a_to_fb exist and is lower than 
      * a_b_distance, return. 
      */
-    struct sample *best_a_to_sfb = find_linked_sample_next(a->nextsamp, b->set->field);
-    if (best_a_to_sfb) {
-        double bestdist_a_to_sfb = dist(a->vector, best_a_to_sfb->vector);
-        if (a_b_distance > bestdist_a_to_sfb)
+    struct sample *a_head  = get_sample_link_head(a);
+    struct sample *b_from_a_old = get_field_member(a, b->set->field);
+    if (b_from_a_old)
+        if (a_b_distance > dist(b_from_a_old->vector, a->vector))
             return;
-    }
 
-
+    fprintf(stderr, "link done 2!\n");
     /* 
      * A would want to link to "b", but maybe "b" have a better match to 
      * field "a" (in an other, allready crossed pixel). If current 
      * bestdist_b_to_fa exist and is lower than  a_b_distance return. 
      */
-    struct sample *best_b_to_sfa = find_linked_sample_prev(b->prevsamp, a->set->field);
-    if (best_b_to_sfa) {
-        double bestdist_b_to_sfa = dist(b->vector, best_b_to_sfa->vector);
-        if (a_b_distance > bestdist_b_to_sfa)
+    struct sample *b_head  = get_sample_link_head(b);
+    struct sample *a_from_b_old = get_field_member(b, a->set->field);
+    if (a_from_b_old)
+        if (a_b_distance > dist(a_from_b_old->vector, b->vector))
             return;
+
+    fprintf(stderr, "link done 3!\n");
+    if (b_from_a_old) {
+        fprintf(stderr, "link done 3.1!\n");
+        //relink_sample_b(a_head, b_from_a_old, b);
+    } else {
+        fprintf(stderr, "link done 3.2!\n");
+        //insert_sample_b(a_head, b);
     }
 
-
-    /* 
-     * If we are here, we must link a->next with b->prev, and unlink previous
-     * samples if they exist 
-     */
-    if (best_a_to_sfb && best_b_to_sfa) {
-
-        if (best_a_to_sfb->nextsamp)
-            best_a_to_sfb->nextsamp->prevsamp = b;
-        best_a_to_sfb->prevsamp->nextsamp = b;
-
-        if (best_b_to_sfa->prevsamp)
-            best_b_to_sfa->prevsamp->nextsamp = a;
-        best_b_to_sfa->nextsamp->prevsamp = a;
-
-        return;
-    } else if (best_a_to_sfb) {
-        if (best_a_to_sfb->nextsamp)
-            best_a_to_sfb->nextsamp->prevsamp = b;
-        best_a_to_sfb->prevsamp->nextsamp = b;
-        struct sample *na = a;
-        while (1) {
-            if (na->nextsamp->epoch < b->epoch) {
-                na = na->nextsamp;
-            }
-        }
-        if (na->prevsamp->nextsamp)
-            na->prevsamp->nextsamp = NULL;
-        na->prevsamp = b;
-    } else if (best_b_to_sfa) {
-        if (best_b_to_sfa->prevsamp)
-            best_b_to_sfa->prevsamp->nextsamp = b;
-        best_b_to_sfa->nextsamp->prevsamp = b;
-        struct sample *nb = b;
-        while (1) {
-            if (nb->prevsamp->epoch > a->epoch) {
-                nb = nb->prevsamp;
-            }
-        }
-        if (nb->nextsamp->prevsamp)
-            nb->nextsamp->prevsamp = NULL;
-        nb->nextsamp = a;
+    fprintf(stderr, "link done 4!\n");
+    if (a_from_b_old) {
+        fprintf(stderr, "link done 4.1!\n");
+        //relink_sample_a(b_head, a_from_b_old, a);
+    } else {
+        fprintf(stderr, "link done 4.2!\n");
+        //insert_sample_a(b_head, a);
     }
-
 
     fprintf(stderr, "link done!\n");
 }
