@@ -224,68 +224,37 @@ get_field_sample(struct sample *s, struct field *f)
     return NULL;
 
 }
-static void
-join_sample_right(struct sample *head, struct sample *s)
+void
+join_sample_left(struct sample *left, struct sample *right)
 {
-    struct sample *found = get_field_sample(head, s->set->field);
+    struct sample *found = get_field_sample(left, right->set->field);
     if (found) {
-        s->prevsamp = found->prevsamp;
+        if (right->prevsamp)
+            right->prevsamp->nextsamp = NULL;
+        right->prevsamp = found->prevsamp;
+        right->prevsamp->nextsamp = right;
         found->prevsamp = NULL;
-        if (s->prevsamp)
-            s->prevsamp->nextsamp = s;
-        return;
     }
 
-    while (head->prevsamp)
-        head = head->prevsamp;
+    while (left->prevsamp)
+        left = left->prevsamp;
 
-    struct sample *insert_b_after;
-    while (cmp_samples(head,s) < 0) {
-        insert_b_after = head;
-        if (head->nextsamp)
-            head = head->nextsamp;
+    struct sample *left_end;
+    while (cmp_samples(left,right) < 0) {
+        left_end = left;
+        if (left->nextsamp)
+            left = left->nextsamp;
         else
             break;
     }
 
-    if (head->nextsamp)
-        head->nextsamp->prevsamp = NULL;
-    head->nextsamp = s;
-    if (s->prevsamp)
-        s->prevsamp->nextsamp = NULL;
-    s->prevsamp = head;
-}
-static void
-join_sample_left(struct sample *head, struct sample *s)
-{
-    struct sample *found = get_field_sample(head, s->set->field);
-    if (found) {
-        s->nextsamp = found->nextsamp;
-        found->nextsamp = NULL;
-        if (s->nextsamp)
-            s->nextsamp->prevsamp = s;
-        return;
-    }
+    if (left_end->nextsamp)
+        left_end->nextsamp->prevsamp = NULL;
+    left_end->nextsamp = right;
 
-    while (head->prevsamp)
-        head = head->prevsamp;
-
-    struct sample *insert_a_before;
-    while (cmp_samples(head,s) < 0) {
-        insert_a_before = head;
-        if (head->nextsamp)
-            head = head->nextsamp;
-        else
-            break;
-    }
-
-    if (head->prevsamp)
-        head->prevsamp->nextsamp = NULL;
-    if (s->nextsamp)
-        s->nextsamp->prevsamp = NULL;
-    head->prevsamp = s;
-    s->nextsamp = head;
-
+    if (right->prevsamp)
+        right->prevsamp->nextsamp = NULL;
+    right->prevsamp = left_end;
 }
 
 static inline void
@@ -324,7 +293,7 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         if (a_b_distance > dist(b->vector, b_best_afield->vector))
             return;
 
-    join_sample_left(b, a);
+    join_sample_left(a, b);
     //printf("%p %p %p %p\n", a->prevsamp, a->nextsamp, b->prevsamp, b->nextsamp);
 
 }

@@ -289,6 +289,7 @@ void makeit(void)
     double raddd = 2.0;
     CrossId_crossSamples(ps, raddd, 4);
 
+    /*
     int h,j,k, l;
     for (g=0; g<ngroup; g++) {
         fgroupstruct *s = fgroups[g];
@@ -322,6 +323,7 @@ void makeit(void)
             }
         }
     }
+    */
 
     if (prefs.solvastrom_flag)
     {
