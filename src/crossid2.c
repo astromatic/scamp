@@ -201,78 +201,93 @@ set_reserve_cross(HealPixel *a)
     pthread_mutex_unlock(&CMUTEX);
 
 }
-
-static struct sample* get_sample_link_head(struct sample *s) {
-    if (s->prevsamp)
-        return get_sample_link_head(s->prevsamp);
-    return s;
-}
-static struct sample* get_field_member(struct sample *s, struct field *f) {
-    if (s == NULL)
-        return NULL;
-    if (s->set->field == f)
-        return s;
-    return get_field_member(s->nextsamp, f);
-}
-static void relink_sample_b(struct sample *ahead, struct sample *oldb, struct sample *newb) {
-    if (ahead == oldb) {
-        ahead->prevsamp->nextsamp = newb;
-        newb->prevsamp = ahead->prevsamp;
-        ahead->prevsamp = NULL;
-        return;
+static int
+cmp_samples(struct sample *a, struct sample *b) {
+    if (a->epoch == b->epoch) {
+        return a->set->field > b->set->field ? 1 : -1;
+    } else {
+        return a->epoch > b->epoch ? 1 : -1;
     }
-    relink_sample_b(ahead->nextsamp, oldb, newb);
-}
-static void relink_sample_a(struct sample *bhead, struct sample *olda, struct sample *newa) {
-    if (bhead == olda) {
-        olda->nextsamp->prevsamp = newa;
-        newa->nextsamp = bhead->nextsamp;
-        bhead->nextsamp = NULL;
-    }
-    relink_sample_a(bhead->nextsamp, olda, newa);
 }
 
-/* b(s) come right after had a */
-static void insert_sample_b(struct sample *head, struct sample *s) {
-    if (s->epoch > head->epoch) {
-        if (head->nextsamp)
-            head->nextsamp->prevsamp = NULL;
-        head->nextsamp = s;
+static inline struct sample*
+get_field_sample(struct sample *s, struct field *f)
+{
+    while (s->prevsamp)
+        s = s->prevsamp;
+
+    do {
+        if (s->set->field == f)
+            return s;
+    } while (s = s->nextsamp);
+
+    return NULL;
+
+}
+static void
+join_sample_right(struct sample *head, struct sample *s)
+{
+    struct sample *found = get_field_sample(head, s->set->field);
+    if (found) {
+        s->prevsamp = found->prevsamp;
+        found->prevsamp = NULL;
         if (s->prevsamp)
-            s->prevsamp->nextsamp = NULL;
-        s->prevsamp = head;
+            s->prevsamp->nextsamp = s;
         return;
     }
-    if (head->nextsamp)
-        return insert_sample_b(head->nextsamp, s);
 
+    while (head->prevsamp)
+        head = head->prevsamp;
+
+    struct sample *insert_b_after;
+    while (cmp_samples(head,s) < 0) {
+        insert_b_after = head;
+        if (head->nextsamp)
+            head = head->nextsamp;
+        else
+            break;
+    }
+
+    if (head->nextsamp)
+        head->nextsamp->prevsamp = NULL;
     head->nextsamp = s;
     if (s->prevsamp)
         s->prevsamp->nextsamp = NULL;
     s->prevsamp = head;
 }
-
-/* a(s) come right before b */
-static void insert_sample_a(struct sample *head, struct sample *s) {
-    if (s->epoch > head->epoch) {
-       if (head->prevsamp)
-           head->prevsamp->nextsamp = NULL;
-       head->prevsamp = s;
-       if (s->nextsamp)
-           s->nextsamp->prevsamp = NULL;
-       s->nextsamp = head;
+static void
+join_sample_left(struct sample *head, struct sample *s)
+{
+    struct sample *found = get_field_sample(head, s->set->field);
+    if (found) {
+        s->nextsamp = found->nextsamp;
+        found->nextsamp = NULL;
+        if (s->nextsamp)
+            s->nextsamp->prevsamp = s;
+        return;
     }
-    if (head->nextsamp)
-        return insert_sample_a(head->nextsamp, s);
+
+    while (head->prevsamp)
+        head = head->prevsamp;
+
+    struct sample *insert_a_before;
+    while (cmp_samples(head,s) < 0) {
+        insert_a_before = head;
+        if (head->nextsamp)
+            head = head->nextsamp;
+        else
+            break;
+    }
 
     if (head->prevsamp)
         head->prevsamp->nextsamp = NULL;
-    head->prevsamp = s;
     if (s->nextsamp)
         s->nextsamp->prevsamp = NULL;
+    head->prevsamp = s;
     s->nextsamp = head;
 
 }
+
 static inline void
 crossmatch(struct sample *a, struct sample *b, double radius)
 {
@@ -291,87 +306,27 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         return;
     }
 
-    struct sample *old_a = NULL;
-    if (a->prevsamp)
-        old_a = a->prevsamp;
-    else if (a->nextsamp)
-        old_a = a->nextsamp;
-
-    if (old_a)  {
-        double old_d = dist(a->vector, old_a->vector);
-        if (old_d < a_b_distance)
-            return;
-    }
-
-    struct sample *old_b = NULL;
-    if (b->prevsamp)
-        old_b = b->prevsamp;
-    else if (b->nextsamp)
-        old_b = b->nextsamp;
-
-    if (old_b) {
-        double old_e = dist(b->vector, old_b->vector);
-        if (old_e < a_b_distance)
-            return;
-    }
-
-    a->prevsamp = a->nextsamp = NULL;
-    b->prevsamp = b->nextsamp = NULL;
-    a->nextsamp = b;
-    b->prevsamp = a;
-    return;
-
-    /* Maybe switch a and b to assert that link will be from 
-     * a->next to b->prev */
-    if (a->epoch > b->epoch) {
-        struct sample *a_tmp = a;
+    struct sample *at = a;
+    if (cmp_samples(a, b) > 0) {
         a = b;
-        b = a_tmp;
+        b = at;
     }
 
-    fprintf(stderr, "link done 1!\n");
-    /* 
-     * Get the current best distance from "a" to a sample from the field "b"
-     * (if it exists). If current bestdist_a_to_fb exist and is lower than 
-     * a_b_distance, return. 
-     */
-    struct sample *a_head  = get_sample_link_head(a);
-    struct sample *b_from_a_old = get_field_member(a, b->set->field);
-    if (b_from_a_old)
-        if (a_b_distance > dist(b_from_a_old->vector, a->vector))
+    /* get best match from field b for a */
+    struct sample *a_best_bfield = get_field_sample(a, b->set->field);
+    if (a_best_bfield)
+        if (a_b_distance > dist(a->vector, a_best_bfield->vector))
             return;
 
-    fprintf(stderr, "link done 2!\n");
-    /* 
-     * A would want to link to "b", but maybe "b" have a better match to 
-     * field "a" (in an other, allready crossed pixel). If current 
-     * bestdist_b_to_fa exist and is lower than  a_b_distance return. 
-     */
-    struct sample *b_head  = get_sample_link_head(b);
-    struct sample *a_from_b_old = get_field_member(b, a->set->field);
-    if (a_from_b_old)
-        if (a_b_distance > dist(a_from_b_old->vector, b->vector))
+    /* get best match from field b for a */
+    struct sample *b_best_afield = get_field_sample(b, a->set->field);
+    if (b_best_afield)
+        if (a_b_distance > dist(b->vector, b_best_afield->vector))
             return;
 
-    fprintf(stderr, "link done 3!\n");
-    if (b_from_a_old) {
-        fprintf(stderr, "link done 3.1!\n");
-        //relink_sample_b(a_head, b_from_a_old, b);
-    } else {
-        fprintf(stderr, "link done 3.2!\n");
-        insert_sample_b(a_head, b);
-    }
+    join_sample_left(b, a);
+    //printf("%p %p %p %p\n", a->prevsamp, a->nextsamp, b->prevsamp, b->nextsamp);
 
-    fprintf(stderr, "link done 4!\n");
-    if (a_from_b_old) {
-        fprintf(stderr, "link done 4.1!\n");
-        //relink_sample_a(b_head, a_from_b_old, a);
-    } else {
-        fprintf(stderr, "link done 4.2!\n");
-        insert_sample_a(b_head, a);
-    }
-
-    fprintf(stderr, "link done!\n");
 }
 
 static long

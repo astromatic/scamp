@@ -287,7 +287,7 @@ void makeit(void)
 
     }
     double raddd = 2.0;
-    CrossId_crossSamples(ps, raddd, 1);
+    CrossId_crossSamples(ps, raddd, 4);
 
     int h,j,k, l;
     for (g=0; g<ngroup; g++) {
