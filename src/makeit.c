@@ -379,16 +379,14 @@ void makeit(void)
             NFPRINTF(OUTPUT, str);
         }
         fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
-        /*
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
         CrossId_crossSamples(ps, raddd, 4);
         PixelStore_free(ps);
-        */
 
         fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
         for (g=0; g<ngroup; g++) {
             fprintf(stderr, "hhhhhhhhhhhhhhhhhhhhhh\n\n");
-            crossid_fgroup(fgroups[g], reffields[g],prefs.crossid_radius*ARCSEC/DEG);
+            //crossid_fgroup(fgroups[g], reffields[g],prefs.crossid_radius*ARCSEC/DEG);
             sprintf(str, "Computing astrometric stats for group %d", g+1);
             NFPRINTF(OUTPUT, str);
             fprintf(stderr, "iiiiiiiiiiiiiiiiiiiiii\n\n");
@@ -423,16 +421,16 @@ void makeit(void)
         sprintf(str, "Making cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
     }
-    /*
     ps = new_pixstore(nfield, ngroup, reffields, fields) ;
     CrossId_crossSamples(ps, raddd, 4);
     PixelStore_free(ps);
-    */
     for (g=0; g<ngroup; g++)
     {
+        /*
         crossid_fgroup(fgroups[g], reffields[g], fgroups[g]->sig_referr[0]?
                 prefs.astrclip_nsig*fgroups[g]->sig_referr[0]
                 : prefs.crossid_radius*ARCSEC/DEG);
+                */
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
         nclip = astrclip_fgroup(fgroups[g], reffields[g], prefs.astrclip_nsig);
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
@@ -580,14 +578,14 @@ void makeit(void)
         /*-- Re-do Cross-ID to recover possibly fast moving objects */
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        /*
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
         CrossId_crossSamples(ps, raddd, 4);
         PixelStore_free(ps);
-        */
 
+        /*
         for (g=0; g<ngroup; g++)
             crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+            */
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
             merge_fgroup(fgroups[g], reffields[g]);
@@ -602,14 +600,14 @@ void makeit(void)
             reproj_fgroup(fgroups[g], reffields[g], 1);
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        /*
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
         CrossId_crossSamples(ps, raddd, 4);
         PixelStore_free(ps);
-        */
 
+        /*
         for (g=0; g<ngroup; g++)
             crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+            */
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
             merge_fgroup(fgroups[g], reffields[g]);
@@ -629,13 +627,13 @@ void makeit(void)
             /*-- Re-do Cross-ID to recover possibly fast moving objects */
             NFPRINTF(OUTPUT, "Pairing detections...");
 
-            /*
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
             CrossId_crossSamples(ps, raddd, 4);
             PixelStore_free(ps);
-            */
+            /*
             for (g=0; g<ngroup; g++)
                 crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
+                */
             NFPRINTF(OUTPUT, "Merging detections...");
             for (g=0; g<ngroup; g++)
                 merge_fgroup(fgroups[g], reffields[g]);
