@@ -229,6 +229,34 @@ get_field_sample(struct sample *s, struct field *f)
     return NULL;
 }
 
+enum join_dir {RIGHT_JOIN, LEFT_JOIN, FULL_JOIN};
+/* 
+ Here we join left and right:
+
+for left as L and right as R, numbers in variables represents fields sorted by
+epoch, uppercast var name, represent our sample:
+L = {l1, l2, l3,  L4,  l5, l6, l7, l8}
+R = {r5, r6, r9,  R10,  r11, r12}
+
+With LEFT_JOIN it will look like:
+{l1, l2, l3,  L4,  l5, l6, l7, l8,  R10,  r11, r12}
+
+With RIGHT_JOIN it will look like:
+{l1, l2, l3,  L4,  r5, r6, r9,  R10,  r11, r12}
+
+With FULL_JOIN it will look like:
+{l1, l2, l3,  L4,  l5, l6, l7, l8, r9,  R10,  r11, r12}
+
+*/
+static void
+join_samples(struct sample *left, struct sample *right, enum join_dir join)
+{
+    switch (join) {
+        case RIGHT_JOIN:
+            break;
+    }
+}
+
 /* Join two inked samples */
 static void
 left_join_samples(struct sample *left, struct sample *right)
