@@ -201,6 +201,9 @@ set_reserve_cross(HealPixel *a)
     pthread_mutex_unlock(&CMUTEX);
 
 }
+
+/* compare two samples by epoch first, the most important, then by field 
+   pointer. */
 static int
 cmp_samples(struct sample *a, struct sample *b) {
     if (a->epoch == b->epoch) {
@@ -210,6 +213,7 @@ cmp_samples(struct sample *a, struct sample *b) {
     }
 }
 
+/* from a linked sample "s" get a sample that belong to the field "f" */
 static inline struct sample*
 get_field_sample(struct sample *s, struct field *f)
 {
@@ -225,6 +229,7 @@ get_field_sample(struct sample *s, struct field *f)
     return NULL;
 }
 
+/* Join two inked samples */
 static void
 left_join_samples(struct sample *left, struct sample *right)
 {
@@ -277,11 +282,12 @@ left_join_samples(struct sample *left, struct sample *right)
     return;
 }
 
+/* compare two samples and maybe join them */
 static inline void
 crossmatch(struct sample *a, struct sample *b, double radius)
 {
 
-    /* Sample of the same field */
+    /* Sample of the same field, no nee to go further */
     if (a->set->field == b->set->field)
         return;
 
@@ -289,11 +295,9 @@ crossmatch(struct sample *a, struct sample *b, double radius)
     ntestmatches++;
     double a_b_distance = dist(a->vector, b->vector);
 
-    /* If distance exceeds the limit, end here */
-    if (a_b_distance > radius) {
-        fprintf(stderr, "over radius\n");
+    /* If distance exceeds the max radius, end here */
+    if (a_b_distance > radius)
         return;
-    }
 
     /* TODO remove this and implement right_join */
     struct sample *at = a;
@@ -302,13 +306,14 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         b = at;
     }
 
-    /* get best match from field b for a */
+    /* get best match from field b for a and terminate if the current match
+     is better ... */
     struct sample *a_best_bfield = get_field_sample(a, b->set->field);
     if (a_best_bfield)
         if (a_b_distance > dist(a->vector, a_best_bfield->vector))
             return;
 
-    /* get best match from field b for a */
+    /* ... the opposite */
     struct sample *b_best_afield = get_field_sample(b, a->set->field);
     if (b_best_afield)
         if (a_b_distance > dist(b->vector, b_best_afield->vector))
@@ -327,6 +332,8 @@ crossmatch(struct sample *a, struct sample *b, double radius)
     return;
 }
 
+/* cross all samples from one pixel to himself, and all neighbors pixel 
+   samples. */
 static long
 cross_pixel(HealPixel *pix, PixelStore *store, double radius)
 {
