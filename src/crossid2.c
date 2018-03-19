@@ -206,8 +206,12 @@ set_reserve_cross(HealPixel *a)
    pointer. */
 static int
 cmp_samples(struct sample *a, struct sample *b) {
+    if (!a)
+        return 1;
+    if (!b)
+        return -1;
     if (a->epoch == b->epoch) {
-        return a->set->field > b->set->field ? 1 : -1;
+        return a->set->field > b->set->field ? 1 : a->set->field == b->set->field ? 0 : - 1;
     } else {
         return a->epoch > b->epoch ? 1 : -1;
     }
@@ -229,85 +233,116 @@ get_field_sample(struct sample *s, struct field *f)
     return NULL;
 }
 
-enum join_dir {RIGHT_JOIN, LEFT_JOIN, FULL_JOIN};
+enum join_dir {RIGHT_JOIN, LEFT_JOIN}; //, FULL_JOIN};
 /* 
  Here we join left and right:
 
-for left as L and right as R, numbers in variables represents fields sorted by
+For left as L and right as R, numbers in variables represents fields sorted by
 epoch, uppercast var name, represent our sample:
-L = {l1, l2, l3,  L4,  l5, l6, l7, l8}
+L = {l1, l2, l3,  L4,  l5, l6, l7, l8, l13}
 R = {r5, r6, r9,  R10,  r11, r12}
 
 With LEFT_JOIN it will look like:
-{l1, l2, l3,  L4,  l5, l6, l7, l8,  R10,  r11, r12}
+{l1, l2, l3,  L4,  l5, l6, l7, l8,  R10,  r11, r12, l13}
 
 With RIGHT_JOIN it will look like:
 {l1, l2, l3,  L4,  r5, r6, r9,  R10,  r11, r12}
 
-With FULL_JOIN it will look like:
-{l1, l2, l3,  L4,  l5, l6, l7, l8, r9,  R10,  r11, r12}
-
 */
 static void
-join_samples(struct sample *left, struct sample *right, enum join_dir join)
+join_samples(
+        struct sample *left, 
+        struct sample *right, 
+        enum join_dir join) 
 {
-    switch (join) {
-        case RIGHT_JOIN:
+
+    /* get head of both linked samples */
+    struct sample *left_head = left;
+    while (left_head->prevsamp)
+        left_head = left_head->prevsamp;
+
+    struct sample *right_head = right;
+    while (right_head->prevsamp)
+        right_head = right_head->prevsamp;
+
+    /* get the total number of samples */
+    struct sample *c;
+    int nsamples = 0;
+
+    c = left;
+    do {
+        nsamples++;
+    } while (c = c->nextsamp);
+
+    c = right;
+    do {
+        nsamples++;
+    } while (c = c->nextsamp);
+
+    /* allocate a temporary array for nsamples, + 1 to allways have a last
+       NULL sample for final linking */
+    struct sample **out = calloc(nsamples + 1, sizeof(struct sample*));
+
+
+    int i;
+    int nlinkedsamples = 0;
+    /* foreach samples, consume eather right_head or left_head and merge the
+       result i out allocated array */
+    /* TODO maybe just "link" both linked samples in one entry and forget
+     about other matches */
+    for (i=0; i < nsamples; i++)
+    {
+
+        if (left_head == NULL && right_head == NULL)
             break;
-    }
-}
 
-/* Join two inked samples */
-static void
-left_join_samples(struct sample *left, struct sample *right)
-{
-    /* file an allready inserted sample from the sampe field as right) */
-    struct sample *found = get_field_sample(left, right->set->field);
-
-    /* if there is one, just switch it with new right */
-    if (found) {
-
-        /* unlink ...*/
-        if (right->prevsamp)
-            right->prevsamp->nextsamp = NULL;
-        if (found->nextsamp)
-            found->nextsamp->prevsamp = NULL;
-
-        /* link ... */
-        right->prevsamp = found;
-        found->nextsamp = right;
-
-        /* ... done. */
-        return;
-
-    }
-
-    /* rewind ... */
-    while (left->prevsamp)
-        left = left->prevsamp;
-
-    /* ... find the last sample from left side, in wich we must link right */
-    struct sample *left_end;
-    while (cmp_samples(left,right) < 0) {
-        left_end = left;
-        if (left->nextsamp)
-            left = left->nextsamp;
-        else
-            break;
+        int cmp = cmp_samples(left_head, right_head);
+        switch(cmp) {
+            case -1:
+                nlinkedsamples++;
+                out[i] = left_head;
+                left_head = left_head->nextsamp;
+                break;
+            case 1:
+                nlinkedsamples++;
+                out[i] = right_head;
+                right_head = right_head->nextsamp;
+                break;
+            case 0:
+                nlinkedsamples++;
+                if (join == LEFT_JOIN) { 
+                    if (right_head == right) {
+                        out[i] = right_head;
+                    } else {
+                        out[i] = left_head;
+                    }
+                } else if (join == RIGHT_JOIN) {
+                    if (left_head == left) {
+                        out[i] = left_head;
+                    } else {
+                        out[i] = right_head;
+                    }
+                }
+                left_head = left_head->nextsamp;
+                right_head = right_head->nextsamp;
+                break;
+        }
     }
 
-    /* unlink ... */
-    if (left_end->nextsamp)
-        left_end->nextsamp->prevsamp = NULL;
-    if (right->prevsamp)
-        right->prevsamp->nextsamp = NULL;
+    /* Relink all array of samples, they are in the good order */
+    struct sample *prev = NULL;
+    struct sample *current;
+    for (i=0;i<nlinkedsamples; i++) {
+        struct sample *current = out[i];
+        current->prevsamp = prev;
+        current->nextsamp = out[i+1];
+        prev = current;
+    }
 
-    /* link ... */
-    left_end->nextsamp = right;
-    right->prevsamp = left_end;
-
-    /* ... done. */
-    return;
+    /* end !*/
+    /* TODO maybe, avoid using malloc, and have to go head and count every link of
+       samples. XXX This will make the code unreadable. */
+    free(out);
 }
 
 /* compare two samples and maybe join them */
@@ -315,7 +350,7 @@ static inline void
 crossmatch(struct sample *a, struct sample *b, double radius)
 {
 
-    /* Sample of the same field, no nee to go further */
+    /* Sample of the same field, no need to go further */
     if (a->set->field == b->set->field)
         return;
 
@@ -326,13 +361,6 @@ crossmatch(struct sample *a, struct sample *b, double radius)
     /* If distance exceeds the max radius, end here */
     if (a_b_distance > radius)
         return;
-
-    /* TODO remove this and implement right_join */
-    struct sample *at = a;
-    if (cmp_samples(a, b) > 0) {
-        a = b;
-        b = at;
-    }
 
     /* get best match from field b for a and terminate if the current match
      is better ... */
@@ -348,14 +376,11 @@ crossmatch(struct sample *a, struct sample *b, double radius)
             return;
 
     /* join samples */
-    left_join_samples(a, b);
-    /* TODO right_join 
-       if (cmp_samples(a,b) > 0) {
-        left_join_samples(a,b);
-       } else {
-        right_join_samples(a,b);
-       }
-     */
+    if (cmp_samples(a,b) > 0) {
+        join_samples(b, a, RIGHT_JOIN);
+    } else {
+        join_samples(a, b, LEFT_JOIN);
+    }
 
     return;
 }
