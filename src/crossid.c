@@ -100,7 +100,7 @@ void crossid_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
         for (s=field[f]->nset; s--;)
         {
             set = *(pset++);
-            sort_samples(set);
+            //sort_samples(set);
             unlink_samples(set);
         }
     }

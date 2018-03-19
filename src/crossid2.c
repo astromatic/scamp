@@ -213,6 +213,7 @@ cmp_samples(struct sample *a, struct sample *b) {
 static inline struct sample*
 get_field_sample(struct sample *s, struct field *f)
 {
+    /* TODO optimize with a kind of bsearch(3) */
     while (s->prevsamp)
         s = s->prevsamp;
 
@@ -222,23 +223,37 @@ get_field_sample(struct sample *s, struct field *f)
     } while (s = s->nextsamp);
 
     return NULL;
-
 }
-void
-join_sample_left(struct sample *left, struct sample *right)
+
+static void
+left_join_samples(struct sample *left, struct sample *right)
 {
+    /* file an allready inserted sample from the sampe field as right) */
     struct sample *found = get_field_sample(left, right->set->field);
+
+    /* if there is one, just switch it with new right */
     if (found) {
+
+        /* unlink ...*/
         if (right->prevsamp)
             right->prevsamp->nextsamp = NULL;
-        right->prevsamp = found->prevsamp;
-        right->prevsamp->nextsamp = right;
-        found->prevsamp = NULL;
+        if (found->nextsamp)
+            found->nextsamp->prevsamp = NULL;
+
+        /* link ... */
+        right->prevsamp = found;
+        found->nextsamp = right;
+
+        /* ... done. */
+        return;
+
     }
 
+    /* rewind ... */
     while (left->prevsamp)
         left = left->prevsamp;
 
+    /* ... find the last sample from left side, in wich we must link right */
     struct sample *left_end;
     while (cmp_samples(left,right) < 0) {
         left_end = left;
@@ -248,13 +263,18 @@ join_sample_left(struct sample *left, struct sample *right)
             break;
     }
 
+    /* unlink ... */
     if (left_end->nextsamp)
         left_end->nextsamp->prevsamp = NULL;
-    left_end->nextsamp = right;
-
     if (right->prevsamp)
         right->prevsamp->nextsamp = NULL;
+
+    /* link ... */
+    left_end->nextsamp = right;
     right->prevsamp = left_end;
+
+    /* ... done. */
+    return;
 }
 
 static inline void
@@ -275,6 +295,7 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         return;
     }
 
+    /* TODO remove this and implement right_join */
     struct sample *at = a;
     if (cmp_samples(a, b) > 0) {
         a = b;
@@ -293,9 +314,17 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         if (a_b_distance > dist(b->vector, b_best_afield->vector))
             return;
 
-    join_sample_left(a, b);
-    //printf("%p %p %p %p\n", a->prevsamp, a->nextsamp, b->prevsamp, b->nextsamp);
+    /* join samples */
+    left_join_samples(a, b);
+    /* TODO right_join 
+       if (cmp_samples(a,b) > 0) {
+        left_join_samples(a,b);
+       } else {
+        right_join_samples(a,b);
+       }
+     */
 
+    return;
 }
 
 static long
