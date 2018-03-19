@@ -239,11 +239,11 @@ enum join_dir {RIGHT_JOIN, LEFT_JOIN}; //, FULL_JOIN};
 
 For left as L and right as R, numbers in variables represents fields sorted by
 epoch, uppercast var name, represent our sample:
-L = {l1, l2, l3,  L4,  l5, l6, l7, l8, l13}
+L = {l1, l2, l3,  L4,  l5, l6, l7, l8, l13} 
 R = {r5, r6, r9,  R10,  r11, r12}
 
 With LEFT_JOIN it will look like:
-{l1, l2, l3,  L4,  l5, l6, l7, l8,  R10,  r11, r12, l13}
+{l1, l2, l3,  L4,  l5, l6, l7, l8,  R10,  r11, r12}
 
 With RIGHT_JOIN it will look like:
 {l1, l2, l3,  L4,  r5, r6, r9,  R10,  r11, r12}
@@ -283,51 +283,52 @@ join_samples(
        NULL sample for final linking */
     struct sample **out = calloc(nsamples + 1, sizeof(struct sample*));
 
-
-    int i;
+    /* first take everythink from left_head to kead */
+    int i = 0;
     int nlinkedsamples = 0;
-    /* foreach samples, consume eather right_head or left_head and merge the
-       result i out allocated array */
-    /* TODO maybe just "link" both linked samples in one entry and forget
-     about other matches */
-    for (i=0; i < nsamples; i++)
-    {
-
-        if (left_head == NULL && right_head == NULL)
-            break;
-
-        int cmp = cmp_samples(left_head, right_head);
-        switch(cmp) {
-            case -1:
-                nlinkedsamples++;
-                out[i] = left_head;
-                left_head = left_head->nextsamp;
-                break;
-            case 1:
-                nlinkedsamples++;
-                out[i] = right_head;
-                right_head = right_head->nextsamp;
-                break;
-            case 0:
-                nlinkedsamples++;
-                if (join == LEFT_JOIN) { 
-                    if (right_head == right) {
-                        out[i] = right_head;
-                    } else {
-                        out[i] = left_head;
-                    }
-                } else if (join == RIGHT_JOIN) {
-                    if (left_head == left) {
-                        out[i] = left_head;
-                    } else {
-                        out[i] = right_head;
-                    }
-                }
-                left_head = left_head->nextsamp;
-                right_head = right_head->nextsamp;
-                break;
-        }
+    while (left_head != left) {
+        nlinkedsamples++;
+        out[i] = left_head;
+        i++;
+        left_head = left_head->nextsamp;
     }
+    out[i] = left_head;
+    i++;
+    left_head = left_head->nextsamp;
+    nlinkedsamples++;
+
+    /* from there, take any left_head until right is reached */
+    if (join == LEFT_JOIN) {
+        while (cmp_samples(left_head, right) < 0) {
+            nlinkedsamples++;
+            out[i] = left_head;
+            i++;
+            left_head = left_head->nextsamp;
+        }
+        while (right) {
+            nlinkedsamples++;
+            out[i] = right;
+            i++;
+            right = right->nextsamp;
+        }
+
+    } else {
+        while (cmp_samples(left_head, right_head) < 0) {
+            nlinkedsamples++;
+            out[i] = left_head;
+            i++;
+            left_head = left_head->nextsamp;
+        }
+        while (right_head) {
+            nlinkedsamples++;
+            out[i] = right_head;
+            i++;
+            right_head = right_head->nextsamp;
+        }
+
+    }
+
+
 
     /* Relink all array of samples, they are in the good order */
     struct sample *prev = NULL;
@@ -338,6 +339,7 @@ join_samples(
         current->nextsamp = out[i+1];
         prev = current;
     }
+
 
     /* end !*/
     /* TODO maybe, avoid using malloc, and have to go head and count every link of
