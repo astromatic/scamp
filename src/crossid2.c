@@ -22,12 +22,23 @@
 #include "chealpix.h"
 #include "chealpixstore.h"
 
+#define NNEIGHBORS 8
+
 static void crossmatch(struct sample*,struct sample*, double radius);
 static long cross_pixel(HealPixel*,PixelStore*,double);
 
-static long ntestmatches;
 
 static pthread_mutex_t CMUTEX = PTHREAD_MUTEX_INITIALIZER;
+
+enum join_direction {RIGHT_JOIN, LEFT_JOIN};
+struct thread_args {
+    PixelStore  *store;
+    int64_t  *pixelindex;
+    int       npixs;
+    double    radius;
+    int      *result;
+};
+
 
 static inline double
 dist(double *va, double *vb)
@@ -40,15 +51,6 @@ dist(double *va, double *vb)
 }
 
 
-#define NNEIGHBORS 8
-
-struct thread_args {
-    PixelStore  *store;
-    int64_t  *pixelindex;
-    int       npixs;
-    double    radius;
-    int      *result;
-};
 
 
 static void*
@@ -202,24 +204,27 @@ set_reserve_cross(HealPixel *a)
 
 }
 
+
 /* compare two samples by epoch first, the most important, then by field 
    pointer. */
 static int
-cmp_samples(struct sample *a, struct sample *b) {
-    if (!a)
-        return 1;
-    if (!b)
-        return -1;
-    if (a->epoch == b->epoch) {
+cmp_samples(
+        struct sample *a, 
+        struct sample *b) 
+{
+    if (!a) return 1;
+    if (!b) return -1;
+    if (a->epoch == b->epoch)
         return a->set->field > b->set->field ? 1 : a->set->field == b->set->field ? 0 : - 1;
-    } else {
-        return a->epoch > b->epoch ? 1 : -1;
-    }
+    return a->epoch > b->epoch ? 1 : -1;
 }
+
 
 /* from a linked sample "s" get a sample that belong to the field "f" */
 static inline struct sample*
-get_field_sample(struct sample *s, struct field *f)
+get_field_sample(
+        struct sample *s, 
+        struct field *f)
 {
     /* TODO optimize with a kind of bsearch(3) */
     while (s->prevsamp)
@@ -233,7 +238,7 @@ get_field_sample(struct sample *s, struct field *f)
     return NULL;
 }
 
-enum join_dir {RIGHT_JOIN, LEFT_JOIN}; //, FULL_JOIN};
+
 /* 
  Here we join left and right:
 
@@ -253,7 +258,7 @@ static void
 join_samples(
         struct sample *left, 
         struct sample *right, 
-        enum join_dir join) 
+        enum join_direction join) 
 {
 
     /* get head of both linked samples */
@@ -269,87 +274,83 @@ join_samples(
     struct sample *c;
     int nsamples = 0;
 
-    c = left;
-    do {
-        nsamples++;
-    } while (c = c->nextsamp);
-
-    c = right;
-    do {
-        nsamples++;
-    } while (c = c->nextsamp);
+    c = left_head;
+    do { nsamples++; } while (c = c->nextsamp);
+    c = right_head;
+    do { nsamples++; } while (c = c->nextsamp);
 
     /* allocate a temporary array for nsamples, + 1 to allways have a last
        NULL sample for final linking */
     struct sample **out = calloc(nsamples + 1, sizeof(struct sample*));
 
-    /* first take everythink from left_head to kead */
+    /* first take everythink from left_head to left */
     int i = 0;
-    int nlinkedsamples = 0;
     while (left_head != left) {
-        nlinkedsamples++;
-        out[i] = left_head;
-        i++;
+        out[i++] = left_head;
         left_head = left_head->nextsamp;
     }
-    out[i] = left_head;
-    i++;
+    out[i++] = left_head;
     left_head = left_head->nextsamp;
-    nlinkedsamples++;
 
-    /* from there, take any left_head until right is reached */
-    if (join == LEFT_JOIN) {
-        while (cmp_samples(left_head, right) < 0) {
-            nlinkedsamples++;
-            out[i] = left_head;
-            i++;
-            left_head = left_head->nextsamp;
-        }
-        while (right) {
-            nlinkedsamples++;
-            out[i] = right;
-            i++;
-            right = right->nextsamp;
-        }
 
-    } else {
-        while (cmp_samples(left_head, right_head) < 0) {
-            nlinkedsamples++;
-            out[i] = left_head;
-            i++;
-            left_head = left_head->nextsamp;
-        }
-        while (right_head) {
-            nlinkedsamples++;
-            out[i] = right_head;
-            i++;
-            right_head = right_head->nextsamp;
-        }
+    struct sample *right_remaining;
+    switch(join) {
+        case LEFT_JOIN:
+            /* from there, take any left_head until right is reached */
+            while (cmp_samples(left_head, right) < 0) {
+                out[i++] = left_head;
+                left_head = left_head->nextsamp;
+            }
+            right_remaining = right;
+            break;
 
+        case RIGHT_JOIN:
+            /* from there, take any left_head until right_head is reached */
+            while (cmp_samples(left_head, right_head) < 0) {
+                out[i++] = left_head;
+                left_head = left_head->nextsamp;
+            }
+            right_remaining = right_head;
+            while (right_head) {
+                out[i++] = right_head;
+                right_head = right_head->nextsamp;
+            }
+            break;
     }
 
+    /* consume remaining right samples */
+    while (right_remaining) {
+        out[i++] = right_remaining;
+        right_remaining = right_remaining->nextsamp;
+    }
 
-
-    /* Relink all array of samples, they are in the good order */
+    /* Relink all array of samples, they are correctly ordered */
     struct sample *prev = NULL;
     struct sample *current;
-    for (i=0;i<nlinkedsamples; i++) {
-        struct sample *current = out[i];
+    int j;
+    for (j=0;j<i; j++) {
+        struct sample *current = out[j];
         current->prevsamp = prev;
-        current->nextsamp = out[i+1];
+        current->nextsamp = out[j+1];
         prev = current;
     }
 
+    /* end WTF! */
 
-    /* end !*/
-    /* TODO maybe, avoid using malloc, and have to go head and count every link of
-       samples. XXX This will make the code unreadable. */
+    /* TODO maybe, avoid using malloc, and have to go to links head and count 
+       every link of samples. XXX This will make the code unreadable. but 
+       certainly faster. */
+
     free(out);
 }
 
+
 /* compare two samples and maybe join them */
 static inline void
-crossmatch(struct sample *a, struct sample *b, double radius)
+crossmatch(
+        struct sample *a, 
+        struct sample *b, 
+        double radius)
 {
 
     /* Sample of the same field, no need to go further */
@@ -357,7 +358,6 @@ crossmatch(struct sample *a, struct sample *b, double radius)
         return;
 
     /* Get distance between two samples */
-    ntestmatches++;
     double a_b_distance = dist(a->vector, b->vector);
 
     /* If distance exceeds the max radius, end here */
@@ -387,10 +387,14 @@ crossmatch(struct sample *a, struct sample *b, double radius)
     return;
 }
 
+
 /* cross all samples from one pixel to himself, and all neighbors pixel 
    samples. */
 static long
-cross_pixel(HealPixel *pix, PixelStore *store, double radius)
+cross_pixel(
+        HealPixel *pix, 
+        PixelStore *store, 
+        double radius)
 {
 
     set_reserve_cross(pix);
@@ -472,11 +476,4 @@ cross_pixel(HealPixel *pix, PixelStore *store, double radius)
 
     return nbmatches;
 
-}
-
-
-int
-get_iterate_count()
-{
-    return ntestmatches;
 }
