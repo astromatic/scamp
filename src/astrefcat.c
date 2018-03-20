@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/02/2018
+*	Last modified:		20/03/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -172,6 +172,13 @@ astrefstruct	astrefcats[] =
 	{"G", ""},
 	1, 0},
 
+  {"PANSTARRS-1", "II/349", {"Qual", "RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+		"Epoch", "gmag","e_gmag","rmag","e_rmag","imag","e_imag",
+		"zmag","e_zmag","ymag","e_ymag",""},
+	{"umag", "gmag", "rmag", "imag", "zmag", ""},
+	{"g", "r", "i", "z", "y", ""},
+	5, 2},
+
   {""}
  };
 
@@ -198,7 +205,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	20/02/2018
+VERSION	20/03/2018
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -752,6 +759,26 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             mag[0] = magerr[0] = 99.0;
           else
             magerr[0] = 1.0857 * fluxerr / flux;
+          break;
+
+        case ASTREFCAT_PANSTARRS1:
+          if (atoi(cols[cindex++]) & 4 == 0)	// Test PS1 reliability
+            continue;
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*ARCSEC/DEG;
+          poserr[lat] = atof(cols[cindex++])*ARCSEC/DEG;
+          epoch = 2000.0 + (atof(cols[cindex++]) - (JD2000 - 2400000.5))/365.25;
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[2] <= ' ')
+              mag[b] = magerr[b] = 99.0;
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = smagerr[2] <= ' '? atof(smagerr): DEFAULT_MAGERR;
+            }
+          }
           break;
 
         case ASTREFCAT_NONE:
