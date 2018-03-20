@@ -209,9 +209,16 @@ static void pixelAvlFree(pixel_avl *pix) {
 static int compSamples(const void* a, const void *b) {
     struct sample *sa = (struct sample*) a;
     struct sample *sb = (struct sample*) b;
-    if (sa->epoch == sb->epoch)
-        return sa->set->field >= sb->set->field ? 1 : -1;
-    return sa->epoch > sb->epoch ? 1 : -1;}
+
+    if (sa->epoch == sb->epoch) {
+        struct field *fa = sa->set->field;
+        struct field *fb = sb->set->field;
+        return fa > fb ? 1 : fa < fb ? -1 : 0;
+    }
+    double ea = sa->epoch;
+    double eb = sb->epoch;
+    return ea > eb ? 1 : ea < eb ? -1 : 0;
+}
 static void pixelAvlSort(pixel_avl *pix) {
     if (pix == NULL)
         return;
@@ -427,7 +434,7 @@ PixelStore_sort(PixelStore* store)
     pixelAvlSort((pixel_avl*) store->pixels);
 }
 
-struct sample*
+struct sample**
 PixelStore_getNextSample(HealPixel *pix, struct sample *pivot, int *rem)
 {
     /* inspired by stdlib-bsearch.h */
@@ -456,9 +463,15 @@ PixelStore_getNextSample(HealPixel *pix, struct sample *pivot, int *rem)
         }
     }
     *rem = pix->nsamples - lastidx;
-    return ret;
+    return &base[lastidx];
 }
 
+int
+PixelStore_compare(struct sample *a, struct sample *b) {
+    if (!a) return 1;
+    if (!b) return -1;
+    return compSamples((void*)a, (void*)b);
+}
 void
 PixelStore_free(PixelStore* store) 
 {

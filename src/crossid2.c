@@ -297,7 +297,7 @@ join_samples(
     switch(join) {
         case LEFT_JOIN:
             /* from there, take any left_head until right is reached */
-            while (cmp_samples(left_head, right) < 0) {
+            while (PixelStore_compare(left_head, right) < 0) {
                 out[i++] = left_head;
                 left_head = left_head->nextsamp;
             }
@@ -306,7 +306,7 @@ join_samples(
 
         case RIGHT_JOIN:
             /* from there, take any left_head until right_head is reached */
-            while (cmp_samples(left_head, right_head) < 0) {
+            while (PixelStore_compare(left_head, right_head) < 0) {
                 out[i++] = left_head;
                 left_head = left_head->nextsamp;
             }
@@ -352,6 +352,7 @@ crossmatch(
         struct sample *b, 
         double radius)
 {
+    return;
 
     /* Sample of the same field, no need to go further */
     if (a->set->field == b->set->field)
@@ -378,7 +379,7 @@ crossmatch(
             return;
 
     /* join samples */
-    if (cmp_samples(a,b) > 0) {
+    if (PixelStore_compare(a,b) > 0) {
         join_samples(b, a, RIGHT_JOIN);
     } else {
         join_samples(a, b, LEFT_JOIN);
@@ -386,7 +387,6 @@ crossmatch(
 
     return;
 }
-
 
 /* cross all samples from one pixel to himself, and all neighbors pixel 
    samples. */
@@ -406,29 +406,23 @@ cross_pixel(
      * Iterate over HealPixel structure which old sample structures
      * belonging to him.
      */
-    long j, k, l;
+    int j, k, l;
 
-    struct sample *current_spl;
-    struct sample *test_spl;
-
+    struct sample *current_spl, **start;
 
     for (j=0; j<pix->nsamples; j++) {
         current_spl = pix->samples[j];
 
         /*
+         * Eliminate previous fields, we only match with upper fields
+         */
+        start = PixelStore_getNextSample(pix, current_spl, &k);
+
+        /*
          * First cross match with samples of the pixel between them
          */
-        for(k=0; k<j; k++) {
-            test_spl = pix->samples[k];
-
-            /*
-            if (abs(current_spl->col - test_spl->col) > radius)
-                continue;
-             */
-
-            crossmatch(current_spl, test_spl, radius);
-
-        }
+        for(; k<pix->nsamples; k++)
+            crossmatch(current_spl, start[k], radius);
 
         /*
          * Then iterate against neighbors pixels
@@ -439,7 +433,6 @@ cross_pixel(
             /* Allready crossed by an neighbor ? */
             if (pix->tneighbors[k] == true)
                 continue;
-
 
             /*
              * Does the pixel exists? It may be a neighbor of current pixel,
@@ -455,21 +448,18 @@ cross_pixel(
              */
             pthread_mutex_lock(&test_pixel->mutex);
 
-            for (l=0; l<test_pixel->nsamples; l++) {
-                test_spl = test_pixel->samples[l];
+            /*
+             * Eliminate previous fields, we only match with upper fields
+             */
+            start = PixelStore_getNextSample(test_pixel, current_spl, &l);
 
-                /*
-                if (abs(current_spl->col - test_spl->col) > radius)
-                    continue;
-                    */
-
-                crossmatch(current_spl, test_spl, radius);
+            for (; l<test_pixel->nsamples; l++) {
+                crossmatch(current_spl, start[l], radius);
 
             }
 
             pthread_mutex_unlock(&test_pixel->mutex);
         }
-
     }
 
     pthread_mutex_unlock(&pix->mutex);

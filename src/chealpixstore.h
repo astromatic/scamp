@@ -84,9 +84,12 @@ PixelStore_updateSamplePos(PixelStore *store);
 /* return a pointer to a sample belonging to a list wich represent the next 
    field sample for the argument sample "pivot". "remains" will contains the
    number of elements remaining in the list, including the return value */
-extern struct sample*
-PixelStore_getNext(HealPixel *pix, struct sample *pivot, int *remains);
+extern struct sample**
+PixelStore_getNextSample(HealPixel *pix, struct sample *pivot, int *remains);
 
 extern void
 PixelStore_sort(PixelStore *store);
+
+extern int
+PixelStore_compare(struct sample *a, struct sample *b);
 #endif /* _CHEALPIXSTORE_H_ */
