@@ -19,6 +19,7 @@
 #include "crossid2.h"
 #include "chealpix.h"
 #include "chealpixstore.h"
+#include "field.h"
 
 #define NNEIGHBORS 8
 
@@ -59,7 +60,11 @@ CrossId_crossSamples(
 
 }
 
-
+struct field_id {
+    int epoch;
+    int fieldindex;
+    int havematch;
+};
 /* cross all samples from one pixel to himself, and all neighbors pixel 
    samples. */
 static long
@@ -78,12 +83,17 @@ cross_pixel(
     int j, k, l;
     int field_index_start, field_index_stop;
 
-    struct sample *current_spl;
+    struct sample *current_spl, *test_spl;
     double distance, old_distance;
     bool rematch_test_sample;
+    struct field_id current_field;
 
     for (j=0; j<pix->nsamples; j++) {
         current_spl = pix->samples[j];
+
+        /*
+         * First cross match with samples of the pixel between them
+         */
 
         /*
          * Eliminate previous fields, we only match with upper fields
@@ -92,16 +102,35 @@ cross_pixel(
                 &field_index_start, &field_index_stop);
 
         /*
-         * First cross match with samples of the pixel between them
+         * All this to iterate over all samples of a field, and stop at
+         * the next field if there is a match. A match in a field must not
+         * stop iteration for the same field 
          */
 
-        /* 
-         * TODO break after the first field that contains a match, but test
-         * all samples for this field to get the best. Then stop. 
-         */
-        for(k=field_index_start; k<field_index_stop; k++)
-            if (crossmatch(current_spl, pix->samples[k], radius))
-                break;
+        /* get the next field id */
+        current_field.epoch = 0;
+        current_field.fieldindex = 0;
+        current_field.havematch = 0;
+
+        for(k=field_index_start; k<field_index_stop; k++) {
+            test_spl = pix->samples[k];
+
+            if (    current_field.epoch      != test_spl->epoch || 
+                    current_field.fieldindex != test_spl->set->field->fieldindex) 
+            {
+                /* we are changing of field */
+                if (current_field.havematch) { 
+                    /* if previous field have a match break */
+                    break;
+                } else {
+                    /* else change field and continue */
+                    current_field.epoch = test_spl->epoch;
+                    current_field.fieldindex = test_spl->set->field->fieldindex;
+                }
+            } 
+
+            current_field.havematch = crossmatch(current_spl, test_spl, radius);
+        }
 
         /*
          * Then iterate against neighbors pixels
@@ -129,9 +158,36 @@ cross_pixel(
             PixelStore_getHigherFields(test_pixel, current_spl, 
                     &field_index_start, &field_index_stop);
 
-            for (l=field_index_start; l<field_index_stop; l++)
-                if(crossmatch(current_spl, test_pixel->samples[l], radius))
-                    break;
+            /*
+             * All this to iterate over all samples of a field, and stop at
+             * the next field if there is a match. A match in a field must not
+             * stop iteration for the same field 
+             */
+            
+            /* initialize current field to a false value */
+            current_field.epoch = 0;
+            current_field.fieldindex = 0;
+            current_field.havematch = 0;
+
+            for (l=field_index_start; l<field_index_stop; l++) {
+                test_spl = test_pixel->samples[l];
+
+                if (    current_field.epoch      != test_spl->epoch || 
+                        current_field.fieldindex != test_spl->set->field->fieldindex) 
+                {
+                    /* we are changing of field */
+                    if (current_field.havematch) { 
+                        /* if previous field have a match break */
+                        break;
+                    } else {
+                        /* else change field and continue */
+                        current_field.epoch = test_spl->epoch;
+                        current_field.fieldindex = test_spl->set->field->fieldindex;
+                    }
+                } 
+
+                current_field.havematch = crossmatch(current_spl, test_spl, radius);
+            }
 
         }
     }
