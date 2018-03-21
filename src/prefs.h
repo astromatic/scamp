@@ -129,6 +129,7 @@ typedef struct
 
 /* Cross-identification */
   double	crossid_radius;		/* Cross-identification radius */
+  int       healpix_resolution; /* Healpix resolution */
 
 /* Photometric solution */
   int		solvphotom_flag;		/* Compute photometric sol.? */

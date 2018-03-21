@@ -39,7 +39,4 @@
 extern int	check_fieldoverlap(fieldstruct *field1, fieldstruct *field2),
 		check_fieldphotomoverlap(fieldstruct *field, int instru);
 
-extern void	crossid_fgroup(fgroupstruct *fgroup,
-				fieldstruct *reffield, double tolerance);
-
 #endif // _CROSSID_H_

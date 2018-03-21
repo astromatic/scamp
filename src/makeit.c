@@ -68,104 +68,8 @@
 #include "crossid2.h"
 
 time_t thetime, thetime2;
+static PixelStore* new_pixstore(int, int, fieldstruct**, fieldstruct**);
 
-static PixelStore*
-new_pixstore(int nfield, int ngroup, fieldstruct **reffields, fieldstruct **fields) 
-{
-    /* Initialize healpix values and stores */
-    int64_t nsides = pow(2, 16);
-    PixelStore *ps = PixelStore_new(nsides);
-    struct set *set;
-
-    int i, f, g;
-    for (i=0; i<nfield; i++) {
-        for (f=0; f<fields[i]->nset; f++) {
-            set = fields[i]->set[f];
-            for (g=0; g < set->nsample;g++) {
-                struct sample *s = &set->sample[g];
-                s->id = g;
-                PixelStore_add(ps, &set->sample[g]);
-            }
-        }
-    }
-
-    if (prefs.astrefcat != ASTREFCAT_NONE) {
-        for (i=0; i<ngroup; i++) {
-            for (f=0; f<reffields[i]->nset; f++) {
-                set = reffields[i]->set[f];
-                for (g=0; g < set->nsample; g++) {
-                    struct sample *s = &set->sample[g];
-                    s->id = g;
-                    PixelStore_add(ps, &set->sample[g]);
-                }
-            }
-        }
-    }
-
-    PixelStore_sort(ps);
-    return ps;
-}
-
-
-void debug_crossid(int ngroup, fgroupstruct **fgroups) {
-    int g,h,j,k, l;
-    int c1, c2, c3, c4;
-    c1 = c2 = c3 = c4 = 0;
-
-    for (g=0; g<ngroup; g++) {
-        fgroupstruct *s = fgroups[g];
-        for (h=0; h<s->nfield; h++) {
-            fieldstruct *f = s->field[h];
-            for (k=0; k<f->nset; k++) {
-                setstruct *s = f->set[k];
-                for  (l=0; l<s->nsample; l++) {
-                    samplestruct *sam = &s->sample[l];
-                    int nindex;
-                    int sindex;
-                    if (sam->prevsamp) {
-                        nindex = sam->prevsamp->set->setindex;
-                        sindex = sam->prevsamp->id;
-                    } else if (sam->nextsamp) {
-                        nindex = sam->nextsamp->set->setindex;
-                        sindex = sam->nextsamp->id;
-                    } else {
-                        c1++;
-
-                        continue;
-                    }
-
-                    if (nindex == sam->set->setindex) {
-                        if (sindex != sam->id) {
-                            c2++;
-                        } else {
-                            c3++;
-                        }
-                    } else {
-                        c4++;
-                    }
-                }
-                for  (l=0; l<s->nsample; l++) {
-                    samplestruct *sam = &s->sample[l];
-                    int count = 0;
-                    int print_info = 0;
-                    if (sam == sam->prevsamp) {
-                        printf("%i error sample linking himself\n", sam->id);
-                        continue;
-                    }
-                    while (sam->prevsamp)
-                        sam = sam->prevsamp;
-                    //fprintf(stderr, "for sampl %i\n", sam->id);
-                     while (sam) {
-                         //fprintf(stderr, "%i\t%s:%i:%p", sam->id, sam->set->field->filename, sam->set->setindex, sam->set);
-                         sam = sam->nextsamp;
-                    }
-                }
-            }
-        }
-    }
-    fprintf(stderr, "\n\nNOLINK: %i, BADID: %i, ERROR: %i, OK: %i\n\n\n", c1, c2, c4, c3);
-
-}
 /********************************** makeit ***********************************/
 void makeit(void)
 {
@@ -354,12 +258,10 @@ void makeit(void)
     }
 
     //debug_crossid(ngroup, fgroups);
-    double raddd = 2.0;
-    int nt = 1;
     PixelStore *ps;
-        ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-        CrossId_crossSamples(ps, raddd);
-        PixelStore_free(ps);
+    ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+    CrossId_crossSamples(ps, prefs.crossid_radius);
+    PixelStore_free(ps);
 
     fprintf(stderr, "end cross 1\n\n");
     if (prefs.solvastrom_flag)
@@ -378,9 +280,9 @@ void makeit(void)
             NFPRINTF(OUTPUT, str);
         }
 
-            ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-            CrossId_crossSamples(ps, raddd);
-            PixelStore_free(ps);
+        ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+        CrossId_crossSamples(ps, prefs.crossid_radius);
+        PixelStore_free(ps);
 
         for (g=0; g<ngroup; g++) {
             sprintf(str, "Computing astrometric stats for group %d", g+1);
@@ -415,9 +317,9 @@ void makeit(void)
         sprintf(str, "Making cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
     }
-        ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-        CrossId_crossSamples(ps, raddd);
-        PixelStore_free(ps);
+    ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+    CrossId_crossSamples(ps, prefs.crossid_radius);
+    PixelStore_free(ps);
     for (g=0; g<ngroup; g++)
     {
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
@@ -567,9 +469,9 @@ void makeit(void)
         /*-- Re-do Cross-ID to recover possibly fast moving objects */
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-            ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-            CrossId_crossSamples(ps, raddd);
-            PixelStore_free(ps);
+        ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+        CrossId_crossSamples(ps, prefs.crossid_radius);
+        PixelStore_free(ps);
 
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
@@ -585,9 +487,9 @@ void makeit(void)
             reproj_fgroup(fgroups[g], reffields[g], 1);
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-            ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-            CrossId_crossSamples(ps, raddd);
-            PixelStore_free(ps);
+        ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+        CrossId_crossSamples(ps, prefs.crossid_radius);
+        PixelStore_free(ps);
 
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
@@ -608,9 +510,9 @@ void makeit(void)
             /*-- Re-do Cross-ID to recover possibly fast moving objects */
             NFPRINTF(OUTPUT, "Pairing detections...");
 
-                ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-                CrossId_crossSamples(ps, raddd);
-                PixelStore_free(ps);
+            ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+            CrossId_crossSamples(ps, prefs.crossid_radius);
+            PixelStore_free(ps);
             NFPRINTF(OUTPUT, "Merging detections...");
             for (g=0; g<ngroup; g++)
                 merge_fgroup(fgroups[g], reffields[g]);
@@ -829,4 +731,45 @@ void write_error(char *msg1, char *msg2)
     return;
 }
 
+
+static PixelStore*
+new_pixstore(
+        int nfield, 
+        int ngroup, 
+        fieldstruct **reffields, 
+        fieldstruct **fields) 
+{
+    /* Initialize healpix values and stores */
+    int64_t nsides = pow(2, prefs.healpix_resolution);
+    PixelStore *ps = PixelStore_new(nsides);
+    struct set *set;
+
+    int i, f, g;
+    for (i=0; i<nfield; i++) {
+        for (f=0; f<fields[i]->nset; f++) {
+            set = fields[i]->set[f];
+            for (g=0; g < set->nsample;g++) {
+                struct sample *s = &set->sample[g];
+                s->id = g;
+                PixelStore_add(ps, &set->sample[g]);
+            }
+        }
+    }
+
+    if (prefs.astrefcat != ASTREFCAT_NONE) {
+        for (i=0; i<ngroup; i++) {
+            for (f=0; f<reffields[i]->nset; f++) {
+                set = reffields[i]->set[f];
+                for (g=0; g < set->nsample; g++) {
+                    struct sample *s = &set->sample[g];
+                    s->id = g;
+                    PixelStore_add(ps, &set->sample[g]);
+                }
+            }
+        }
+    }
+
+    PixelStore_sort(ps);
+    return ps;
+}
 
