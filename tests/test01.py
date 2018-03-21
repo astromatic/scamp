@@ -53,11 +53,11 @@ fgroups = votable.get_table_by_id("FGroups")
 
 # Test number of matched detections
 nmatched_int = fgroups.array["AstromNDets_Internal"][0]
-scamp_test("# of matched detections", nmatched_int > 180100)
+scamp_test("# of matched detections: " + str(nmatched_int) + " expected: > 180100", nmatched_int > 180100)
 
 # Test number of matched reference sources
 nmatched_ref = fgroups.array["AstromNDets_Reference"][0]
-scamp_test("# of matched references", nmatched_ref > 1650)
+scamp_test("# of matched references: " + str(nmatched_ref) + " expected: > 1650", nmatched_ref > 1650)
 
 # Test mean internal RMS errors
 sigma_int = scamp_meanrms(fgroups.array["AstromSigma_Internal_HighSN"][0])
