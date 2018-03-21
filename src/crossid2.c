@@ -23,12 +23,12 @@
 
 #define NNEIGHBORS 8
 
-static long cross_pixel(HealPixel*,PixelStore*,double);
+static void cross_pixel(HealPixel*,PixelStore*,double);
 static int crossmatch(struct sample*,struct sample*, double, PixelStore*);
 static double dist(double*,double*);
 
 
-long
+void
 CrossId_crossSamples(
         PixelStore *pixstore,
         double  radius_arcsec)
@@ -47,16 +47,10 @@ CrossId_crossSamples(
     /* vector to euclidean distance */
     radius = dist(va, vb);
 
-    long nmatches = 0;
     for (i=0; i<pixstore->npixels; i++) {
         HealPixel *pix = PixelStore_get(pixstore, pixstore->pixelids[i]);
-        nmatches += cross_pixel(pix, pixstore, radius);
+        cross_pixel(pix, pixstore, radius);
     }
-
-    fprintf(stderr,
-            "Crossmatch end: %li matches for all pixels!\n", nmatches);
-
-    return nmatches;
 
 }
 
@@ -193,13 +187,12 @@ cross_sample(
 
 /* cross all samples from one pixel to himself, and all neighbors pixel 
    samples. */
-static long
+static void
 cross_pixel(
         HealPixel *pix, 
         PixelStore *store, 
         double radius)
 {
-    long nbmatches = 0;
     int i, j;
 
     /*
@@ -224,7 +217,6 @@ cross_pixel(
     for (j=0; j<pix->nsamples; j++)
         cross_sample(pix->samples[j], pix, store, false, radius);
 
-    return nbmatches;
 }
 
 

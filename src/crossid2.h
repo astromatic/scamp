@@ -14,7 +14,7 @@
 
 #include "chealpixstore.h"
 
-extern long
+extern void
 CrossId_crossSamples(PixelStore *store, double radius_arcsec);
 
 #endif /* __CROSSID2_H__ */
