@@ -410,6 +410,21 @@ PixelStore_add(
 
 
 HealPixel*
+PixelStore_getPixelFromSample(
+        PixelStore      *store, 
+        struct sample   *sample)
+{
+    double lon, col;
+    vec2ang(sample->vector, &col, &lon);
+
+    int64_t pixnum;
+    ang2pix_nest64(store->nsides, col, lon, &pixnum);
+
+    return PixelStore_get(store, pixnum);
+}
+
+
+HealPixel*
 PixelStore_get(
         PixelStore *store, 
         int64_t  key) 

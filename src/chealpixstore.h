@@ -35,7 +35,7 @@ typedef struct HealPixel HealPixel;
  */
 struct HealPixel {
 
-    long id;            /* healpix id */
+    int64_t id;            /* healpix id */
     struct sample **samples;    /* our samples */
     int nsamples;       /* number of samples belonging to this pixel */
     int size;           /* for reallocation if required */
@@ -88,6 +88,8 @@ void
 PixelStore_getHigherFields(HealPixel *pix, struct sample *pivot, 
         int *start, int *remains);
 
+HealPixel*
+PixelStore_getPixelFromSample(PixelStore *store, struct sample *sample);
 extern void
 PixelStore_sort(PixelStore *store);
 

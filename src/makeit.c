@@ -47,7 +47,6 @@
 #include "catout.h"
 #include "colour.h"
 #include "cplot.h"
-#include "crossid.h"
 #include "dgeomap.h"
 #include "fft.h"
 #include "fgroup.h"
@@ -179,9 +178,6 @@ void makeit(void)
     char *pstr,
          sign;
     int i,f,g, nfield, ngroup, nsample, nclip, hh,mm,dd,dm;
-
-    int m0, m1, m2, m3, m4, m5;
-    m0 = m1 = m2 = m3 = m4 = m5 = 1;
 
     /* Install error logging */
     error_installfunc(write_error);
@@ -355,20 +351,15 @@ void makeit(void)
         /*-- Perform cross-identifications across catalogs */
         sprintf(str, "Making preliminary cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
-        if (!m0) {
-            crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
-        }
     }
 
     //debug_crossid(ngroup, fgroups);
     double raddd = 2.0;
     int nt = 1;
     PixelStore *ps;
-    if (m0) {
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
         CrossId_crossSamples(ps, raddd);
         PixelStore_free(ps);
-    }
 
     fprintf(stderr, "end cross 1\n\n");
     if (prefs.solvastrom_flag)
@@ -387,16 +378,11 @@ void makeit(void)
             NFPRINTF(OUTPUT, str);
         }
 
-        if (m1) {
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
             CrossId_crossSamples(ps, raddd);
             PixelStore_free(ps);
-        }
 
         for (g=0; g<ngroup; g++) {
-            if (!m1) {
-                crossid_fgroup(fgroups[g], reffields[g],prefs.crossid_radius*ARCSEC/DEG);
-            }
             sprintf(str, "Computing astrometric stats for group %d", g+1);
             NFPRINTF(OUTPUT, str);
             astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
@@ -429,18 +415,11 @@ void makeit(void)
         sprintf(str, "Making cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
     }
-    if (m2) {
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
         CrossId_crossSamples(ps, raddd);
         PixelStore_free(ps);
-    }
     for (g=0; g<ngroup; g++)
     {
-        if (!m2) {
-        crossid_fgroup(fgroups[g], reffields[g], fgroups[g]->sig_referr[0]?
-                prefs.astrclip_nsig*fgroups[g]->sig_referr[0]
-                : prefs.crossid_radius*ARCSEC/DEG);
-        }
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
         nclip = astrclip_fgroup(fgroups[g], reffields[g], prefs.astrclip_nsig);
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
@@ -588,14 +567,10 @@ void makeit(void)
         /*-- Re-do Cross-ID to recover possibly fast moving objects */
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        if (m3) {
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
             CrossId_crossSamples(ps, raddd);
             PixelStore_free(ps);
-        } else {
-            for (g=0; g<ngroup; g++)
-                crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
-        }
+
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
             merge_fgroup(fgroups[g], reffields[g]);
@@ -610,14 +585,9 @@ void makeit(void)
             reproj_fgroup(fgroups[g], reffields[g], 1);
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        if (m4) {
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
             CrossId_crossSamples(ps, raddd);
             PixelStore_free(ps);
-        } else {
-            for (g=0; g<ngroup; g++)
-                crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
-        }
 
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
@@ -638,14 +608,9 @@ void makeit(void)
             /*-- Re-do Cross-ID to recover possibly fast moving objects */
             NFPRINTF(OUTPUT, "Pairing detections...");
 
-            if (m5) {
                 ps = new_pixstore(nfield, ngroup, reffields, fields) ;
                 CrossId_crossSamples(ps, raddd);
                 PixelStore_free(ps);
-            } else {
-                for (g=0; g<ngroup; g++)
-                    crossid_fgroup(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
-            }
             NFPRINTF(OUTPUT, "Merging detections...");
             for (g=0; g<ngroup; g++)
                 merge_fgroup(fgroups[g], reffields[g]);

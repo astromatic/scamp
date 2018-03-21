@@ -24,7 +24,7 @@
 #define NNEIGHBORS 8
 
 static long cross_pixel(HealPixel*,PixelStore*,double);
-static int crossmatch(struct sample*,struct sample*, double radius);
+static int crossmatch(struct sample*,struct sample*, double, PixelStore*);
 static double dist(double*,double*);
 
 
@@ -73,13 +73,7 @@ cross_pixel(
         PixelStore *store, 
         double radius)
 {
-
     long nbmatches = 0;
-
-    /*
-     * Iterate over HealPixel structure which old sample structures
-     * belonging to him.
-     */
     int j, k, l;
     int field_index_start, field_index_stop;
 
@@ -88,15 +82,36 @@ cross_pixel(
     bool rematch_test_sample;
     struct field_id current_field;
 
+    /*
+     * Mark other pixels as done so they will not cross identify with me later.
+     */
+    HealPixel *test_pix;
+    for (j=0; j<NNEIGHBORS; j++) {
+        test_pix = pix->pneighbors[j];
+        if (test_pix) {
+            for (k=0; k<NNEIGHBORS; k++) {
+                if (test_pix->neighbors[l] == pix->id) {
+                    test_pix->tneighbors[l] = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    /*
+     * Then iterate over our pixel samples
+     */
     for (j=0; j<pix->nsamples; j++) {
         current_spl = pix->samples[j];
 
         /*
-         * First cross match with samples of the pixel between them
+         * First cross match with samples of the pixel between them.
          */
 
         /*
          * Eliminate previous fields, we only match with upper fields
+         * TODO this can be optimized, by using this function once for a set
+         * of samples of the same field.
          */
         PixelStore_getHigherFields(pix, current_spl, 
                 &field_index_start, &field_index_stop);
@@ -104,13 +119,14 @@ cross_pixel(
         /*
          * All this to iterate over all samples of a field, and stop at
          * the next field if there is a match. A match in a field must not
-         * stop iteration for the same field 
+         * stop iteration for the same field.
          */
 
+
         /* get the next field id */
-        current_field.epoch = 0;
+        current_field.epoch      = 0;
         current_field.fieldindex = 0;
-        current_field.havematch = 0;
+        current_field.havematch  = 0;
 
         for(k=field_index_start; k<field_index_stop; k++) {
             test_spl = pix->samples[k];
@@ -129,13 +145,16 @@ cross_pixel(
                 }
             } 
 
-            current_field.havematch = crossmatch(current_spl, test_spl, radius);
+            current_field.havematch = crossmatch(
+                    current_spl, test_spl, radius, store);
         }
+
 
         /*
          * Then iterate against neighbors pixels
+         * TODO this can be optimized, by using this loop once for a set
+         * of samples.
          */
-        HealPixel *test_pixel;
         for (k=0; k<NNEIGHBORS; k++) {
 
             /* Allready crossed by an neighbor ? */
@@ -147,15 +166,15 @@ cross_pixel(
              * but not be initialized because it does not contains
              * any samples.
              */
-            test_pixel = pix->pneighbors[k];
-            if (test_pixel == NULL)
+            test_pix = pix->pneighbors[k];
+            if (test_pix == NULL)
                 continue;
 
             /*
              * Eliminate previous to current fields, we only match with upper 
              * fields.
              */
-            PixelStore_getHigherFields(test_pixel, current_spl, 
+            PixelStore_getHigherFields(test_pix, current_spl, 
                     &field_index_start, &field_index_stop);
 
             /*
@@ -170,7 +189,7 @@ cross_pixel(
             current_field.havematch = 0;
 
             for (l=field_index_start; l<field_index_stop; l++) {
-                test_spl = test_pixel->samples[l];
+                test_spl = test_pix->samples[l];
 
                 if (    current_field.epoch      != test_spl->epoch || 
                         current_field.fieldindex != test_spl->set->field->fieldindex) 
@@ -186,9 +205,9 @@ cross_pixel(
                     }
                 } 
 
-                current_field.havematch = crossmatch(current_spl, test_spl, radius);
+                current_field.havematch = crossmatch(
+                        current_spl, test_spl, radius, store);
             }
-
         }
     }
 
@@ -197,11 +216,21 @@ cross_pixel(
 }
 
 
+static void
+relink_sample(struct sample *sample, PixelStore *store) 
+{
+    fprintf(stderr, "\n\nRELINK SAMPLE\n\n");
+    sample->nextsamp = NULL;
+    HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
+}
+
+
 static int
 crossmatch(
         struct sample *a, 
         struct sample *b, 
-        double radius)
+        double radius,
+        PixelStore *store)
 {
 
     double distance = dist(a->vector, b->vector);
@@ -221,7 +250,7 @@ crossmatch(
         a->nextsamp->prevsamp = NULL;
 
     if (b->prevsamp)
-        b->prevsamp->nextsamp = NULL;
+        relink_sample(b->prevsamp, store);
 
     a->nextsamp = b;
     b->prevsamp = a;
