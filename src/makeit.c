@@ -366,7 +366,7 @@ void makeit(void)
     PixelStore *ps;
     if (m0) {
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-        CrossId_crossSamples(ps, raddd, nt);
+        CrossId_crossSamples(ps, raddd);
         PixelStore_free(ps);
     }
 
@@ -389,7 +389,7 @@ void makeit(void)
 
         if (m1) {
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-            CrossId_crossSamples(ps, raddd, nt);
+            CrossId_crossSamples(ps, raddd);
             PixelStore_free(ps);
         }
 
@@ -431,7 +431,7 @@ void makeit(void)
     }
     if (m2) {
         ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-        CrossId_crossSamples(ps, raddd, nt);
+        CrossId_crossSamples(ps, raddd);
         PixelStore_free(ps);
     }
     for (g=0; g<ngroup; g++)
@@ -590,7 +590,7 @@ void makeit(void)
 
         if (m3) {
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-            CrossId_crossSamples(ps, raddd, nt);
+            CrossId_crossSamples(ps, raddd);
             PixelStore_free(ps);
         } else {
             for (g=0; g<ngroup; g++)
@@ -612,7 +612,7 @@ void makeit(void)
 
         if (m4) {
             ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-            CrossId_crossSamples(ps, raddd, nt);
+            CrossId_crossSamples(ps, raddd);
             PixelStore_free(ps);
         } else {
             for (g=0; g<ngroup; g++)
@@ -640,7 +640,7 @@ void makeit(void)
 
             if (m5) {
                 ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-                CrossId_crossSamples(ps, raddd, nt);
+                CrossId_crossSamples(ps, raddd);
                 PixelStore_free(ps);
             } else {
                 for (g=0; g<ngroup; g++)
