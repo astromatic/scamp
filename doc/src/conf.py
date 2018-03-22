@@ -465,7 +465,7 @@ class ADSArxivStyle(UnsrtStyle):
                 optional_field('adsurl'),
                 join ['http://arxiv.org/abs/', optional_field('eprint')],
                 optional_field('url'),
-                optional [join ['http://dx.doi.org/', field('doi')]]
+                optional [join ['https://doi.org/', field('doi')]]
         ]
         template = toplevel [
             self.format_names('author'),
@@ -485,7 +485,7 @@ class ADSArxivStyle(UnsrtStyle):
                 optional_field('adsurl'),
                 optional [join ['http://arxiv.org/abs/', field('eprint')]],
                 optional_field('url'),
-                optional [join ['http://dx.doi.org/', field('doi')]]
+                optional [join ['https://doi.org/', field('doi')]]
         ]
         template = toplevel [
             sentence [self.format_names('author')],
