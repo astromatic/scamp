@@ -327,7 +327,7 @@ void makeit(void)
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
         if (fgroups[g]->nintmatch>0)
         {
-            QPRINTF(OUTPUT, 
+            QPRINTF(OUTPUT,
                     "Group %2d: %6.3g\" %6.3g\" %6.2g %7d %6.3g\" %6.3g\" %6.2g %7d\n",
                     g+1,
                     fgroups[g]->sig_interr[0]*DEG/ARCSEC,
@@ -350,7 +350,7 @@ void makeit(void)
             "dAXIS1 dAXIS2 chi2 nstars");
     for (g=0; g<ngroup; g++)
     {
-        QPRINTF(OUTPUT, 
+        QPRINTF(OUTPUT,
                 "Group %2d: %6.3g\" %6.3g\" %6.2g %7d %6.3g\" %6.3g\" %6.2g %7d\n",
                 g+1,
                 fgroups[g]->sig_referr[0]*DEG/ARCSEC,
@@ -533,7 +533,7 @@ void makeit(void)
         /*---- Check if a header filename is provided */
         if (prefs.head_name[f] && *(prefs.head_name[f]))
             strcpy(filename, prefs.head_name[f]);
-        else { 
+        else {
             /*---- Create a file name with a "header" extension */
             strcpy(filename, fields[f]->filename);
             if (!(pstr = strrchr(filename, '.')))
@@ -734,10 +734,10 @@ void write_error(char *msg1, char *msg2)
 
 static PixelStore*
 new_pixstore(
-        int nfield, 
-        int ngroup, 
-        fieldstruct **reffields, 
-        fieldstruct **fields) 
+        int nfield,
+        int ngroup,
+        fieldstruct **reffields,
+        fieldstruct **fields)
 {
     /* Initialize healpix values and stores */
     int64_t nsides = pow(2, prefs.healpix_resolution);

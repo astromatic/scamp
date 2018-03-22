@@ -23,8 +23,20 @@
 
 #define NNEIGHBORS 8
 
+typedef enum {TIME_CLOSEST, RAW_CLOSEST} closest_algo;
+struct field_id {
+    int epoch;
+    int fieldindex;
+    int havematch;
+};
+
+static closest_algo closest = TIME_CLOSEST;
 static void cross_pixel(HealPixel*,PixelStore*,double);
+static void cross_sample(struct sample*, HealPixel*, PixelStore*, bool, double);
+static int cross_time_closest_sample(
+        struct sample*,struct sample*,double,PixelStore*, struct field_id*);
 static int crossmatch(struct sample*,struct sample*, double, PixelStore*);
+static void relink_sample(struct sample*, PixelStore*, double);
 static double dist(double*,double*);
 
 
@@ -33,39 +45,79 @@ CrossId_crossSamples(
         PixelStore *pixstore,
         double  radius_arcsec)
 {
-    int i;
+    /*
+     * First build samples vectors. These are built from the lon and lat
+     * sample values that are modified by astrometric resolution.
+     */
     PixelStore_updateSamplePos(pixstore);
 
-    /* arcsec to radiant */
+    /*
+     * Convert radius in arcsec then in 3d euclidean distance
+     * arcsec -> rad -> vector -> distance
+     */
     double radius = radius_arcsec * TO_RAD;
-
-    /* radiant to vector */
     double va[3], vb[3];
-    ang2vec(0,0,va);
-    ang2vec(HALFPI - radius,0,vb);
+    ang2vec(0, 0, va);
+    ang2vec(HALFPI - radius, 0, vb);
+    double radius_dist = dist(va, vb);
 
-    /* vector to euclidean distance */
-    radius = dist(va, vb);
-
-    for (i=0; i<pixstore->npixels; i++) {
-        HealPixel *pix = PixelStore_get(pixstore, pixstore->pixelids[i]);
-        cross_pixel(pix, pixstore, radius);
-    }
+    /*
+     * Iterate over all created Healpix pixels. They contains a least one
+     * sample
+     */
+    int i;
+    for (i=0; i<pixstore->npixels; i++)
+        cross_pixel(
+            PixelStore_get(pixstore, pixstore->pixelids[i]),
+            pixstore,
+            radius_dist);
 
 }
 
-struct field_id {
-    int epoch;
-    int fieldindex;
-    int havematch;
-};
+
+static void
+cross_pixel(
+        HealPixel *pix,
+        PixelStore *store,
+        double radius)
+{
+
+    /*
+     * Mark other pixels as done. They will then not cross identify with
+     * this pixel later.
+     */
+    HealPixel *test_pix;
+    int i, j;
+    for (i=0; i<NNEIGHBORS; i++) {
+        test_pix = pix->pneighbors[i];
+        if (test_pix) {
+            for (j=0; j<NNEIGHBORS; j++) {
+                if (test_pix->neighbors[j] == pix->id) {
+                    test_pix->tneighbors[j] = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    /*
+     * For each sample of this pixel, find the best match. There are two
+     * method for this:
+     * - RAW_CLOSEST: find the closest sample in all upper fields.
+     * - TIME_CLOSEST: for each upper fields starting from the lower, find a
+     *   closest match . If it is found, stop iterating upper fields.
+     */
+    for (i=0; i<pix->nsamples; i++)
+        cross_sample(pix->samples[i], pix, store, false, radius);
+
+}
 
 
 static void
 cross_sample(
-        struct sample *current_spl, 
-        HealPixel *pix, 
-        PixelStore *store, 
+        struct sample *current_spl,
+        HealPixel *pix,
+        PixelStore *store,
         bool force_neighbor_cross,
         double radius)
 {
@@ -75,53 +127,30 @@ cross_sample(
     bool rematch_test_sample;
     struct sample *test_spl;
     HealPixel *test_pix;
-
-    /*
-     * First cross match with samples of the pixel between them.
-     */
+    struct field_id fi;
 
     /*
      * Eliminate previous fields, we only match with upper fields
      * TODO this can be optimized, by using this function once for a set
      * of samples of the same field.
      */
-    PixelStore_getHigherFields(pix, current_spl, 
+    PixelStore_getHigherFields(pix, current_spl,
             &field_index_start, &field_index_stop);
 
-    /*
-     * All this to iterate over all samples of a field, and stop at
-     * the next field if there is a match. A match in a field must not
-     * stop iteration for the same field.
-     */
-
-
-    /* get the next field id */
-    struct field_id current_field;
-    current_field.epoch      = 0;
-    current_field.fieldindex = 0;
-    current_field.havematch  = 0;
-
-    for(i=field_index_start; i<field_index_stop; i++) {
-        test_spl = pix->samples[i];
-
-        if (    current_field.epoch      != test_spl->epoch || 
-                current_field.fieldindex != test_spl->set->field->fieldindex) 
-        {
-            /* we are changing of field */
-            if (current_field.havematch) { 
-                /* if previous field have a match break */
-                break;
-            } else {
-                /* else change field and continue */
-                current_field.epoch = test_spl->epoch;
-                current_field.fieldindex = test_spl->set->field->fieldindex;
+    switch (closest) {
+        case TIME_CLOSEST:
+            fi.epoch = fi.fieldindex = fi.havematch = 0;
+            for (i=field_index_start; i<field_index_stop; i++) {
+                if (cross_time_closest_sample(current_spl, pix->samples[i],
+                            radius, store, &fi) == 1)
+                    break;
             }
-        } 
-
-        current_field.havematch = crossmatch(
-                current_spl, test_spl, radius, store);
+            break;
+        case RAW_CLOSEST:
+            for (i=field_index_start; i<field_index_stop; i++)
+                crossmatch(current_spl, pix->samples[i], radius, store);
+            break;
     }
-
 
     /*
      * Then iterate against neighbors pixels
@@ -145,94 +174,65 @@ cross_sample(
             continue;
 
         /*
-         * Eliminate previous to current fields, we only match with upper 
+         * Eliminate previous to current fields, we only match with upper
          * fields.
          */
-        PixelStore_getHigherFields(test_pix, current_spl, 
+        PixelStore_getHigherFields(test_pix, current_spl,
                 &field_index_start, &field_index_stop);
 
-        /*
-         * All this to iterate over all samples of a field, and stop at
-         * the next field if there is a match. A match in a field must not
-         * stop iteration for the same field 
-         */
-
-        /* initialize current field to a false value */
-        current_field.epoch = 0;
-        current_field.fieldindex = 0;
-        current_field.havematch = 0;
-
-        for (j=field_index_start; j<field_index_stop; j++) {
-            test_spl = test_pix->samples[j];
-
-            if (    current_field.epoch      != test_spl->epoch || 
-                    current_field.fieldindex != test_spl->set->field->fieldindex) 
-            {
-                /* we are changing of field */
-                if (current_field.havematch) { 
-                    /* if previous field have a match break */
-                    break;
-                } else {
-                    /* else change field and continue */
-                    current_field.epoch = test_spl->epoch;
-                    current_field.fieldindex = test_spl->set->field->fieldindex;
+        switch (closest) {
+            case TIME_CLOSEST:
+                fi.epoch = fi.fieldindex = fi.havematch = 0;
+                for (j=field_index_start; j<field_index_stop; j++) {
+                    if (cross_time_closest_sample(
+                                current_spl, test_pix->samples[j],
+                                radius, store, &fi) == 1)
+                        break;
                 }
-            } 
-
-            current_field.havematch = crossmatch(
-                    current_spl, test_spl, radius, store);
+                break;
+            case RAW_CLOSEST:
+                for (i=field_index_start; i<field_index_stop; i++)
+                    crossmatch(current_spl, test_pix->samples[j], radius, store);
+                break;
         }
+
     }
 }
 
-/* cross all samples from one pixel to himself, and all neighbors pixel 
-   samples. */
-static void
-cross_pixel(
-        HealPixel *pix, 
-        PixelStore *store, 
-        double radius)
-{
-    int i, j;
 
-    /*
-     * Mark other pixels as done so they will not cross identify with me later.
-     */
-    HealPixel *test_pix;
-    for (i=0; i<NNEIGHBORS; i++) {
-        test_pix = pix->pneighbors[i];
-        if (test_pix) {
-            for (j=0; j<NNEIGHBORS; j++) {
-                if (test_pix->neighbors[j] == pix->id) {
-                    test_pix->tneighbors[j] = true;
-                    break;
-                }
+static int
+cross_time_closest_sample(
+        struct sample *current_spl,
+        struct sample *test_spl,
+        double radius,
+        PixelStore *store,
+        struct field_id *current_field) {
+
+        if (    current_field->epoch      != test_spl->epoch ||
+                current_field->fieldindex != test_spl->set->field->fieldindex)
+        {
+            /* we are changing of field */
+            if (current_field->havematch) {
+                /* if previous field have a match break */
+                return 0;
+            } else {
+                /* else change field and continue */
+                current_field->epoch = test_spl->epoch;
+                current_field->fieldindex = test_spl->set->field->fieldindex;
             }
         }
-    }
 
-    /*
-     * Then iterate over our pixel samples
-     */
-    for (j=0; j<pix->nsamples; j++)
-        cross_sample(pix->samples[j], pix, store, false, radius);
+        current_field->havematch = crossmatch(
+                current_spl, test_spl, radius, store);
 
-}
-
-
-static void
-relink_sample(struct sample *sample, PixelStore *store, double radius) 
-{
-    sample->nextsamp = NULL;
-    HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
-    cross_sample(sample, pix, store, true, radius);
+    return 1;
 }
 
 
 static int
 crossmatch(
-        struct sample *a, 
-        struct sample *b, 
+        struct sample *a,
+        struct sample *b,
         double radius,
         PixelStore *store)
 {
@@ -240,15 +240,15 @@ crossmatch(
     double distance = dist(a->vector, b->vector);
     struct sample *relink = NULL;
 
-    if (distance > radius) 
+    if (distance > radius)
         return 0;
 
     if (a->nextsamp)
-        if (dist(a->vector, a->nextsamp->vector) < distance) 
+        if (dist(a->vector, a->nextsamp->vector) < distance)
             return 0;
 
     if (b->prevsamp)
-        if (dist(b->vector, b->prevsamp->vector) < distance) 
+        if (dist(b->vector, b->prevsamp->vector) < distance)
             return 0;
 
     if (a->nextsamp)
@@ -263,6 +263,15 @@ crossmatch(
         relink_sample(relink, store, radius);
 
     return 1;
+}
+
+
+static void
+relink_sample(struct sample *sample, PixelStore *store, double radius)
+{
+    sample->nextsamp = NULL;
+    HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
+    cross_sample(sample, pix, store, true, radius);
 }
 
 
