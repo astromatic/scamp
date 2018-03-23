@@ -739,8 +739,21 @@ new_pixstore(
         fieldstruct **reffields,
         fieldstruct **fields)
 {
-    /* Initialize healpix values and stores */
-    int64_t nsides = pow(2, prefs.healpix_resolution);
+
+    /* define healpix resolution from the match radius */
+    double total_lat = 180 * 3600;
+    double total_rings = total_lat / prefs.crossid_radius;
+
+    /* 
+       total_rings is the ideal number of rings in latitude, nside must be a 
+       power of two that will build a pixel definition that fullfill the need
+       of rings.
+
+       This get the nearest next power of two from the ideal total rings 
+       required. [https://en.wikipedia.org/wiki/Logarithm#Change_of_base]
+     */
+    int64_t nsides = pow(2, ceil(log(total_rings / 4 + 1) / log(2)));
+
     PixelStore *ps = PixelStore_new(nsides);
     struct set *set;
 
