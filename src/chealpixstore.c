@@ -449,47 +449,25 @@ PixelStore_sort(PixelStore* store)
     pixelAvlSort((pixel_avl*) store->pixels);
 }
 
-void
+int
 PixelStore_getHigherFields(
         HealPixel       *pix, 
-        struct sample   *pivot, 
-        int             *start, 
-        int             *end)
+        struct sample   *pivot)
 {
-    int i, c;
-    for (i=0; i<pix->nsamples; i++) {
-        c = compSamples(&pivot, &pix->samples[i]);
-        if (c < 0)
-            break;
-    }
-    *start = i;
-    *end = pix->nsamples;
-    /* inspired by stdlib-bsearch.h */
-    /*
-    struct sample **base = pix->samples;
+    int max = pix->nsamples;
+    int min = 0;
+    int i;
 
-    struct sample *p, *ret = NULL;
-    int lastidx = 0;
-
-    int comparison, idx;
-
-    int l = 0, u = pix->nsamples;
-    while (l < u)
+    while (min < max) 
     {
-        idx = (l + u ) / 2;
-        p = base[idx];
-
-        comparison = compSamples(&pivot,&p);
-        if (comparison < 0) {
-            lastidx = idx;
-            u = idx;
-        } else {
-            l = idx + 1;
-        }
+        i = (min + max) / 2;
+        if (compSamples(&pivot, &pix->samples[i]) < 0)
+            max = i;
+        else
+            min = i + 1;
     }
-    *rem = pix->nsamples - lastidx;
-    return &base[lastidx];
-    */
+
+    return max;
 }
 
 int
@@ -498,6 +476,7 @@ PixelStore_compare(struct sample *a, struct sample *b) {
     if (!b) return -1;
     return compSamples(&a, &b);
 }
+
 void
 PixelStore_free(PixelStore* store) 
 {
@@ -509,4 +488,3 @@ PixelStore_free(PixelStore* store)
 /**
  * PUBLIC FUNCTIONS END
  ******************************************************************************/
-

@@ -263,7 +263,6 @@ void makeit(void)
     CrossId_crossSamples(ps, prefs.crossid_radius);
     PixelStore_free(ps);
 
-    fprintf(stderr, "end cross 1\n\n");
     if (prefs.solvastrom_flag)
     {
         /*-- Compute global astrometric solution: 1st iteration */

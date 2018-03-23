@@ -81,12 +81,8 @@ PixelStore_setMaxRadius(PixelStore *store, double radius);
 extern void
 PixelStore_updateSamplePos(PixelStore *store);
 
-/* return a pointer to a sample belonging to a list wich represent the next 
-   field sample for the argument sample "pivot". "remains" will contains the
-   number of elements remaining in the list, including the return value */
-void
-PixelStore_getHigherFields(HealPixel *pix, struct sample *pivot, 
-        int *start, int *remains);
+int
+PixelStore_getHigherFields(HealPixel *pix, struct sample *pivot);
 
 HealPixel*
 PixelStore_getPixelFromSample(PixelStore *store, struct sample *sample);

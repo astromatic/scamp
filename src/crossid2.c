@@ -30,7 +30,7 @@ struct field_id {
     int havematch;
 };
 
-static closest_algo closest = TIME_CLOSEST;
+static closest_algo closest = RAW_CLOSEST;
 static void cross_pixel(HealPixel*,PixelStore*,double);
 static void cross_sample(struct sample*, HealPixel*, PixelStore*, bool, double);
 static int cross_time_closest_sample(
@@ -122,7 +122,7 @@ cross_sample(
         double radius)
 {
     int i, j;
-    int field_index_start, field_index_stop;
+    int field_index_start;
     double distance;
     bool rematch_test_sample;
     struct sample *test_spl;
@@ -134,20 +134,19 @@ cross_sample(
      * TODO this can be optimized, by using this function once for a set
      * of samples of the same field.
      */
-    PixelStore_getHigherFields(pix, current_spl,
-            &field_index_start, &field_index_stop);
+    field_index_start = PixelStore_getHigherFields(pix, current_spl);
 
     switch (closest) {
         case TIME_CLOSEST:
             fi.epoch = fi.fieldindex = fi.havematch = 0;
-            for (i=field_index_start; i<field_index_stop; i++) {
+            for (i=field_index_start; i<pix->nsamples; i++) {
                 if (cross_time_closest_sample(current_spl, pix->samples[i],
                             radius, store, &fi) == 1)
                     break;
             }
             break;
         case RAW_CLOSEST:
-            for (i=field_index_start; i<field_index_stop; i++)
+            for (i=field_index_start; i<pix->nsamples; i++)
                 crossmatch(current_spl, pix->samples[i], radius, store);
             break;
     }
@@ -177,13 +176,12 @@ cross_sample(
          * Eliminate previous to current fields, we only match with upper
          * fields.
          */
-        PixelStore_getHigherFields(test_pix, current_spl,
-                &field_index_start, &field_index_stop);
+        field_index_start =PixelStore_getHigherFields(test_pix, current_spl);
 
         switch (closest) {
             case TIME_CLOSEST:
                 fi.epoch = fi.fieldindex = fi.havematch = 0;
-                for (j=field_index_start; j<field_index_stop; j++) {
+                for (j=field_index_start; j<test_pix->nsamples; j++) {
                     if (cross_time_closest_sample(
                                 current_spl, test_pix->samples[j],
                                 radius, store, &fi) == 1)
@@ -191,7 +189,7 @@ cross_sample(
                 }
                 break;
             case RAW_CLOSEST:
-                for (i=field_index_start; i<field_index_stop; i++)
+                for (i=field_index_start; i<test_pix->nsamples; i++)
                     crossmatch(current_spl, test_pix->samples[j], radius, store);
                 break;
         }
