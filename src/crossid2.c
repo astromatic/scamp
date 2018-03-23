@@ -30,7 +30,7 @@ struct field_id {
     int havematch;
 };
 
-static closest_algo closest = RAW_CLOSEST;
+static closest_algo closest = TIME_CLOSEST;
 static void cross_pixel(HealPixel*,PixelStore*,double);
 static void cross_sample(struct sample*, HealPixel*, PixelStore*, bool, double);
 static int cross_time_closest_sample(

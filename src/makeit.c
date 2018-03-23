@@ -744,14 +744,17 @@ new_pixstore(
     double total_rings = total_lat / prefs.crossid_radius;
 
     /* 
-       total_rings is the ideal number of rings in latitude, nside must be a 
-       power of two that will build a pixel definition that fullfill the need
-       of rings.
-
-       This get the nearest next power of two from the ideal total rings 
-       required. [https://en.wikipedia.org/wiki/Logarithm#Change_of_base]
+     * total_rings is the ideal number of rings in latitude, nside must be a 
+     * power of two that will build a pixel definition that fullfill the need
+     * of rings.
+     *
+     * This get the nearest next power of two from the ideal total rings 
+     * required. [https://en.wikipedia.org/wiki/Logarithm#Change_of_base]
      */
-    int64_t nsides = pow(2, ceil(log(total_rings / 4 + 1) / log(2)));
+    int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
+
+    /* minus 1 nsides power, to be sure to not loss any match */
+    int64_t nsides = pow(2, --nsides_pow);
 
     PixelStore *ps = PixelStore_new(nsides);
     struct set *set;
