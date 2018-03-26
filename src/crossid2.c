@@ -25,12 +25,11 @@
 
 typedef enum {TIME_CLOSEST, RAW_CLOSEST} closest_algo;
 struct field_id {
-    int epoch;
     int fieldindex;
     int havematch;
 };
 
-static closest_algo closest = TIME_CLOSEST;
+static closest_algo closest = RAW_CLOSEST;
 static void cross_pixel(HealPixel*,PixelStore*,double);
 static void cross_sample(struct sample*, HealPixel*, PixelStore*, bool, double);
 static int cross_time_closest_sample(
@@ -121,12 +120,7 @@ cross_sample(
         bool force_neighbor_cross,
         double radius)
 {
-    int i, j;
     int field_index_start;
-    double distance;
-    bool rematch_test_sample;
-    struct sample *test_spl;
-    HealPixel *test_pix;
     struct field_id fi;
 
     /*
@@ -136,9 +130,10 @@ cross_sample(
      */
     field_index_start = PixelStore_getHigherFields(pix, current_spl);
 
+    int i;
     switch (closest) {
         case TIME_CLOSEST:
-            fi.epoch = fi.fieldindex = fi.havematch = 0;
+            fi.fieldindex = fi.havematch = 0;
             for (i=field_index_start; i<pix->nsamples; i++) {
                 if (cross_time_closest_sample(current_spl, pix->samples[i],
                             radius, store, &fi) == 1)
@@ -157,7 +152,6 @@ cross_sample(
      * of samples.
      */
     for (i=0; i<NNEIGHBORS; i++) {
-
         /* Allready crossed by an neighbor ? */
         if (force_neighbor_cross == false)
             if (pix->tneighbors[i] == true)
@@ -168,7 +162,7 @@ cross_sample(
          * but not be initialized because it does not contains
          * any samples.
          */
-        test_pix = pix->pneighbors[i];
+        HealPixel *test_pix = pix->pneighbors[i];
         if (test_pix == NULL)
             continue;
 
@@ -178,9 +172,10 @@ cross_sample(
          */
         field_index_start =PixelStore_getHigherFields(test_pix, current_spl);
 
+        int j;
         switch (closest) {
             case TIME_CLOSEST:
-                fi.epoch = fi.fieldindex = fi.havematch = 0;
+                fi.fieldindex = fi.havematch = 0;
                 for (j=field_index_start; j<test_pix->nsamples; j++) {
                     if (cross_time_closest_sample(
                                 current_spl, test_pix->samples[j],
@@ -189,7 +184,7 @@ cross_sample(
                 }
                 break;
             case RAW_CLOSEST:
-                for (i=field_index_start; i<test_pix->nsamples; i++)
+                for (j=field_index_start; j<test_pix->nsamples; j++)
                     crossmatch(current_spl, test_pix->samples[j], radius, store);
                 break;
         }
@@ -206,8 +201,7 @@ cross_time_closest_sample(
         PixelStore *store,
         struct field_id *current_field) {
 
-        if (    current_field->epoch      != test_spl->epoch ||
-                current_field->fieldindex != test_spl->set->field->fieldindex)
+        if (current_field->fieldindex != test_spl->set->field->fieldindex)
         {
             /* we are changing of field */
             if (current_field->havematch) {
@@ -215,7 +209,6 @@ cross_time_closest_sample(
                 return 0;
             } else {
                 /* else change field and continue */
-                current_field->epoch = test_spl->epoch;
                 current_field->fieldindex = test_spl->set->field->fieldindex;
             }
         }
@@ -241,13 +234,11 @@ crossmatch(
     if (distance > radius)
         return 0;
 
-    if (a->nextsamp)
-        if (dist(a->vector, a->nextsamp->vector) < distance)
-            return 0;
+    if (a->nextsamp && dist(a->vector, a->nextsamp->vector) <= distance)
+        return 0;
 
-    if (b->prevsamp)
-        if (dist(b->vector, b->prevsamp->vector) < distance)
-            return 0;
+    if (b->prevsamp && dist(b->vector, b->prevsamp->vector) <= distance)
+        return 0;
 
     if (a->nextsamp)
         a->nextsamp->prevsamp = NULL;
@@ -272,6 +263,22 @@ relink_sample(struct sample *sample, PixelStore *store, double radius)
     cross_sample(sample, pix, store, true, radius);
 }
 
+
+/* up to one month of time distance would give a distance of 0 */
+static double TIME_DISTANCE_LIMIT = 60 * 60 * 24 * 7 * 4;
+static double TIME_DISTANCE_WEIGHT = 0.5;
+static double
+dist2(struct sample *a, struct sample *b)
+{
+    double x = a->vector[0] - b->vector[0];
+    double y = a->vector[1] - b->vector[1];
+    double z = a->vector[2] - b->vector[2];
+    double t = abs(a->set->field->epoch - b->set->field->epoch) / TIME_DISTANCE_LIMIT * TIME_DISTANCE_WEIGHT;
+
+    return x*x + y*y + z*z + t;
+
+    
+}
 
 static double
 dist(double *va, double *vb)

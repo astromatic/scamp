@@ -21,6 +21,7 @@
 
 #include "chealpixstore.h"
 #include "chealpix.h"
+#include "field.h"
 
 /*****************************************************************************
  * 1 AVL Tree implementation
@@ -206,18 +207,19 @@ static void pixelAvlFree(pixel_avl *pix) {
     free(pix);
 }
 
-static int compSamples(const void* a, const void *b) {
+int cmp_samples(const void* a, const void *b) {
     struct sample *sa = * (struct sample**) a;
     struct sample *sb = * (struct sample**) b;
+    struct field *fa = sa->set->field;
+    struct field *fb = sb->set->field;
 
-    if (sa->epoch == sb->epoch) {
-        struct field *fa = sa->set->field;
-        struct field *fb = sb->set->field;
-        return fa > fb ? 1 : fa < fb ? -1 : 0;
-    }
-    double ea = sa->epoch;
-    double eb = sb->epoch;
-    return ea > eb ? 1 : ea < eb ? -1 : 0;
+    if (fa->epoch < fb->epoch)
+        return -1;
+    else if (fa->epoch > fb->epoch)
+        return 1;
+    else
+        return fa->fieldindex > fb->fieldindex ? 1 : 
+                    fa->fieldindex < fb->fieldindex ? -1 : 0;
 }
 static void pixelAvlSort(pixel_avl *pix) {
     if (pix == NULL)
@@ -227,7 +229,7 @@ static void pixelAvlSort(pixel_avl *pix) {
     qsort(pix->pixel.samples, 
             pix->pixel.nsamples, 
             sizeof(struct sample*),
-            compSamples);
+            cmp_samples);
 
 }
 
@@ -239,9 +241,9 @@ static void updateSamplePos(pixel_avl *pix) {
     updateSamplePos(pix->pBefore);
 
     int i;
-    struct sample *s;
-    for (i=0; i<pix->pixel.nsamples; i++) {
-        s = pix->pixel.samples[i];
+    for (i=0; i<pix->pixel.nsamples; i++) 
+    {
+        struct sample *s = pix->pixel.samples[i];
         double lon = s->wcspos[0] * TO_RAD;
         double col = HALFPI - s->wcspos[1] * TO_RAD;
         ang2vec(col, lon, s->vector);
@@ -454,6 +456,13 @@ PixelStore_getHigherFields(
         HealPixel       *pix, 
         struct sample   *pivot)
 {
+/*
+    int i;
+    for (i=0; i<pix->nsamples; i++)
+        if (cmp_samples(&pivot, &pix->samples[i]) > 0)
+            return i;
+
+*/
     int max = pix->nsamples;
     int min = 0;
     int i;
@@ -461,20 +470,13 @@ PixelStore_getHigherFields(
     while (min < max) 
     {
         i = (min + max) / 2;
-        if (compSamples(&pivot, &pix->samples[i]) < 0)
+        if (cmp_samples(&pivot, &pix->samples[i]) < 0)
             max = i;
         else
             min = i + 1;
     }
 
     return max;
-}
-
-int
-PixelStore_compare(struct sample *a, struct sample *b) {
-    if (!a) return 1;
-    if (!b) return -1;
-    return compSamples(&a, &b);
 }
 
 void
