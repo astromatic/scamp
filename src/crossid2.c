@@ -15,12 +15,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#ifdef USE_THREADS
+#include <pthread.h>
+#endif
 
 #include "crossid2.h"
 #include "chealpix.h"
 #include "chealpixstore.h"
 #include "field.h"
-
 #define NNEIGHBORS 8
 
 typedef enum {TIME_CLOSEST, RAW_CLOSEST} closest_algo;
@@ -28,8 +30,18 @@ struct field_id {
     int fieldindex;
     int havematch;
 };
+#ifdef USE_THREADS
+struct thread_args {
+    PixelStore  *store;
+    int64_t     *pixelindex;
+    int         npixs;
+    double      radius;
+};
+static pthread_mutex_t GLOBAL_MUTEX = PTHREAD_MUTEX_INITIALIZER;
+#endif /* USE_THREADS */
 
-static closest_algo closest = RAW_CLOSEST;
+static closest_algo closest = TIME_CLOSEST;
+static void* pthread_cross_pixel(void*);
 static void cross_pixel(HealPixel*,PixelStore*,double);
 static void cross_sample(struct sample*, HealPixel*, PixelStore*, bool, double);
 static int cross_time_closest_sample(
@@ -64,13 +76,55 @@ CrossId_crossSamples(
      * Iterate over all created Healpix pixels. They contains a least one
      * sample
      */
+
     int i;
+#ifdef USE_THREADS
+#define NTHREADS 28
+    pthread_t *threads;
+    struct thread_args *args;
+    int *npixs;
+    QMALLOC(threads, pthread_t, NTHREADS);
+    QMALLOC(args, struct thread_args, NTHREADS);
+    QMALLOC(npixs, int, NTHREADS);
+    int np = pixstore->npixels / NTHREADS;
+    for (i=0; i<NTHREADS; i++)
+        npixs[i] = np;
+    npixs[0] += pixstore->npixels % NTHREADS;
+    int64_t *pixelindex = pixstore->pixelids;
+    for (i=0; i<NTHREADS; i++) {
+        struct thread_args *arg = &args[i];
+        arg->store = pixstore;
+        arg->radius = radius;
+        arg->pixelindex = pixelindex;
+        arg->npixs  = npixs[i];
+        pthread_create(&threads[i], NULL, pthread_cross_pixel, arg);
+        pixelindex += npixs[i];
+    }
+
+    for (i=0; i<NTHREADS; i++)
+        pthread_join(threads[i], NULL);
+    free(threads);
+    free(args);
+    free(npixs);
+#else
     for (i=0; i<pixstore->npixels; i++)
         cross_pixel(
             PixelStore_get(pixstore, pixstore->pixelids[i]),
             pixstore,
             radius_dist);
 
+#endif /* USE_THREADS */
+}
+
+static void*
+pthread_cross_pixel(void *args)
+{
+    struct thread_args *ta = (struct thread_args*) args;
+    int i;
+    for (i=0; i<ta->npixs; i++) {
+        HealPixel *pix = PixelStore_get(ta->store, ta->pixelindex[i]);
+        cross_pixel(pix, ta->store, ta->radius);
+    }
 }
 
 
@@ -81,6 +135,10 @@ cross_pixel(
         double radius)
 {
 
+#ifdef USE_THREADS
+    pthread_mutex_lock(&GLOBAL_MUTEX);
+    pthread_mutex_lock(&pix->mutex);
+#endif /* USE_THREADS */
     /*
      * Mark other pixels as done. They will then not cross identify with
      * this pixel later.
@@ -98,7 +156,9 @@ cross_pixel(
             }
         }
     }
-
+#ifdef USE_THREADS
+    pthread_mutex_unlock(&GLOBAL_MUTEX);
+#endif /* USE_THREADS */
     /*
      * For each sample of this pixel, find the best match. There are two
      * method for this:
@@ -108,6 +168,9 @@ cross_pixel(
      */
     for (i=0; i<pix->nsamples; i++)
         cross_sample(pix->samples[i], pix, store, false, radius);
+#ifdef USE_THREADS
+    pthread_mutex_unlock(&pix->mutex);
+#endif /* USE_THREADS */
 
 }
 
@@ -170,8 +233,9 @@ cross_sample(
          * Eliminate previous to current fields, we only match with upper
          * fields.
          */
-        field_index_start =PixelStore_getHigherFields(test_pix, current_spl);
+        field_index_start = PixelStore_getHigherFields(test_pix, current_spl);
 
+        pthread_mutex_lock(&test_pix->mutex);
         int j;
         switch (closest) {
             case TIME_CLOSEST:
@@ -188,6 +252,7 @@ cross_sample(
                     crossmatch(current_spl, test_pix->samples[j], radius, store);
                 break;
         }
+        pthread_mutex_unlock(&test_pix->mutex);
 
     }
 }
@@ -260,7 +325,7 @@ relink_sample(struct sample *sample, PixelStore *store, double radius)
 {
     sample->nextsamp = NULL;
     HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
-    cross_sample(sample, pix, store, true, radius);
+    //cross_sample(sample, pix, store, true, radius);
 }
 
 
