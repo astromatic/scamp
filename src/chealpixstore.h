@@ -16,7 +16,6 @@
 #define _CHEALPIXSTORE_H_
 
 #include <stdbool.h>
-#include <pthread.h>
 
 #include "define.h"
 #include "globals.h"
@@ -42,7 +41,6 @@ struct HealPixel {
     int64_t neighbors[8];  /* Neighbors indexes */
     HealPixel *pneighbors[8];
     bool tneighbors[8]; /* check if neighbors have allready been matched */
-	pthread_mutex_t mutex;
 
 };
 

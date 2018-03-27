@@ -325,7 +325,6 @@ insert_sample_into_avltree_store(
         QCALLOC(avlpix->pixel.samples, struct sample *, SPL_BASE_SIZE);
         avlpix->pixel.size = SPL_BASE_SIZE;
         avlpix->pixel.nsamples = 0;
-        pthread_mutex_init(&avlpix->pixel.mutex, NULL);
 
         for (i=0;i<8;i++)
             avlpix->pixel.tneighbors[i] = false;
