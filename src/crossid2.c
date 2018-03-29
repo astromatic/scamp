@@ -42,11 +42,9 @@ CrossId_crossSamples(
         PixelStore *pixstore,
         double  radius_arcsec)
 {
-    /*
-     * First build samples vectors. These are built from the lon and lat
-     * sample values that are modified by astrometric resolution.
-     */
-    PixelStore_updateSamplePos(pixstore);
+
+    /* sort samples */
+    PixelStore_sort(pixstore);
 
     /*
      * Convert radius in arcsec then in 3d euclidean distance
@@ -126,7 +124,7 @@ cross_sample(
          * but not be initialized because it does not contains
          * any samples.
          */
-        HealPixel *test_pix = pix->pneighbors[i];
+        HealPixel *test_pix = PixelStore_get(store, pix->neighbors[i]);
         if (test_pix == NULL)
             continue;
 

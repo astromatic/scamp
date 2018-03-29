@@ -293,9 +293,41 @@ void makeit(void)
     //debug_crossid(ngroup, fgroups);
     PixelStore *ps;
     ps = new_pixstore(nfield, ngroup, reffields, fields) ;
+    /* for 2.0 radius, dist is 0.000000338463790 */
     CrossId_crossSamples(ps, prefs.crossid_radius);
+    samplestruct *s2 = &fields[0]->set[0]->sample[17];
+    HealPixel *pix = PixelStore_getPixelFromSample(ps, s2);
+    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
+    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
+    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
+    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
+    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
+    for (i=0; i<pix->nsamples; i++) {
+        samplestruct *s3 = pix->samples[i];
+        fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s3->vector[0],s3->vector[1],s3->vector[2]);
+    }
+    for (i=0; i<8; i++) {
+        HealPixel *pixin = PixelStore_get(ps, pix->neighbors[i]);
+        fprintf(stderr, "%li -------------- %p\n", pix->neighbors[i], pixin);
+        if (pixin) {
+            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
+            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
+            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
+            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
+            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
+            int y;
+            for (y=0; y<pixin->nsamples; y++) {
+                samplestruct *s4 = pixin->samples[y];
+                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
+                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
+                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
+                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
+            }
+        }
+    }
     PixelStore_free(ps);
-    plot_debug(fields, nfield);
+    //plot_debug(fields, nfield);
+    exit(0);
 
     if (prefs.solvastrom_flag)
     {
@@ -788,7 +820,7 @@ new_pixstore(
     int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
 
     /* minus 1 nsides power, to be sure to not loss any match */
-    nsides_pow  = 15;
+    nsides_pow -= 2;
     int64_t nsides = pow(2, nsides_pow);
 
     PixelStore *ps = PixelStore_new(nsides);
@@ -817,7 +849,6 @@ new_pixstore(
         }
     }
 
-    PixelStore_sort(ps);
     return ps;
 }
 

@@ -40,13 +40,11 @@ struct HealPixel {
     int nsamples;       /* number of samples belonging to this pixel */
     int size;           /* for reallocation if required */
     int64_t neighbors[8];  /* Neighbors indexes */
-    HealPixel *pneighbors[8];
-
 };
 
 typedef struct PixelStore {
     int64_t     nsides;
-    void        *pixels; /* our opaque data */
+    HealPixel   *pixels;
 
     /* These are used to iterate over pixels */
     long        npixels;
@@ -77,13 +75,14 @@ extern void
 PixelStore_setMaxRadius(PixelStore *store, double radius);
 
 extern void
-PixelStore_updateSamplePos(PixelStore *store);
+PixelStore_commit(PixelStore *store);
 
-int
+extern int
 PixelStore_getHigherFields(HealPixel *pix, struct sample *pivot);
 
 HealPixel*
 PixelStore_getPixelFromSample(PixelStore *store, struct sample *sample);
+
 extern void
 PixelStore_sort(PixelStore *store);
 
