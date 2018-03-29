@@ -92,7 +92,7 @@ static void plot_debug(fieldstruct **fields, int nfield)
                         int index = sls->set->field->fieldindex + 1;            
                         if (sls->set->field->fieldindex == 0 && sls->set->field->epoch < 0.01)
                             index = 0;                                          
-                        printf("%i:%0.10lf %0.10lf %0.10lf, ", index, sls->vector[0], sls->vector[1], sls->vector[2]);
+                        printf("%i:%0.20lf %0.20lf %0.20lf, ", index, sls->vector[0], sls->vector[1], sls->vector[2]);
                         sls->set = NULL;                                        
                     } while (sls = sls->nextsamp);                              
                     printf("\n");                                               
@@ -293,41 +293,11 @@ void makeit(void)
     //debug_crossid(ngroup, fgroups);
     PixelStore *ps;
     ps = new_pixstore(nfield, ngroup, reffields, fields) ;
-    /* for 2.0 radius, dist is 0.000000338463790 */
     CrossId_crossSamples(ps, prefs.crossid_radius);
-    samplestruct *s2 = &fields[0]->set[0]->sample[17];
-    HealPixel *pix = PixelStore_getPixelFromSample(ps, s2);
-    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
-    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
-    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
-    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
-    fprintf(stderr, "have %i npix in pix %li\n", pix->nsamples, pix->id);
-    for (i=0; i<pix->nsamples; i++) {
-        samplestruct *s3 = pix->samples[i];
-        fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s3->vector[0],s3->vector[1],s3->vector[2]);
-    }
-    for (i=0; i<8; i++) {
-        HealPixel *pixin = PixelStore_get(ps, pix->neighbors[i]);
-        fprintf(stderr, "%li -------------- %p\n", pix->neighbors[i], pixin);
-        if (pixin) {
-            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
-            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
-            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
-            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
-            fprintf(stderr, "have %i npix in neighbor %li\n", pixin->nsamples, pixin->id);
-            int y;
-            for (y=0; y<pixin->nsamples; y++) {
-                samplestruct *s4 = pixin->samples[y];
-                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
-                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
-                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
-                fprintf(stderr, "spl %0.10lf %0.10lf %0.10lf\n", s4->vector[0],s4->vector[1],s4->vector[2]);
-            }
-        }
-    }
     PixelStore_free(ps);
-    //plot_debug(fields, nfield);
-    exit(0);
+    plot_debug(fields, nfield);
+
+    //exit(0);
 
     if (prefs.solvastrom_flag)
     {
@@ -806,8 +776,8 @@ new_pixstore(
 {
 
     /* define healpix resolution from the match radius */
-    double total_lat = 180 * 3600;
-    double total_rings = total_lat / prefs.crossid_radius;
+    int total_lat = 180 * 3600;
+    int total_rings = total_lat / prefs.crossid_radius;
 
     /* 
      * total_rings is the ideal number of rings in latitude, nside must be a 
@@ -820,7 +790,12 @@ new_pixstore(
     int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
 
     /* minus 1 nsides power, to be sure to not loss any match */
-    nsides_pow -= 2;
+    fprintf(stderr, "qqqqqqqqqqqqqqqqqqqqqqqqqqqq %li\n", nsides_pow);
+    fprintf(stderr, "qqqqqqqqqqqqqqqqqqqqqqqqqqqq %li\n", nsides_pow);
+    fprintf(stderr, "qqqqqqqqqqqqqqqqqqqqqqqqqqqq %li\n", nsides_pow);
+    fprintf(stderr, "qqqqqqqqqqqqqqqqqqqqqqqqqqqq %li\n", nsides_pow);
+    fprintf(stderr, "qqqqqqqqqqqqqqqqqqqqqqqqqqqq %li\n", nsides_pow);
+    nsides_pow = 10;
     int64_t nsides = pow(2, nsides_pow);
 
     PixelStore *ps = PixelStore_new(nsides);

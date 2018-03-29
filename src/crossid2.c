@@ -50,10 +50,10 @@ CrossId_crossSamples(
      * Convert radius in arcsec then in 3d euclidean distance
      * arcsec -> rad -> vector -> distance
      */
-    double radius = radius_arcsec / 60 * TO_RAD;
+    double radius_rad = radius_arcsec / 3600 * TO_RAD;
     double va[3], vb[3];
     ang2vec(0, 0, va);
-    ang2vec(radius, 0, vb);
+    ang2vec(radius_rad, 0, vb);
     double radius_dist = dist(va, vb);
 
     /*
@@ -225,23 +225,6 @@ relink_sample(struct sample *sample, PixelStore *store, double radius)
     sample->nextsamp = NULL;
     HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
     cross_sample(sample, pix, store, radius);
-}
-
-
-/* up to one month of time distance would give a distance of 0 */
-static double TIME_DISTANCE_LIMIT = 60 * 60 * 24 * 7 * 4;
-static double TIME_DISTANCE_WEIGHT = 0.5;
-static double
-dist2(struct sample *a, struct sample *b)
-{
-    double x = a->vector[0] - b->vector[0];
-    double y = a->vector[1] - b->vector[1];
-    double z = a->vector[2] - b->vector[2];
-    double t = abs(a->set->field->epoch - b->set->field->epoch) / TIME_DISTANCE_LIMIT * TIME_DISTANCE_WEIGHT;
-
-    return x*x + y*y + z*z + t;
-
-    
 }
 
 static double

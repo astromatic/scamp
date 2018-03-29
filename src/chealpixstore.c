@@ -374,7 +374,7 @@ PixelStore_add(
     spl->nextsamp = spl->prevsamp = NULL;
 
     double lon = spl->wcspos[spl->set->field->lng] * TO_RAD;
-    double col = HALFPI + spl->wcspos[spl->set->field->lat] * TO_RAD;
+    double col = HALFPI - (spl->wcspos[spl->set->field->lat] * TO_RAD);
     ang2vec(col, lon, spl->vector);
 
     int64_t pixnum;
