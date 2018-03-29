@@ -54,8 +54,8 @@ typedef struct PixelStore {
 } PixelStore;
 
 
-extern PixelStore*
-PixelStore_new(int64_t nsides);
+extern void
+PixelStore_new(int64_t nsides, PixelStore *ps);
 
 /* 
  * Store "spl" in "store" in pixel id "key". Set "ext to contains a pointer to
