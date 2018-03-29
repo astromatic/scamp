@@ -244,8 +244,10 @@ static void updateSamplePos(pixel_avl *pix) {
     for (i=0; i<pix->pixel.nsamples; i++) 
     {
         struct sample *s = pix->pixel.samples[i];
-        double lon = s->wcspos[0] * TO_RAD;
-        double col = HALFPI - s->wcspos[1] * TO_RAD;
+        int lng = s->set->field->lng;
+        int lat = s->set->field->lat;
+        double lon = s->wcspos[lng] * TO_RAD;
+        double col = HALFPI + s->wcspos[lat] * TO_RAD;
         ang2vec(col, lon, s->vector);
         s->prevsamp = s->nextsamp = NULL;
     }
@@ -326,8 +328,6 @@ insert_sample_into_avltree_store(
         avlpix->pixel.size = SPL_BASE_SIZE;
         avlpix->pixel.nsamples = 0;
 
-        for (i=0;i<8;i++)
-            avlpix->pixel.tneighbors[i] = false;
         neighbours_nest64(store->nsides, pixnum, avlpix->pixel.neighbors);
 
         pixelAvlInsert((pixel_avl**) &store->pixels, avlpix);
@@ -399,8 +399,8 @@ PixelStore_add(
 
     spl->nextsamp = spl->prevsamp = NULL;
 
-    double lon = spl->wcspos[0] * TO_RAD;
-    double col = HALFPI - spl->wcspos[1] * TO_RAD;
+    double lon = spl->wcspos[spl->set->field->lng] * TO_RAD;
+    double col = HALFPI + spl->wcspos[spl->set->field->lat] * TO_RAD;
     ang2vec(col, lon, spl->vector);
 
     int64_t pixnum;
@@ -455,13 +455,12 @@ PixelStore_getHigherFields(
         HealPixel       *pix, 
         struct sample   *pivot)
 {
-/*
+    /*
     int i;
     for (i=0; i<pix->nsamples; i++)
-        if (cmp_samples(&pivot, &pix->samples[i]) > 0)
+        if (cmp_samples(&pivot, &pix->samples[i]) < 0)
             return i;
-
-*/
+            */
     int max = pix->nsamples;
     int min = 0;
     int i;

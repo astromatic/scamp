@@ -20,6 +20,7 @@
 #include "define.h"
 #include "globals.h"
 #include "samples.h"
+#include "fgroup.h"
 
 #define SC_PI 3.141592653589793238462643383279502884197                            
 #define SC_TWOPI 6.283185307179586476925286766559005768394                         
@@ -40,7 +41,6 @@ struct HealPixel {
     int size;           /* for reallocation if required */
     int64_t neighbors[8];  /* Neighbors indexes */
     HealPixel *pneighbors[8];
-    bool tneighbors[8]; /* check if neighbors have allready been matched */
 
 };
 

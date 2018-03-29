@@ -66,9 +66,42 @@
 #include "xml.h"
 #include "chealpixstore.h"
 #include "crossid2.h"
+#include "chealpix.h"
 
 time_t thetime, thetime2;
 static PixelStore* new_pixstore(int, int, fieldstruct**, fieldstruct**);
+
+static void plot_debug(fieldstruct **fields, int nfield)                        
+{                                                                               
+#define HALFPI 1.570796326794896619231321691639751442099                        
+#define TO_RAD 0.0174532925199432957692369076848861271344                       
+    /* save gnuplot for debug */                                                
+    int f;                                                                      
+    for (f=0; f<nfield; f++) {                                                  
+        fieldstruct *ff = fields[f];                                            
+        int q;                                                                  
+        for (q=0; q<ff->nset; q++) {                                            
+            setstruct *ss = ff->set[q];                                         
+            int l;                                                              
+            for (l=0; l<ss->nsample; l++) {                                     
+                samplestruct *sls = &ss->sample[l];                             
+                if (sls->set) {                                                 
+                    while (sls->prevsamp)                                       
+                        sls = sls->prevsamp;                                    
+                    do {                                                        
+                        int index = sls->set->field->fieldindex + 1;            
+                        if (sls->set->field->fieldindex == 0 && sls->set->field->epoch < 0.01)
+                            index = 0;                                          
+                        printf("%i:%0.10lf %0.10lf %0.10lf, ", index, sls->vector[0], sls->vector[1], sls->vector[2]);
+                        sls->set = NULL;                                        
+                    } while (sls = sls->nextsamp);                              
+                    printf("\n");                                               
+                }                                                               
+            }                                                                   
+        }                                                                       
+    }                                                                           
+    exit (0);                                                                   
+}       
 
 /********************************** makeit ***********************************/
 void makeit(void)
@@ -262,6 +295,7 @@ void makeit(void)
     ps = new_pixstore(nfield, ngroup, reffields, fields) ;
     CrossId_crossSamples(ps, prefs.crossid_radius);
     PixelStore_free(ps);
+    plot_debug(fields, nfield);
 
     if (prefs.solvastrom_flag)
     {
@@ -754,7 +788,8 @@ new_pixstore(
     int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
 
     /* minus 1 nsides power, to be sure to not loss any match */
-    int64_t nsides = pow(2, --nsides_pow);
+    nsides_pow  = 15;
+    int64_t nsides = pow(2, nsides_pow);
 
     PixelStore *ps = PixelStore_new(nsides);
     struct set *set;
@@ -765,7 +800,6 @@ new_pixstore(
             set = fields[i]->set[f];
             for (g=0; g < set->nsample;g++) {
                 struct sample *s = &set->sample[g];
-                s->id = g;
                 PixelStore_add(ps, &set->sample[g]);
             }
         }
@@ -777,7 +811,6 @@ new_pixstore(
                 set = reffields[i]->set[f];
                 for (g=0; g < set->nsample; g++) {
                     struct sample *s = &set->sample[g];
-                    s->id = g;
                     PixelStore_add(ps, &set->sample[g]);
                 }
             }
