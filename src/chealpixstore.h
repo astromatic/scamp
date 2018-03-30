@@ -44,7 +44,7 @@ struct HealPixel {
 
 typedef struct PixelStore {
     int64_t     nsides;
-    HealPixel   *pixels;
+    void        *pixels;
 
     /* These are used to iterate over pixels */
     long        npixels;

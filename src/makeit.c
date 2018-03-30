@@ -89,10 +89,12 @@ static void plot_debug(fieldstruct **fields, int nfield)
                     while (sls->prevsamp)                                       
                         sls = sls->prevsamp;                                    
                     do {                                                        
-                        int index = sls->set->field->fieldindex + 1;            
+                        int findex = sls->set->field->fieldindex;            
+                        int sindex = sls->set->setindex;
                         if (sls->set->field->fieldindex == 0 && sls->set->field->epoch < 0.01)
-                            index = 0;                                          
-                        printf("%i:%0.20lf %0.20lf %0.20lf, ", index, sls->vector[0], sls->vector[1], sls->vector[2]);
+                            findex = -1;                                          
+                        printf("%i:%i:%i: %0.10lf %0.10lf %0.10lf, ", findex, sindex, l,
+                                sls->vector[0], sls->vector[1], sls->vector[2]);
                         sls->set = NULL;                                        
                     } while (sls = sls->nextsamp);                              
                     printf("\n");                                               
@@ -289,15 +291,36 @@ void makeit(void)
         sprintf(str, "Making preliminary cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
     }
-
     //debug_crossid(ngroup, fgroups);
     PixelStore ps;
     new_pixstore(nfield, ngroup, reffields, fields, &ps);
     CrossId_crossSamples(&ps, prefs.crossid_radius);
-    PixelStore_free(&ps);
-    //plot_debug(fields, nfield);
 
-    //exit(0);
+    samplestruct *sx = &fields[0]->set[0]->sample[1];
+    HealPixel *pii = PixelStore_getPixelFromSample(&ps, sx);
+    int64_t ne[8];
+
+    fprintf(stderr, "begin test \n");
+    fprintf(stderr, "begin test \n");
+    fprintf(stderr, "begin test \n");
+    fprintf(stderr, "begin test \n");
+    fprintf(stderr, "begin test \n");
+
+    neighbours_nest64(65536, pii->id, ne);
+    fprintf(stderr, "for pixel %li\n", pii->id);
+    for (i=0; i<8; i++) {
+        printf("neighbor is %li\n", ne[i]);
+    }
+    /*
+    for (i=0; i<pii->nsamples; i++) {
+        samplestruct *sxz = pii->samples[i];
+        printf("have sample %i %i %i\n", sxz->set->field->fieldindex, sxz->set->setindex, i);
+    }
+    */
+    //PixelStore_print(&ps);
+    PixelStore_free(&ps);
+
+    exit(0);
 
     if (prefs.solvastrom_flag)
     {
@@ -792,6 +815,7 @@ new_pixstore(
 
     /* minus 1 nsides power, to be sure to not loss any match */
     int64_t nsides = pow(2, --nsides_pow);
+    fprintf(stderr, "nsides %li\n", nsides);
 
     PixelStore_new(nsides, ps);
     struct set *set;

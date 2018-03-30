@@ -926,14 +926,15 @@ void neighbours_nest64(int64_t nside, int64_t pix, int64_t *neighbours) {
     nest2xyf64(nside, pix, &ix, &iy, &face_num);
     int order = nside2order(nside);
     nsm1 = nside -1;
+
     if ((ix>0) && (ix<nsm1) && (iy>0) && (iy<nsm1)) {
-        int64_t fpix = (long) face_num << (2 * order);
-        int64_t px0 = spread_bits(ix);
-        int64_t py0 = spread_bits(iy) << 1;
-        int64_t pxp = spread_bits(ix + 1);
-        int64_t pyp = spread_bits(iy + 1) << 1;
-        int64_t pxm = spread_bits(ix - 1);
-        int64_t pym = spread_bits(iy - 1) << 1;
+        long fpix = (long) face_num << (2 * order);
+        unsigned int px0 = spread_bits(ix);
+        unsigned int pxp = spread_bits(ix + 1);
+        unsigned int pxm = spread_bits(ix - 1);
+        unsigned int py0 = spread_bits(iy) << 1;
+        unsigned int pyp = spread_bits(iy + 1) << 1;
+        unsigned int pym = spread_bits(iy - 1) << 1;
 
         neighbours[0] = fpix + pxm + py0;
         neighbours[1] = fpix + pxm + pyp;

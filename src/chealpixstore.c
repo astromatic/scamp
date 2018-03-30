@@ -37,6 +37,7 @@ struct pixel_avl {
     short int imbalance; /* Height difference between pBefore and pAfter */
 };
 static void pixelAvlFree(pixel_avl*);
+static void pixelAvlPrint(pixel_avl*);
 static pixel_avl *pixelAvlSearch(pixel_avl*, const long);
 static void pixelAvlSort(pixel_avl*);
 static pixel_avl *pixelAvlInsert(pixel_avl **, pixel_avl *);
@@ -80,6 +81,9 @@ PixelStore_add(
     /* search for the pixel */
     pixel_avl *avlpix =
         pixelAvlSearch((pixel_avl*) store->pixels, pixnum);
+
+    if (pixnum == 0)
+        fprintf(stderr, "have pixnum 0\n");
 
     if (!avlpix) { // no such pixel
 
@@ -183,6 +187,11 @@ PixelStore_free(PixelStore* store)
     free(store->pixelids);
 }
 
+void
+PixelStore_print(PixelStore* store)
+{
+    pixelAvlPrint((pixel_avl*) store->pixels);
+}
 
 /*****************************************************************************
  * 1 AVL Tree implementation
@@ -348,6 +357,14 @@ static pixel_avl *pixelAvlInsert(pixel_avl **ppHead, pixel_avl *pNew) {
     return 0;
 }
 
+static void pixelAvlPrint(pixel_avl *pix) {
+    if (pix == NULL)
+        return;
+    pixelAvlPrint(pix->pAfter);
+    pixelAvlPrint(pix->pBefore);
+
+    fprintf(stderr, "pixel num: %li\n", pix->pixel.id);
+}
 static void pixelAvlFree(pixel_avl *pix) {
     if (pix == NULL)
         return;
