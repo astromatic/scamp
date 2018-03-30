@@ -296,6 +296,7 @@ void makeit(void)
     new_pixstore(nfield, ngroup, reffields, fields, &ps);
     CrossId_crossSamples(&ps, prefs.crossid_radius);
 
+    /*
     samplestruct *sx = &fields[0]->set[0]->sample[1];
     HealPixel *pii = PixelStore_getPixelFromSample(&ps, sx);
     int64_t ne[8];
@@ -311,7 +312,6 @@ void makeit(void)
     for (i=0; i<8; i++) {
         printf("neighbor is %li\n", ne[i]);
     }
-    /*
     for (i=0; i<pii->nsamples; i++) {
         samplestruct *sxz = pii->samples[i];
         printf("have sample %i %i %i\n", sxz->set->field->fieldindex, sxz->set->setindex, i);
@@ -319,8 +319,6 @@ void makeit(void)
     */
     //PixelStore_print(&ps);
     PixelStore_free(&ps);
-
-    exit(0);
 
     if (prefs.solvastrom_flag)
     {
