@@ -296,28 +296,8 @@ void makeit(void)
     new_pixstore(nfield, ngroup, reffields, fields, &ps);
     CrossId_crossSamples(&ps, prefs.crossid_radius);
 
-    /*
-    samplestruct *sx = &fields[0]->set[0]->sample[1];
-    HealPixel *pii = PixelStore_getPixelFromSample(&ps, sx);
-    int64_t ne[8];
+    //plot_debug(fields, nfield);
 
-    fprintf(stderr, "begin test \n");
-    fprintf(stderr, "begin test \n");
-    fprintf(stderr, "begin test \n");
-    fprintf(stderr, "begin test \n");
-    fprintf(stderr, "begin test \n");
-
-    neighbours_nest64(65536, pii->id, ne);
-    fprintf(stderr, "for pixel %li\n", pii->id);
-    for (i=0; i<8; i++) {
-        printf("neighbor is %li\n", ne[i]);
-    }
-    for (i=0; i<pii->nsamples; i++) {
-        samplestruct *sxz = pii->samples[i];
-        printf("have sample %i %i %i\n", sxz->set->field->fieldindex, sxz->set->setindex, i);
-    }
-    */
-    //PixelStore_print(&ps);
     PixelStore_free(&ps);
 
     if (prefs.solvastrom_flag)
@@ -811,9 +791,9 @@ new_pixstore(
      */
     int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
 
-    /* minus 1 nsides power, to be sure to not loss any match */
-    int64_t nsides = pow(2, --nsides_pow);
-    fprintf(stderr, "nsides %li\n", nsides);
+    /* minus 1 nsides power, to be sure to not loss any matches */
+    --nsides_pow;
+    int64_t nsides = pow(2, nsides_pow);
 
     PixelStore_new(nsides, ps);
     struct set *set;

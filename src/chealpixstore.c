@@ -163,6 +163,13 @@ PixelStore_getHigherFields(
         HealPixel       *pix,
         struct sample   *pivot)
 {
+    /*
+    int i;
+    for (i=0; i<pix->nsamples; i++) {
+        if (cmp_samples(&pivot, &pix->samples[i]) < 0)
+            return i;
+    }
+    */
     int max = pix->nsamples;
     int min = 0;
     int i;

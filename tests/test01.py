@@ -45,8 +45,8 @@ fields = votable.get_table_by_id("Fields")
 # Get AS and XY contrasts
 contrast_as_min = np.amin(fields.array["AS_Contrast"])
 contrast_xy_min = np.amin(fields.array["XY_Contrast"])
-scamp_test("Minimum AS contrast", contrast_as_min > 22.00)
-scamp_test("Minimum XY contrast", contrast_xy_min > 22.90)
+scamp_test("Minimum AS contrast: " + str(contrast_as_min) + " expected: > 22.00", contrast_as_min > 22.00)
+scamp_test("Minimum XY contrast: " + str(contrast_xy_min) + " expected: > 22.90", contrast_xy_min > 22.90)
 
 # FGroups table
 fgroups = votable.get_table_by_id("FGroups")
@@ -61,11 +61,11 @@ scamp_test("# of matched references: " + str(nmatched_ref) + " expected: > 1650"
 
 # Test mean internal RMS errors
 sigma_int = scamp_meanrms(fgroups.array["AstromSigma_Internal_HighSN"][0])
-scamp_test("Internal dispersion", sigma_int < 0.031)
+scamp_test("Internal dispersion: " + str(sigma_int) + " expected: < 0.031", sigma_int < 0.031)
 
 # Test mean reference RMS errors
 sigma_ref = scamp_meanrms(fgroups.array["AstromSigma_Reference_HighSN"][0])
-scamp_test("Reference dispersion", sigma_ref < 0.085)
+scamp_test("Reference dispersion: " + str(sigma_ref) + " expected: < 0.085", sigma_ref < 0.085)
 
 # Exit with status and message
 print "All OK." if status == 0 else "%d errors." %status

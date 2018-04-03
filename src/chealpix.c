@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdint.h>
 #include "chealpix.h"
 
 static const double twothird = 2.0 / 3.0;
@@ -929,12 +930,12 @@ void neighbours_nest64(int64_t nside, int64_t pix, int64_t *neighbours) {
 
     if ((ix>0) && (ix<nsm1) && (iy>0) && (iy<nsm1)) {
         long fpix = (long) face_num << (2 * order);
-        unsigned int px0 = spread_bits(ix);
-        unsigned int pxp = spread_bits(ix + 1);
-        unsigned int pxm = spread_bits(ix - 1);
-        unsigned int py0 = spread_bits(iy) << 1;
-        unsigned int pyp = spread_bits(iy + 1) << 1;
-        unsigned int pym = spread_bits(iy - 1) << 1;
+        uint64_t px0 = spread_bits64(ix);
+        uint64_t pxp = spread_bits64(ix + 1);
+        uint64_t pxm = spread_bits64(ix - 1);
+        uint64_t py0 = spread_bits64(iy) << 1;
+        uint64_t pyp = spread_bits64(iy + 1) << 1;
+        uint64_t pym = spread_bits64(iy - 1) << 1;
 
         neighbours[0] = fpix + pxm + py0;
         neighbours[1] = fpix + pxm + pyp;
