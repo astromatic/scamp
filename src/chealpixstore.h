@@ -79,6 +79,8 @@ PixelStore_commit(PixelStore *store);
 
 extern int
 PixelStore_getHigherFields(HealPixel *pix, struct sample *pivot);
+extern int
+PixelStore_getLowerFields(HealPixel *pix, struct sample *pivot);
 
 HealPixel*
 PixelStore_getPixelFromSample(PixelStore *store, struct sample *sample);

@@ -186,6 +186,37 @@ PixelStore_getHigherFields(
     return max;
 }
 
+/* ... the opposite */
+int
+PixelStore_getLowerFields(
+        HealPixel       *pix,
+        struct sample   *pivot)
+{
+    int i;
+    for (i=0; i<pix->nsamples; i++) {
+        if (cmp_samples(&pivot, &pix->samples[i]) <= 0)
+            return i-1;
+    }
+    /*
+    int max = pix->nsamples;
+    int min = 0;
+    int i;
+
+    while (min < max)
+    {
+        i = (min + max) / 2;
+        if (cmp_samples(&pivot, &pix->samples[i]) < 0)
+            max = i;
+        else
+            min = i + 1;
+    }
+
+    return max;
+    */
+}
+
+
+
 /* free everything */
 void
 PixelStore_free(PixelStore* store)
@@ -199,6 +230,14 @@ PixelStore_print(PixelStore* store)
 {
     pixelAvlPrint((pixel_avl*) store->pixels);
 }
+
+int
+PixelStore_compare(struct sample *a, struct sample *b)
+{
+    return cmp_samples(&a, &b);
+}
+
+
 
 /*****************************************************************************
  * 1 AVL Tree implementation
