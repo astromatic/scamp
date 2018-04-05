@@ -16,13 +16,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "crossid2.h"
 #include "chealpix.h"
 #include "chealpixstore.h"
+#include "crossid2.h"
 #include "field.h"
-#define NNEIGHBORS 8
 
-static int ds = 0;
+#define NNEIGHBORS 8
 
 typedef enum {CROSS_UP, CROSS_DOWN} cross_direction;
 struct field_id {
@@ -30,14 +29,20 @@ struct field_id {
     int havematch;
 };
 
-static void cross_sample(struct sample*, HealPixel*, PixelStore*, double, cross_direction);
-static int cross_time_closest_sample(struct sample*,struct sample*,
+static void cross_sample(samplestruct*, HealPixel*, PixelStore*, double, cross_direction);
+static int cross_time_closest_sample(samplestruct*,samplestruct*,
         double,PixelStore*, struct field_id*);
-static int crossmatch(struct sample*,struct sample*, double, PixelStore*);
-static void relink_sample_up(struct sample*, PixelStore*, double);
-static void relink_sample_down(struct sample*, PixelStore*, double);
-static double dist(double*,double*);
+static int crossmatch(samplestruct*,samplestruct*, double, PixelStore*);
 
+static inline double
+dist(double *va, double *vb)
+{
+    double x = va[0] - vb[0];
+    double y = va[1] - vb[1];
+    double z = va[2] - vb[2];
+
+    return x*x + y*y + z*z;
+}
 
 void
 CrossId_crossSamples(
@@ -75,7 +80,7 @@ CrossId_crossSamples(
 
 static void
 cross_sample(
-        struct sample *current_spl,
+        samplestruct *current_spl,
         HealPixel *pix,
         PixelStore *store,
         double maxdist,
@@ -165,8 +170,8 @@ cross_sample(
 
 static int
 cross_time_closest_sample(
-        struct sample *current_spl,
-        struct sample *test_spl,
+        samplestruct *current_spl,
+        samplestruct *test_spl,
         double maxdist,
         PixelStore *store,
         struct field_id *current_field)
@@ -192,32 +197,64 @@ cross_time_closest_sample(
 
 static int
 crossmatch(
-        struct sample *a,
-        struct sample *b,
+        samplestruct *a,
+        samplestruct *b,
         double maxdist,
         PixelStore *store)
 {
 
-    double distance = dist(a->vector, b->vector);
-    struct sample *relink_up    = NULL;
-    struct sample *relink_down  = NULL;
+    /*
+     * "a" and "b" comme allready sorted by epoch, with "a" being older than
+     * b. Calling this function in the opposite is a bug.
+     */
 
+    /*
+     * First if distance exceed the maximum distance, stop here.
+     */
+    double distance = dist(a->vector, b->vector);
     if (distance > maxdist)
         return 0;
 
+    /*
+     * "a" allready have a nextsamp. So we have to determinate what action to
+     * take, even before comparing distances...
+     */
     if (a->nextsamp) {
+        /*
+         * Compare the new candiate a->nextsamp and a->nextsamp. 
+         */
         int a_cmp = PixelStore_compare(b, a->nextsamp);
-        if (a_cmp > 0)
+        /* is b farther in time than a->nextsamp 
+         * XXX < or >???
+         */
+        if (a_cmp > 0) {
+            /* 
+             * "a" have a valid nextsamp closer in time than "b" (in assending
+             * order). So we will not compare "a"<->"b" distance and keep the 
+             * actual nextsamp for "a".
+             */
             return 0;
-        else if (a_cmp == 0) { // same field?
+        } else if (a_cmp == 0) {
             double a_next_dist = dist(a->vector, a->nextsamp->vector);
-            if (a_next_dist <= distance)
+            /*
+             * "a->nextsamp" belong to the same field layer than "b". So we
+             * compare distances, and go further if "b" is a better match.
+             */
+            if (a_next_dist <= distance) {
+                /* 
+                 * stop here, and keep "a->nextsamp" for "a"
+                 */
                 return 0;
-        } /* else we force the match */
+            }
+        } /* else we continue */
     }
 
+    /*
+     * Same as above, but the opposite (search in descending order)
+     */
     if (b->prevsamp) {
         int b_cmp = PixelStore_compare(a, b->prevsamp);
+        /* XXX < or > ??? */
         if (b_cmp < 0)
             return 0;
         else if (b_cmp == 0) {
@@ -227,47 +264,55 @@ crossmatch(
         }
     }
 
-    if (a->nextsamp) {
-        relink_down = a->nextsamp;
-        relink_down->prevsamp = NULL;
-    }
-    if (b->prevsamp) {
-        relink_up   = b->prevsamp;
-        relink_up->nextsamp = NULL;
-    }
 
+    /* 
+     * Here, we want to link a->b. But we also want previous linked samples
+     * to search another link.
+     *
+     * The order of these next liens IS important.
+     */
+
+    /* If an old link exists, take it and reset their link information */
+    samplestruct *relink_up    = b->prevsamp;
+    samplestruct *relink_down  = a->nextsamp;
+    if (relink_down)
+        relink_down->prevsamp = NULL;
+    if (relink_up)
+        relink_up->nextsamp = NULL;
+
+    /* Link "a" and "b", will finalyse unlinkage with previous samples */
     a->nextsamp = b;
     b->prevsamp = a;
 
-    if (relink_up)
-        relink_sample_up(relink_up, store, maxdist);
 
-    if (relink_down)
-        relink_sample_down(relink_down, store, maxdist);
+    /* 
+     * We now have reached a stable state, with a and b linked, and possibly
+     * old links pointing to NULL samples. We want to recurse for each of them
+     * and try to find a new link. There are many cases that need this 
+     * recursion.
+     *
+     * One of the trickiest:
+     * - let's take 4 samples "w" "x" "y" "z".
+     * - "w" match "x", succeed
+     * - "y" match "x", fail because "w" is closer to "x" than "y"
+     * - "z" match "w", succeed
+     * - "x" would match "y", but the comparison is allready done, and "y" 
+     * and "x" will stay unlinked.
+     *
+     * So recursion on unlink is required.
+     */
+    if (relink_up) {
+        HealPixel *pix = PixelStore_getPixelFromSample(store, relink_up); 
+        cross_sample(relink_up, pix, store, maxdist, CROSS_UP);
+    }
 
+    if (relink_down) {
+        HealPixel *pix = PixelStore_getPixelFromSample(store, relink_down);
+        cross_sample(relink_down, pix, store, maxdist, CROSS_DOWN);
+    }
+
+    /* alleluia */
     return 1;
 }
 
-int upd = 0;
-static void
-relink_sample_down(struct sample *sample, PixelStore *store, double maxdist){
-    HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
-    cross_sample(sample, pix, store, maxdist, CROSS_DOWN);
-}
-int ddp = 0;
-static void
-relink_sample_up(struct sample *sample, PixelStore *store, double maxdist)
-{
-    HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
-    cross_sample(sample, pix, store, maxdist, CROSS_UP);
-}
 
-static double
-dist(double *va, double *vb)
-{
-    double x = va[0] - vb[0];
-    double y = va[1] - vb[1];
-    double z = va[2] - vb[2];
-
-    return x*x + y*y + z*z;
-}
