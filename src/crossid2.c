@@ -62,6 +62,7 @@ CrossId_crossSamples(
      * Iterate over all created Healpix pixels. They contains a least one
      * sample
      */
+
     int i;
     for (i=0; i<pixstore->npixels; i++) {
         HealPixel *pix = PixelStore_get(pixstore, pixstore->pixelids[i]);
@@ -205,21 +206,25 @@ crossmatch(
         return 0;
 
     if (a->nextsamp) {
-        double a_next_dist = dist(a->vector, a->nextsamp->vector);
-        if (a_next_dist < distance)
+        int a_cmp = PixelStore_compare(b, a->nextsamp);
+        if (a_cmp > 0)
             return 0;
-        else if (a_next_dist == distance)
-            if (PixelStore_compare(b, a->nextsamp) >= 0)
+        else if (a_cmp == 0) { // same field?
+            double a_next_dist = dist(a->vector, a->nextsamp->vector);
+            if (a_next_dist <= distance)
                 return 0;
+        } /* else we force the match */
     }
 
     if (b->prevsamp) {
-        double b_prev_dist = dist(b->vector, b->prevsamp->vector);
-        if (b_prev_dist < distance)
+        int b_cmp = PixelStore_compare(a, b->prevsamp);
+        if (b_cmp < 0)
             return 0;
-        else if (b_prev_dist == distance)
-            if (PixelStore_compare(a, b->prevsamp) <= 0)
+        else if (b_cmp == 0) {
+            double b_prev_dist = dist(b->vector, b->prevsamp->vector);
+            if (b_prev_dist <= distance)
                 return 0;
+        }
     }
 
     if (a->nextsamp) {
@@ -231,10 +236,8 @@ crossmatch(
         relink_up->nextsamp = NULL;
     }
 
-
     a->nextsamp = b;
     b->prevsamp = a;
-
 
     if (relink_up)
         relink_sample_up(relink_up, store, maxdist);
