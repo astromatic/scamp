@@ -24,14 +24,12 @@
 
 static int ds = 0;
 
-typedef enum {TIME_CLOSEST, RAW_CLOSEST} closest_algo;
 typedef enum {CROSS_UP, CROSS_DOWN} cross_direction;
 struct field_id {
     int fieldindex;
     int havematch;
 };
 
-static closest_algo closest = TIME_CLOSEST;
 static void cross_sample(struct sample*, HealPixel*, PixelStore*, double, cross_direction);
 static int cross_time_closest_sample(struct sample*,struct sample*,
         double,PixelStore*, struct field_id*);
@@ -83,11 +81,6 @@ cross_sample(
         cross_direction direction)
 {
 
-    if (direction == CROSS_DOWN) {
-        fprintf(stderr, "not implemented\n");
-        exit(1);
-    }
-
     int field_index_pivot;
     struct field_id fi;
 
@@ -96,47 +89,30 @@ cross_sample(
      * TODO this can be optimized, by using this function once for a set
      * of samples of the same field.
      */
+    int i;
+    fi.fieldindex = -1;
+    fi.havematch  = 0;
     switch (direction) {
         case CROSS_UP:
             field_index_pivot = PixelStore_getHigherFields(pix, current_spl);
+            for (i=field_index_pivot; i<pix->nsamples; i++) 
+            {
+                if (cross_time_closest_sample(
+                            current_spl, pix->samples[i],
+                            maxdist, store, &fi) == 1)
+                    break;
+            }
             break;
         case CROSS_DOWN:
             field_index_pivot = PixelStore_getLowerFields(pix, current_spl);
-            break;
-    }
+            for (i=field_index_pivot; i>-1; i--) 
+            {
+                if (cross_time_closest_sample(
+                            pix->samples[i], current_spl,
+                            maxdist, store, &fi) == 1)
+                    break;
+            }
 
-    int i;
-    switch (closest) {
-        case TIME_CLOSEST:
-            fi.fieldindex = -1;
-            fi.havematch = 0;
-            if (direction == CROSS_UP)
-                for (i=field_index_pivot; i<pix->nsamples; i++) 
-                {
-                    if (cross_time_closest_sample(current_spl, pix->samples[i],
-                                maxdist, store, &fi) == 1)
-                    {
-                        break;
-                    }
-                }
-            else
-                for (i=0; i>field_index_pivot; i++) 
-                {
-                    if (cross_time_closest_sample(pix->samples[i], current_spl,
-                                maxdist, store, &fi) == 1)
-                    {
-                        break;
-                    }
-                }
-
-            break;
-        case RAW_CLOSEST:
-            if (direction == CROSS_UP)
-                for (i=field_index_pivot; i<pix->nsamples; i++)
-                    crossmatch(current_spl, pix->samples[i], maxdist, store);
-            else
-                for (i=0; i<field_index_pivot; i++)
-                    crossmatch(pix->samples[i], current_spl, maxdist, store);
             break;
     }
 
@@ -160,47 +136,25 @@ cross_sample(
          * Eliminate previous to current fields, we only match with upper
          * fields (or the oposite).
          */
+        int j;
+        fi.fieldindex = -1;
+        fi.havematch = 0;
         switch (direction) {
             case CROSS_UP:
                 field_index_pivot = PixelStore_getHigherFields(test_pix, current_spl);
+                for (j=field_index_pivot; j<test_pix->nsamples; j++) {
+                    if (cross_time_closest_sample(current_spl, test_pix->samples[j],
+                                maxdist, store, &fi) == 1)
+                        break;
+                }
                 break;
             case CROSS_DOWN:
                 field_index_pivot = PixelStore_getLowerFields(test_pix, current_spl);
-                break;
-        }
-
-        int j;
-        switch (closest) {
-            case TIME_CLOSEST:
-                fi.fieldindex = -1;
-                fi.havematch = 0;
-                if (direction == CROSS_UP)
-                    for (j=field_index_pivot; j<test_pix->nsamples; j++) 
-                    {
-                        if (cross_time_closest_sample(current_spl, test_pix->samples[j],
-                                    maxdist, store, &fi) == 1)
-                        {
-                            break;
-                        }
-                    }
-                else
-                    for (i=0; i>field_index_pivot; i++) 
-                    {
-                        if (cross_time_closest_sample(test_pix->samples[j], current_spl,
-                                    maxdist, store, &fi) == 1)
-                        {
-                            break;
-                        }
-                    }
-
-                break;
-            case RAW_CLOSEST:
-                if (direction == CROSS_UP)
-                    for (j=field_index_pivot; j<test_pix->nsamples; j++)
-                        crossmatch(current_spl, test_pix->samples[j], maxdist, store);
-                else
-                    for (j=0; j<field_index_pivot; j++)
-                        crossmatch(test_pix->samples[j], current_spl, maxdist, store);
+                for (j=field_index_pivot; j>-1; j--) {
+                    if (cross_time_closest_sample(test_pix->samples[j], current_spl,
+                                maxdist, store, &fi) == 1)
+                        break;
+                }
                 break;
         }
     }
@@ -261,38 +215,46 @@ crossmatch(
 
     if (b->prevsamp) {
         double b_prev_dist = dist(b->vector, b->prevsamp->vector);
-        if (b_prev_dist < distance) {
+        if (b_prev_dist < distance)
             return 0;
-        } else if (b_prev_dist == distance)
+        else if (b_prev_dist == distance)
             if (PixelStore_compare(a, b->prevsamp) <= 0)
                 return 0;
     }
 
-    relink_up   = b->prevsamp;
-    relink_down = a->nextsamp;
+    if (a->nextsamp) {
+        relink_down = a->nextsamp;
+        relink_down->prevsamp = NULL;
+    }
+    if (b->prevsamp) {
+        relink_up   = b->prevsamp;
+        relink_up->nextsamp = NULL;
+    }
+
 
     a->nextsamp = b;
     b->prevsamp = a;
 
+
     if (relink_up)
         relink_sample_up(relink_up, store, maxdist);
+
     if (relink_down)
         relink_sample_down(relink_down, store, maxdist);
 
     return 1;
 }
 
+int upd = 0;
 static void
 relink_sample_down(struct sample *sample, PixelStore *store, double maxdist){
-    sample->prevsamp = NULL;
     HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
     cross_sample(sample, pix, store, maxdist, CROSS_DOWN);
 }
-
+int ddp = 0;
 static void
 relink_sample_up(struct sample *sample, PixelStore *store, double maxdist)
 {
-    sample->nextsamp = NULL;
     HealPixel *pix = PixelStore_getPixelFromSample(store, sample);
     cross_sample(sample, pix, store, maxdist, CROSS_UP);
 }

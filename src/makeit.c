@@ -71,39 +71,48 @@
 time_t thetime, thetime2;
 static void new_pixstore(int, int, fieldstruct**, fieldstruct**, PixelStore*);
 
-static void plot_debug(fieldstruct **fields, int nfield)                        
-{                                                                               
-#define HALFPI 1.570796326794896619231321691639751442099                        
-#define TO_RAD 0.0174532925199432957692369076848861271344                       
-    /* save gnuplot for debug */                                                
-    int f;                                                                      
-    for (f=0; f<nfield; f++) {                                                  
-        fieldstruct *ff = fields[f];                                            
-        int q;                                                                  
-        for (q=0; q<ff->nset; q++) {                                            
-            setstruct *ss = ff->set[q];                                         
-            int l;                                                              
-            for (l=0; l<ss->nsample; l++) {                                     
-                samplestruct *sls = &ss->sample[l];                             
-                if (sls->set) {                                                 
-                    while (sls->prevsamp)                                       
-                        sls = sls->prevsamp;                                    
-                    do {                                                        
-                        int findex = sls->set->field->fieldindex;            
+static void plot_debug(fieldstruct **fields, int nfield)
+{
+#define HALFPI 1.570796326794896619231321691639751442099
+#define TO_RAD 0.0174532925199432957692369076848861271344
+    /* save gnuplot for debug */
+    int f;
+    for (f=0; f<nfield; f++) {
+        fieldstruct *ff = fields[f];
+        int q;
+        for (q=0; q<ff->nset; q++) {
+            setstruct *ss = ff->set[q];
+            int l;
+            for (l=0; l<ss->nsample; l++) {
+                samplestruct *sls = &ss->sample[l];
+                if (sls->set) {
+                    while (sls->prevsamp)
+                        sls = sls->prevsamp;
+
+                    if (sls->nextsamp) {
+                        if (sls != sls->nextsamp->prevsamp) {
+                            printf("hhhhhhhhhheeeeeeeeeeeeeeerrrrrrrrrrrror\n");
+                            printf("hhhhhhhhhheeeeeeeeeeeeeeerrrrrrrrrrrror\n");
+                            printf("hhhhhhhhhheeeeeeeeeeeeeeerrrrrrrrrrrror\n");
+                            exit(1);
+                        }
+                    }
+
+                    do {
+                        int findex = sls->set->field->fieldindex;
                         int sindex = sls->set->setindex;
-                        if (sls->set->field->fieldindex == 0 && sls->set->field->epoch < 0.01)
-                            findex = -1;                                          
                         printf("%i:%i:%i: %0.10lf %0.10lf %0.10lf, ", findex, sindex, l,
                                 sls->vector[0], sls->vector[1], sls->vector[2]);
-                        sls->set = NULL;                                        
-                    } while (sls = sls->nextsamp);                              
-                    printf("\n");                                               
-                }                                                               
-            }                                                                   
-        }                                                                       
-    }                                                                           
-    exit (0);                                                                   
-}       
+                        sls->set = NULL;
+                    } while (sls = sls->nextsamp);
+
+                    printf("\n");
+                }
+            }
+        }
+    }
+    exit (0);
+}
 
 /********************************** makeit ***********************************/
 void makeit(void)
@@ -296,7 +305,7 @@ void makeit(void)
     new_pixstore(nfield, ngroup, reffields, fields, &ps);
     CrossId_crossSamples(&ps, prefs.crossid_radius);
 
-    //plot_debug(fields, nfield);
+    plot_debug(fields, nfield);
 
     PixelStore_free(&ps);
 
@@ -781,18 +790,19 @@ new_pixstore(
     int total_lat = 180 * 3600;
     int total_rings = total_lat / prefs.crossid_radius;
 
-    /* 
-     * total_rings is the ideal number of rings in latitude, nside must be a 
+    /*
+     * total_rings is the ideal number of rings in latitude, nside must be a
      * power of two that will build a pixel definition that fullfill the need
      * of rings.
      *
-     * This get the nearest next power of two from the ideal total rings 
+     * This get the nearest next power of two from the ideal total rings
      * required. [https://en.wikipedia.org/wiki/Logarithm#Change_of_base]
      */
     int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
 
     /* minus 1 nsides power, to be sure to not loss any matches */
     --nsides_pow;
+    nsides_pow = 15;
     int64_t nsides = pow(2, nsides_pow);
 
     PixelStore_new(nsides, ps);
