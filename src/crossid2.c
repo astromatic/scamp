@@ -208,10 +208,7 @@ crossmatch(
      * "a" and "b" comme allready sorted by epoch, with "a" being older than
      * b. Calling this function in the opposite order is a bug.
      */
-    /*
-    if (PixelStore_compare(a, b) > 0)
-        exit(1);
-    */
+    //assert(PixelStore_compare(a, b) < 0);
 
 
     /*
@@ -291,30 +288,28 @@ crossmatch(
     a->nextsamp = b;
     b->prevsamp = a;
 
-
-
-
     /* 
      * We have now reached a stable state, with a and b linked, and possibly
-     * old links pointing to NULL samples.
-     */
-
-
-
-
-    /*We want to recurse for each of them
-     * and try to find a new link. There are many cases that need this 
-     * recursion.
+     * old links pointing to NULL samples. This is where the old crossid 
+     * algorithm was ending.
      *
-     * One of the trickiest:
-     * - let's take 4 samples "w" "x" "y" "z".
-     * - "w" match "x", succeed
-     * - "y" match "x", fail because "w" is closer to "x" than "y"
-     * - "z" match "w", succeed
-     * - "x" would match "y", but the comparison is allready done, and "y" 
-     * and "x" will stay unlinked.
+     * We want to recurse for each unlinked samples and try to find a new link. 
+     * There are many cases that need this recursion.
      *
-     * So recursion on unlink is required.
+     * One of the many cases: let's take 4 samples "a" "b" "y" "z".
+     * field at epoch+1: ------a-b--------------
+     * field at epoch  : -------y-z-------------
+     * - "z" match "b", succeed
+     * - "y" match "b", succedd (unlink z->next)
+     * - "y" match "a", succeed (unlink b->prev)
+     * - "z" and "b" will stay unlinked when they should.
+     *
+     * With the new algo it now behave like this:
+     * - "z" match "b", succed
+     * - "y" match "b", succeed, relink up "z" (possibly found a link in upper fields)
+     * - "y" match "a", succedd, relink down "b" (and found "z" as best match)
+     * - eveything is fine "y"->"a", and "z"->"b".
+     *
      */
     if (relink_up) {
         HealPixel *pix = PixelStore_getPixelFromSample(store, relink_up); 
