@@ -67,7 +67,19 @@ PixelStore_new(int64_t nsides, PixelStore *store)
     store->pixelids_size = PIXELIDS_BASE_SIZE;
 }
 
-/* add a sample to a pixel store */
+
+/**
+ * \brief free everything 
+ * \param store
+ */
+void
+PixelStore_free(PixelStore* store)
+{
+    pixelAvlFree((pixel_avl*) store->pixels);
+    free(store->pixelids);
+}
+
+
 /**
  * \brief add a sample to a pixel store
  * \param store
@@ -128,6 +140,7 @@ PixelStore_add(
     pix->nsamples++;
 }
 
+
 /**
  * \brief get a piwel by index 
  * \param store
@@ -146,6 +159,7 @@ PixelStore_get(
     return &match_avl->pixel;
 
 }
+
 
 /**
  * \brief return the pixel to wich the sample belong to
@@ -166,6 +180,7 @@ PixelStore_getPixelFromSample(
     return PixelStore_get(store, pixnum);
 }
 
+
 /**
  * \brief sort samples by epoch and fields if epoch are equals
  * \param store
@@ -175,6 +190,7 @@ PixelStore_sort(PixelStore* store)
 {
     pixelAvlSort((pixel_avl*) store->pixels);
 }
+
 
 /**
  * \brief return an index value to the first next test sample
@@ -214,6 +230,7 @@ PixelStore_getHigherFields(
     return max;
     */
 }
+
 
 /**
  * \brief return an index value to the previous next test sample
@@ -257,18 +274,6 @@ PixelStore_getLowerFields(
 }
 
 
-
-/**
- * \brief free everything 
- * \param store
- */
-void
-PixelStore_free(PixelStore* store)
-{
-    pixelAvlFree((pixel_avl*) store->pixels);
-    free(store->pixelids);
-}
-
 /**
  * \brief print store values
  * \param store
@@ -278,6 +283,7 @@ PixelStore_print(PixelStore* store)
 {
     pixelAvlPrint((pixel_avl*) store->pixels);
 }
+
 
 /**
  * \brief compare two samples

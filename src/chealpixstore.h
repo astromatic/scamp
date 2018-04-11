@@ -31,9 +31,8 @@
 
 typedef struct HealPixel HealPixel;
 struct HealPixel {
-
     int64_t id;                 /* healpix id */
-    struct sample **samples;    /* our samples */
+    samplestruct **samples;    /* our samples */
     int nsamples;               /* number of samples belonging to this pixel */
     int size;                   /* for reallocation if required */
     int64_t neighbors[8];       /* Neighbors indexes */
@@ -54,32 +53,27 @@ extern void
 PixelStore_new(int64_t nsides, PixelStore *ps);
 
 extern void
-PixelStore_add(PixelStore *store, struct sample *spl);
+PixelStore_free(PixelStore *store);
+
+extern void
+PixelStore_add(PixelStore *store, samplestruct *spl);
 
 extern HealPixel*
 PixelStore_get(PixelStore *store, int64_t key);
 
-extern void
-PixelStore_free(PixelStore *store);
-
-extern void
-PixelStore_setMaxRadius(PixelStore *store, double radius);
-
-extern void
-PixelStore_commit(PixelStore *store);
+extern HealPixel*
+PixelStore_getPixelFromSample(PixelStore *store, samplestruct *sample);
 
 extern int
-PixelStore_getHigherFields(HealPixel *pix, struct sample *pivot);
-extern int
-PixelStore_getLowerFields(HealPixel *pix, struct sample *pivot);
+PixelStore_getHigherFields(HealPixel *pix, samplestruct *pivot);
 
-HealPixel*
-PixelStore_getPixelFromSample(PixelStore *store, struct sample *sample);
+extern int
+PixelStore_getLowerFields(HealPixel *pix, samplestruct *pivot);
 
 extern void
 PixelStore_sort(PixelStore *store);
 
 extern int
-PixelStore_compare(struct sample *a, struct sample *b);
+PixelStore_compare(samplestruct *a, samplestruct *b);
 
 #endif /* _CHEALPIXSTORE_H_ */
