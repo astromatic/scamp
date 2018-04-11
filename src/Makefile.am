@@ -43,7 +43,8 @@ scamp_SOURCES	= astrefcat.c astrsolve.c astrstats.c catout.c check.c \
 		  fgroup.h field.h fitswcs.h globals.h header.h key.h match.h \
 		  merge.h misc.h mosaic.h photsolve.h preflist.h prefs.h \
 		  proper.h pqueue.h quadtree.h samples.h threads.h types.h \
-		  url.h wcscelsys.h xml.h
+		  url.h wcscelsys.h xml.h chealpix.h chealpix.c chealpixstore.h \
+          chealpixstore.c
 scamp_LDADD	= $(srcdir)/fits/libfits.a \
 		  $(srcdir)/wcs/libwcs_c.a
 DATE=`date +"%Y-%m-%d"`
