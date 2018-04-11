@@ -1,7 +1,10 @@
-/*
- * Copyright (C) 2017 University of Bordeaux. All right reserved.
- * Written by Emmanuel Bertin
- * Written by Sebastien Serre
+/**
+ *
+ * \file        crossid2.h
+ * \author      Sébastien Serre
+ * \date        11/04/2018
+ *
+ * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

@@ -1,9 +1,11 @@
-/*
- * Healpix pixels storage mechanism.
+/**
  *
- * Copyright (C) 2017 University of Bordeaux. All right reserved.
- * Written by Emmanuel Bertin
- * Written by Sebastien Serre
+ * \file        chealpixstore.h
+ * \brief       Helpix pixels storarge
+ * \author      Sébastien Serre
+ * \date        11/04/2018
+ *
+ * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,16 +13,15 @@
  * (at your option) any later version.
  */
 
-
 #ifndef _CHEALPIXSTORE_H_
 #define _CHEALPIXSTORE_H_
 
 #include <stdbool.h>
 
 #include "define.h"
+#include "fgroup.h"
 #include "globals.h"
 #include "samples.h"
-#include "fgroup.h"
 
 #define SC_PI 3.141592653589793238462643383279502884197                            
 #define SC_TWOPI 6.283185307179586476925286766559005768394                         
@@ -29,17 +30,13 @@
 #define TO_RAD 0.0174532925199432957692369076848861271344
 
 typedef struct HealPixel HealPixel;
-/**
- * HealPixel store pointers to every samples of all fields, belonging to a
- * common healpix pixel.
- */
 struct HealPixel {
 
-    int64_t id;            /* healpix id */
+    int64_t id;                 /* healpix id */
     struct sample **samples;    /* our samples */
-    int nsamples;       /* number of samples belonging to this pixel */
-    int size;           /* for reallocation if required */
-    int64_t neighbors[8];  /* Neighbors indexes */
+    int nsamples;               /* number of samples belonging to this pixel */
+    int size;                   /* for reallocation if required */
+    int64_t neighbors[8];       /* Neighbors indexes */
 };
 
 typedef struct PixelStore {
@@ -53,15 +50,9 @@ typedef struct PixelStore {
 
 } PixelStore;
 
-
 extern void
 PixelStore_new(int64_t nsides, PixelStore *ps);
 
-/* 
- * Store "spl" in "store" in pixel id "key". Set "ext to contains a pointer to
- * our newly created sample. In case of internal reallocation, ext is 
- * updated automatically.
- */
 extern void
 PixelStore_add(PixelStore *store, struct sample *spl);
 
@@ -90,4 +81,5 @@ PixelStore_sort(PixelStore *store);
 
 extern int
 PixelStore_compare(struct sample *a, struct sample *b);
+
 #endif /* _CHEALPIXSTORE_H_ */

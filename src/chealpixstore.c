@@ -1,56 +1,63 @@
-/*
- * Healpix pixels storage mechanism.
+/**
  *
- * This file is divided in four parts:
- * - 1 AVL tree implementations,
- * - 2 static functions
- * - 3 public interface
+ * \file        chealpixstore.c
+ * \brief       Healpix pixels storage mechanism.
+ * \author      Sébastien Serre
+ * \date        11/04/2018
  *
- * Copyright (C) 2017 University of Bordeaux. All right reserved.
- * Written by Emmanuel Bertin
- * Written by Sebastien Serre
+ * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
+ * \details
+ *
+ * This file is divided in four parts:
+ * - public interface
+ * - static functions
+ * - AVL tree implementations,
+ *
  */
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "chealpixstore.h"
 #include "chealpix.h"
+#include "chealpixstore.h"
 #include "field.h"
 
+#define PIXELIDS_BASE_SIZE 1000 /* initial malloc or PixelStore->pixelids */
+#define SPL_BASE_SIZE 10        /* initial malloc of HealPixel->samples */
 
-/* 
- * forward AVL tree function declarations 
- */
+/* forward AVL tree function declarations */
 typedef struct pixel_avl pixel_avl;
 struct pixel_avl {
-    HealPixel pixel; /* The samples being stored. Key is at pixel.id */
-    pixel_avl *pBefore; /* Other elements less than pixel.id */
-    pixel_avl *pAfter; /* Other elements greater than pixel.id */
-    pixel_avl *pUp; /* Parent element */
-    short int height; /* Height of this node.  Leaf==1 */
-    short int imbalance; /* Height difference between pBefore and pAfter */
+    HealPixel pixel;        /* The samples being stored. Key is at pixel.id */
+    pixel_avl *pBefore;     /* Other elements less than pixel.id */
+    pixel_avl *pAfter;      /* Other elements greater than pixel.id */
+    pixel_avl *pUp;         /* Parent element */
+    short int height;       /* Height of this node.  Leaf==1 */
+    short int imbalance;    /* Height difference between pBefore and pAfter */
 };
-static void pixelAvlFree(pixel_avl*);
-static void pixelAvlPrint(pixel_avl*);
 static pixel_avl *pixelAvlSearch(pixel_avl*, const long);
-static void pixelAvlSort(pixel_avl*);
 static pixel_avl *pixelAvlInsert(pixel_avl **, pixel_avl *);
+static void pixelAvlFree(pixel_avl*);
+
+/* forward utility declaration */
 static int cmp_samples(const void* a, const void *b);
+static void pixelAvlSort(pixel_avl*);
+static void pixelAvlPrint(pixel_avl*);
 
 
-
-/*
- * Main API
+/**
+ * \brief create a new pixel store 
+ * \param nsides the healpix nsides resolution parameter
+ * \param store
+ * \details
+ * The store must be released with PixelStore_free when no more used.
  */
-
-/* create a new pixel store */
-#define PIXELIDS_BASE_SIZE 1000
 void
 PixelStore_new(int64_t nsides, PixelStore *store)
 {
@@ -62,11 +69,15 @@ PixelStore_new(int64_t nsides, PixelStore *store)
 }
 
 /* add a sample to a pixel store */
-#define SPL_BASE_SIZE 50
+/**
+ * \brief add a sample to a pixel store
+ * \param store
+ * \param spl the sample
+ */
 void
 PixelStore_add(
         PixelStore      *store,
-        struct sample   *spl)
+        samplestruct   *spl)
 {
 
     spl->nextsamp = spl->prevsamp = NULL;
@@ -90,7 +101,7 @@ PixelStore_add(
         int i;
         QCALLOC(avlpix, pixel_avl, 1);
         avlpix->pixel.id = pixnum;
-        QCALLOC(avlpix->pixel.samples, struct sample *, SPL_BASE_SIZE);
+        QCALLOC(avlpix->pixel.samples, samplestruct *, SPL_BASE_SIZE);
         avlpix->pixel.size = SPL_BASE_SIZE;
         avlpix->pixel.nsamples = 0;
 
@@ -110,7 +121,7 @@ PixelStore_add(
 
     HealPixel *pix = &avlpix->pixel;
     if (pix->nsamples == pix->size) {
-        QREALLOC(pix->samples, struct sample*, pix->size * 2);
+        QREALLOC(pix->samples, samplestruct*, pix->size * 2);
         pix->size *= 2;
     }
 
@@ -118,7 +129,11 @@ PixelStore_add(
     pix->nsamples++;
 }
 
-/* get a piwel by index */
+/**
+ * \brief get a piwel by index 
+ * \param store
+ * \param key
+ */
 HealPixel*
 PixelStore_get(
         PixelStore *store,
@@ -133,11 +148,15 @@ PixelStore_get(
 
 }
 
-/* return the pixel to wich the sample belong to */
+/**
+ * \brief return the pixel to wich the sample belong to
+ * \param store
+ * \param sample
+ */
 HealPixel*
 PixelStore_getPixelFromSample(
         PixelStore      *store,
-        struct sample   *sample)
+        samplestruct   *sample)
 {
     double lon, col;
     vec2ang(sample->vector, &col, &lon);
@@ -148,20 +167,29 @@ PixelStore_getPixelFromSample(
     return PixelStore_get(store, pixnum);
 }
 
-/* before crossmatching, sort samples by epoch and fields */
+/**
+ * \brief sort samples by epoch and fields if epoch are equals
+ * \param store
+ */
 void
 PixelStore_sort(PixelStore* store)
 {
     pixelAvlSort((pixel_avl*) store->pixels);
 }
 
-/* return the index at wich wen can start crossmatching for the sample "pivot"
-   avoiding unmatchables samples that have a timestamp lesser than the one
-   of the sample */
+/**
+ * \brief return an index value to the first next test sample
+ * \param pix
+ * \param pivot
+ * \details
+ * return the index at wich wen can start crossmatching for the sample "pivot"
+ * avoiding unmatchables samples that have a timestamp lesser than the one
+ * of the sample.
+ */
 int
 PixelStore_getHigherFields(
         HealPixel       *pix,
-        struct sample   *pivot)
+        samplestruct   *pivot)
 {
     int i;
     for (i=0; i<pix->nsamples; i++) {
@@ -187,11 +215,21 @@ PixelStore_getHigherFields(
     */
 }
 
-/* ... the opposite */
+/**
+ * \brief return an index value to the previous next test sample
+ * \param pix
+ * \param pivot
+ * \details
+ * return the index at wich wen can start crossmatching for the sample "pivot"
+ * avoiding unmatchables samples that have a timestamp gretter than the one
+ * of the sample.
+ * Iterating with this value, must be done in reverse order:
+ * for (i=ret; i>-1; i--)
+ */
 int
 PixelStore_getLowerFields(
         HealPixel       *pix,
-        struct sample   *pivot)
+        samplestruct   *pivot)
 {
     int i;
     for (i=0; i<pix->nsamples; i++) {
@@ -219,7 +257,10 @@ PixelStore_getLowerFields(
 
 
 
-/* free everything */
+/**
+ * \brief free everything 
+ * \param store
+ */
 void
 PixelStore_free(PixelStore* store)
 {
@@ -227,16 +268,84 @@ PixelStore_free(PixelStore* store)
     free(store->pixelids);
 }
 
+/**
+ * \brief print store values
+ * \param store
+ */
 void
 PixelStore_print(PixelStore* store)
 {
     pixelAvlPrint((pixel_avl*) store->pixels);
 }
 
+/**
+ * \brief compare two samples
+ * \param a
+ * \param b
+ * \return 1 if a is newer than b, -1 if he is older, 0 if they comme from the same field.
+ * \details
+ * This compare uses the same function than the one used to sort samples.
+ *
+ * If epoch are equals, samples will be compared on field indexes.
+ * If a and b come from the same field, they will the be considered equal.
+ */
 int
-PixelStore_compare(struct sample *a, struct sample *b)
+PixelStore_compare(samplestruct *a, samplestruct *b)
 {
     return cmp_samples(&a, &b);
+}
+
+
+
+/* print */
+static void pixelAvlPrint(pixel_avl *pix) {
+    if (pix == NULL)
+        return;
+    pixelAvlPrint(pix->pAfter);
+    pixelAvlPrint(pix->pBefore);
+
+    fprintf(stderr, "pixel num: %li\n", pix->pixel.id);
+}
+
+/* free */
+static void pixelAvlFree(pixel_avl *pix) {
+    if (pix == NULL)
+        return;
+
+    pixelAvlFree(pix->pAfter);
+    pixelAvlFree(pix->pBefore);
+
+    free(pix->pixel.samples);
+    free(pix);
+}
+
+/* compare */
+static int cmp_samples(const void* a, const void *b) {
+    samplestruct *sa = * (samplestruct**) a;
+    samplestruct *sb = * (samplestruct**) b;
+    struct field *fa = sa->set->field;
+    struct field *fb = sb->set->field;
+
+    if (fa->epoch < fb->epoch)
+        return -1;
+    else if (fa->epoch > fb->epoch)
+        return 1;
+    else
+        return fa->fieldindex > fb->fieldindex ? 1 :
+                    fa->fieldindex < fb->fieldindex ? -1 : 0;
+}
+
+/* sort */
+static void pixelAvlSort(pixel_avl *pix) {
+    if (pix == NULL)
+        return;
+    pixelAvlSort(pix->pAfter);
+    pixelAvlSort(pix->pBefore);
+    qsort(pix->pixel.samples,
+            pix->pixel.nsamples,
+            sizeof(samplestruct*),
+            cmp_samples);
+
 }
 
 
@@ -405,51 +514,6 @@ static pixel_avl *pixelAvlInsert(pixel_avl **ppHead, pixel_avl *pNew) {
     return 0;
 }
 
-static void pixelAvlPrint(pixel_avl *pix) {
-    if (pix == NULL)
-        return;
-    pixelAvlPrint(pix->pAfter);
-    pixelAvlPrint(pix->pBefore);
-
-    fprintf(stderr, "pixel num: %li\n", pix->pixel.id);
-}
-static void pixelAvlFree(pixel_avl *pix) {
-    if (pix == NULL)
-        return;
-
-    pixelAvlFree(pix->pAfter);
-    pixelAvlFree(pix->pBefore);
-
-    free(pix->pixel.samples);
-    free(pix);
-}
-
-static int cmp_samples(const void* a, const void *b) {
-    struct sample *sa = * (struct sample**) a;
-    struct sample *sb = * (struct sample**) b;
-    struct field *fa = sa->set->field;
-    struct field *fb = sb->set->field;
-
-    if (fa->epoch < fb->epoch)
-        return -1;
-    else if (fa->epoch > fb->epoch)
-        return 1;
-    else
-        return fa->fieldindex > fb->fieldindex ? 1 :
-                    fa->fieldindex < fb->fieldindex ? -1 : 0;
-}
-static void pixelAvlSort(pixel_avl *pix) {
-    if (pix == NULL)
-        return;
-    pixelAvlSort(pix->pAfter);
-    pixelAvlSort(pix->pBefore);
-    qsort(pix->pixel.samples,
-            pix->pixel.nsamples,
-            sizeof(struct sample*),
-            cmp_samples);
-
-}
-
 
 #if 0 /* NOT USED */
 /* Remove node pOld from the tree.  pOld must be an element of the tree or
@@ -495,9 +559,3 @@ static void amatchAvlRemove(amatch_avl **ppHead, amatch_avl *pOld){
     /* assert( amatchAvlIntegrity2(*ppHead) ); */
 }
 #endif
-/**
- * AVL related functions end
- ******************************************************************************/
-
-
-

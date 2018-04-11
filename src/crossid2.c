@@ -1,14 +1,107 @@
-/*
- * Efficient catalogs cross matching functions.
+/**
  *
- * Copyright (C) 2017 University of Bordeaux. All right reserved.
- * Written by Emmanuel Bertin
- * Written by Sebastien Serre
+ * \file        crossid2.c
+ * \brief       Efficient catalogs cross matching functions.
+ * \author      Sébastien Serre
+ * \date        11/04/2018
+ *
+ * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
+ *
+ * \details
+ * 
+ * This file is in charge of linking samples to their best match, traversing
+ * all fields in epoch order. It uses PixelStore as sample container, and
+ * use it to iterate over all pixels. The most important functions in this 
+ * file are the static functions "cross_sample" and "crossmatch".
+ *
+ * I've found that two fields and four samples are enought to represent all 
+ * cases I have identified and have to deal with. The problem is that the 
+ * order in wich matches are done, can leave unliked samples. These example 
+ * are high level, ignoring pixels, just talking about distance between samples 
+ * and ordering in time.
+ *
+ * Let's take this as a first work case with field1 an field2 sorted by epoch 
+ * (with field1 older) and four samples "a", "b",  "y" and "z":
+ *
+ * \code{.unparsed}
+ * field2 ---y----x--------------
+ * field1 ------a--b-------------
+ * \endcode
+ * 
+ * \par Case 1 (the fine case)
+ * - "b" link "x" as his closest match,
+ * - "a" link "y" as his closest match, (would have taken "x", but "x" have a 
+ * better  match with "b")
+ * - we have iterated all field1 samples, this end here for this field.
+ *
+ * Everything is fine.
+ *
+ * \par Case 2 (a problem)
+ * - "a" link "x" as his closest match, (better than "y"), then
+ * - "b" link "x" as his closest match, (unlinking a->next bestmach)
+ * - we have iterated all field1 samples, this end here for this field.
+ *
+ * In this case, "a" will never match "y" where he should.
+ *
+ * So when "b" is linking himself to "x", it must tell "a" (the previous "x" 
+ * match) to search a new match in upper fields. This is done in the new 
+ * algorythm as "CROSS_UP" option. In this case, "CROSS_UP" would just 
+ * add a new step after unlinking any sample->next match. Example:
+ *
+ * - "a" link "x" as his closest match, (better than "y"), then
+ * - "b" link "x" as his closest match, (unlinking a->next bestmach)
+ * - CROSS_UP "a": "a" link "y" as his closest match (and fail for "x" 
+ * because "b" is a better match for "x")
+ * - we have iterated all field1 samples, this end here for this field.
+ *
+ * Fine.
+ *
+ * \par Case 3 (CROSS_UP is not enought)
+ *
+ * Another test case:
+ * \code{.unparsed}
+ * field2 -----y--x--------------
+ * field1 ------a----b-----------
+ * \endcode
+ * 
+ * We use relink_up:
+ * - "b" link "x" as his closest match, then
+ * - "a" link "x" as his closest match, (unlinking b->next),
+ * - relink_up(b) found no valid match (or any other "bad" match).
+ * - "a" link "y" as his closest match, (it is better than "x") and unlink 
+ * him from x->prev.
+ * - we have iterated all field1 samples, this end here for this field.
+ *
+ * In this case, "b" and "x" are not matching, when they should. Plus the 
+ * order in wich the matches have been done have deleted the relation between 
+ * "x" and "b", "relink_up" does not sove this.
+ *
+ * So, when "a" link to "y" and unlink from "x", it left "x" prevsamples 
+ * empty. We need to tell "x" to find a new match back in time. This is done 
+ * with the "CROSS_DOWN" logic in the new code.
+ *
+ * \par Case 4 (fine again)
+ *
+ * Here whith the use of "relink_up" and "CROSS_DOWN", we have the expected 
+ * result in all cases:
+ *
+ * - "b" link "x" as his closest match, then
+ * - "a" link "x" as his closest match, (unlink b->next)
+ * - relink_up "b": found no valid match (or any other "bad" match),
+ * - "a" link "y" as his closest match, (unlink x->prev)
+ * - CROSS_DOWN "x": found "b" as his closest match
+ * - we have iterated all field1 samples, this end here for this field.
+ *
+ * Everything is fine, "a" matches "y" and "b" matches "x".
+ *
+ * Note that these steps can recurse, because they might unlink 
+ * other samples. So a simple crossmatch can recurse many times
+ * change and relink many samples until it reaches a stable state.
  */
 
 #include <math.h>
@@ -21,19 +114,32 @@
 #include "crossid2.h"
 #include "field.h"
 
-#define NNEIGHBORS 8
 
+/* local types */
+#define NNEIGHBORS 8
 typedef enum {CROSS_UP, CROSS_DOWN} cross_direction;
 struct field_id {
     int fieldindex;
     int havematch;
 };
 
+/* forward declarations */
 static void cross_sample(samplestruct*, HealPixel*, PixelStore*, double, cross_direction);
 static int cross_time_closest_sample(samplestruct*,samplestruct*,
         double,PixelStore*, struct field_id*);
 static int crossmatch(samplestruct*,samplestruct*, double, PixelStore*);
 
+
+
+
+
+
+/**
+ * \details
+ * This is the function used to compare samples distance. The normal euclidean
+ * ditance would be sqrt(x*x + y*y + z*z), but this one is enought to compare
+ * and is faster.
+ */
 static inline double
 dist(double *va, double *vb)
 {
@@ -44,6 +150,13 @@ dist(double *va, double *vb)
     return x*x + y*y + z*z;
 }
 
+/**
+ * \brief Cross match and link all samples
+ * \param pixstore The pixel store (PixelStore)
+ * \param radius_arcsec The max radius
+ * \details
+ * This is where it would start to implement multi threading. 
+ */
 void
 CrossId_crossSamples(
         PixelStore *pixstore,
@@ -65,9 +178,8 @@ CrossId_crossSamples(
 
     /*
      * Iterate over all created Healpix pixels. They contains a least one
-     * sample
+     * sample.
      */
-
     int i;
     for (i=0; i<pixstore->npixels; i++) {
         HealPixel *pix = PixelStore_get(pixstore, pixstore->pixelids[i]);
@@ -78,7 +190,14 @@ CrossId_crossSamples(
     }
 }
 
-/* TODO factorize */
+/**
+ * \brief Take a sample and link it with his best match in "cross_direction"
+ * \param current_spl The sample we want to link
+ * \param pix The sample pixel
+ * \param store The pixel store (to get neighbors)
+ * \param maxdist The maximum radius distance
+ * \param direction Match back or forward in time
+ */
 static void
 cross_sample(
         samplestruct *current_spl,
@@ -92,9 +211,12 @@ cross_sample(
     struct field_id fi;
 
     /*
-     * Eliminate previous fields, we only match with upper fields
-     * TODO this can be optimized, by using this function once for a set
-     * of samples of the same field.
+     * Iterate over current_spl pixel samples.
+     *
+     * If i want to CROSS_UP, eliminate all samples older or bellonging to the
+     * field of current_spl, then iterate from the closer samples in time,
+     * and stop if a match is found in a field. "cross_time_closest" take
+     * care of taking the best sample for a field.
      */
     int i;
     fi.fieldindex = -1;
@@ -125,23 +247,20 @@ cross_sample(
 
     /*
      * Then iterate against neighbors pixels
-     * TODO this can be optimized, by using this loop once for a set
-     * of samples.
      */
     for (i=0; i<NNEIGHBORS; i++) {
 
         /*
          * Does the pixel exists? It may be a neighbor of current pixel,
-         * but not be initialized because it does not contains
-         * any samples. TODO opti: get pixel once.
+         * but not be initialized because it does not contains samples.
          */
         HealPixel *test_pix = PixelStore_get(store, pix->neighbors[i]);
         if (test_pix == NULL)
             continue;
 
         /*
-         * Eliminate previous to current fields, we only match with upper
-         * fields (or the oposite).
+         * Again only match a portion of the pix->sample, and stop if a field
+         * contains a match.
          */
         int j;
         fi.fieldindex = -1;
@@ -168,7 +287,19 @@ cross_sample(
 }
 
 
-
+/**
+ * \brief Called from a list iterator over samples, return 1 when a match is found.
+ * \param current_spl The sample we want to link
+ * \param test_spl The sample we test
+ * \param maxdist maximum radius
+ * \param store the pixel store
+ * \param current_field the structure used to keep track of the last match/field.
+ * \return 0 when no matches are found, 1 where there is.
+ * \details This function means is to iterate samples from different fields and
+ * to stop when a match is found AND we are changing field, wich means that we
+ * have the previous field best sample match. This function must be called
+ * on a sample array sorted in the desired time order.
+ */
 static int
 cross_time_closest_sample(
         samplestruct *current_spl,
@@ -196,6 +327,16 @@ cross_time_closest_sample(
 }
 
 
+/**
+ * \brief Crossmatch two samples
+ * \param a the first sample (older than b)
+ * \param b the seconds sample (newer than a)
+ * \param maxidist maximum radius
+ * \param store our pixel store
+ * \details This function can call "cross_sample" and then recurse. See the
+ * documentation in this header file, and the code comments to understand
+ * the how and why of his behaviour.
+ */
 static int
 crossmatch(
         samplestruct *a,
@@ -273,7 +414,7 @@ crossmatch(
      * Here, we want to link a->b. But we also want previous linked samples
      * to search another link.
      *
-     * The order of these next liens IS important.
+     * The order of these next lines IS important.
      */
 
     /* If an old link exists, take it and reset their link information */
@@ -291,25 +432,11 @@ crossmatch(
     /* 
      * We have now reached a stable state, with a and b linked, and possibly
      * old links pointing to NULL samples. This is where the old crossid 
-     * algorithm was ending.
+     * algorithm ended.
      *
-     * We want to recurse for each unlinked samples and try to find a new link. 
-     * There are many cases that need this recursion.
-     *
-     * One of the many cases: let's take 4 samples "a" "b" "y" "z".
-     * field at epoch+1: ------a-b--------------
-     * field at epoch  : -------y-z-------------
-     * - "z" match "b", succeed
-     * - "y" match "b", succedd (unlink z->next)
-     * - "y" match "a", succeed (unlink b->prev)
-     * - "z" and "b" will stay unlinked when they should.
-     *
-     * With the new algo it now behave like this:
-     * - "z" match "b", succed
-     * - "y" match "b", succeed, relink up "z" (possibly found a link in upper fields)
-     * - "y" match "a", succedd, relink down "b" (and found "z" as best match)
-     * - eveything is fine "y"->"a", and "z"->"b".
-     *
+     * We want to recurse for each unlinked samples so they can fine a new
+     * best match. There are many cases that need this recursion (see doc in 
+     * this header file).
      */
     if (relink_up) {
         HealPixel *pix = PixelStore_getPixelFromSample(store, relink_up); 
