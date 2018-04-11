@@ -130,10 +130,6 @@ static int cross_time_closest_sample(samplestruct*,samplestruct*,
 static int crossmatch(samplestruct*,samplestruct*, double, PixelStore*);
 
 
-
-
-
-
 /**
  * \details
  * This is the function used to compare samples distance. The normal euclidean
@@ -224,8 +220,7 @@ cross_sample(
     switch (direction) {
         case CROSS_UP:
             field_index_pivot = PixelStore_getHigherFields(pix, current_spl);
-            for (i=field_index_pivot; i<pix->nsamples; i++) 
-            {
+            for (i=field_index_pivot; i<pix->nsamples; i++) {
                 if (cross_time_closest_sample(
                             current_spl, pix->samples[i],
                             maxdist, store, &fi) == 1)
@@ -234,8 +229,7 @@ cross_sample(
             break;
         case CROSS_DOWN:
             field_index_pivot = PixelStore_getLowerFields(pix, current_spl);
-            for (i=field_index_pivot; i>-1; i--) 
-            {
+            for (i=field_index_pivot; i>-1; i--) {
                 if (cross_time_closest_sample(
                             pix->samples[i], current_spl,
                             maxdist, store, &fi) == 1)
@@ -336,6 +330,7 @@ cross_time_closest_sample(
  * \details This function can call "cross_sample" and then recurse. See the
  * documentation in this header file, and the code comments to understand
  * the how and why of his behaviour.
+ *
  */
 static int
 crossmatch(
@@ -346,8 +341,11 @@ crossmatch(
 {
 
     /*
-     * "a" and "b" comme allready sorted by epoch, with "a" being older than
-     * b. Calling this function in the opposite order is a bug.
+     * Might set a->nextsamp equal to b, and b->prevsamp equal to a.
+     *
+     * So, "a" and "b" must comme allready sorted by epoch, 
+     * with "a" being older tha "b". Calling this function in the opposite 
+     * order is a bug.
      */
     //assert(PixelStore_compare(a, b) < 0);
 
@@ -365,30 +363,26 @@ crossmatch(
      */
     if (a->nextsamp) {
         /*
-         * Compare the new candiate a->nextsamp and a->nextsamp. 
+         * Compare the new candiate and the old
          */
-        int a_cmp = PixelStore_compare(b, a->nextsamp);
-
-        /* 
-         * If b is farther in time than a->nextsamp, stop here.
-         *
-         * If "a" have a valid ->nextsamp closer in time than "b" 
-         * we will not compare "a"<->"b" distance and keep the 
-         * actual nextsamp for "a".
-         */
-        if (a_cmp > 0)
-            return 0;
-
-        /*
-         * If "a->nextsamp" belong to the same field layer than "b". So we
-         * compare distances, and go further if "b" is a better match.
-         */
-        if (a_cmp == 0) {
-            double a_next_dist = dist(a->vector, a->nextsamp->vector);
-            if (a_next_dist <= distance)
+        switch (PixelStore_compare(b, a->nextsamp)) {
+            case 1:
+                /* 
+                 * b is from a field farther in time from a than a->nextsamp. 
+                 * Stop here.
+                 */
                 return 0;
-        } 
+            case 0:
+                /*
+                 * "a->nextsamp" belong to the same field layer than "b". So we
+                 * compare distances, and go further if "b" is a better match.
+                 */
+                if (dist(a->vector, a->nextsamp->vector) <= distance)
+                    return 0;
+        }
+
         /* Else whatever the distance is, "a" will want to link to "b" */
+
     }
 
     /*
@@ -396,15 +390,12 @@ crossmatch(
      */
     if (b->prevsamp) {
 
-        int b_cmp = PixelStore_compare(a, b->prevsamp);
-
-        if (b_cmp < 0)
-            return 0;
-
-        if (b_cmp == 0) {
-            double b_prev_dist = dist(b->vector, b->prevsamp->vector);
-            if (b_prev_dist <= distance)
+        switch (PixelStore_compare(a, b->prevsamp)) {
+            case -1:
                 return 0;
+            case 0:
+                if (dist(b->vector, b->prevsamp->vector) <= distance)
+                    return 0;
         }
         /* Else whatever the distance is, "b" will want to link to "a" */
     }
@@ -413,29 +404,29 @@ crossmatch(
     /* 
      * Here, we want to link a->b. But we also want previous linked samples
      * to search another link.
-     *
-     * The order of these next lines IS important.
      */
 
     /* If an old link exists, take it and reset their link information */
     samplestruct *relink_up    = b->prevsamp;
     samplestruct *relink_down  = a->nextsamp;
 
+    /* unlink old matches */
     if (relink_down)
         relink_down->prevsamp = NULL;
     if (relink_up)
         relink_up->nextsamp = NULL;
 
+    /* do the new match linkage */
     a->nextsamp = b;
     b->prevsamp = a;
 
     /* 
      * We have now reached a stable state, with a and b linked, and possibly
-     * old links pointing to NULL samples. This is where the old crossid 
-     * algorithm ended.
+     * old matches linkss pointing to NULL samples. This is where the old crossid 
+     * algorithm was ending.
      *
-     * We want to recurse for each unlinked samples so they can fine a new
-     * best match. There are many cases that need this recursion (see doc in 
+     * We now want to recurse for each unlinked samples so they can find a new
+     * best match. There are many cases that needed this recursion (see doc in 
      * this header file).
      */
     if (relink_up) {

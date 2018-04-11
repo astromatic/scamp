@@ -13,7 +13,6 @@
  * (at your option) any later version.
  *
  * \details
- *
  * This file is divided in four parts:
  * - public interface
  * - static functions
@@ -101,7 +100,7 @@ PixelStore_add(
         int i;
         QCALLOC(avlpix, pixel_avl, 1);
         avlpix->pixel.id = pixnum;
-        QCALLOC(avlpix->pixel.samples, samplestruct *, SPL_BASE_SIZE);
+        QCALLOC(avlpix->pixel.samples, samplestruct*, SPL_BASE_SIZE);
         avlpix->pixel.size = SPL_BASE_SIZE;
         avlpix->pixel.nsamples = 0;
 
@@ -156,7 +155,7 @@ PixelStore_get(
 HealPixel*
 PixelStore_getPixelFromSample(
         PixelStore      *store,
-        samplestruct   *sample)
+        samplestruct    *sample)
 {
     double lon, col;
     vec2ang(sample->vector, &col, &lon);
@@ -189,7 +188,7 @@ PixelStore_sort(PixelStore* store)
 int
 PixelStore_getHigherFields(
         HealPixel       *pix,
-        samplestruct   *pivot)
+        samplestruct    *pivot)
 {
     int i;
     for (i=0; i<pix->nsamples; i++) {
@@ -230,7 +229,7 @@ PixelStore_getHigherFields(
 int
 PixelStore_getLowerFields(
         HealPixel       *pix,
-        samplestruct   *pivot)
+        samplestruct    *pivot)
 {
     int i;
     for (i=0; i<pix->nsamples; i++) {
