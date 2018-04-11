@@ -65,7 +65,7 @@
 #include "wcs/wcs.h"
 #include "xml.h"
 #include "chealpixstore.h"
-#include "crossid2.h"
+#include "crossid.h"
 #include "chealpix.h"
 
 time_t thetime, thetime2;

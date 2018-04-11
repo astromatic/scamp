@@ -61,11 +61,11 @@ scamp_test("# of matched references: " + str(nmatched_ref) + " expected: > 1650"
 
 # Test mean internal RMS errors
 sigma_int = scamp_meanrms(fgroups.array["AstromSigma_Internal_HighSN"][0])
-scamp_test("Internal dispersion: " + str(sigma_int) + " expected: < 0.031", sigma_int < 0.031)
+scamp_test("Internal dispersion: " + str(sigma_int) + " expected: < 0.035", sigma_int < 0.035)
 
 # Test mean reference RMS errors
 sigma_ref = scamp_meanrms(fgroups.array["AstromSigma_Reference_HighSN"][0])
-scamp_test("Reference dispersion: " + str(sigma_ref) + " expected: < 0.085", sigma_ref < 0.085)
+scamp_test("Reference dispersion: " + str(sigma_ref) + " expected: < 0.097", sigma_ref < 0.097)
 
 # Exit with status and message
 print "All OK." if status == 0 else "%d errors." %status

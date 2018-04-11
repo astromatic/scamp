@@ -1,42 +1,23 @@
-/*
-*				crossid.h
-*
-* Include file for crossid.c
-*
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-*
-*	This file part of:	SCAMP
-*
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
-*
-*	License:		GNU General Public License
-*
-*	SCAMP is free software: you can redistribute it and/or modify
-*	it under the terms of the GNU General Public License as published by
-*	the Free Software Foundation, either version 3 of the License, or
-* 	(at your option) any later version.
-*	SCAMP is distributed in the hope that it will be useful,
-*	but WITHOUT ANY WARRANTY; without even the implied warranty of
-*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*	GNU General Public License for more details.
-*	You should have received a copy of the GNU General Public License
-*	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
-*
-*	Last modified:		10/10/2010
-*
-*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+/**
+ *
+ * \file        crossid.h
+ * \author      Sébastien Serre
+ * \date        11/04/2018
+ *
+ * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
 
-#ifndef _CROSSID_H_
-#define _CROSSID_H_
+#ifndef __CROSSID2_H__
+#define __CROSSID2_H__
 
-#include "fgroup.h"
+#include "chealpixstore.h"
 
-/*---------------------------- Internal constants ---------------------------*/
+extern void
+CrossId_crossSamples(PixelStore *store, double radius_arcsec);
 
-/*--------------------------------- typedefs --------------------------------*/
-/*------------------------------- functions ---------------------------------*/
-
-extern int	check_fieldoverlap(fieldstruct *field1, fieldstruct *field2),
-		check_fieldphotomoverlap(fieldstruct *field, int instru);
-
-#endif // _CROSSID_H_
+#endif /* __CROSSID2_H__ */

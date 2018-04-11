@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/02/2018
+*	Last modified:		11/04/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -37,7 +37,6 @@
 
 #include "define.h"
 #include "globals.h"
-#include "crossid.h"
 #include "fgroup.h"
 #include "field.h"
 #include "fits/fitscat.h"
@@ -54,6 +53,55 @@
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #endif
+
+/****** check_fieldphotomoverlap **********************************************
+  PROTO int check_fieldphotomoverlap(fieldstruct *field, int instru)
+  PURPOSE Check if a field overlaps a photometric field or not.
+  INPUT ptr to the field to check,
+  photometric instrument index.
+  OUTPUT Photometric code (1 for genuine, 2 for dummy) if it overlaps, 0
+  otherwise.
+  NOTES -.
+  AUTHOR E. Bertin (IAP)
+  VERSION 19/02/2018
+ ***/
+int check_fieldphotomoverlap(fieldstruct *field, int instru)
+
+{
+    setstruct **pset,
+              *set;
+    samplestruct *samp,*samp2;
+    int  n,s;
+
+    pset = field->set;
+    for (s=field->nset; s--;)
+    {
+        set = *(pset++);
+        samp = set->sample;
+        for (n=set->nsample; n--; samp++)
+        {
+            if (samp->nextsamp)
+            {
+                samp2 = samp;
+                while ((samp2=samp2->nextsamp))
+                    if (samp2->set->field->photomflag
+                            && samp2->set->field->photomlabel==instru)
+                        return samp2->set->field->photomflag;
+            }
+            if (samp->prevsamp)
+            {
+                samp2 = samp;
+                while ((samp2=samp2->prevsamp))
+                    if (samp2->set->field->photomflag
+                            && samp2->set->field->photomlabel==instru)
+                        return samp2->set->field->photomflag;
+            }
+        }
+    }
+
+    /* No photometric field found */
+    return 0;
+}
 
 /****** photsolve_fgroups ****************************************************
 PROTO	void photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
@@ -816,6 +864,52 @@ void	avermags_fgroup(fgroupstruct *fgroup)
   return;
   }
 
+/****** check_fieldoverlap ****************************************************
+  PROTO int check_fieldoverlap(fieldstruct *field1, fieldstruct *field2)
+  PURPOSE Check if two fields overlap or not.
+  INPUT ptr to the first field,
+  ptr to the second field.
+  OUTPUT 1 if they overlap, 0 otherwise.
+  NOTES -.
+  AUTHOR E. Bertin (IAP)
+  VERSION 07/02/2005
+ **
+int check_fieldoverlap(fieldstruct *field1, fieldstruct *field2)
+
+{
+    setstruct **pset,
+              *set;
+    samplestruct *samp,*samp2;
+    int  n,s;
+
+    pset = field1->set;
+    set = *(pset++);
+    for (s=field1->nset; s--; set=*(pset++))
+    {
+        samp = set->sample;
+        for (n=set->nsample; n--; samp++)
+        {
+            if (samp->nextsamp)
+            {
+                samp2 = samp;
+                while ((samp2=samp2->nextsamp))
+                    if (samp2->set->field == field2)
+                        return 1;
+            }
+            if (samp->prevsamp)
+            {
+                samp2 = samp;
+                while ((samp2=samp2->prevsamp))
+                    if (samp2->set->field == field2)
+                        return 1;
+            }
+        }
+    }
+
+    No link found between both fields 
+    return 0;
+}
+*/
 
 /****** selecphotom_fgroup *****************************************************
 PROTO	void selecphotom_fgroup(fgroupstruct *fgroup)
