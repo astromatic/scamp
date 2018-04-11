@@ -198,6 +198,7 @@ PixelStore_getHigherFields(
     }
     return i;
     /*
+       TODO test and use this optimized version.
     int max = pix->nsamples;
     int min = 0;
     int i;
@@ -238,6 +239,7 @@ PixelStore_getLowerFields(
     }
     return -1;
     /*
+       TODO test and use this optimized version.
     int max = pix->nsamples;
     int min = 0;
     int i;
