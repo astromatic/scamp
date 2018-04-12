@@ -149,7 +149,7 @@ void pix2vec_ring64(int64_t nside, int64_t ipix, double *vec);
 /*! Return neighbors of pix in NEST scheme. neighbors pointer must be an array
     of 8 long minimum. Negative number in neighbors, means it is inexistent.
     There can be 7 to 8 valid neighbors. */
-void neighbours_nest64(long nside, long pix, long *neighbours);
+void neighbours_nest64(int64_t nside, int64_t pix, int64_t *neighbours);
 /*! Returns the distance angle between two vectors in radiant. Vectors do not
     have to be normalized. TODO tests*/
 double angdist(double *vector_A, double *vector_B);
