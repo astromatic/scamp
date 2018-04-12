@@ -251,9 +251,9 @@ PixelStore_getLowerFields(
     int i;
     for (i=0; i<pix->nsamples; i++) {
         if (cmp_samples(&pivot, &pix->samples[i]) <= 0)
-            return i-1;
+            break;
     }
-    return -1;
+    return --i;
     /*
        TODO test and use this optimized version.
     int max = pix->nsamples;
