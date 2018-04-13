@@ -298,11 +298,12 @@ void makeit(void)
     NFPRINTF(OUTPUT, "");
     QPRINTF(OUTPUT, " \n----- Astrometric stats (internal) :\n\n");
     QIPRINTF(OUTPUT,
-            " All detections | "
-            " High S/N ");
+  "                  All detections         | "
+    "          High S/N           ");
+
     QIPRINTF(OUTPUT,
-            " dAXIS1 dAXIS2 chi2 ndets | "
-            "dAXIS1 dAXIS2 chi2 ndets");
+    "           dAXIS1  dAXIS2   chi2   ndets | "
+    "dAXIS1  dAXIS2   chi2   ndets");
     for (g=0; g<ngroup; g++)
     {
         /*-- Reproject all fields from a group to a common projection (update) */
@@ -337,11 +338,11 @@ void makeit(void)
     NFPRINTF(OUTPUT, "");
     QPRINTF(OUTPUT, " \n----- Astrometric stats (external):\n\n");
     QIPRINTF(OUTPUT,
-            " All detections | "
-            " High S/N ");
+    "                  All detections         | "
+    "          High S/N           ");
     QIPRINTF(OUTPUT,
-            " dAXIS1 dAXIS2 chi2 nstars | "
-            "dAXIS1 dAXIS2 chi2 nstars");
+    "           dAXIS1  dAXIS2   chi2  nstars | "
+    "dAXIS1  dAXIS2   chi2  nstars");
     for (g=0; g<ngroup; g++)
     {
         QPRINTF(OUTPUT,
@@ -389,10 +390,10 @@ void makeit(void)
 
     NFPRINTF(OUTPUT, "");
     QPRINTF(OUTPUT, " \n----- Photometric stats (internal):\n\n");
-    QIPRINTF(OUTPUT, " All detections | "
-            " High S/N ");
-    QIPRINTF(OUTPUT, " Instru mag RMS chi2 ndets | "
-            "mag RMS chi2 ndets");
+    QIPRINTF(OUTPUT, "                     All detections     | "
+    "       High S/N        ");
+    QIPRINTF(OUTPUT, "         Instru mag RMS    chi2   ndets | "
+    "mag RMS    chi2   ndets");
     for (g=0; g<ngroup; g++)
     {
         compmags_fgroup(fgroups[g]);
@@ -418,10 +419,10 @@ void makeit(void)
 
     NFPRINTF(OUTPUT, "");
     QPRINTF(OUTPUT, " \n----- Photometric stats (external):\n\n");
-    QIPRINTF(OUTPUT, " All detections | "
-            " High S/N ");
-    QIPRINTF(OUTPUT, " Instru mag RMS chi2 nstars | "
-            "mag RMS chi2 nstars");
+    QIPRINTF(OUTPUT, "                     All detections     | "
+    "       High S/N        ");
+    QIPRINTF(OUTPUT, "         Instru mag RMS    chi2  nstars | "
+    "mag RMS    chi2  nstars");
     for (g=0; g<ngroup; g++)
         for (i=0; i<prefs.nphotinstrustr; i++)
         {
