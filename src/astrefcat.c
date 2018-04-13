@@ -1116,7 +1116,7 @@ fieldstruct	*load_astreffield(char *filename, double *wcspos,
 
 /* This is a reference catalog */
   field->astromlabel = field->photomlabel = -1;
-  field->epoch = 0.0;
+  field->epoch = -1.0;
   field->set[0] = set;
   field->nset = 1;
   set->lng = field->lng = lng;
