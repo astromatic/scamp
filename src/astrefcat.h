@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/03/2018
+*	Last modified:		25/04/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ typedef enum {ASTREFCAT_NONE, ASTREFCAT_FILE,
 		ASTREFCAT_URAT1, ASTREFCAT_SDSSR9, ASTREFCAT_NOMAD1,
 		ASTREFCAT_PPMX, ASTREFCAT_CMC15, ASTREFCAT_TYCHO2,
 		ASTREFCAT_IGSL, ASTREFCAT_ALLWISE, ASTREFCAT_GAIADR1,
-		ASTREFCAT_PANSTARRS1}	astrefenum;
+		ASTREFCAT_GAIADR2, ASTREFCAT_PANSTARRS1}	astrefenum;
 
 typedef struct
   {

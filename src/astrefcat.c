@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		20/03/2018
+*	Last modified:		25/04/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -172,6 +172,13 @@ astrefstruct	astrefcats[] =
 	{"G", ""},
 	1, 0},
 
+  {"GAIA-DR2", "I/345", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
+		"Gmag","e_Gmag","BPmag","e_BPmag","RPmag","e_RPmag",""},
+	{"Gmag", "BPmag","RPmag",""},
+	{"G", "BP", "RP", ""},
+	3, 0},
+
   {"PANSTARRS-1", "II/349", {"Qual", "RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
 		"Epoch", "gmag","e_gmag","rmag","e_rmag","imag","e_imag",
 		"zmag","e_zmag","ymag","e_ymag",""},
@@ -205,7 +212,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	20/03/2018
+VERSION	25/04/2018
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -759,6 +766,45 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             mag[0] = magerr[0] = 99.0;
           else
             magerr[0] = 1.0857 * fluxerr / flux;
+          break;
+
+        case ASTREFCAT_GAIADR2:
+/*-------- Reject duplicated sources */
+          sflag = cols[cindex++];
+/*
+          if (sflag[0]!='0')
+            continue;
+*/
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*MAS/DEG;
+          poserr[lat] = atof(cols[cindex++])*MAS/DEG;
+          epoch = atof(cols[cindex++]);
+          sprop[lng] = cols[cindex++];
+          sprop[lat] = cols[cindex++];
+          sproperr[lng] = cols[cindex++];
+          sproperr[lat] = cols[cindex++];
+          if (sprop[lng][4]<= ' ' || sprop[lat][4]<= ' ') {
+            prop[lng] = prop[lat] = properr[lng] = properr[lat] = 0.0;
+          } else {
+            prop[lng] = atof(sprop[lng])*MAS/DEG;
+            prop[lat] = atof(sprop[lat])*MAS/DEG;
+            properr[lng] = (sproperr[lng][1]==' '?
+				1000.0 : atof(sproperr[lng])) * MAS/DEG;
+            properr[lat] = (sproperr[lat][1]==' '?
+				1000.0 : atof(sproperr[lat])) * MAS/DEG;
+          }
+          for (b=0; b<nband; b++) {
+            smag = cols[cindex++];
+            smagerr = cols[cindex++];
+            if (smag[4] <= ' ' || smagerr[4] <= ' ') {
+              mag[b] = magerr[b] = 99.0;
+}
+            else {
+              mag[b] = atof(smag);
+              magerr[b] = atof(smagerr);
+            }
+          }
           break;
 
         case ASTREFCAT_PANSTARRS1:
