@@ -502,6 +502,8 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
               meani[i] += samp2->projpos[i];
             nmeani++;
             }
+          if (!(nmeani))
+            continue;
           sampr = samp2;
           if (nmeani>1)
             {
@@ -539,6 +541,12 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
                 nmeanr++;
                 }
               }
+            }
+          else
+            {
+            for (i=0; i<naxis; i++)
+              meanr[i] = meani[i];
+            nmeanr = 1;
             }
           if ((sampr) && (sampr->nextsamp))
             {
