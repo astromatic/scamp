@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		30/04/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -442,7 +442,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	30/04/2018
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
