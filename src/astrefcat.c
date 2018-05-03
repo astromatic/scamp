@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/04/2018
+*	Last modified:		02/05/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -115,7 +115,14 @@ astrefstruct	astrefcats[] =
 	{"f.mag", ""}, {"R", ""},
 	1, 0},
 
-  {"SDSS-R9", "V/139", {"mode","Q","RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
+  {"SDSS-R9", "V/139", {"mode","Q","RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+		"ObsDate", "umag","e_umag","gmag","e_gmag","rmag","e_rmag",
+		"imag","e_imag","zmag","e_zmag",""},
+	{"umag", "gmag", "rmag", "imag", "zmag", ""},
+	{"u", "g", "r", "i", "z", ""},
+	5, 2},
+
+  {"SDSS-R12", "V/147", {"mode","Q","RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
 		"ObsDate", "umag","e_umag","gmag","e_gmag","rmag","e_rmag",
 		"imag","e_imag","zmag","e_zmag",""},
 	{"umag", "gmag", "rmag", "imag", "zmag", ""},
@@ -212,7 +219,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	25/04/2018
+VERSION	02/05/2018
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -560,6 +567,23 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           break;
 
         case ASTREFCAT_SDSSR9:
+/*-------- Avoid missing or poor observations, and secondary detections */
+          mode = atoi(cols[cindex++]);
+          qual = atoi(cols[cindex++]);
+          if (mode==2 || qual<2 || qual>3)
+            continue;
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+          poserr[lng] = atof(cols[cindex++])*ARCSEC/DEG;
+          poserr[lat] = atof(cols[cindex++])*ARCSEC/DEG;
+          epoch = atof(cols[cindex++]);
+          for (b=0; b<nband; b++) {
+            mag[b] = atof(cols[cindex++]);
+            magerr[b] = atof(cols[cindex++]);
+          }
+          break;
+
+        case ASTREFCAT_SDSSR12:
 /*-------- Avoid missing or poor observations, and secondary detections */
           mode = atoi(cols[cindex++]);
           qual = atoi(cols[cindex++]);
