@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 1993-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 1993-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/11/2013
+*	Last modified:		04/05/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -328,7 +328,7 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/11/2013
+VERSION	04/05/2018
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
@@ -442,8 +442,9 @@ wcsstruct	*read_wcs(tabstruct *tab)
 	&& wcs->wcsprm->flag<999)
     {
      char	*pstr, tstr[100];
-     double	date, dpar5, jdsec;
-     int	biss, dpar[5];
+     double	dpar[6] = {0.0},
+		date, jdsec, tmp, biss;
+     int	sflag;
 
 /*-- Coordinate reference frame */
 /*-- Search for an observation date expressed in Julian days */
@@ -461,37 +462,34 @@ wcsstruct	*read_wcs(tabstruct *tab)
       if (*str)
         {
 /*------ Decode DATE-OBS format: DD/MM/YYThh:mm:ss[.sss] or YYYY-MM-DDThh:mm:ss[.sss] */
-        for (l=0; l<5 && (pstr = strtok_r(l?NULL:str,"/-T: ", &ptr)); l++)
-          dpar[l] = atoi(pstr);
-        pstr = strtok_r(l?NULL:str,"/-T: ", &ptr);
-        dpar5 = atof(pstr);
-        if (l<3 || !dpar[0] || !dpar[1] || !dpar[2])
+        sflag = strchr(str, '/') != NULL;
+        for (l=0; l<5 && (pstr = strtok_r(l ? NULL : str, "/-T: ", &ptr)); l++)
+          dpar[l] = atof(pstr);
+        if (l<3 || dpar[0] == 0.0 || dpar[1] == 0.0 || dpar[2] == 0.0)
           {
 /*-------- If DATE-OBS value corrupted or incomplete, assume 2000-1-1 */
           warning("Invalid DATE-OBS value in header: ", str);
-          dpar[0] = 2000; dpar[1] = 1; dpar[2] = 1;
+          dpar[0] = 2000.0; dpar[1] = 1.0; dpar[2] = 1.0;
           }
-        else if (strchr(str, '/') && dpar[0]<32 && dpar[2]<100)
+        else if (sflag && dpar[0] < 32.0 && dpar[2] < 100.0)
           {
-          j = dpar[0];
-          dpar[0] = dpar[2]+1900;
-          dpar[2] = j;
+          tmp = dpar[0];
+          dpar[0] = dpar[2] + 1900.0;
+          dpar[2] = tmp;
           }
 
-        biss = (dpar[0]%4)?0:1;
+        biss = (((int)dpar[0]) % 4) ? 0.0 : 1.0;
 /*------ Convert date to MJD */
-        jdsec = (dpar5 + dpar[4] * 60. + dpar[3] * 3600.) / 86400.;
-        date = (-678956 + (365*dpar[0]+dpar[0]/4) - biss
-			+ ((dpar[1]>2?((int)((dpar[1]+1)*30.6)-63+biss)
-		:((dpar[1]-1)*(63+biss))/2) + dpar[2])) + jdsec;
-
-        wcs->obsdate = 2000.0 - (MJD2000 - date)/365.25;
+        jdsec = (dpar[5] + dpar[4] * 60.0 + dpar[3] * 3600.0) / 86400.0;
+        date = ((365.0 * dpar[0] + dpar[0] / 4.0) - 678956.0 - biss
+		+ ((dpar[1] > 2.0? (floor((dpar[1] + 1.0) * 30.6) - 63.0 + biss)
+		: ((dpar[1] - 1.0) * (63.0 + biss)) / 2.0) + dpar[2])) + jdsec;
+        wcs->obsdate = 2000.0 - (MJD2000 - date) / 365.25;
         }
       else
 /*------ Well if really no date is found */
         wcs->obsdate = 0.0;
       }
-
     FITSREADF(buf, "EPOCH", wcs->epoch, 2000.0);
     FITSREADF(buf, "EQUINOX", wcs->equinox, wcs->epoch);
     if (fitsread(buf, "RADESYS", str, H_STRING,T_STRING) != RETURN_OK)
