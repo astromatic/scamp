@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  26/06/2017
+ * Last modified:  07/05/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -33,6 +33,7 @@
 #include "config.h"
 #endif
 
+#include "define.h"
 #include "fits/fitscat.h"
 #include "fitswcs.h"
 #include "samples.h"
@@ -52,6 +53,7 @@ typedef enum {PROJECTION_SAME, PROJECTION_TPV, PROJECTION_TAN} projenum;
 typedef struct field
 {
     int  fieldindex;  /* field index */
+    short int isrefcat;
     /* ---- file parameters */
     char  path[MAXCHAR];  /* catalog path */
     char  filename[MAXCHAR]; /* catalog filename */

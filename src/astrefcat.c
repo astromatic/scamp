@@ -309,6 +309,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
     if (!field)
         error(EXIT_FAILURE,"*Error*: No appropriate FITS-LDAC astrometric ",
 			"reference catalog found");
+    field->isrefcat = 1;
     return field;
     }
 
@@ -948,6 +949,7 @@ epoch, sample->mag, sample->magerr);
   field->set[0] = set;
   field->nset = 1;
 /* This is a reference catalog */
+  field->isrefcat = 1;
   field->astromlabel = field->photomlabel = -1;
   set->lng = field->lng = lng;
   set->lat = field->lat = lat;

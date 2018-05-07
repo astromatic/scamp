@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/03/2016
+*	Last modified:		03/05/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -30,8 +30,8 @@
 #define _DEFINE_H_
 /* Check if we are using a configure script here */
 #ifndef HAVE_CONFIG_H
-#define         VERSION         "1.x"
-#define         DATE            "2016-09-16"
+#define         VERSION         "2.x"
+#define         DATE            "03-05-18"
 #define		THREADS_NMAX	1024              /* max. number of threads */
 #endif
 
@@ -39,11 +39,11 @@
 
 #define         BANNER		"SCAMP"
 #define         MYVERSION       VERSION
-#define         COPYRIGHT       "2010-2016 IAP/CNRS/UPMC"
+#define         COPYRIGHT       "2010-2018 Sorbonne Université/Université de Bordeaux/CNRS"
 #define		DISCLAIMER	BANNER " comes with ABSOLUTELY NO WARRANTY\n" \
 		"You may redistribute copies of " BANNER "\n" \
 		"under the terms of the GNU General Public License."
-#define		AUTHORS		"Emmanuel BERTIN <bertin@iap.fr>"
+#define		AUTHORS		"Emmanuel BERTIN <bertin@iap.fr> and Sébastien Serre <serre@u-bordeaux.fr>"
 #define		WEBSITE		"http://astromatic.net/software/scamp"
 #define         INSTITUTE	"IAP  http://www.iap.fr"
 

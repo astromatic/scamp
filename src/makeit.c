@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified: 20/10/2016
+ * Last modified: 07/05/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,7 +69,6 @@
 #include "chealpix.h"
 
 time_t thetime, thetime2;
-static void crossid(int, int, fieldstruct**, fieldstruct**);
 
 /********************************** makeit ***********************************/
 void makeit(void)
@@ -247,8 +246,6 @@ void makeit(void)
 
     QPRINTF(OUTPUT, "\n");
 
-
-
     for (g=0; g<ngroup; g++)
     {
         /*-- Reproject all fields from a group to a common projection */
@@ -256,9 +253,8 @@ void makeit(void)
         /*-- Perform cross-identifications across catalogs */
         sprintf(str, "Making preliminary cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
+        CrossId_run(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
     }
-
-    crossid(nfield, ngroup, reffields, fields);
 
     if (prefs.solvastrom_flag)
     {
@@ -274,11 +270,8 @@ void makeit(void)
             /*---- Perform cross-identifications across catalogs */
             sprintf(str, "Making cross-identifications in group %d", g+1);
             NFPRINTF(OUTPUT, str);
-        }
+            CrossId_run(fgroups[g], reffields[g],prefs.crossid_radius*ARCSEC/DEG);
 
-        crossid(nfield, ngroup, reffields, fields);
-
-        for (g=0; g<ngroup; g++) {
             sprintf(str, "Computing astrometric stats for group %d", g+1);
             NFPRINTF(OUTPUT, str);
             astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
@@ -311,12 +304,10 @@ void makeit(void)
         /*-- Perform cross-identifications across catalogs */
         sprintf(str, "Making cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
-    }
+        CrossId_run(fgroups[g], reffields[g], fgroups[g]->sig_referr[0]?
+                prefs.astrclip_nsig*fgroups[g]->sig_referr[0]
+                : prefs.crossid_radius*ARCSEC/DEG);
 
-    crossid(nfield, ngroup, reffields, fields);
-
-    for (g=0; g<ngroup; g++)
-    {
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
         nclip = astrclip_fgroup(fgroups[g], reffields[g], prefs.astrclip_nsig);
         astrstats_fgroup(fgroups[g], reffields[g], prefs.sn_thresh[1]);
@@ -464,7 +455,8 @@ void makeit(void)
         /*-- Re-do Cross-ID to recover possibly fast moving objects */
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        crossid(nfield, ngroup, reffields, fields);
+        for (g=0; g<ngroup; g++)
+            CrossId_run(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
 
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
@@ -480,7 +472,8 @@ void makeit(void)
             reproj_fgroup(fgroups[g], reffields[g], 1);
         NFPRINTF(OUTPUT, "Pairing detections...");
 
-        crossid(nfield, ngroup, reffields, fields);
+       for (g=0; g<ngroup; g++)
+            CrossId_run(fgroups[g], reffields[g], prefs.crossid_radius*ARCSEC/DEG);
 
         NFPRINTF(OUTPUT, "Merging detections...");
         for (g=0; g<ngroup; g++)
@@ -501,7 +494,9 @@ void makeit(void)
             /*-- Re-do Cross-ID to recover possibly fast moving objects */
             NFPRINTF(OUTPUT, "Pairing detections...");
 
-            crossid(nfield, ngroup, reffields, fields);
+            for (g=0; g<ngroup; g++)
+                CrossId_run(fgroups[g], reffields[g],
+			prefs.crossid_radius * ARCSEC / DEG);
 
             NFPRINTF(OUTPUT, "Merging detections...");
             for (g=0; g<ngroup; g++)
@@ -720,62 +715,3 @@ void write_error(char *msg1, char *msg2)
 
     return;
 }
-
-
-void
-crossid(
-        int nfield,
-        int ngroup,
-        fieldstruct **reffields,
-        fieldstruct **fields)
-{
-
-    PixelStore ps;
-
-    /* define healpix resolution from the match radius */
-    int total_lat = 180 * 3600;
-    int total_rings = total_lat / prefs.crossid_radius;
-
-    /*
-     * total_rings is the ideal number of rings in latitude, nside must be a
-     * power of two that will build a pixel definition that fullfill the need
-     * of rings.
-     *
-     * This get the nearest next power of two from the ideal total rings
-     * required. [https://en.wikipedia.org/wiki/Logarithm#Change_of_base]
-     */
-    int64_t nsides_pow = ceil(log(total_rings / 4 + 1) / log(2));
-
-    /* minus 1 nsides power, to be sure to not loss any matches */
-    --nsides_pow;
-    int64_t nsides = pow(2, nsides_pow);
-
-    PixelStore_new(nsides, &ps);
-
-    struct set *set;
-    int i, f, g;
-    for (i=0; i<nfield; i++) {
-        for (f=0; f<fields[i]->nset; f++) {
-            set = fields[i]->set[f];
-            for (g=0; g < set->nsample;g++) {
-                struct sample *s = &set->sample[g];
-                PixelStore_add(&ps, &set->sample[g]);
-            }
-        }
-    }
-
-    if (prefs.astrefcat != ASTREFCAT_NONE) {
-        for (i=0; i<ngroup; i++) {
-            for (f=0; f<reffields[i]->nset; f++) {
-                set = reffields[i]->set[f];
-                for (g=0; g < set->nsample; g++) {
-                    struct sample *s = &set->sample[g];
-                    PixelStore_add(&ps, &set->sample[g]);
-                }
-            }
-        }
-    }
-    CrossId_crossSamples(&ps, prefs.crossid_radius);
-    PixelStore_free(&ps);
-}
-

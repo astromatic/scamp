@@ -3,7 +3,7 @@
  * \file        chealpixstore.c
  * \brief       Healpix pixels storage mechanism.
  * \author      Sébastien Serre
- * \date        11/04/2018
+ * \date        07/05/2018
  *
  * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
@@ -51,7 +51,7 @@ static void pixelAvlPrint(pixel_avl*);
 
 
 /**
- * \brief create a new pixel store 
+ * \brief create a new pixel store
  * \param nsides the healpix nsides resolution parameter
  * \param store
  * \details
@@ -69,7 +69,7 @@ PixelStore_new(int64_t nsides, PixelStore *store)
 
 
 /**
- * \brief free everything 
+ * \brief free everything
  * \param store
  */
 void
@@ -87,7 +87,7 @@ PixelStore_free(PixelStore* store)
  */
 void
 PixelStore_add(
-        PixelStore      *store,
+        PixelStore     *store,
         samplestruct   *spl)
 {
 
@@ -142,7 +142,7 @@ PixelStore_add(
 
 
 /**
- * \brief get a piwel by index 
+ * \brief get a piwel by index
  * \param store
  * \param key
  */
@@ -206,14 +206,14 @@ PixelStore_getHigherFields(
         HealPixel       *pix,
         samplestruct    *pivot)
 {
+    /* this is what is done
     int i;
     for (i=0; i<pix->nsamples; i++) {
         if (cmp_samples(&pivot, &pix->samples[i]) < 0)
             break;
     }
     return i;
-    /*
-       TODO test and use this optimized version.
+    */
     int max = pix->nsamples;
     int min = 0;
     int i;
@@ -228,7 +228,6 @@ PixelStore_getHigherFields(
     }
 
     return max;
-    */
 }
 
 
@@ -248,14 +247,14 @@ PixelStore_getLowerFields(
         HealPixel       *pix,
         samplestruct    *pivot)
 {
+    /*
     int i;
     for (i=0; i<pix->nsamples; i++) {
         if (cmp_samples(&pivot, &pix->samples[i]) <= 0)
             break;
     }
     return --i;
-    /*
-       TODO test and use this optimized version.
+    */
     int max = pix->nsamples;
     int min = 0;
     int i;
@@ -263,14 +262,13 @@ PixelStore_getLowerFields(
     while (min < max)
     {
         i = (min + max) / 2;
-        if (cmp_samples(&pivot, &pix->samples[i]) < 0)
+        if (cmp_samples(&pivot, &pix->samples[i]) <= 0)
             max = i;
         else
             min = i + 1;
     }
 
-    return max;
-    */
+    return --min;
 }
 
 
@@ -330,16 +328,20 @@ static void pixelAvlFree(pixel_avl *pix) {
 static int cmp_samples(const void* a, const void *b) {
     samplestruct *sa = * (samplestruct**) a;
     samplestruct *sb = * (samplestruct**) b;
-    struct field *fa = sa->set->field;
-    struct field *fb = sb->set->field;
 
-    if (fa->epoch < fb->epoch)
+    if (sa->epoch < sb->epoch)
         return -1;
-    else if (fa->epoch > fb->epoch)
+    else if (sa->epoch > sb->epoch)
         return 1;
-    else
-        return fa->fieldindex > fb->fieldindex ? 1 :
-                    fa->fieldindex < fb->fieldindex ? -1 : 0;
+
+    fieldstruct  *fa = sa->set->field;
+    fieldstruct  *fb = sb->set->field;
+
+    int aindex = fa->isrefcat ? (0 - (fa->fieldindex + 1)) : fa->fieldindex;
+    int bindex = fb->isrefcat ? (0 - (fb->fieldindex + 1)) : fb->fieldindex;
+
+    return  aindex > bindex ? 1 :
+            aindex < bindex ? -1 : 0;
 }
 
 /* sort */

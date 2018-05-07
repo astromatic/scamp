@@ -47,10 +47,15 @@
 /doc/build/
 
 # test output
+/tests/.deps
+/tests/test_chealpix
+/tests/test_chealpixstore
+/tests/test_crossid_single_catalog
+/tests/test_crossid_single_catalog_moving
+/tests/*.o
 /tests/Makefile
 /tests/Makefile.in
-/tests/test-suite.log
-/tests/test01.py.log
-/tests/test01.py.trs
+/tests/*.log
 /tests/*.head
-/tests/test01.xml
+/tests/extra/*.head
+/tests/*.xml

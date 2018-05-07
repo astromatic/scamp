@@ -4,8 +4,8 @@ import math,os,subprocess,sys
 import numpy as np
 from astropy.io.votable import parse
 
-conf = "test01.conf"
-xml = "test01.xml"
+conf = "test_integration01.conf"
+xml  = "test_integration01.xml"
 
 # Exit status 0 (= OK) by default
 status = 0
@@ -22,8 +22,8 @@ def scamp_test(str, passed):
     print "%-24s ... failed" %str
   return passed
 
-catlist = ["744331p.cat", "744332p.cat", "744333p.cat", "744334p.cat", \
-           "744335p.cat", "744336p.cat", "744337p.cat"]
+catlist = ["extra/744331p.cat", "extra/744332p.cat", "extra/744333p.cat", "extra/744334p.cat", \
+           "extra/744335p.cat", "extra/744336p.cat", "extra/744337p.cat"]
 
 # Remove any preexisting XML file
 try:

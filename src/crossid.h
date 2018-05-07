@@ -1,8 +1,9 @@
 /**
  *
  * \file        crossid.h
+ * \author      Emmanuel Bertin
  * \author      Sébastien Serre
- * \date        11/04/2018
+ * \date        7/05/2018
  *
  * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
@@ -15,9 +16,11 @@
 #ifndef __CROSSID2_H__
 #define __CROSSID2_H__
 
-#include "chealpixstore.h"
+#include "fgroup.h"
+#include "field.h"
 
 extern void
-CrossId_crossSamples(PixelStore *store, double radius_arcsec);
+CrossId_run(fgroupstruct *fgroup,  fieldstruct *reffield, double radius);
+
 
 #endif /* __CROSSID2_H__ */

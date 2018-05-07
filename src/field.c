@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  11/11/2017
+ * Last modified:  07/05/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -101,6 +101,7 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     QCALLOC(field, fieldstruct, 1);
     QMALLOC(field->set, setstruct *, MAXSET);
     field->fieldindex = fieldindex;
+    field->isrefcat = 0;
 
     strcpy (field->filename, filename);
     field->rfilename = rfilename;

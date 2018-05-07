@@ -3,7 +3,7 @@
  * \file        chealpixstore.h
  * \brief       Helpix pixels storarge
  * \author      Sébastien Serre
- * \date        11/04/2018
+ * \date        07/05/2018
  *
  * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
@@ -17,6 +17,7 @@
 #define _CHEALPIXSTORE_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "define.h"
 #include "fgroup.h"
