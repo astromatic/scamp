@@ -172,14 +172,14 @@ astrefstruct	astrefcats[] =
 	{"J", "H", "Ks", "W1", "W2", "W3", "W4", ""}, 
 	7, 3},
 
-  {"GAIA-DR1", "I/337", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+  {"GAIA-DR1", "I/337/gaia", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
 		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
 		"<FG>","e_<FG>","<Gmag>",""},
 	{"<Gmag>", ""},
 	{"G", ""},
 	1, 0},
 
-  {"GAIA-DR2", "I/345", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+  {"GAIA-DR2", "I/345/gaia2", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
 		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
 		"Gmag","e_Gmag","BPmag","e_BPmag","RPmag","e_RPmag",""},
 	{"Gmag", "BPmag","RPmag",""},
