@@ -7,7 +7,7 @@
  *
  *	This file part of:	SCAMP
  *
- *	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+ *	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
  *
  *	License:		GNU General Public License
  *
@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		12/11/2013
+ *	Last modified:		20/07/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@
   OUTPUT  Pointer to an allocated array of merged samples (sources).
   NOTES   Global preferences are used.
   AUTHOR  E. Bertin (IAP)
-  VERSION 12/11/2013
+  VERSION 20/07/2018
  */
 msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 
@@ -222,12 +222,12 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
                             msamp->spread = spread / wspread;
                             msamp->spreaderr = sqrt(1.0 / wspread);
                         }
+                        msamp->npos_tot = nall;
+                        msamp->npos_ok = nposok;
+                        for (samp2 = samp; samp2; samp2=samp2->prevsamp)
+                            samp2->msamp = msamp;
+                        msamp++;
                     }
-                    msamp->npos_tot = nall;
-                    msamp->npos_ok = nposok;
-                    for (samp2 = samp; samp2; samp2=samp2->prevsamp)
-                        samp2->msamp = msamp;
-                    msamp++;
                 }
         }
     }
