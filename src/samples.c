@@ -1,13 +1,13 @@
 /*
  *    samples.c
  *
- * Read and filter input detections from catalogues.
+ * Read and filter input detections from catalogs.
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2017 IAP/CNRS/UPMC
+ * Copyright:  (C) 2002-2018 IAP/CNRS/SorbonneU
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  29/10/2017
+ * Last modified:  17/07/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -683,8 +683,8 @@ void malloc_samples(setstruct *set, int nsample)
   desired number of samples.
   OUTPUT  -.
   NOTES   -.
-  AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-  VERSION 02/03/99
+  AUTHOR  E. Bertin (IAP), S.Serre (LAB)
+  VERSION 17/07/2018
  */
 void realloc_samples(setstruct *set, int nsample)
 
@@ -701,6 +701,7 @@ void realloc_samples(setstruct *set, int nsample)
     {
         QREALLOC(set->sample, samplestruct, nsample);
         sample = set->sample + set->nsamplemax;
+        memset(sample, '\0', (nsample - set->nsamplemax)*sizeof(samplestruct));
         for (n = nsample - set->nsamplemax; n--; sample++)
             if (set->ncontext)
                 QMALLOC(sample->context, double, set->ncontext);
