@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2018 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		18/08/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -452,7 +452,7 @@ INPUT	Ptr to the field group,
 OUTPUT	Number of "good" detections in the chain.
 NOTES	Uses the global preferences.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	18/08/2018
  ***/
 static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 			wcsstruct *wcsec, double *alpha, double *beta,
@@ -480,7 +480,7 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   lat = wcs->lat;
   csscale = fgroup->intcolshiftscale;
   cszero = fgroup->intcolshiftzero;
-  colour = samp->msamp->colour;
+  colour = samp->msamp ? samp->msamp->colour : 0.0;
   refflag = prefs.astrefinprop_flag;
   colcorflag = prefs.colourshiftcorr_flag;
   paralflag = prefs.parallax_flag;

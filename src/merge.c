@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		20/07/2018
+ *	Last modified:		18/08/2018
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -117,6 +117,7 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     msamp = fgroup->msample;
 
     index = 0;
+    nmsample = 0;
     for (f=0; f<fgroup->nfield; f++)
     {
         field = fgroup->field[f];
@@ -227,10 +228,13 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
                         for (samp2 = samp; samp2; samp2=samp2->prevsamp)
                             samp2->msamp = msamp;
                         msamp++;
+                        nmsample++;
                     }
                 }
         }
     }
+
+    fgroup->nmsample = nmsample;
 
     return fgroup->msample;
 }
