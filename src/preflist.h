@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/05/2018
+*	Last modified:		29/08/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -219,7 +219,7 @@ char *default_prefs[] =
 "                                       # vizier.nao.ac.jp,",
 "                                       # vizier.hia.nrc.ca,",
 "                                       # vizier.ast.cam.ac.uk,",
-"                                       # vizier.iucaa.ernet.in,",
+"                                       # vizier.iucaa.in,",
 "                                       # vizier.china-vo.org,",
 "                                       # vizier.cfa.harvard.edu and",
 "                                       # viziersaao.chpc.ac.za",
