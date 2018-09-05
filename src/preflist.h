@@ -214,7 +214,7 @@ char *default_prefs[] =
 " ",
 "#---------------------------- Reference catalogs ------------------------------",
 " ",
-"REF_SERVER         vizier.u-strasbg.fr # Internet addresses of catalog servers",
+"REF_SERVER         vizier.unistra.fr   # Internet addresses of catalog servers",
 "                                       # Possible mirrors include:",
 "                                       # vizier.nao.ac.jp,",
 "                                       # vizier.hia.nrc.ca,",

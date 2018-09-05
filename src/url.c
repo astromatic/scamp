@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -24,7 +24,7 @@
 *	This file incorporates work covered by the copyright and permission
 *	notice below.
 *
-*	Last modified:		31/03/2016
+*	Last modified:		05/09/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*****************************************************************************
@@ -250,6 +250,7 @@ URL_FILE *url_fopen(const char *url, double timeout)
   curl_easy_setopt(file->curl, CURLOPT_URL, url);
   curl_easy_setopt(file->curl, CURLOPT_WRITEDATA, file);
   curl_easy_setopt(file->curl, CURLOPT_VERBOSE, 0L);
+  curl_easy_setopt(file->curl, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(file->curl, CURLOPT_WRITEFUNCTION, write_callback);
   if (timeout > 0)
     curl_easy_setopt(file->curl, CURLOPT_CONNECTTIMEOUT_MS,
