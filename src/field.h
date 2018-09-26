@@ -1,30 +1,30 @@
 /*
- *    field.h
- *
- * Include file for field.c
- *
- *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- *
- * This file part of: SCAMP
- *
- ** Copyright:  (C) 2002-2017 IAP/CNRS/UPMC
- *
- * License:  GNU General Public License
- *
- * SCAMP is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- * SCAMP is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License
- * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
- *
- * Last modified:  07/05/2018
- *
- *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
+*				field.h
+*
+* Include file for field.c
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+*
+*	This file part of:	SCAMP
+*
+**	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*
+*	License:		GNU General Public License
+*
+*	SCAMP is free software: you can redistribute it and/or modify
+*	it under the terms of the GNU General Public License as published by
+*	the Free Software Foundation, either version 3 of the License, or
+* 	(at your option) any later version.
+*	SCAMP is distributed in the hope that it will be useful,
+*	but WITHOUT ANY WARRANTY; without even the implied warranty of
+*	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*	GNU General Public License for more details.
+*	You should have received a copy of the GNU General Public License
+*	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
+*
+*	Last modified:		16/03/2018
+*
+*%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
 #ifndef _FIELD_H_
 #define _FIELD_H_
@@ -128,10 +128,11 @@ extern fieldstruct *inherit_field(char *filename, fieldstruct *reffield,
 
 extern double  dhmedian(double *ra, int n);
 
-extern void  end_field(fieldstruct *field),
-       locate_field(fieldstruct *field),
-       print_fieldinfo(fieldstruct *field),
-       scale_field(fieldstruct *field, fieldstruct *reffield);
+extern void		end_field(fieldstruct *field),
+			locate_field(fieldstruct *field),
+			makepoly_field(fieldstruct *field),
+			print_fieldinfo(fieldstruct *field),
+			scale_field(fieldstruct *field, fieldstruct *reffield);
 #ifdef USE_THREADS
 void   pthread_end_fields(fieldstruct **fields, int nfield),
        *pthread_load_field(void *arg),

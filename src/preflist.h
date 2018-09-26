@@ -198,7 +198,12 @@ pkeystruct key[] =
    {"QUIET","NORMAL","LOG", "FULL",""}},
   {"WEIGHTFLAGS_MASK", P_INT, &prefs.wflags_mask, 0,0xff, 0.0,0.0},
   {"WRITE_XML", P_BOOL, &prefs.xml_flag},
+  {"WRITE_JSON", P_BOOL, &prefs.json_flag},
+  {"WRITE_HTML", P_BOOL, &prefs.html_flag},
   {"XML_NAME", P_STRING, prefs.xml_name},
+  {"JSON_NAME", P_STRING, prefs.json_name},
+  {"HTML_NAME", P_STRING, prefs.html_name},
+  {"HTML_TPL", P_STRING, prefs.html_tpl},
   {"XSL_URL", P_STRING, prefs.xsl_name},
   {""}
  };
@@ -367,7 +372,13 @@ char *default_prefs[] =
 " ",
 "VERBOSE_TYPE           NORMAL          # QUIET, NORMAL, LOG or FULL",
 "WRITE_XML              Y               # Write XML file (Y/N)?",
+"WRITE_JSON             Y               # Write JSON file (Y/N)?",
+"WRITE_HTML             Y               # Write HTML file (Y/N)?",
 "XML_NAME               scamp.xml       # Filename for XML output",
+"JSON_NAME              scamp.json      # Filename for JSON output",
+"HTML_NAME              scamp.html      # Filename for HTML output",
+"*HTML_TPL               " HTML_TPL,
+"*                                       # Filename for HTML template",
 "*XSL_URL                " XSL_URL,
 "*                                       # Filename for XSL style-sheet",
 #ifdef USE_THREADS

@@ -179,4 +179,5 @@
 			else if (prefs.verbose_type == LOG) \
 				fprintf(w, "%s\n", x);}
 
+#include "globals.h"
 #endif // _DEFINE_H_

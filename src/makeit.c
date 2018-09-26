@@ -64,6 +64,8 @@
 #endif
 #include "wcs/wcs.h"
 #include "xml.h"
+#include "htmlout.h"
+#include "jsonout.h"
 #include "chealpixstore.h"
 #include "crossid.h"
 #include "chealpix.h"
@@ -124,6 +126,14 @@ void makeit(void)
             init_xml(NULL, 0, NULL, 0);
             write_xml(prefs.xml_name);
             end_xml();
+        }
+
+        /*-- Write JSON/HTML */
+        if (prefs.json_flag)
+        {
+            JsonOut_write();
+            if (prefs.html_flag)
+                HtmlOut_write();
         }
         return;
     }
@@ -528,6 +538,10 @@ void makeit(void)
         write_aschead(filename, fields[f]);
     }
 
+    NFPRINTF(OUTPUT, "Computing detector footprints ...");
+    for (f=0; f<nfield; f++)
+      makepoly_field(fields[f]);
+
 #ifdef HAVE_PLPLOT
 
     /* Plot field and source positions */
@@ -597,6 +611,7 @@ void makeit(void)
         cplot_adprophisto2d(fgroups[g], prefs.sn_thresh[1]);
 #endif
 
+    JsonOut_set_data(fields, nfield, fgroups, ngroup);
     init_xml(fields, nfield, fgroups, ngroup);
 
     /* Processing end date and time */
@@ -668,6 +683,13 @@ void makeit(void)
     /* Write XML */
     if (prefs.xml_flag)
         write_xml(prefs.xml_name);
+
+    /* Write JSON/HTML */
+    if (prefs.json_flag) {
+        JsonOut_write();
+        if (prefs.html_flag)
+            HtmlOut_write();
+    }
 
     end_xml();
 

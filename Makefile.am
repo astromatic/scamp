@@ -29,7 +29,7 @@
 ACLOCAL_AMFLAGS		= -I m4
 AUTOMAKE_OPTIONS	= foreign no-dependencies
 SUBDIRS			= src tests man doc debian
-dist_pkgdata_DATA	= config/*.ahead xsl/scamp.xsl
+dist_pkgdata_DATA	= config/*.ahead xsl/scamp.xsl html/scamp.html.tpl
 EXTRA_DIST		= autogen.sh AUTHORS BUGS ChangeLog COPYRIGHT \
 			  HISTORY INSTALL LICENSE README.md THANKS
 RPM_ROOTDIR		= `rpmbuild --nobuild -E %_topdir`

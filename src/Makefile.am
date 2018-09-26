@@ -35,14 +35,14 @@ endif
 bin_PROGRAMS	= scamp
 scamp_SOURCES	= astrefcat.c astrsolve.c astrstats.c catout.c chealpix.c \
 		  chealpixstore.c check.c colour.c $(CPLOTSOURCE) crossid.c \
-		  dgeomap.c fft.c fgroup.c field.c fitswcs.c header.c main.c \
+		  dgeomap.c fft.c fgroup.c field.c fitswcs.c header.c htmlout.c jsonout.c main.c \
 		  makeit.c match.c merge.c misc.c mosaic.c photsolve.c \
 		  pqueue.c prefs.c proper.c quadtree.c samples.c threads.c \
 		  url.c xml.c \
 		  astrefcat.h astrsolve.h astrstats.h cathead.h catout.h \
 		  chealpix.h chealpixstore.h check.h colour.h cplot.h \
 		  crossid.h define.h dgeomap.h fft.h fgroup.h field.h \
-		  fitswcs.h globals.h header.h key.h match.h merge.h misc.h \
+		  fitswcs.h globals.h header.h htmlout.h jsonout.h key.h match.h merge.h misc.h \
 		  mosaic.h photsolve.h preflist.h prefs.h proper.h pqueue.h \
 		  quadtree.h samples.h threads.h types.h url.h wcscelsys.h \
 		  xml.h

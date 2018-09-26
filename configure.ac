@@ -205,6 +205,16 @@ AC_ARG_WITH(plplot-incdir,
 	[Provide an alternative path to the PLPlot include directory])])
 
 
+
+# Provide a special option for the default HTML template
+with_html_file=""$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_TARNAME/$PACKAGE_TARNAME.html.tpl"
+AC_ARG_WITH(html_file,
+	[AS_HELP_STRING([--with-html_file=<default path for HTML file>],
+	[Provide an alternative default HTML file])])
+AC_DEFINE_UNQUOTED([HTML_TPL], "$with_html_file",[Default path of the HTML file])
+
+
+
 # Provide a special option for the default XSLT URL
 with_xsl_url="file://"$(URBI_RESOLVE_DIR([$datadir]))"/$PACKAGE_TARNAME/$PACKAGE_TARNAME.xsl"
 AC_ARG_WITH(xsl_url,
@@ -245,6 +255,14 @@ AC_ARG_ENABLE(best-link,
 the executable as portable as possible (default = no)])],
 	AC_MSG_RESULT([yes]),
 	AC_MSG_RESULT([no]))
+
+PKG_CHECK_MODULES(JSON, json-c, [], [
+    PKG_CHECK_MODULES(JSON, json-c11, [], [
+    	PKG_CHECK_MODULES(JSON, json-c12)
+	])
+])
+AM_CFLAGS="$AM_CFLAGS $JSON_CFLAGS "
+AM_LDFLAGS="$AM_LDFLAGS $JSON_LIBS "
 
 ################# Actions to complete in case of multhreading ################
 AC_DEFINE_UNQUOTED(THREADS_NMAX, $n_pthreads,[Maximum number of POSIX threads])
@@ -364,7 +382,6 @@ AC_SUBST(AM_LDFLAGS)
 AC_MSG_RESULT([***************************************************************])
 AC_MSG_RESULT([Compile cmdline:  $CC $AM_CPPFLAGS $CPPFLAGS $AM_CFLAGS $CFLAGS])
 AC_MSG_RESULT([Link    cmdline:  $CC $AM_LDFLAGS $LDFLAGS $LIBS])
-AC_MSG_RESULT([Default XSLT URL: $xsl_url])
 AC_MSG_RESULT([***************************************************************])
 
 AC_CONFIG_FILES([
