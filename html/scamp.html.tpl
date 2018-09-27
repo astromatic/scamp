@@ -194,7 +194,9 @@
 				<!-- ALADIN -->
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5">
 					<div class="panel panel-default">
-						<div class="panel-heading text-center">Catalogs Footprint</div>
+						<div class="panel-heading text-center">
+							Catalogs Footprint
+						</div>
 						<div id="aladin-lite-div" class="panel-body" style="width: 100%; height:600px;"></div>
 					</div>
 				</div> <!-- end col -->
@@ -217,7 +219,11 @@
 								<strong>Summary Table on Input Files</strong> (Fields)
 							</button>
 						</div>
-						<div id="fieldsTableCollapse" class="collapse panel-body table-responsive">
+						<div id="fieldsTableCollapse" class="collapse panel-body table-responsive" style="max-height: 600px;">
+							<div id="aladinSelectionDiv">
+								<span><strong>Field selected: </strong></span><span id="aladinSelection">None</span>
+								<span id="aladinSelectionClear" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+							</div>
 							<table 
 								id="fieldsTable" 
 								class="table table-hover table-bordered table-striped table-sm" 
@@ -805,6 +811,8 @@ function downloadScampConf() {
 $(document).ready(function() {
 });
 
+GLOBAL_FIELD_SELECTED = null;
+
 $(document).ready(function() {
 	/* first initialize aladin */
 	aladin = A.aladin('#aladin-lite-div', {
@@ -898,12 +906,25 @@ $(document).ready(function() {
 		searching: true
 	});
 
+	$('#aladinSelectionClear').hide();
 	setAladinPos();
 	$('#fieldsTable tbody tr').on('click', function(event) {
-		$(this).addClass('info').siblings().removeClass('info');
-		aladinDraw($(this).children('td:first').text() - 1);
-		console.log($(this).children('td:first').text() - 1);
+		GLOBAL_FIELD_SELECTED = $(this);
+		GLOBAL_FIELD_SELECTED.addClass('info').siblings().removeClass('info');
+		var fnum = GLOBAL_FIELD_SELECTED.children('td:first').text();
+		aladinDraw(fnum - 1);
+		$('#aladinSelection').text(GLOBAL_FIELD_SELECTED.children('td:nth-child(2)').text() + " (" + fnum + ")");
+		$('#aladinSelectionClear').show();
 	});
+	
+	$('#aladinSelectionClear').on('click', function(event) {
+		if (GLOBAL_FIELD_SELECTED) {
+			GLOBAL_FIELD_SELECTED.removeClass('info');
+			$("#aladinSelection").text("None");
+			$(this).hide();
+			aladinDraw(-1);
+		}
+	})
 
 	/* 
 	 * build fields groups table 
