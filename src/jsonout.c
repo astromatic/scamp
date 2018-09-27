@@ -1104,11 +1104,20 @@ JsonOut_write()
 
 
     /* command line */
-    strbuff[0] = '\0';
+    int cmdline_buff_len = 0;
+    for (i=0; i<prefs.ncommand_line; i++)
+        cmdline_buff_len += strlen(prefs.command_line[i]);
+    cmdline_buff_len += prefs.ncommand_line; /* add spaces separators (one of them will be unused and be null) */
+
+    char *cmdline_buff = malloc(cmdline_buff_len);
+    cmdline_buff[0] = '\0';
+
     int pos = 0;
     for (i=0; i<prefs.ncommand_line; i++)
-        pos += snprintf(&strbuff[pos], MAXCHAR - strlen(strbuff), "%s ", prefs.command_line[i]);
-    json_object_object_add(main_obj, "CommandLine", json_object_new_string(strbuff));
+        pos += sprintf(&cmdline_buff[pos], "%s ", prefs.command_line[i]);
+    json_object_object_add(main_obj, "CommandLine", json_object_new_string(cmdline_buff));
+
+    free(cmdline_buff);
 
 
     /* config file */
