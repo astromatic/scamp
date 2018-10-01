@@ -194,9 +194,7 @@
 				<!-- ALADIN -->
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5">
 					<div class="panel panel-default">
-						<div class="panel-heading text-center">
-							Catalogs Footprint
-						</div>
+						<div class="panel-heading text-center">Catalogs Footprint</div>
 						<div id="aladin-lite-div" class="panel-body" style="width: 100%; height:600px;"></div>
 					</div>
 				</div> <!-- end col -->
@@ -219,11 +217,7 @@
 								<strong>Summary Table on Input Files</strong> (Fields)
 							</button>
 						</div>
-						<div id="fieldsTableCollapse" class="collapse panel-body table-responsive" style="max-height: 600px;">
-							<div id="aladinSelectionDiv">
-								<span><strong>Field selected: </strong></span><span id="aladinSelection">None</span>
-								<span id="aladinSelectionClear" class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-							</div>
+						<div id="fieldsTableCollapse" class="collapse panel-body table-responsive">
 							<table 
 								id="fieldsTable" 
 								class="table table-hover table-bordered table-striped table-sm" 
@@ -650,20 +644,11 @@ function setDDmenuCallback() {
 		if (isColumn) {
 			divId = listId.substring(0, listId.length - 5)
 			var tableId = $('#' + divId + '_btn1').text();
-			console.log("divid " + divId + '_btn1' + 'table id: ' + tableId);
 			generateHistogram(tableId, value, '#' + divId, PLOT_COLORS['#'+divId]);
 		} else {
 			divId = listId.substring(0, listId.length - 4)
 			generateHistogram(value, FIRST_COL[value], '#' + divId, PLOT_COLORS['#'+divId]);
 		}
-
-
-		// $(".btn:first-child").text($(this).text());
-		//$(".btn:first-child").val($(this).text());
-		console.log("hello dropdown!" + value);
-		console.log("plot is : " + listId);
-		console.log("end with _cols: " + isColumn);
-		console.log("full id is : " + divId);
 	});
 }
 
@@ -807,12 +792,6 @@ function downloadScampConf() {
 	document.body.removeChild(element);
 }
 
-// Tabbed table headers were not sized correctly
-$(document).ready(function() {
-});
-
-GLOBAL_FIELD_SELECTED = null;
-
 $(document).ready(function() {
 	/* first initialize aladin */
 	aladin = A.aladin('#aladin-lite-div', {
@@ -900,31 +879,23 @@ $(document).ready(function() {
 		table_row += "</tr>";
 		$(table_row).appendTo("#fieldsTable tbody");
 	});
+
 	$('#fieldsTable').DataTable({
 		paging: false,
 		info: false,
 		searching: true
 	});
 
-	$('#aladinSelectionClear').hide();
 	setAladinPos();
 	$('#fieldsTable tbody tr').on('click', function(event) {
-		GLOBAL_FIELD_SELECTED = $(this);
-		GLOBAL_FIELD_SELECTED.addClass('info').siblings().removeClass('info');
-		var fnum = GLOBAL_FIELD_SELECTED.children('td:first').text();
-		aladinDraw(fnum - 1);
-		$('#aladinSelection').text(GLOBAL_FIELD_SELECTED.children('td:nth-child(2)').text() + " (" + fnum + ")");
-		$('#aladinSelectionClear').show();
-	});
-	
-	$('#aladinSelectionClear').on('click', function(event) {
-		if (GLOBAL_FIELD_SELECTED) {
-			GLOBAL_FIELD_SELECTED.removeClass('info');
-			$("#aladinSelection").text("None");
-			$(this).hide();
+		if ($(this).hasClass('info'))  {
+			$(this).removeClass('info');
 			aladinDraw(-1);
+			return;
 		}
-	})
+		$(this).addClass('info').siblings().removeClass('info');
+		aladinDraw($(this).children('td:first').text() - 1);
+	});
 
 	/* 
 	 * build fields groups table 
