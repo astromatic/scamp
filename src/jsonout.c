@@ -1106,8 +1106,8 @@ JsonOut_write()
     /* command line */
     int cmdline_buff_len = 0;
     for (i=0; i<prefs.ncommand_line; i++)
-        cmdline_buff_len += strlen(prefs.command_line[i]);
-    cmdline_buff_len += prefs.ncommand_line; /* add spaces separators (one of them will be unused and be null) */
+        cmdline_buff_len += strlen(prefs.command_line[i]) + 1;
+    cmdline_buff_len++;
 
     char *cmdline_buff = malloc(cmdline_buff_len);
     cmdline_buff[0] = '\0';
