@@ -86,8 +86,6 @@
 		</nav> <!-- nav -->
 
 		<div class="container-fluid role="main"">
-
-
 			<!-- WARNINGS TABLE -->
 			<div class="row-fluid">
 				<div class="col-xs-12 col-sm-12 col-md-12">
@@ -531,250 +529,272 @@
  * of this html file is his own <script> tag.
  */
 
-/* from an array of object (data), return the "value" property of   
- * object havinig "str" as "name" property. */   
-function getElemVal(str, data) {
-	var value = "";
-	$.each(data, function (i, elem) {
+class TableUtils {
+
+	/* from an array of object (data), return the "value" property of   
+	 * object havinig "str" as "name" property. */   
+	static getElemVal(str, data) {
+		var value = "";
+		$.each(data, function (i, elem) {
 			if (elem.name == str) {
-			value = elem.value;
-			return;
+				value = elem.value;
+				return;
 			}
-			});
-	return value;
-}
+		});
+		return value;
+	}
 
-function getFlagValHelper(b, t) {
-	if (b)
-		return t;
-	return "-";
-}
+	static getFlagValHelper(b, t) {
+		if (b)
+			return t;
+		return "-";
+	}
 
-function getElemAverageValHelper(a) {
-	var value = 0.0;
-	var n = 0;
-	$.each(a, function(i, elem) {
+	static getElemAverageValHelper(a) {
+		var value = 0.0;
+		var n = 0;
+		$.each(a, function(i, elem) {
 			value += elem;
 			n++;
-			});
-	return value / n;
-}
+		});
+		return value / n;
+	}
 
-function getElemListValHelperFixedHelper(arr, unit, fix) {
-	var value = "";
-	$.each(arr, function(i, elem) {
+	static getElemListValHelperFixedHelper(arr, unit, fix) {
+		var value = "";
+		$.each(arr, function(i, elem) {
 			if (fix >= 0) {
-			elem = elem.toFixed(fix);
+				elem = elem.toFixed(fix);
 			}
 			value += elem + unit + " ";
-			});
-	return value;
-}
-
-function getElemListValHelper(arr, unit) {
-	return getElemListValHelperFixedHelper(arr, unit, -1);
-}
-
-function getRaValHelper(value) {
-	var a = Math.floor(value[0] / 15.0);
-	var b = Math.floor((value[0] * 4) % 60);
-	var c = Math.floor((value[0] *240) % 60);
-	return a + ":" + b + ":" + c.toFixed(2);
-}
-
-function getDecValHelper(value) {
-	var sign = "";
-	if (value[1] < 0) {
-		sign = "-";
-		value[1] = 0 - value[1];
+		});
+		return value;
 	}
-	var a = Math.floor(value[1]);
-	var b = Math.floor((value[1] * 60) % 60);
-	var c = Math.floor((value[1] * 3600) % 60);
 
-	return sign + a + ":" + b + ":" + c.toFixed(2);
-}
-
-function setAladinPos() {
-	var left_max	= 1000;
-	var top_max	 = -1;
-	var right_max   = -1;
-	var bottom_max  = 1000;
-	$.each(scamp_data.Fields, function(i, field) {
-		for (var i=0; i<field.Set_Polygon.value.length; i++) {
-			var poly = field.Set_Polygon.value[i];
-			if (poly[0][0] < left_max)
-				left_max = poly[0][0];
-			if (poly[0][1] > top_max)
-				top_max = poly[0][1];
-			if (poly[1][0] > right_max)
-				right_max = poly[1][0];
-			if (poly[2][1] < bottom_max)
-				bottom_max = poly[2][1];
-		}
-	})
-
-	var center_lng = (left_max + right_max) / 2;
-	var center_lat = (top_max + bottom_max) / 2;
-	aladin.gotoRaDec(center_lng, center_lat);
-
-	var height_max = Math.abs(top_max - bottom_max);
-	aladin.setFov(height_max * 4);
-}
-
-
-PLOT_COLORS = {
-	'#plot1': '#fce84f',
-	'#plot2': '#4e9a06'
-};
-
-FIRST_COL = {
-	'Fields': 'Observation_Date',
-	'Fgroups': 'Max_Radius',
-	'AstroInstruments': 'NFields',
-	'PhotInstruments': 'NFields'
-}
-
-function setDDmenuCallback() {
-	$(".dropdown-menu li a").click(function() {
-		var value   = $(this).text();
-		var listId  = $(this).parent().parent().attr('id');
-		var isColumn = listId.endsWith('_cols');
-		var divId = '';
-		if (isColumn) {
-			divId = listId.substring(0, listId.length - 5)
-			var tableId = $('#' + divId + '_btn1').text();
-			generateHistogram(tableId, value, '#' + divId, PLOT_COLORS['#'+divId]);
-		} else {
-			divId = listId.substring(0, listId.length - 4)
-			generateHistogram(value, FIRST_COL[value], '#' + divId, PLOT_COLORS['#'+divId]);
-		}
-	});
-}
-
-
-COL_Fields = `
-<li class="dropdown-header">Column</li>
-<li role="separator" class="divider"></li>
-<li><a href="javascript:void(0);">Observation_Date</a></li>
-<li><a href="javascript:void(0);">Exposure_Time</a></li>
-<li><a href="javascript:void(0);">Air_Mass</a></li>
-<li><a href="javascript:void(0);">Pixel_Scale</a></li>
-<li><a href="javascript:void(0);">AS_Contrast</a></li>
-<li><a href="javascript:void(0);">XY_Contrast</a></li>
-`;
-
-COL_Groups = `
-<li class="dropdown-header">Column</li>
-<li role="separator" class="divider"></li>
-<li><a href="javascript:void(0);">Max_Radius</a></li>
-<li><a href="javascript:void(0);">AstromNDets_Internal</a></li>
-`;
-
-COL_AstroInstruments = `
-<li class="dropdown-header">Column</li>
-<li role="separator" class="divider"></li>
-<li><a href="javascript:void(0);">NFields</a></li>
-`
-
-COL_PhotInstruments = `
-<li class="dropdown-header">Column</li>
-<li role="separator" class="divider"></li>
-<li><a href="javascript:void(0);">NFields</a></li>
-`
-
-function generateHistogram(table, column, divId, color) {
-	$(divId + '_btn1').html(table);
-	$(divId + '_btn2').html(column);
-
-	if (table == 'Fields') {
-		$(divId + '_cols').html(COL_Fields);
-	} else if (table == 'Fgroups') {
-		$(divId + '_cols').html(COL_Groups);
-	} else if (table == 'PhotInstruments') {
-		$(divId + '_cols').html(COL_PhotInstruments);
-	} else if (table == 'AstroInstruments') {
-		$(divId + '_cols').html(COL_AstroInstruments);
+	static getElemListValHelper(arr, unit) {
+		return TableUtils.getElemListValHelperFixedHelper(arr, unit, -1);
 	}
-	setDDmenuCallback();
 
-	var d3 = Plotly.d3;
-	var gd = d3.select(divId).node();
-	var x = [];
-	$.each(scamp_data[table], function(i, row) {
-		x[i] = row[column].value;
-	});
 
-	var layout = {
-		showlegend:  false,
-		xaxis: {title: column},
-		margin: {l:50, r:50, b:80, t:40, pad:4},
-		height: 300
-	};
+	static getRaValHelper(value) {
+		var a = Math.floor(value[0] / 15.0);
+		var b = Math.floor((value[0] * 4) % 60);
+		var c = Math.floor((value[0] *240) % 60);
+		return a + ":" + b + ":" + c.toFixed(2);
+	}
 
-	Plotly.newPlot(gd, [{
-		type: 'histogram',
-		autobinx: false,
-		histfunc: "density",
-		x: x,
-		marker: {color: color, line: {color: '#555',width:1}},
-		opacity: 0.8,
-	}], layout, {displayModeBar:true,showLink:false,displayLogo:false});
 
-	return gd;
+	static getDecValHelper(value) {
+		var sign = "";
+		if (value[1] < 0) {
+			sign = "-";
+			value[1] = 0 - value[1];
+		}
+		var a = Math.floor(value[1]);
+		var b = Math.floor((value[1] * 60) % 60);
+		var c = Math.floor((value[1] * 3600) % 60);
+		return sign + a + ":" + b + ":" + c.toFixed(2);
+	}
+
+
+	static generateImageColHelper(imageUrl) {
+		if (imageUrl == null)
+			return "<td></td>";
+
+		var value = "";
+		/* value += "<td><a type='button' rel='popover' data-img='"+imageUrl+"'>"; */
+		value += "<td><a type='button' data-toggle='modal' data-target='#imageModal' data-imgurl='" + imageUrl.value + "'>";
+		value += "<img width='100' class='img-fluid' src='" + imageUrl.value + "' />";
+		value += "</a></td>";
+		return value;
+	}
+
 }
 
-function aladinDraw(higlight) {
-	aladin.removeLayers();
-	var lineWidth = 1;
-	var color = '#bbbbbbff';
-	var overlay;
-	var poly;
-	var drawline;
 
-	$.each(scamp_data.Fields, function(i, field) {
-		if (higlight == i)
+aladin = null;
+class AladinScampUtils {
+	static init() {
+		/* first initialize aladin */
+		aladin = A.aladin('#aladin-lite-div', {
+			survey: "P/DSS2/color", 
+			fov: 60,
+			showReticle: true,
+			showZoomControl: true,
+			showFullScreenControl: true,
+			showLayersControl: true,
+			showGotoControl: true,
+			showShareControl: true,
+			fulscreen: true
+		});
+
+		var left_max	= 1000;
+		var top_max	 = -1;
+		var right_max   = -1;
+		var bottom_max  = 1000;
+		$.each(scamp_data.Fields, function(i, field) {
+			for (var i=0; i<field.Set_Polygon.value.length; i++) {
+				var poly = field.Set_Polygon.value[i];
+				if (poly[0][0] < left_max)
+					left_max = poly[0][0];
+				if (poly[0][1] > top_max)
+					top_max = poly[0][1];
+				if (poly[1][0] > right_max)
+					right_max = poly[1][0];
+				if (poly[2][1] < bottom_max)
+					bottom_max = poly[2][1];
+			}
+		})
+
+		var center_lng = (left_max + right_max) / 2;
+		var center_lat = (top_max + bottom_max) / 2;
+		aladin.gotoRaDec(center_lng, center_lat);
+
+		var height_max = Math.abs(top_max - bottom_max);
+		aladin.setFov(height_max * 4);
+
+		AladinScampUtils.draw(-1);
+	}
+
+
+	static draw(higlight) {
+		aladin.removeLayers();
+		var lineWidth = 1;
+		var color = '#bbbbbbff';
+		var overlay;
+		var poly;
+		var drawline;
+
+		$.each(scamp_data.Fields, function(i, field) {
+			if (higlight == i)
+				return;
+
+			overlay = A.graphicOverlay({color: color, lineWidth: lineWidth});
+			aladin.addOverlay(overlay);
+
+			for (var i=0; i<field.Set_Polygon.value.length; i++) {
+				poly = field.Set_Polygon.value[i];
+				drawline = poly;
+				drawline.push(poly[0]);
+				overlay.add(A.polyline(drawline));
+			}
+		})
+
+		if (higlight < 0)
 			return;
 
-		overlay = A.graphicOverlay({color: color, lineWidth: lineWidth});
+		/* remain the hiligted one */
+		lineWidth = 10;
+		color = '#ff0000ff';
+		var field = scamp_data.Fields[higlight];
+		var overlay = A.graphicOverlay({color: color, lineWidth: lineWidth});
 		aladin.addOverlay(overlay);
-
 		for (var i=0; i<field.Set_Polygon.value.length; i++) {
-			poly = field.Set_Polygon.value[i];
-			drawline = poly;
+			var poly = field.Set_Polygon.value[i];
+			var drawline = poly;
 			drawline.push(poly[0]);
 			overlay.add(A.polyline(drawline));
 		}
-	})
-
-	if (higlight < 0)
-		return;
-
-	/* remain the hiligted one */
-	lineWidth = 10;
-	color = '#ff0000ff';
-	var field = scamp_data.Fields[higlight];
-	var overlay = A.graphicOverlay({color: color, lineWidth: lineWidth});
-	aladin.addOverlay(overlay);
-	for (var i=0; i<field.Set_Polygon.value.length; i++) {
-		var poly = field.Set_Polygon.value[i];
-		var drawline = poly;
-		drawline.push(poly[0]);
-		overlay.add(A.polyline(drawline));
 	}
 }
 
-function generateImageColHelper(imageUrl) {
-	if (imageUrl == null)
-		return "<td></td>";
+class Histograms {
+	static getPlotColors() {
+		return {
+			'#plot1': '#fce84f',
+			'#plot2': '#4e9a06'
+		};
+	}
 
-	var value = "";
-	/* value += "<td><a type='button' rel='popover' data-img='"+imageUrl+"'>"; */
-	value += "<td><a type='button' data-toggle='modal' data-target='#imageModal' data-imgurl='" + imageUrl.value + "'>";
-	value += "<img width='100' class='img-fluid' src='" + imageUrl.value + "' />";
-	value += "</a></td>";
-	return value;
+	static getFirstColumn() {
+		return {
+			'Fields': 'Observation_Date',
+			'Fgroups': 'Max_Radius',
+			'AstroInstruments': 'NFields',
+			'PhotInstruments': 'NFields'
+		};
+	}
+
+
+	static setDropDownMenuCallback() {
+		$(".dropdown-menu li a").click(function() {
+			var value   = $(this).text();
+			var listId  = $(this).parent().parent().attr('id');
+			var isColumn = listId.endsWith('_cols');
+			var divId = '';
+			if (isColumn) {
+				divId = listId.substring(0, listId.length - 5)
+				var tableId = $('#' + divId + '_btn1').text();
+				Histograms.generate(tableId, value, '#' + divId, Histograms.getPlotColors()['#'+divId]);
+			} else {
+				divId = listId.substring(0, listId.length - 4)
+				Histograms.generate(value, Histograms.getFirstColumn()[value], '#' + divId, Histograms.getPlotColors()['#'+divId]);
+			}
+		});
+	}
+
+	static generate(table, column, divId, color) {
+		var fieldsCols =  `<li class="dropdown-header">Column</li>
+			<li role="separator" class="divider"></li>
+			<li><a href="javascript:void(0);">Observation_Date</a></li>
+			<li><a href="javascript:void(0);">Exposure_Time</a></li>
+			<li><a href="javascript:void(0);">Air_Mass</a></li>
+			<li><a href="javascript:void(0);">Pixel_Scale</a></li>
+			<li><a href="javascript:void(0);">AS_Contrast</a></li>
+			<li><a href="javascript:void(0);">XY_Contrast</a></li>`;
+		var groupsCols =  `<li class="dropdown-header">Column</li>
+			<li role="separator" class="divider"></li>
+			<li><a href="javascript:void(0);">Max_Radius</a></li>
+			<li><a href="javascript:void(0);">AstromNDets_Internal</a></li>`;
+		var astroCols = `<li class="dropdown-header">Column</li>
+						 <li role="separator" class="divider"></li>
+						 <li><a href="javascript:void(0);">NFields</a></li>`;
+		var photoCols = `<li class="dropdown-header">Column</li>
+						 <li role="separator" class="divider"></li>
+						 <li><a href="javascript:void(0);">NFields</a></li>`;
+
+		$(divId + '_btn1').html(table);
+		$(divId + '_btn2').html(column);
+
+		if (table == 'Fields') {
+			$(divId + '_cols').html(fieldsCols);
+		} else if (table == 'Fgroups') {
+			$(divId + '_cols').html(groupsCols);
+		} else if (table == 'PhotInstruments') {
+			$(divId + '_cols').html(astroCols);
+		} else if (table == 'AstroInstruments') {
+			$(divId + '_cols').html(photoCols);
+		}
+		Histograms.setDropDownMenuCallback();
+
+		var d3 = Plotly.d3;
+		var gd = d3.select(divId).node();
+		var x = [];
+		$.each(scamp_data[table], function(i, row) {
+			x[i] = row[column].value;
+		});
+
+		var layout = {
+			showlegend:  false,
+			xaxis: {title: column},
+			margin: {l:50, r:50, b:80, t:40, pad:4},
+			height: 300
+		};
+
+		Plotly.newPlot(gd, [{
+			type: 'histogram',
+			autobinx: false,
+			histfunc: "density",
+			x: x,
+			marker: {color: color, line: {color: '#555',width:1}},
+			opacity: 0.8,
+		}], layout, {displayModeBar:true,showLink:false,displayLogo:false});
+
+		return gd;
+	}
+
 }
+
 
 function downloadScampConf() {
 	/* generate scamp conf string */
@@ -793,21 +813,10 @@ function downloadScampConf() {
 }
 
 $(document).ready(function() {
-	/* first initialize aladin */
-	aladin = A.aladin('#aladin-lite-div', {
-		survey: "P/DSS2/color", 
-		fov: 60,
-		showReticle: true,
-		showZoomControl: true,
-		showFullScreenControl: true,
-		showLayersControl: true,
-		showGotoControl: true,
-		showShareControl: true,
-		fulscreen: true
-	});
 
-	aladinDraw(-1);
 	console.log(scamp_data);
+	AladinScampUtils.init();
+
 
 	/* build status string */
 	$('#soft').text(scamp_data.Software.Name.value +" "+scamp_data.Software.Version.value);
@@ -818,10 +827,13 @@ $(document).ready(function() {
 	$('#username').text(scamp_data.Software.User.value);
 	$('#rundir').text(scamp_data.Software.Path.value);
 
+
+
 	/* show/hide match option and plots */
-	var showmatch = getElemVal("MATCH", scamp_data.Configuration);
-	var showplot  = getElemVal("CHECKPLOT_DEV", scamp_data.Configuration)[0];
-	showplot = (showplot == "PNG") ? true : false;
+	var showmatch = TableUtils.getElemVal("MATCH", scamp_data.Configuration);
+	var showplot  = (TableUtils.getElemVal("CHECKPLOT_DEV", scamp_data.Configuration)[0] == "PNG") ? true: false;
+
+
 
 	/* 
 	 * build fields table 
@@ -845,17 +857,17 @@ $(document).ready(function() {
 		table_row += tdClass +  field.Image_Ident.value + "</td>";
 		table_row += tdClass +  field.NExtensions.value + "</td>";
 		table_row += tdClass +  field.NDetect.value + "</td>";
-		table_row += tdClass +  getFlagValHelper(field.Ext_Header.value, "H")  + getFlagValHelper(field.Photom_Flag, "P") +  "</td>";
+		table_row += tdClass +  TableUtils.getFlagValHelper(field.Ext_Header.value, "H")  + TableUtils.getFlagValHelper(field.Photom_Flag, "P") +  "</td>";
 		table_row += tdClass +  field.Group.value + "</td>";
 		table_row += tdClass +  field.Astr_Instrum.value + "</td>";
 		table_row += tdClass +  field.Phot_Instrum.value + "</td>";
 		table_row += tdClass +  field.Observation_Date.value + "</td>";
 		table_row += tdClass +  field.Exposure_Time.value.toFixed(3) + "</td>";
 		table_row += tdClass +  field.Air_Mass.value.toFixed(2) + "</td>";
-		table_row += tdClass +  getRaValHelper(field.Field_Coordinates.value) + "</td>";
-		table_row += tdClass +  getDecValHelper(field.Field_Coordinates.value) + "</td>";
+		table_row += tdClass +  TableUtils.getRaValHelper(field.Field_Coordinates.value) + "</td>";
+		table_row += tdClass +  TableUtils.getDecValHelper(field.Field_Coordinates.value) + "</td>";
 		table_row += tdClass +  field.Max_Radius.value.toFixed(3) + "'" + "</td>";
-		table_row += tdClass +  getElemAverageValHelper(field.Pixel_Scale.value).toFixed(4) + "''" + "</td>";
+		table_row += tdClass +  TableUtils.getElemAverageValHelper(field.Pixel_Scale.value).toFixed(4) + "''" + "</td>";
 		if (showmatch) {
 			table_row += tdClass +  field.DPixel_Scale.value.toFixed(4) + "</td>";
 			table_row += tdClass +  field.DPos_Angle.value + "°" + "</td>";
@@ -880,22 +892,42 @@ $(document).ready(function() {
 		$(table_row).appendTo("#fieldsTable tbody");
 	});
 
+	/* activate datatable for sorting */
 	$('#fieldsTable').DataTable({
 		paging: false,
 		info: false,
 		searching: true
 	});
 
-	setAladinPos();
+	if (!showmatch) {
+		$('#fieldsTable th:nth-child(17)').hide();
+		$('#fieldsTable td:nth-child(17)').hide();
+		$('#fieldsTable th:nth-child(18)').hide();
+		$('#fieldsTable td:nth-child(18)').hide();
+		$('#fieldsTable th:nth-child(19)').hide();
+		$('#fieldsTable td:nth-child(19)').hide();
+		$('#fieldsTable th:nth-child(20)').hide();
+		$('#fieldsTable td:nth-child(20)').hide();
+		$('#fieldsTable th:nth-child(21)').hide();
+		$('#fieldsTable td:nth-child(21)').hide();
+		$('#fieldsTable th:nth-child(22)').hide();
+		$('#fieldsTable td:nth-child(22)').hide();
+	}
+
+	/* configure highlighting of footprint on aladin on click */
 	$('#fieldsTable tbody tr').on('click', function(event) {
 		if ($(this).hasClass('info'))  {
 			$(this).removeClass('info');
-			aladinDraw(-1);
+			AladinScampUtils.draw(-1);
 			return;
 		}
 		$(this).addClass('info').siblings().removeClass('info');
-		aladinDraw($(this).children('td:first').text() - 1);
+		AladinScampUtils.draw($(this).children('td:first').text() - 1);
 	});
+
+
+
+
 
 	/* 
 	 * build fields groups table 
@@ -905,70 +937,70 @@ $(document).ready(function() {
 		table_row += "<tr>";
 		table_row += "<td>" +  group.Name.value + "</td>";
 		if (showplot) {
-			table_row += generateImageColHelper(group.FgroupsPlot);
+			table_row += TableUtils.generateImageColHelper(group.FgroupsPlot);
 		} else {
 			table_row += "<td></td>";
 		}
 		table_row += "<td>" +  group.Index.value + "</td>";
 		table_row += "<td>" +  group.NFields.value + "</td>";
-		table_row += "<td>" +  getRaValHelper(group.Field_Coordinates.value) + "</td>";
-		table_row += "<td>" +  getDecValHelper(group.Field_Coordinates.value) + "</td>";
-		table_row += "<td>" +  getElemAverageValHelper(group.Pixel_Scale.value).toFixed(4) + "''" + "</td>";
+		table_row += "<td>" +  TableUtils.getRaValHelper(group.Field_Coordinates.value) + "</td>";
+		table_row += "<td>" +  TableUtils.getDecValHelper(group.Field_Coordinates.value) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemAverageValHelper(group.Pixel_Scale.value).toFixed(4) + "''" + "</td>";
 		table_row += "<td>" +  group.Max_Radius.value.toFixed(3) + "'" + "</td>";
 		table_row += "<td>" +  group.AstRef_Catalog.value + "</td>";
 		table_row += "<td>" +  group.AstRef_Band.value + "</td>";
 		if (showplot) {
-			table_row += generateImageColHelper(group.Chi2Plot);
+			table_row += TableUtils.generateImageColHelper(group.Chi2Plot);
 		} else {
 			table_row += "<td></td>";
 		}
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.AstromSigma_Internal.value, "'' ", 4) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.AstromSigma_Internal.value, "'' ", 4) + "</td>";
 		table_row += "<td>" +  group.AstromCorr_Internal.value.toFixed(5) + "</td>";
 		table_row += "<td>" +  group.AstromChi2_Internal.value.toFixed(1) + "</td>";
 		table_row += "<td>" +  group.AstromNDets_Internal.value + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.AstromSigma_Internal_HighSN.value, "'' ", 4) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.AstromSigma_Internal_HighSN.value, "'' ", 4) + "</td>";
 		table_row += "<td>" +  group.AstromCorr_Internal_HighSN.value.toFixed(5)  + "</td>";
 		table_row += "<td>" +  group.AstromChi2_Internal_HighSN.value.toFixed(1) + "</td>";
 		table_row += "<td>" +  group.AstromNDets_Internal_HighSN.value + "</td>";
 		if (showplot) {
-			table_row += generateImageColHelper(group.IntErr1DimPlot);
-			table_row += generateImageColHelper(group.IntErr2DimPlot);
+			table_row += TableUtils.generateImageColHelper(group.IntErr1DimPlot);
+			table_row += TableUtils.generateImageColHelper(group.IntErr2DimPlot);
 		} else {
 			table_row += "<td></td>";
 			table_row += "<td></td>";
 		}
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.AstromOffset_Reference.value, "'' ", 4) + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.AstromSigma_Reference.value, "'' ", 3) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.AstromOffset_Reference.value, "'' ", 4) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.AstromSigma_Reference.value, "'' ", 3) + "</td>";
 		table_row += "<td>" +  group.AstromCorr_Reference.value.toFixed(4) + "</td>";
 		table_row += "<td>" +  group.AstromChi2_Reference.value.toFixed(1) + "</td>";
 		table_row += "<td>" +  group.AstromNDets_Reference.value + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.AstromOffset_Reference_HighSN.value, "'' ", 4) + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.AstromSigma_Reference_HighSN.value, "'' ", 3) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.AstromOffset_Reference_HighSN.value, "'' ", 4) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.AstromSigma_Reference_HighSN.value, "'' ", 3) + "</td>";
 		table_row += "<td>" +  group.AstromCorr_Reference_HighSN.value.toFixed(4) + "</td>";
 		table_row += "<td>" +  group.AstromChi2_Reference_HighSN.value.toFixed(1) + "</td>";
 		table_row += "<td>" +  group.AstromNDets_Reference_HighSN.value + "</td>";
 		if (showplot) {
-			table_row += generateImageColHelper(group.RefErr1DimPlot);
-			table_row += generateImageColHelper(group.RefErr2DimPlot);
+			table_row += TableUtils.generateImageColHelper(group.RefErr1DimPlot);
+			table_row += TableUtils.generateImageColHelper(group.RefErr2DimPlot);
 		} else {
 			table_row += "<td></td>";
 			table_row += "<td></td>";
 		}
-		table_row += "<td>" +  getElemListValHelper(group.PhotInstru_Name.value,", ") + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotSigma_Internal.value, " ", 6) + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotChi2_Internal.value, " ", 4) + "</td>";
-		table_row += "<td>" +  getElemListValHelper(group.PhotNDets_Internal.value, " ") + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotSigma_Internal_HighSN.value, " ", 6) + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotChi2_Internal_HighSN.value, " ", 2) + "</td>";
-		table_row += "<td>" +  getElemListValHelper(group.PhotNDets_Internal_HighSN.value, " ") + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotSigma_Reference.value, " ", 6) + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotChi2_Reference.value, " ", 6) + "</td>";
-		table_row += "<td>" +  getElemListValHelper(group.PhotNDets_Reference.value, " ") + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotSigma_Reference_HighSN.value, " ", 6) + "</td>";
-		table_row += "<td>" +  getElemListValHelperFixedHelper(group.PhotChi2_Reference_HighSN.value, " ", 6) + "</td>";
-		table_row += "<td>" +  getElemListValHelper(group.PhotNDets_Reference_HighSN.value, " ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(group.PhotInstru_Name.value,", ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotSigma_Internal.value, " ", 6) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotChi2_Internal.value, " ", 4) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(group.PhotNDets_Internal.value, " ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotSigma_Internal_HighSN.value, " ", 6) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotChi2_Internal_HighSN.value, " ", 2) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(group.PhotNDets_Internal_HighSN.value, " ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotSigma_Reference.value, " ", 6) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotChi2_Reference.value, " ", 6) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(group.PhotNDets_Reference.value, " ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotSigma_Reference_HighSN.value, " ", 6) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelperFixedHelper(group.PhotChi2_Reference_HighSN.value, " ", 6) + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(group.PhotNDets_Reference_HighSN.value, " ") + "</td>";
 		if (showplot) {
-			table_row += generateImageColHelper(group.PhotErrPlot);
+			table_row += TableUtils.generateImageColHelper(group.PhotErrPlot);
 		} else {
 			table_row += "<td></td>";
 		}
@@ -976,11 +1008,33 @@ $(document).ready(function() {
 		$(table_row).appendTo("#groupsTable tbody");
 	});
 
+	if (!showplot) {
+		$('#groupsTable th:nth-child(2)').hide();
+		$('#groupsTable td:nth-child(2)').hide();
+		$('#groupsTable th:nth-child(11)').hide();
+		$('#groupsTable td:nth-child(11)').hide();
+		$('#groupsTable th:nth-child(20)').hide();
+		$('#groupsTable td:nth-child(20)').hide();
+		$('#groupsTable th:nth-child(21)').hide();
+		$('#groupsTable td:nth-child(21)').hide();
+		$('#groupsTable th:nth-child(32)').hide();
+		$('#groupsTable td:nth-child(32)').hide();
+		$('#groupsTable th:nth-child(33)').hide();
+		$('#groupsTable td:nth-child(33)').hide();
+		$('#groupsTable th:nth-child(47)').hide();
+		$('#groupsTable td:nth-child(47)').hide();
+		$('#astrometricInstrumentsTable th:nth-child(6)').hide();   
+		$('#astrometricInstrumentsTable td:nth-child(6)').hide();  
+	}
+
 	$('#groupsTable').DataTable({
 		paging: false,
 		info: false,
 		searching: false
 	});
+
+
+
 
 	/* 
 	 * build astrometric instruments table 
@@ -992,9 +1046,9 @@ $(document).ready(function() {
 		table_row += "<td>" +  astroinstru.Index.value + "</td>";
 		table_row += "<td>" +  astroinstru.NFields.value + "</td>";
 		table_row += "<td>" +  astroinstru.NKeys.value + "</td>";
-		table_row += "<td>" +  getElemListValHelper(astroinstru.Keys.value, " ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(astroinstru.Keys.value, " ") + "</td>";
 		if (showplot) {
-			table_row += generateImageColHelper(astroinstru.DistPlot);
+			table_row += TableUtils.generateImageColHelper(astroinstru.DistPlot);
 		} else {
 			table_row += "<td></td>";
 		}
@@ -1009,6 +1063,8 @@ $(document).ready(function() {
 	});
 
 
+
+
 	/* 
 	 * build photometric instruments table 
 	 */
@@ -1020,7 +1076,7 @@ $(document).ready(function() {
 		table_row += "<td>" +  photoinstru.NFields.value + "</td>";
 		table_row += "<td>" +  photoinstru.MagZeroPoint_Output.value + "</td>";
 		table_row += "<td>" +  photoinstru.NKeys.value + "</td>";
-		table_row += "<td>" +  getElemListValHelper(photoinstru.Keys.value, " ") + "</td>";
+		table_row += "<td>" +  TableUtils.getElemListValHelper(photoinstru.Keys.value, " ") + "</td>";
 		table_row += "</tr>";
 		$(table_row).appendTo("#photometricInstrumentsTable tbody");
 	});
@@ -1030,6 +1086,7 @@ $(document).ready(function() {
 		info: false,
 		searching: false
 	});
+
 
 
 	/* 
@@ -1061,6 +1118,9 @@ $(document).ready(function() {
 		searching: false
 	});
 
+
+
+
 	/* 
 	 * build warnings table 
 	 */
@@ -1079,48 +1139,13 @@ $(document).ready(function() {
 		searching: false
 	});
 
-	/*
-	 * Hide unused columns
-	 */
-	if (!showmatch) {
-		$('#fieldsTable th:nth-child(17)').hide();
-		$('#fieldsTable td:nth-child(17)').hide();
-		$('#fieldsTable th:nth-child(18)').hide();
-		$('#fieldsTable td:nth-child(18)').hide();
-		$('#fieldsTable th:nth-child(19)').hide();
-		$('#fieldsTable td:nth-child(19)').hide();
-		$('#fieldsTable th:nth-child(20)').hide();
-		$('#fieldsTable td:nth-child(20)').hide();
-		$('#fieldsTable th:nth-child(21)').hide();
-		$('#fieldsTable td:nth-child(21)').hide();
-		$('#fieldsTable th:nth-child(22)').hide();
-		$('#fieldsTable td:nth-child(22)').hide();
-	}
-	if (!showplot) {
-		$('#groupsTable th:nth-child(2)').hide();
-		$('#groupsTable td:nth-child(2)').hide();
-		$('#groupsTable th:nth-child(11)').hide();
-		$('#groupsTable td:nth-child(11)').hide();
-		$('#groupsTable th:nth-child(20)').hide();
-		$('#groupsTable td:nth-child(20)').hide();
-		$('#groupsTable th:nth-child(21)').hide();
-		$('#groupsTable td:nth-child(21)').hide();
-		$('#groupsTable th:nth-child(32)').hide();
-		$('#groupsTable td:nth-child(32)').hide();
-		$('#groupsTable th:nth-child(33)').hide();
-		$('#groupsTable td:nth-child(33)').hide();
-		$('#groupsTable th:nth-child(47)').hide();
-		$('#groupsTable td:nth-child(47)').hide();
-		$('#astrometricInstrumentsTable th:nth-child(6)').hide();   
-		$('#astrometricInstrumentsTable td:nth-child(6)').hide();  
-	}
-
 	if (scamp_data.Warnings.length == 0) {
 		$("#warningDiv").hide();
 	} else {
 		var nwarn = $('#warningsTable tbody tr').length;
 		$('#warningsShort').html(' (' + nwarn + ')');
 	}
+
 
 
 	/*
@@ -1148,8 +1173,8 @@ $(document).ready(function() {
 	});
 
 
-	var gd1 = generateHistogram('Fields', 'Observation_Date', '#plot1', PLOT_COLORS['#plot1']);
-	var gd2 = generateHistogram('Fields', 'XY_Contrast',	  '#plot2', PLOT_COLORS['#plot2']);
+	var gd1 = Histograms.generate('Fields', 'Observation_Date', '#plot1', Histograms.getPlotColors()['#plot1']);
+	var gd2 = Histograms.generate('Fields', 'XY_Contrast', '#plot2', Histograms.getPlotColors()['#plot2']);
 
 	window.onresize = function() {
 		Plotly.Plots.resize(gd1);
@@ -1168,7 +1193,7 @@ $(document).ready(function() {
 		`);
 	});
 
-	setDDmenuCallback();
+	Histograms.setDropDownMenuCallback();
 
 	$("#configCollapse").on('shown.bs.collapse', function() {
 		$('#configTable').DataTable().columns.adjust().draw();
