@@ -87,7 +87,7 @@
 
 		<div class="container-fluid role="main"">
 			<!-- WARNINGS TABLE -->
-			<div class="row-fluid">
+			<div class="row">
 				<div class="col-xs-12 col-sm-12 col-md-12">
 					<div id ="warningDiv" class="alert alert-warning">
 						<button 
@@ -117,7 +117,7 @@
 
 
 
-			<div class="row-fluid">
+			<div class="row">
 				<!--  HISTOGRAMS -->
 				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-7">
 					<div class="row">
@@ -201,7 +201,7 @@
 
 
 			<!-- FIELD TABLE -->
-			<div class="row-fluid">
+			<div class="row">
 				<div class="col-md-12">
 					<div id="inputFiles" class="panel panel-default">
 						<div class="panel-heading text-left">
@@ -262,7 +262,7 @@
 
 
 			<!-- GROUPS TABLE -->
-			<div class="row-fluid">
+			<div class="row">
 				<div class="col-md-12">
 					<div id="groupProperties" class="panel panel-default">
 						<div class="panel-heading text-left">
@@ -338,7 +338,7 @@
 
 
 
-			<div class="row-fluid">
+			<div class="row">
 				<!-- ASTROINSTRUMENTS TABLE -->
 				<div class="col-md-6"> 
 					<div id="astroInstruments" class="panel panel-default">
@@ -409,7 +409,7 @@
 
 
 			<!-- SCAMP CONFIG -->
-			<div class="row-fluid">
+			<div class="row">
 				<div class="col-md-12"> 
 					<div id="configFile" class="panel panel-default">
 						<div class="panel-heading text-left">
@@ -1147,10 +1147,6 @@ $(document).ready(function() {
 	}
 
 
-
-	/*
-	 * Configure our modal image viewers
-	 */
 	$('#imageModal').on('show.bs.modal', function (event) {
 		var button = $(event.relatedTarget); // Button that triggered the modal
 		var img = button.data('imgurl'); // Extract info from data-* attributes
@@ -1159,7 +1155,7 @@ $(document).ready(function() {
 		imgtag = modal.find('.modal-img');
 		imgtag.attr("src", img);
 		imgtag.attr("title", img);
-			imgtag.attr("alt", img);
+		imgtag.attr("alt", img);
 	})
 
 	$('a[rel=popover]').popover({
