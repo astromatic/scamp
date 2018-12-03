@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/08/2018
+*	Last modified:		03/12/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -79,7 +79,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	03/12/2018
  ***/
 void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -146,7 +146,7 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
           sig = samp->wcsposerr[d];
           sigma[d] = sig*sig;
           }
-         xi = samp->msamp->colour;
+        xi = samp->msamp ? samp->msamp->colour : 0.0;
 /*------ Explore the forward direction */
         for (samp2=samp; (samp2=samp2->nextsamp);)
           {
