@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/02/2015
+*	Last modified:		06/12/2018
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -557,7 +557,7 @@ INPUT	Pointer to the WCS projection structure,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	06/12/2018
  ***/
 int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
 				double ymin, double ymax)
@@ -591,7 +591,7 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
   alphabeg = fmod(wcs2->wcsmin[lng], 360.0);
   alphaend = fmod(wcs2->wcsmax[lng], 360.0);
   while (alphaend<alphabeg)
-    alphabeg -= 360.0;
+    alphaend += 360.0;
   deltabeg = wcs2->wcsmin[lat];
   deltaend = wcs2->wcsmax[lat];
 
@@ -632,7 +632,7 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
   alphabeg = fmod (alphabeg, 360.0);
   alphaend += alphastep;
   while (alphaend<alphabeg)
-    alphabeg -= 360.0;
+    alphaend += 360.0;
 
   deltastep = deltaend - deltabeg;
 /* Quantize at the 15 degrees level */
@@ -698,7 +698,8 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
 		&& (xm = (xd-xmin)/dx) > 0.0 && xm < 1.0
 		&& fabs(xm-xmd) > 0.1)
           {
-          plmtex("b", 2.0, (PLFLT)xm, 0.5, cplot_degtosexde(str,wcspos[0],
+          plmtex("b", 2.0, (PLFLT)xm, 0.5,
+		cplot_degtosexde(str,fmod_m90_p90(wcspos[0]),
 		alphastep));
           xmd = xm;
           }
@@ -706,7 +707,8 @@ int	cplot_drawloccoordgrid(wcsstruct *wcs, double xmin, double xmax,
 		&& (xm = (xd-xmin)/dx) > 0.0 && xm < 1.0
 		&& fabs(xm-xmu) > 0.1)
           {
-          plmtex("t", 1.5, (PLFLT)xm, 0.5, cplot_degtosexde(str,wcspos[0],
+          plmtex("t", 1.5, (PLFLT)xm, 0.5,
+		cplot_degtosexde(str,fmod_m90_p90(wcspos[0]),
 		alphastep));
           xmu = xm;
           }
