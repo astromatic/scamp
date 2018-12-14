@@ -262,7 +262,7 @@ AM_CONDITIONAL(USE_THREADS, test $use_pthreads = "yes")
 
 ############ handle the INTEL MKL library (FFTW + LAPACKe) ###########
 if test "$enable_mkl" = "yes"; then
-  convlibs="${srcdir}/wcs/libwcs_c.a"
+  convlibs="${srcdir}/../src/wcs/libwcs_c.a"
   ACX_MKL($with_mkl_dir,yes,$enable_best_link,$convlibs)
   AC_MSG_CHECKING([for the INTEL MKL])
   if test "$MKL_WARN" == ""; then
