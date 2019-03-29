@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  17/07/2018
+ * Last modified:  29/03/2019
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -70,7 +70,7 @@ int sort_coord;
   NOTES   The filename is used for error messages only. Global preferences are
   used.
   AUTHOR  E. Bertin (IAP)
-  VERSION  29/10/2017
+  VERSION  29/03/2019
  */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -562,7 +562,9 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
         sample->mag = (sample->flux>0.0)? -2.5*log10(sample->flux) : 99.0;
         sample->rawpos[0] = x;
         sample->rawpos[1] = y;
-        assert(raw_to_wcs(set->wcs, sample->rawpos, sample->wcspos) == 0);
+        if (raw_to_wcs(set->wcs, sample->rawpos, sample->wcspos) != RETURN_OK) {
+            warning("Invalid deprojected coordinates in " , rfilename);
+        }
 
         sample->epoch = set->epoch;
 
