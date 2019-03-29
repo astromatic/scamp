@@ -163,7 +163,7 @@ PV2_4   =                   0. / WCS parameter value term
 PV2_5   =                   0. / WCS parameter value term
 END     
 CTYPE1  = 'RA---TAN'           / Coordinate/projection type
-CTYPE1  = 'DEC--TAN'           / Coordinate/projection type
+CTYPE2  = 'DEC--TAN'           / Coordinate/projection type
 EQUINOX =                2000. / Standard ICRS (years)
 RADECSYS= 'ICRS    '           / Coordinate reference frame
 CRPIX1  =     -4.526592641E+02 / Reference pixel on this axis
