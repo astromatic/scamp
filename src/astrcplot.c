@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		06/12/2018
+*	Last modified:		13/12/2019
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -997,7 +997,7 @@ INPUT	Pointer to the field.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_distort(fieldstruct *field)
   {
@@ -1005,7 +1005,7 @@ int	cplot_distort(fieldstruct *field)
    wcsstruct		*wcs, *wcsin;
    setstruct		*set;
    PLFLT		**scale,
-			clevel[CPLOT_NSHADES], cpoint[3], r[3],g[3],b[3],
+			clevel[CPLOT_NSHADES], cpoint[5], r[5],g[5],b[5],
 			cscale, scalemin,scalemax, mscale,dscale;
    PLINT		lwid;
    char			*ctype[NAXIS],
@@ -1094,10 +1094,12 @@ int	cplot_distort(fieldstruct *field)
     dscale = 1.0e-6;
   for (i=0; i<CPLOT_NSHADES; i++)
     clevel[i] = scalemin + (i-0.5) * dscale / (CPLOT_NSHADES-2);
-  cpoint[0] = 0.0; r[0] = 0.5; g[0] = 0.5; b[0] = 1.0;
-  cpoint[1] = 0.5; r[1] = 0.5; g[1] = 1.0; b[1] = 0.5;
-  cpoint[2] = 1.0; r[2] = 1.0; g[2] = 0.5; b[2] = 0.5;
-  plscmap1l(1, 3, cpoint, r, g, b, NULL);
+  cpoint[0] = 0.00; r[0] = 0.5; g[0] = 0.5; b[0] = 1.0;
+  cpoint[1] = 0.25; r[1] = 0.5; g[1] = 1.0; b[1] = 1.0;
+  cpoint[2] = 0.50; r[2] = 0.5; g[2] = 1.0; b[2] = 0.5;
+  cpoint[3] = 0.75; r[3] = 1.0; g[3] = 1.0; b[3] = 0.5;
+  cpoint[4] = 1.00; r[4] = 1.0; g[4] = 0.5; b[4] = 0.5;
+  plscmap1l(1, 5, cpoint, r, g, b, NULL);
 
   plAlloc2dGrid(&scale, CPLOT_NDISTGRID, CPLOT_NDISTGRID);
 
@@ -2067,7 +2069,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2255,8 +2257,8 @@ int	cplot_aderrhisto1d(fgroupstruct *fgroup, double hsn_thresh)
         {
         for (i=0; i<CPLOT_NSHADES; i++)
           clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d3]+0.5;
-        r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
-        r[1] = 0.2; g[1] = 0.3; b[1] = 0.2;
+        r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+        r[1] = 0.0; g[1] = 0.8; b[1] = 0.0;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
         plshades((const PLFLT **)histo[d3], CPLOT_ADERR1DNX, CPLOT_ADERR1DNY, NULL,
 		fgroup->projposmin[d2], fgroup->projposmax[d2], -maxlim, maxlim,
@@ -2336,7 +2338,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -2504,8 +2506,8 @@ int	cplot_aderrhisto2d(fgroupstruct *fgroup, double hsn_thresh)
     {
     for (i=0; i<CPLOT_NSHADES; i++)
       clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax+0.5;
-    r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
-    r[1] = 0.2; g[1] = 0.3; b[1] = 0.2;
+    r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+    r[1] = 0.0; g[1] = 0.8; b[1] = 0.0;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
     plshades((const PLFLT **)histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
@@ -2594,7 +2596,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
 		double hsn_thresh)
@@ -2777,8 +2779,8 @@ int	cplot_referrhisto1d(fgroupstruct *fgroup, fieldstruct *reffield,
         {
         for (i=0; i<CPLOT_NSHADES; i++)
           clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d3]+0.5;
-        r[0] = 1.0; g[0] = 0.98; b[0] = 0.98;
-        r[1] = 0.6; g[1] = 0.1; b[1] = 0.1;
+        r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+        r[1] = 0.8; g[1] = 0.0; b[1] = 0.0;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
         plshades((const PLFLT **)histo[d3],
 		CPLOT_ADERR1DNX, CPLOT_ADERR1DNY, NULL,
@@ -2861,7 +2863,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -3024,8 +3026,8 @@ int	cplot_referrhisto2d(fgroupstruct *fgroup, fieldstruct *reffield,
     {
     for (i=0; i<CPLOT_NSHADES; i++)
       clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax+0.5;
-    r[0] = 1.0; g[0] = 0.98; b[0] = 0.98;
-    r[1] = 0.6; g[1] = 0.1; b[1] = 0.1;
+    r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+    r[1] = 0.8; g[1] = 0.0; b[1] = 0.0;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
     plshades((const PLFLT **)histo, CPLOT_REFERR2DN, CPLOT_REFERR2DN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
@@ -3114,7 +3116,7 @@ INPUT	Pointer to an array of field group pointers,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 		double hsn_thresh)
@@ -3377,8 +3379,8 @@ int	cplot_pixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 /*
         for (i=0; i<CPLOT_NSHADES; i++)
           clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d3]+0.5;
-        r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
-        r[1] = 0.3; g[1] = 0.4; b[1] = 0.3;
+        r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+        r[1] = 0.0; g[1] = 0.8; b[1] = 0.0;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
         plshades((const PLFLT **)histo[d3], CPLOT_PIXERR1DNX, CPLOT_PIXERR1DNY,
 		NULL, 0.5, maxwidth, -maxlim, maxlim,
@@ -3727,8 +3729,8 @@ int	cplot_subpixerrhisto1d(fgroupstruct **fgroups, int ngroup, int instru,
 /*
         for (i=0; i<CPLOT_NSHADES; i++)
           clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d3]+0.5;
-        r[0] = 0.96; g[0] = 1.0; b[0] = 0.96;
-        r[1] = 0.3; g[1] = 0.4; b[1] = 0.3;
+        r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+        r[1] = 0.0; g[1] = 0.8; b[1] = 0.0;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
         plshades((const PLFLT **)histo[d3],
 		CPLOT_SUBPIXERR1DNX, CPLOT_SUBPIXERR1DNY, NULL,
@@ -3829,7 +3831,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	astrcolshift_fgroup() must have been run on group first.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/02/2015
+VERSION	13/12/2019
  ***/
 int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4080,8 +4082,8 @@ int	cplot_astrcolshift1d(fgroupstruct *fgroup, double hsn_thresh)
           {
           for (i=0; i<CPLOT_NSHADES; i++)
             clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d]+0.5;
-          r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
-          r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
+          r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+          r[1] = 0.8; g[1] = 0.0; b[1] = 0.8;
           plscmap1l(1, 2, cpoint, r, g, b, NULL);
           plshades((const PLFLT **)histo[d],
 		CPLOT_ASTRCOLSHIFT1DNX, CPLOT_ASTRCOLSHIFT1DNY,
@@ -4185,7 +4187,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() and astrprop_fgroup() must have been run on all groups
 	first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -4327,8 +4329,8 @@ int	cplot_astrefprop(fgroupstruct *fgroup, fieldstruct *reffield,
       {
       for (i=0; i<CPLOT_NSHADES; i++)
         clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d]+0.5;
-      r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
-      r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
+      r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+      r[1] = 0.8; g[1] = 0.0; b[1] = 0.8;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
       plshades((const PLFLT **)histo[d], CPLOT_REFPROPN, CPLOT_REFPROPN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,
@@ -4620,7 +4622,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
   {
@@ -4771,8 +4773,8 @@ int	cplot_adprophisto2d(fgroupstruct *fgroup, double hsn_thresh)
     {
     for (i=0; i<CPLOT_NSHADES; i++)
       clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax+0.5;
-    r[0] = 1.0; g[0] = 0.96; b[0] = 1.0;
-    r[1] = 0.3; g[1] = 0.2; b[1] = 0.3;
+    r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+    r[1] = 0.8; g[1] = 0.0; b[1] = 0.8;
     plscmap1l(1, 2, cpoint, r, g, b, NULL);
     plshades((const PLFLT **)histo, CPLOT_ADERR2DN, CPLOT_ADERR2DN, NULL,
 	-maxlim,maxlim, -maxlim,maxlim,

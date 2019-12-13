@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/07/2014
+*	Last modified:		13/12/2019
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -254,7 +254,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -460,8 +460,8 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
         {
         for (i=0; i<CPLOT_NSHADES; i++)
           clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax[d]+0.5;
-        r[0] = 0.98; g[0] = 0.98; b[0] = 1.0;
-        r[1] = 0.3; g[1] = 0.3; b[1] = 0.4;
+        r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+        r[1] = 0.0; g[1] = 0.0; b[1] = 0.8;
         plscmap1l(1, 2, cpoint, r, g, b, NULL);
         plshades((const PLFLT **)histo[d],
 		CPLOT_PHOTERRNX, CPLOT_PHOTERRNY, NULL,
@@ -543,7 +543,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP), C. MARMO (IAP)
-VERSION	09/07/2014
+VERSION	13/12/2019
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -754,8 +754,8 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
       {
       for (i=0; i<CPLOT_NSHADES; i++)
         clevel[i] = pow(i/(CPLOT_NSHADES-1.0),1.8)*zmax+0.5;
-      r[0] = 0.98; g[0] = 0.98; b[0] = 1.0;
-      r[1] = 0.3; g[1] = 0.3; b[1] = 0.4;
+      r[0] = 1.0; g[0] = 1.0; b[0] = 1.0;
+      r[1] = 0.0; g[1] = 0.0; b[1] = 0.8;
       plscmap1l(1, 2, cpoint, r, g, b, NULL);
       plshades((const PLFLT **)histo, CPLOT_PHOTERRNX, CPLOT_PHOTERRNY, NULL,
 		xoffset, magmax, -maxlim, maxlim,
