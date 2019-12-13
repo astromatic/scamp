@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 1993-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 1993-2019 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		04/05/2018
+*	Last modified:		02/12/2019
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -490,6 +490,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
 /*------ Well if really no date is found */
         wcs->obsdate = 0.0;
       }
+
     FITSREADF(buf, "EPOCH", wcs->epoch, 2000.0);
     FITSREADF(buf, "EQUINOX", wcs->equinox, wcs->epoch);
     if (fitsread(buf, "RADESYS", str, H_STRING,T_STRING) != RETURN_OK)
@@ -628,7 +629,7 @@ INPUT	tab structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	06/12/2012
+VERSION	27/11/2013
  ***/
 void	write_wcs(tabstruct *tab, wcsstruct *wcs)
 
@@ -892,7 +893,7 @@ void	invert_wcs(wcsstruct *wcs)
   pixin[lng] += ARCSEC/DEG;
   linfwd(pixin, wcs->lin, raw);
   rawsize = sqrt((raw[lng]-rawmin[lng])*(raw[lng]-rawmin[lng])
-		+(raw[lat]-rawmin[lat])*(raw[lat]-rawmin[lat]))*DEG/ARCSEC;
+		+(raw[lat]-rawmin[lat])*(raw[lat]-rawmin[lat])) * DEG/ARCSEC;
   if (!rawsize)
     error(EXIT_FAILURE, "*Error*: incorrect linear conversion in ",
 		wcs->wcsprm->pcode);
@@ -946,7 +947,7 @@ void	invert_wcs(wcsstruct *wcs)
   pixin[lat] += ARCSEC/DEG;
   linfwd(pixin, wcs->lin, raw);
   rawsize = sqrt((raw[lng]-rawmin[lng])*(raw[lng]-rawmin[lng])
-		+(raw[lat]-rawmin[lat])*(raw[lat]-rawmin[lat]))*DEG/ARCSEC;
+		+(raw[lat]-rawmin[lat])*(raw[lat]-rawmin[lat])) * DEG/ARCSEC;
   if (!rawsize)
     error(EXIT_FAILURE, "*Error*: incorrect linear conversion in ",
 		wcs->wcsprm->pcode);
