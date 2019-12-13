@@ -7,7 +7,7 @@
  *
  *	This file part of:	SCAMP
  *
- *	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+ *	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
  *
  *	License:		GNU General Public License
  *
@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		19/02/2018
+ *	Last modified:		13/12/2019
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -113,29 +113,29 @@ static void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
   NOTES	Uses the global preferences. Input structures must have gone through
   crossid_fgroup() first.
   AUTHOR	E. Bertin (IAP)
-  VERSION	03/10/2016
+  VERSION	13/12/2019
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 {
-    fieldstruct		**fields,**fields2,
-                    *field,*field2;
+   fieldstruct		**fields,**fields2,
+			*field,*field2;
     setstruct		*set,*set2;
-    samplestruct		*samp;
+    samplestruct	*samp;
     polystruct		*poly, *poly2;
-    char			str[64],
-    **contextname,
-    lap_equed;
+    char		str[64],
+			**contextname,
+			lap_equed;
     double		cmin[MAXCONTEXT],cmax[MAXCONTEXT],
-    cscale[MAXCONTEXT], czero[MAXCONTEXT],
+			cscale[MAXCONTEXT], czero[MAXCONTEXT],
     *alpha, *beta,
-    dval;
+    alphamin, alphamin2, dval;
     size_t		size;
     int			group2[NAXIS],
-    *findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
+			*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
     c,cm,f,f2,g,g2,i,n,s,s2,sm, nfield,nfield2,
     ninstru, instru, naxis, ncoeff, ncoeff2, ncoefftot,
     npcoeff, npcoeff2,
-    d, index, index2,
+    d, index, index2, minindex2,
     ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
     startindex2, nmiss;
 
@@ -529,6 +529,44 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 
 
 #else
+
+/*-- Identify starting index for field dependent parameters */
+        minindex2 = 10000000;	/* A very big number */
+        for (g=0; g < nfgroup; g++) {    
+          nfield = fgroups[g]->nfield;
+          fields = fgroups[g]->field;
+          for (f=0; f < nfield; f++) {
+            index2 = fields[f]->index2;
+            if (index2 < minindex2)
+              minindex2 = index2;
+          }
+        }
+        if (minindex2 <= 0)
+          minindex2 = ncoefftot;
+/*-- Identify smallest constant non-zero diagonal terms */
+        alphamin = BIG;
+        for (c = 0; c < minindex2; c++) {
+          cm = c + c*ncoefftot;
+          if (alpha[cm] < alphamin && alpha[cm] > TINY)
+            alphamin = alpha[cm];
+        }
+/*-- Crude Tikhonov regularization */
+        if (alphamin < BIG)
+          for (c = 0; c < minindex2; c++)
+            alpha[c + c*ncoefftot] += alphamin;
+
+/*-- Identify smallest field-dependent, non-zero diagonal terms */
+        alphamin2 = BIG;
+        for (c = minindex2; c < ncoefftot; c++) {
+          cm = c + c*ncoefftot;
+          if (alpha[cm] < alphamin2 && alpha[cm] > TINY)
+            alphamin2 = alpha[cm];
+    }
+/*-- Crude Tikhonov regularization */
+        if (alphamin2 < BIG)
+          for (c = minindex2; c < ncoefftot; c++)
+            alpha[c + c*ncoefftot] += alphamin2;
+
         if (clapack_dposv(CblasRowMajor, CblasUpper,
                     ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot) != 0)
             warning("Not a positive definite matrix", " in astrometry solver");
