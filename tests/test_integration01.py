@@ -1,4 +1,4 @@
-#! /usr/bin/python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 import math,os,subprocess,sys
 import numpy as np
@@ -16,10 +16,10 @@ def scamp_meanrms(dx):
 def scamp_test(str, passed):
   global status
   if passed:
-    print "%-24s ... passed" %str
+    print("%-24s ... passed" %str)
   else:
     status += 1
-    print "%-24s ... failed" %str
+    print("%-24s ... failed" %str)
   return passed
 
 catlist = ["extra/744331p.cat", "extra/744332p.cat", "extra/744333p.cat", "extra/744334p.cat", \
@@ -31,7 +31,7 @@ try:
 except OSError:
   pass
 
-print "Running Test #1 ..."
+print("Running Test #1 ...")
 ret = subprocess.call(["../src/scamp", "-c", conf] + catlist)
 scamp_test("SCAMP execution", ret == 0)
 
@@ -57,7 +57,7 @@ scamp_test("# of matched detections: " + str(nmatched_int) + " expected: > 18010
 
 # Test number of matched reference sources
 nmatched_ref = fgroups.array["AstromNDets_Reference"][0]
-scamp_test("# of matched references: " + str(nmatched_ref) + " expected: > 1650", nmatched_ref > 1650)
+scamp_test("# of matched references: " + str(nmatched_ref) + " expected: > 1640", nmatched_ref > 1640)
 
 # Test mean internal RMS errors
 sigma_int = scamp_meanrms(fgroups.array["AstromSigma_Internal_HighSN"][0])
@@ -68,6 +68,9 @@ sigma_ref = scamp_meanrms(fgroups.array["AstromSigma_Reference_HighSN"][0])
 scamp_test("Reference dispersion: " + str(sigma_ref) + " expected: < 0.097", sigma_ref < 0.097)
 
 # Exit with status and message
-print "All OK." if status == 0 else "%d errors." %status
+if status == 0:
+  print("All OK.")
+else:
+  print("%d errors." %status)
 sys.exit(status)
 

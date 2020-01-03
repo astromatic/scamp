@@ -30,6 +30,7 @@ int main(int argc, char **argv)
     fieldstruct f1;
     f1.epoch = 0;
     f1.fieldindex = 0;
+    f1.isrefcat = 0;
     f1.lat = 0;
     f1.lng = 1;
     setstruct s1;
@@ -38,6 +39,7 @@ int main(int argc, char **argv)
     fieldstruct f2;
     f2.epoch = 0;
     f2.fieldindex = 1;
+    f2.isrefcat = 0;
     f2.lat = 0;
     f2.lng = 1;
     setstruct s2;
@@ -46,6 +48,7 @@ int main(int argc, char **argv)
     fieldstruct f3;
     f3.epoch = 1;
     f3.fieldindex = 1;
+    f3.isrefcat = 0;
     f3.lat = 0;
     f3.lng = 1;
     setstruct s3;
@@ -104,11 +107,11 @@ int main(int argc, char **argv)
 
     /* getHigherFields for s0 must return index 2 */
     index = PixelStore_getHigherFields(pix, &spls[0]);
-    assert(index == 4);
+    assert(index == 2);
 
     /* getHigherFields for s1 must return index 2 */
     index = PixelStore_getHigherFields(pix, &spls[1]);
-    assert(index == 4);
+    assert(index == 2);
 
     /* getHigherFields for s2 must return index 4 */
     index = PixelStore_getHigherFields(pix, &spls[2]);
@@ -135,19 +138,19 @@ int main(int argc, char **argv)
 
     /* getLowerFields for s0 must return -1 */
     index = PixelStore_getLowerFields(pix, &spls[0]);
-    assert(index == 3);
+    assert(index == -1);
 
     /* getLowerFields for s1 must return -1 */
     index = PixelStore_getLowerFields(pix, &spls[1]);
-    assert(index == 3);
+    assert(index == -1);
 
     /* getLowerFields for s2 must return 1 */
     index = PixelStore_getLowerFields(pix, &spls[2]);
-    assert(index == -1);
+    assert(index == 1);
 
     /* getLowerFields for s3 must return 1 */
     index = PixelStore_getLowerFields(pix, &spls[3]);
-    assert(index == -1);
+    assert(index == 1);
 
     /* getLowerFields for s4 must return 3 */
     index = PixelStore_getLowerFields(pix, &spls[4]);
