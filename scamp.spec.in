@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
+#	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		27/12/2017
+#	Last modified:		02/01/2020
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -36,7 +36,7 @@ Summary: compute astrometric and photometric solutions from SExtractor catalogs
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Source0: ftp://ftp.iap.fr/pub/from_users/bertin/%{name}/%{name}-%{version}.tar.gz
+Source0: http://astromatic.net/download/%{name}/%{name}-%{version}.tar.gz
 URL: http://astromatic.net/software/%{name}/
 License: GPL v3+
 Group: Sciences/Astronomy
@@ -56,11 +56,11 @@ SExtractor catalogs
 
 %build
 if test "$USE_BEST"; then
-%configure --enable-mkl --enable-auto-flags --enable-best-link
+%configure --enable-mkl --enable-auto-flags --enable-best-link --with-release=@PACKAGE_RELEASE@
 elif test "$USE_ICC"; then
-%configure --enable-icc
+%configure --enable-icc --with-release=@PACKAGE_RELEASE@
 else
-%configure
+%configure --with-release=@PACKAGE_RELEASE@
 fi
 make %{?_smp_mflags}
 
