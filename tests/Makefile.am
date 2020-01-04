@@ -1,5 +1,5 @@
 # Test Makefile for SCAMP
-AUTOMAKE_OPTIONS = serial-tests
+AUTOMAKE_OPTIONS = parallel-tests
 check_PROGRAMS = \
                  test_chealpix \
                  test_chealpixstore \
