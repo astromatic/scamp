@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		17/07/2017
+*	Last modified:		08/01/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -64,22 +64,24 @@ extern double		findcrosspeak(float *histo,
 				double xrange, double yrange,
 				double xresol, double yresol,
 				double *xpeak, double *ypeak),
-			match_setas(setstruct *set, setstruct *refset, int nmax,
+			match_findas(setstruct *set, setstruct *refset, int nmax,
 				double matchresol, double *angle,double *scale),
-			match_setll(setstruct *set, setstruct *refset,
-				double matchresol, double *dlng, double *dlat),
+			match_findxy(setstruct *set, setstruct *refset,
+				double matchresol, double *dx, double *dy),
 			mean_wcsposvar(setstruct *set);
 
 extern void		compute_rawpos(wcsstruct *wcs, samplestruct *refsample,
 				int nrefsample),
 			compute_wcsss(wcsstruct *wcs,
 				double *sangle, double *shear),
+			dxy_to_dll(wcsstruct *wcs, double dx, double dy,
+				double *dlng, double *dlat),
 			flipimage(float *histo, int width, int height),
 			match_field(fieldstruct *field, fieldstruct *reffield),
 			match_refine(setstruct *set, setstruct *refset,
 				double matchresol, double *angle, double *scale,
 				double *sangle, double *ratio,
-				double *dlng,double *dlat),
+				double *dx,double *dy),
 			match_test(setstruct *set, setstruct *refset,
 				double matchresol, double *angle, double *scale,
 				double *sangle, double *ratio,
@@ -87,8 +89,7 @@ extern void		compute_rawpos(wcsstruct *wcs, samplestruct *refsample,
 			print_matchinfo(fieldstruct *field),
 			update_wcsas(wcsstruct *wcs, double angle,
 				double scale),
-			update_wcscc(wcsstruct *wcs, double drawlng,
-				double drawlat),
+			update_wcscc(wcsstruct *wcs, double dx, double dy),
 			update_wcsll(wcsstruct *wcs, double dlng, double dlat),
 			update_wcsss(wcsstruct *wcs, double sangle,
 				double shear);

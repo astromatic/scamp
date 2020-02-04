@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  18/12/2018
+ * Last modified:  04/02/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -101,14 +101,14 @@ static void putgauss(float *histo, int width,int height, double x,double y,
   OUTPUT -.
   NOTES Uses the global preferences.
   AUTHOR E. Bertin (IAP)
-  VERSION 29/09/2012
+  VERSION 04/02/2020
  ***/
 void match_field(fieldstruct *field, fieldstruct *reffield)
 {
     setstruct *refset, *refset2, *set, *fieldset;
     char  str[128];
     double wcspos[NAXIS],
-    angle,scale,dlng,dlat,sig, dlng2,dlat2,sig2, asig,
+    angle,scale,dlng,dlat, dx,dy, dx2,dy2, sig, dlng2,dlat2,sig2, asig,
     dangle,dscale, ddlng,ddlat, shear,sangle, sheartot, sangletot,
     matchresol, refarea,area, refcrossec,crossec;
     int  i,j,k, lng,lat,
@@ -164,45 +164,48 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
             }
             /*-- Choose the number of stars used for MATCHing */
             if (prefs.nmatchmax>0)
-                asig = match_setas(set, refset2, prefs.nmatchmax, matchresol,
+                asig = match_findas(set, refset2, prefs.nmatchmax, matchresol,
                         &angle, &scale);
             else
                 for (nmax = AS_NSOURCESTART;
                         nmax <= AS_NSOURCEMAX &&
-                        (asig = match_setas(set, refset2, nmax, matchresol, &angle,&scale))
+                        (asig = match_findas(set, refset2, nmax, matchresol, &angle,&scale))
                         <MATCH_MINCONT && 
                         (nmax < set->nsample || nmax < refset2->nsample);
                         nmax*=2);
             locate_set(set);
             update_samples(set, set->radius);
             update_wcsas(set->wcs, -set->wcs->chirality*angle, scale);
-            sig = match_setll(set, refset2, matchresol, &dlng, &dlat);
+            sig = match_findxy(set, refset2, matchresol, &dx, &dy);
             if (prefs.posangle_maxerr > 90.0)
             {
                 /*------ The result might be rotated by more than 90 deg */
                 update_wcsas(set->wcs, 180.0, 1.0);
-                sig2 = match_setll(set, refset2, matchresol, &dlng2, &dlat2);
+                sig2 = match_findxy(set, refset2, matchresol, &dx2, &dy2);
                 if (sig2>sig)
                 {
                     sig = sig2;
                     angle += 180.0;
-                    dlng = dlng2;
-                    dlat = dlat2;
+                    dx = dx2;
+                    dy = dy2;
                 }
                 else
                     update_wcsas(set->wcs, 180.0, 1.0);
             }
-            update_wcscc(set->wcs, dlng,dlat);
+            dxy_to_dll(set->wcs, dx, dy, &dlng, &dlat);
+            update_wcscc(set->wcs, dx,dy);
             end_set(refset2); 
             refset2 = frame_set(refset, set->wcs, set->wcspos,
                     set->radius+prefs.radius_maxerr);
             /*---- Now refine all parameters */
             match_refine(set, refset2, matchresol,
-                    &dangle, &dscale, &sangle, &shear, &ddlng, &ddlat);
+                    &dangle, &dscale, &sangle, &shear, &dx, &dy);
             /*---- Apply refinement */
             update_wcsas(set->wcs, dangle, dscale);
             update_wcsss(set->wcs, sangle, shear);
-            update_wcscc(set->wcs, -ddlng, -ddlat);
+            dxy_to_dll(set->wcs, dx, dy, &ddlng, &ddlat);
+            update_wcscc(set->wcs, -dx, -dy);
+
             end_set(refset2);
             compute_wcsss(set->wcs, &sangletot, &sheartot);
 
@@ -258,12 +261,12 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
         }
         /*-- Choose the number of stars used for MATCHing */
         if (prefs.nmatchmax>0)
-            asig = match_setas(fieldset, refset2, prefs.nmatchmax, matchresol,
+            asig = match_findas(fieldset, refset2, prefs.nmatchmax, matchresol,
                     &angle, &scale);
         else
             for (nmax = AS_NSOURCESTART;
                     nmax <= AS_NSOURCEMAX &&
-                    (asig=match_setas(fieldset, refset2, nmax, matchresol, &angle,&scale))
+                    (asig=match_findas(fieldset, refset2, nmax, matchresol, &angle,&scale))
                     <MATCH_MINCONT
                     && (nmax < fieldset->nsample || nmax < refset2->nsample);
                     nmax*=2);
@@ -272,7 +275,7 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
         /*-- Only keep reference samples close enough to the current set */
         refset2 = frame_set(refset, fieldset->wcs, fieldset->wcspos,
                 fieldset->radius+prefs.radius_maxerr);
-        sig = match_setll(fieldset, refset2, matchresol, &dlng, &dlat);
+        sig = match_findxy(fieldset, refset2, matchresol, &dx, &dy);
         if (prefs.posangle_maxerr > 90.0)
         {
             update_wcsas(fieldset->wcs, 180.0, 1.0);
@@ -280,18 +283,18 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
             end_set(refset2); 
             refset2 = frame_set(refset, fieldset->wcs, fieldset->wcspos,
                     fieldset->radius+prefs.radius_maxerr);
-            sig2 = match_setll(fieldset, refset2, matchresol, &dlng2, &dlat2);
+            sig2 = match_findxy(fieldset, refset2, matchresol, &dx2, &dy2);
             if (sig2>sig)
             {
                 sig = sig2;
                 angle = (angle>0.0)? angle - 180.0 : 180.0 + angle;
-                dlng = dlng2;
-                dlat = dlat2;
+                dx = dx2;
+                dy = dy2;
             }
             else
                 update_wcsas(fieldset->wcs, 180.0, 1.0);
         }
-
+        dxy_to_dll(fieldset->wcs, dx, dy, &dlng, &dlat);
         end_set(refset2);
         end_set(fieldset);
 
@@ -311,9 +314,10 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
         refset2 = frame_set(refset, fieldset->wcs, fieldset->wcspos,
                 fieldset->radius+prefs.radius_maxerr);
         match_refine(fieldset, refset2, 2.0*matchresol,
-                &dangle, &dscale, &sangle, &shear, &ddlng, &ddlat);
+                &dangle, &dscale, &sangle, &shear, &dx, &dy);
         update_wcsas(fieldset->wcs, -dangle, dscale);
         update_wcsss(fieldset->wcs, -sangle, shear);
+        dxy_to_dll(fieldset->wcs, dx, dy, &ddlng, &ddlat);
         update_wcsll(fieldset->wcs, -ddlng, -ddlat);
         compute_wcsss(fieldset->wcs, &sangletot, &sheartot);
         /*-- Apply refinements */
@@ -414,8 +418,8 @@ setstruct *new_fieldset(fieldstruct *field)
     return fieldset;
 }
 
-/****** match_setas **********************************************************
-  PROTO double match_setas(setstruct *set, setstruct *refset, int nmax,
+/****** match_findas **********************************************************
+  PROTO double match_findas(setstruct *set, setstruct *refset, int nmax,
   double matchresol, double *angle, double *scale)
   PURPOSE Find position angle and scale of a set of catalogs relative to an
   astrometric reference catalog using pattern matching.
@@ -430,9 +434,9 @@ setstruct *new_fieldset(fieldstruct *field)
   pixel coordinates) for homogeneity reasons.
   Uses the global preferences.
   AUTHOR E. Bertin (IAP)
-  VERSION 10/12/2018
+  VERSION 08/01/2020
  ***/
-double match_setas(setstruct *set, setstruct *refset, int nmax,
+double match_findas(setstruct *set, setstruct *refset, int nmax,
         double matchresol, double *angle, double *scale)
 {
     samplestruct *refsample, *sample;
@@ -676,9 +680,9 @@ double match_setas(setstruct *set, setstruct *refset, int nmax,
 }
 
 
-/****** match_setll **********************************************************
-  PROTO double match_setll(setstruct *set, setstruct *refset,
-  double matchresol, double *dlng, double *dlat)
+/****** match_findxy **********************************************************
+  PROTO double match_findxy(setstruct *set, setstruct *refset,
+  double matchresol, double *dx, double *dy)
   PURPOSE Find the celestial coordinate shift of a set of catalogs relative to an
   astrometric reference catalog using pattern matching.
   INPUT ptr to the set to be matched,
@@ -689,10 +693,10 @@ double match_setas(setstruct *set, setstruct *refset, int nmax,
   OUTPUT Confidence level of the solution (in units of sigma).
   NOTES Uses the global preferences.
   AUTHOR E. Bertin (IAP)
-  VERSION 23/10/2013
+  VERSION 08/01/2020
  ***/
-double match_setll(setstruct *set, setstruct *refset,
-        double matchresol, double *dlng, double *dlat)
+double match_findxy(setstruct *set, setstruct *refset,
+        double matchresol, double *dx, double *dy)
 {
     samplestruct *refsample, *sample;
     wcsstruct *wcs;
@@ -843,17 +847,11 @@ double match_setll(setstruct *set, setstruct *refset,
 
     if (sig>0.0)
     {
-        /*-- The new CRVAL corresponds approximately to a shifted raw coordinate */
-        for (k=0; k<naxis; k++)
-            rawpos[k] = wcs->crpix[k];
-        rawpos[lng] -= x/xfac;
-        rawpos[lat] -= y/yfac;
-        raw_to_wcs(wcs, rawpos, wcspos);
-        *dlng = wcspos[lng] - wcs->crval[lng];
-        *dlat = wcspos[lat] - wcs->crval[lat];
+        *dx = x / xfac;
+        *dy = y / yfac;
     }
     else
-        *dlng = *dlat = 0.0;
+        *dx = *dy = 0.0;
 
     free(rhisto);
     free(histo);
@@ -1139,7 +1137,7 @@ double findcrosspeak(float *histo, int width, int height,
 /****** match_refine *********************************************************
   PROTO void match_refine(setstruct *set, setstruct *refset, double matchresol,
   double *angle, double *scale, double *sangle,
-  double *ratio, *dlng, double *dlat)
+  double *ratio, *dx, double *dy)
   PURPOSE Refine the celestial coordinate transformation of a set of catalogs 
   relative to an astrometric reference catalog using pattern matching.
   INPUT ptr to the set to be matched,
@@ -1154,12 +1152,12 @@ double findcrosspeak(float *histo, int width, int height,
   OUTPUT Confidence level of the solution (in units of sigma).
   NOTES Uses the global preferences.
   AUTHOR E. Bertin (IAP)
-  VERSION 01/07/2012
+  VERSION 08/01/2020
  ***/
 void match_refine(setstruct *set, setstruct *refset, double matchresol,
         double *angle, double *scale,
         double *sangle, double *shear,
-        double *dlng,double *dlat)
+        double *dx, double *dy)
 {
     wcsstruct *wcs;
     samplestruct *refsample, *samp1,*samp2,*samp2b,*samp2min;
@@ -1355,21 +1353,14 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
             *sangle = 0.5*atan2(2.0*(a11*a21+a12*a22),
                     a11*a11-a12*a12-a22*a22+a21*a21)/ DEG;
 
-            /*-- The new CRVAL corresponds approximately to a shifted raw coordinate */
-            for (d=0; d<naxis; d++)
-                rawpos[d] = wcs->crpix[d];
-            rawpos[lng] -= blng[2];
-            rawpos[lat] -= blat[2];
-            raw_to_wcs(wcs, rawpos, wcspos);
-
-            *dlng = wcspos[lng] - wcs->crval[lng];
-            *dlat = wcspos[lat] - wcs->crval[lat];
+            *dx = blng[2];
+            *dy = blat[2];
         }
         else
         {
             /*-- No solution found: do not apply any change */
             *scale = 1.0;
-            *shear = *angle = *sangle = *dlng = *dlat = 0.0;
+            *shear = *angle = *sangle = *dx = *dy = 0.0;
         }
 
         return;
@@ -1649,7 +1640,7 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
 
 
     /****** update_wcscc *********************************************************
-      PROTO void update_wcscc(wcsstruct *wcs, double drawlng, double drawlat)
+      PROTO void update_wcscc(wcsstruct *wcs, double dx, double dy)
       PURPOSE Update the projection center of a WCS projection.
       INPUT ptr to the WCS structure,
       longitude projected increment (pixel),
@@ -1657,9 +1648,9 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES The new celestial position is an approximation of the exact one.
       AUTHOR E. Bertin (IAP)
-      VERSION 23/09/2003
+      VERSION 08/01/2020
      ***/
-    void update_wcscc(wcsstruct *wcs, double drawlng, double drawlat)
+    void update_wcscc(wcsstruct *wcs, double dx, double dy)
     {
         double wcspos[NAXIS];
 
@@ -1672,13 +1663,9 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         if (lng == lat)
             return;
 
-        for (i=0; i<naxis; i++)
-            wcspos[i] = wcs->crval[i];
-        wcspos[lng] -= drawlng;
-        wcspos[lat] -= drawlat;
+        wcs->crpix[lng] += dx;
+        wcs->crpix[lat] += dy;
 
-        wcs_to_raw(wcs, wcspos, wcs->crpix);
-        /* Initialize other WCS structures */
         init_wcs(wcs);
         /* Find the range of coordinates */
         range_wcs(wcs);
@@ -1768,6 +1755,43 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         return;
     }
 
+
+/****** dxy_to_dll ************************************************************
+PROTO	void dxy_to_dll(wcsstruct *wcs, double dx, double dy,
+			double *dlng, double *dlat)
+PURPOSE	Translate a pixel coordinate shift into a world coordinate shift.
+INPUT	ptr to the WCS structure,
+	pixel x coordinate shift,
+	pixel y coordinate shift,
+	longitude shift in deg (output),
+	latitude shift in deg (output).
+OUTPUT	-.
+NOTES	The shift in celestial position is that of the projection center.
+	AUTHOR E. Bertin (IAP)
+	VERSION 04/02/2020
+***/
+void	dxy_to_dll(wcsstruct *wcs, double dx, double dy,
+		double *dlng, double *dlat) {
+
+   double	rawpos[NAXIS], wcspos[NAXIS];
+   int		d, lng, lat;
+
+  lng = wcs->lng;
+  lat = wcs->lat;
+
+  for (d=0; d < wcs->naxis; d++)
+    rawpos[d] = wcs->crpix[d];
+
+  rawpos[lng] -= dx;
+  rawpos[lat] -= dy;
+
+  raw_to_wcs(wcs, rawpos, wcspos);
+
+  *dlng = wcspos[lng] - wcs->crval[lng];
+  *dlat = wcspos[lat] - wcs->crval[lat];
+
+  return;
+}
 
     /****** print_matchinfo *******************************************************
       PROTO void print_matchinfo(fieldstruct *field)
