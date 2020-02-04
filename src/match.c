@@ -1685,20 +1685,20 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES The new celestial position is an approximation of the exact one.
       AUTHOR E. Bertin (IAP)
-      VERSION 16/02/2010
+      VERSION 04/02/2020
      ***/
     void update_wcsll(wcsstruct *wcs, double dlng, double dlat)
     {
         double wcspos[NAXIS], a[NAXIS*NAXIS],b[NAXIS*NAXIS],
-        *c,*at,
+        *c,*at, *pv1, *pv2, *pvt1, *pvt2,
         val, cas, sas, angle, dalpha;
-        int  i,j,k, lng,lat, naxis;
+        int  i,j,k, lng,lat, naxis, npv;
 
         lng = wcs->lng;
         lat = wcs->lat;
         naxis = wcs->naxis;
 
-        if (lng == lat)
+        if (lng == lat || !(wcs->prj))
             return;
 
         for (i=0; i<naxis; i++)
@@ -1725,25 +1725,41 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         cas = cos(-angle*DEG);
         sas = sin(-angle*DEG);
 
-        for (i=0; i<naxis; i++)
-            b[i+i*naxis] = 1.0;
-        b[lng+lng*naxis] = cas;
-        b[lat+lng*naxis] = -sas;
-        b[lng+lat*naxis] = sas;
-        b[lat+lat*naxis] = cas;
-        at = a;
-        for (j=0; j<naxis; j++)
-            for (i=0; i<naxis; i++)
-            {
-                val = 0.0;
-                for (k=0; k<naxis; k++)
-                    val += b[k+j*naxis]*c[i+k*naxis];
-                *(at++) = val;
-            }
+        if ((npv = wcs->prj->n)) {
+          pv1 = wcs->prj->p;
+          pv2 = wcs->prj->p + 1;
+          npv = wcs->prj->n;
+          QCALLOC(pvt1, double, npv);  
+          QCALLOC(pvt2, double, npv);
+          for (i=0; i<npv; i++) {
+            pvt1[i] = pv1[i] * cas - pv2[i] * sas;
+            pvt2[i] = pv1[i] * sas + pv2[i] * cas;
+          }
+          memcpy(pv1, pvt1, npv * sizeof(double));
+          memcpy(pv2, pvt2, npv * sizeof(double));
+          free(pvt1);
+          free(pvt2);
+        } else {
+          for (i=0; i<naxis; i++)
+              b[i+i*naxis] = 1.0;
+          b[lng+lng*naxis] = cas;
+          b[lat+lng*naxis] = -sas;
+          b[lng+lat*naxis] = sas;
+          b[lat+lat*naxis] = cas;
+          at = a;
+          for (j=0; j<naxis; j++)
+              for (i=0; i<naxis; i++)
+              {
+                  val = 0.0;
+                  for (k=0; k<naxis; k++)
+                       val += b[k+j*naxis]*c[i+k*naxis];
+                  *(at++) = val;
+              }
 
-        at = a;
-        for (i=0; i<naxis*naxis; i++)
-            *(c++) = *(at++);
+          at = a;
+          for (i=0; i<naxis*naxis; i++)
+              *(c++) = *(at++);
+        }
 
         /* Initialize other WCS structures */
         init_wcs(wcs);
