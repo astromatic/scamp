@@ -91,6 +91,11 @@ static int compraw(const void *sample1, const void *sample2);
 static void putgauss(float *histo, int width,int height, double x,double y,
         double flux, double xsig, double ysig);
 
+static const int pvmap[] =
+	{0, 2,1, 3, 6,5,4, 10,9,8,7, 11, 16,15,14,13,12, 22,21,20,19,18,17, 23,
+	30,29,28,27,26,25,24, 38,37,36,35,34,33,32,31, 39};
+
+
 /****** match_field ***********************************************************
   PROTO void match_field(fieldstruct *field, fieldstruct *reffield)
   PURPOSE Perform (linear) pattern matching between a linked-set of catalogs and
@@ -270,7 +275,7 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
                     <MATCH_MINCONT
                     && (nmax < fieldset->nsample || nmax < refset2->nsample);
                     nmax*=2);
-        end_set(refset2); 
+        end_set(refset2);
         update_wcsas(fieldset->wcs, -angle, scale);
         /*-- Only keep reference samples close enough to the current set */
         refset2 = frame_set(refset, fieldset->wcs, fieldset->wcspos,
@@ -834,7 +839,6 @@ double match_findxy(setstruct *set, setstruct *refset,
 #endif
 
     fastcorr(histo, rhisto, cnaxis, csize, lopass, hipass);
-
     sig = findcrosspeak(histo, csize[0], csize[1],
             prefs.position_maxerr[0]*xerrfac,
             prefs.position_maxerr[1]*yerrfac,
@@ -844,7 +848,6 @@ double match_findxy(setstruct *set, setstruct *refset,
     /* Check-image for longitude-latitude correlation of the reference catalog */
     if ((checknum=check_check(CHECK_LLXCORR))>=0)
         write_check(prefs.check_name[checknum], histo, csize[0], csize[1]);
-
     if (sig>0.0)
     {
         *dx = x / xfac;
@@ -1037,7 +1040,7 @@ void flipimage(float *histo, int width, int height)
   OUTPUT Significance of the peak.
   NOTES -.
   AUTHOR E. Bertin (IAP)
-  VERSION 28/04/2006
+  VERSION 05/02/2020
  ***/
 double findcrosspeak(float *histo, int width, int height,
         double xrange, double yrange,
@@ -1047,7 +1050,7 @@ double findcrosspeak(float *histo, int width, int height,
 {
     double xstep,ystep, xmean,ymean, dx,dy, dxpeak,dypeak, dval, dsum;
     float val, max,max1;
-    int  i, ix,iy,iy2, ixmax,iymax, xmin,xmax,ymin,ymax, resol2,
+    int  i, ix,iy,iy2, ixmax,iymax, xmin,xmax,ymin,ymax, resol2, resol22,
          ixpeak,iypeak, idx,idy;
 
     /* Apply a fudge factor to low-pass filter cut-off wavelength */
@@ -1080,7 +1083,6 @@ double findcrosspeak(float *histo, int width, int height,
     max1 = max;
     ixpeak = ixmax;
     iypeak = iymax;
-
     /* Fit the maximum */
     xstep = 1.0/xresol; /* Includes a hidden fudge factor: sqrt(2) */
     ystep = 1.0/yresol; /* Includes a hidden fudge factor: sqrt(2) */
@@ -1115,6 +1117,7 @@ double findcrosspeak(float *histo, int width, int height,
     *ypeak = (double)(iypeak - height/2) + dypeak;
 
     max = -BIG;
+    resol22 = 4.0 * resol2;
     /* Find a second maximum */
     for (iy=0; iy<height; iy++)
     {
@@ -1123,8 +1126,8 @@ double findcrosspeak(float *histo, int width, int height,
             {
                 idx = fabs(ix-ixpeak);
                 idy = fabs(iy-iypeak);
-                if (idx*idx + idy*idy > resol2
-                        && (width-idx)*(width-idx) + (height-idy)*(height-idy) > resol2)
+                if (idx*idx + idy*idy > resol22
+                        && (width-idx)*(width-idx) + (height-idy)*(height-idy) > resol22)
                     max = val;
             }
     }
@@ -1477,14 +1480,14 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES -.
       AUTHOR E. Bertin (IAP)
-      VERSION 16/02/2010
+      VERSION 04/02/2020
      ***/
     void update_wcsas(wcsstruct *wcs, double angle, double scale)
     {
         double a[NAXIS*NAXIS],b[NAXIS*NAXIS],
-        *c,*at,
+        *c,*at, *pv1, *pv2, *pvt1, *pvt2,
         val, cas, sas, fascale, sgn;
-        int  i,j,k, lng,lat,naxis;
+        int  i,j,k, lng,lat,naxis, npv;
 
         lng = wcs->lng;
         lat = wcs->lat;
@@ -1493,9 +1496,7 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         if (lng == lat)
             return;
 
-        c = wcs->cd;
 
-        /* A = B*C */
         /* The B matrix is made of 2 numbers */
         fascale = fabs(scale);
         sgn = (scale<0.0)? -1.0 : 1.0;
@@ -1503,26 +1504,43 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         //    angle = -angle;
         cas = cos(angle*DEG)*fascale;
         sas = sin(angle*DEG)*fascale;
-        for (i=0; i<naxis; i++)
-            b[i+i*naxis] = 1.0;
-        b[lng+lng*naxis] = cas;
-        b[lat+lng*naxis] = -sas*sgn;
-        b[lng+lat*naxis] = sas;
-        b[lat+lat*naxis] = cas*sgn;
-        at = a;
-        for (j=0; j<naxis; j++)
-            for (i=0; i<naxis; i++)
-            {
-                val = 0.0;
-                for (k=0; k<naxis; k++)
-                    val += b[k+j*naxis]*c[i+k*naxis];
-                *(at++) = val;
-            }
+        if ((npv = wcs->prj->n)) {
+          pv1 = &wcs->projp[lng*100];
+          pv2 = &wcs->projp[lat*100];
+          npv = wcs->nprojp;
+          QCALLOC(pvt1, double, 40);  
+          QCALLOC(pvt2, double, 40);
+          for (i=0; i<npv; i++) {
+            pvt1[i] = pv1[i] * cas - pv2[pvmap[i]] * sas * sgn;
+            pvt2[i] = pv1[pvmap[i]] * sas + pv2[i] * cas * sgn;
+          }
+          memcpy(pv1, pvt1, npv * sizeof(double));
+          memcpy(pv2, pvt2, npv * sizeof(double));
+          free(pvt1);
+          free(pvt2);
+        } else {
+        /* A = B*C */
+          for (i=0; i<naxis; i++)
+              b[i+i*naxis] = 1.0;
+          b[lng+lng*naxis] = cas;
+          b[lat+lng*naxis] = -sas*sgn;
+          b[lng+lat*naxis] = sas;
+          b[lat+lat*naxis] = cas*sgn;
+          at = a;
+          c = wcs->cd;
+          for (j=0; j<naxis; j++)
+              for (i=0; i<naxis; i++)
+              {
+                  val = 0.0;
+                  for (k=0; k<naxis; k++)
+                      val += b[k+j*naxis]*c[i+k*naxis];
+                  *(at++) = val;
+              }
 
-        at = a;
-        for (i=0; i<naxis*naxis; i++)
-            *(c++) = *(at++);
-
+          at = a;
+          for (i=0; i<naxis*naxis; i++)
+              *(c++) = *(at++);
+        }
         /* Initialize other WCS structures */
         init_wcs(wcs);
         /* Find the range of coordinates */
@@ -1726,17 +1744,17 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         sas = sin(-angle*DEG);
 
         if ((npv = wcs->prj->n)) {
-          pv1 = wcs->prj->p;
-          pv2 = wcs->prj->p + 1;
-          npv = wcs->prj->n;
-          QCALLOC(pvt1, double, npv);  
-          QCALLOC(pvt2, double, npv);
+          pv1 = &wcs->projp[lng*100];
+          pv2 = &wcs->projp[lat*100];
+          npv = wcs->nprojp;
+          QCALLOC(pvt1, double, 40);  
+          QCALLOC(pvt2, double, 40);
           for (i=0; i<npv; i++) {
-            pvt1[i] = pv1[i] * cas - pv2[i] * sas;
-            pvt2[i] = pv1[i] * sas + pv2[i] * cas;
+            pvt1[i] = pv1[i] * cas - pv2[pvmap[i]] * sas;
+            pvt2[i] = pv1[pvmap[i]] * sas + pv2[i] * cas;
           }
-          memcpy(pv1, pvt1, npv * sizeof(double));
-          memcpy(pv2, pvt2, npv * sizeof(double));
+          memcpy(pv1, pvt1, 40 * sizeof(double));
+          memcpy(pv2, pvt2, 40 * sizeof(double));
           free(pvt1);
           free(pvt2);
         } else {
