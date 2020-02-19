@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		31/03/2016
+*	Last modified:		19/02/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -487,9 +487,6 @@ void	useprefs(void)
 #ifdef USE_THREADS
    int			nproc;
 #endif
-
-/* Test if byteswapping will be needed */
-  bswapflag = *((char *)&ashort);
 
 /* Multithreading */
 #ifdef USE_THREADS
