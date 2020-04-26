@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic WCS library
 *
-*	Copyright:		(C) 2000-2019 IAP/CNRS/UPMC
+*	Copyright:		(C) 2000-2019 IAP/CNRS/SorbonneU
 *				(C) 1995-1999 Mark Calabretta (original version)
 *
 *	Licenses:		GNU General Public License
@@ -412,7 +412,7 @@ struct prjprm *prj;
 double *x, *y;
 
 {
-   double r, s, xp[2];
+   double r, s, xp[2], x1,y1;
 
    if (abs(prj->flag) != PRJSET) {
       if(tanset(prj)) return 1;
@@ -424,17 +424,17 @@ double *x, *y;
    r =  prj->r0*wcs_cosd(theta)/s;
    xp[0] =  r*wcs_sind(phi);
    xp[1] = -r*wcs_cosd(phi);
-   if (prj->n) {
-     if ((prj->inv_x) && (prj->inv_y)) {
-       *x = prj->inv_x? poly_func(prj->inv_x, xp) : xp[0];
-       *y = prj->inv_y? poly_func(prj->inv_y, xp) : xp[1];
-     } else
-       pv_to_raw(prj, xp[0],xp[1], x,y);
-   } else {
+   if (prj->n)
+     pv_to_raw(prj, xp[0],xp[1], x,y);
+   else
+     {
      *x = xp[0];
      *y = xp[1];
-   }
-
+     }
+/*
+   *x = prj->inv_x? poly_func(prj->inv_x, xp) : xp[0];
+   *y = prj->inv_y? poly_func(prj->inv_y, xp) : xp[1];
+*/
    if (prj->flag == PRJSET && s < 0.0) {
       return 2;
    }
@@ -1323,24 +1323,28 @@ struct prjprm *prj;
    if (prj->r0 == 0.0) {
       prj->r0 = R2D;
 
-      prj->w[4] = prj->p[1]? prj->p[1] : 1.0;
-      prj->w[0] = prj->p[2]? prj->p[2] : 1.0;
+      prj->w[0] = prj->p[2];
+      if (prj->w[0] == 0.0) {
+         return 1;
+      }
 
       prj->w[1] = 1.0/prj->w[0];
 
-      prj->w[2] = R2D*(prj->w[4] + prj->w[0]);
+      prj->w[2] = R2D*(prj->p[1] + prj->p[2]);
       if (prj->w[2] == 0.0) {
          return 1;
       }
 
       prj->w[3] = 1.0/prj->w[2];
    } else {
-      prj->w[4] = prj->p[1]? prj->p[1] : 1.0;
-      prj->w[0] = (prj->p[2]? prj->p[2] : 1.0) * prj->r0 * D2R;
+      prj->w[0] = prj->r0*prj->p[2]*D2R;
+      if (prj->w[0] == 0.0) {
+         return 1;
+      }
 
       prj->w[1] = 1.0/prj->w[0];
 
-      prj->w[2] = prj->r0*(prj->w[4] + prj->w[0]);
+      prj->w[2] = prj->r0*(prj->p[1] + prj->p[2]);
       if (prj->w[2] == 0.0) {
          return 1;
       }
@@ -1368,7 +1372,7 @@ double *x, *y;
       if (cypset(prj)) return 1;
    }
 
-   s = prj->w[4] + wcs_cosd(theta);
+   s = prj->p[1] + wcs_cosd(theta);
    if (s == 0.0) {
          return 2;
       }
@@ -1400,7 +1404,7 @@ double *phi, *theta;
    else if (*phi<-180.0)
      *phi += 360.0;
    eta    = y*prj->w[3];
-   *theta = wcs_atan2d(eta,1.0) + wcs_asind(eta*prj->w[4]/sqrt(eta*eta+1.0));
+   *theta = wcs_atan2d(eta,1.0) + wcs_asind(eta*prj->p[1]/sqrt(eta*eta+1.0));
 
    return 0;
 }
@@ -1570,21 +1574,23 @@ int ceaset(prj)
 struct prjprm *prj;
 
 {
-   double	lambda = prj->p[1];
-
-   if (lambda <= 0.0 || lambda > 1.0)
-     lambda = 1.0;
    if (prj->r0 == 0.0) {
       prj->r0 = R2D;
       prj->w[0] = 1.0;
       prj->w[1] = 1.0;
-      prj->w[2] = prj->r0 / lambda;
-      prj->w[3] = lambda / prj->r0;
+      if (prj->p[1] <= 0.0 || prj->p[1] > 1.0) {
+         return 1;
+      }
+      prj->w[2] = prj->r0/prj->p[1];
+      prj->w[3] = prj->p[1]/prj->r0;
    } else {
       prj->w[0] = prj->r0*D2R;
       prj->w[1] = R2D/prj->r0;
-      prj->w[2] = prj->r0 / lambda;
-      prj->w[3] = lambda / prj->r0;
+      if (prj->p[1] <= 0.0 || prj->p[1] > 1.0) {
+         return 1;
+      }
+      prj->w[2] = prj->r0/prj->p[1];
+      prj->w[3] = prj->p[1]/prj->r0;
    }
 
    prj->flag = PRJSET;
