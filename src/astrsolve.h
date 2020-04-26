@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/05/2012
+*	Last modified:		23/03/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -37,6 +37,7 @@
 /*----------------------------- Internal constants --------------------------*/
 
 #define	ASTREF_WEIGHTFACTOR	1.0	/* Fudge factor applied to ref.weights*/
+#define	ASTROM_REGULFACTOR	0.001	/* Fudge factor applied to regul. */
 
 /*--------------------------- structure definitions -------------------------*/
 /*---------------------------------- protos --------------------------------*/
@@ -49,6 +50,8 @@ extern void	astr_orthopoly(polystruct *poly),
 				setstruct *set),
 		reproj_fgroup(fgroupstruct *fgroup,fieldstruct *field,
 				int propflag),
+		regul_mat(fgroupstruct **fgroups, int nfgroup,
+			double *alpha, int ncoefftot),
 		shrink_mat(double *alpha, double *beta, int ncoefftot,
 				int index, int nmiss);
 

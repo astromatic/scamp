@@ -7,7 +7,7 @@
  *
  *	This file part of:	SCAMP
  *
- *	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
+ *	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
  *
  *	License:		GNU General Public License
  *
@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		13/12/2019
+ *	Last modified:		15/04/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -113,7 +113,7 @@ static void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
   NOTES	Uses the global preferences. Input structures must have gone through
   crossid_fgroup() first.
   AUTHOR	E. Bertin (IAP)
-  VERSION	13/12/2019
+  VERSION	24/03/2020
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 {
@@ -505,6 +505,8 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
     NFPRINTF(OUTPUT, "Solving the global astrometry matrix...");
     if (ncoefftot)
     {
+        regul_mat(fgroups, nfgroup, alpha, ncoefftot);
+
 #if defined(HAVE_LAPACKE)
         QMALLOC(lap_ipiv, lapack_int, ncoefftot);
 
@@ -529,43 +531,6 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 
 
 #else
-
-/*-- Identify starting index for field dependent parameters */
-        minindex2 = 10000000;	/* A very big number */
-        for (g=0; g < nfgroup; g++) {    
-          nfield = fgroups[g]->nfield;
-          fields = fgroups[g]->field;
-          for (f=0; f < nfield; f++) {
-            index2 = fields[f]->index2;
-            if (index2 < minindex2)
-              minindex2 = index2;
-          }
-        }
-        if (minindex2 <= 0)
-          minindex2 = ncoefftot;
-/*-- Identify smallest constant non-zero diagonal terms */
-        alphamin = BIG;
-        for (c = 0; c < minindex2; c++) {
-          cm = c + c*ncoefftot;
-          if (alpha[cm] < alphamin && alpha[cm] > TINY)
-            alphamin = alpha[cm];
-        }
-/*-- Crude Tikhonov regularization */
-        if (alphamin < BIG)
-          for (c = 0; c < minindex2; c++)
-            alpha[c + c*ncoefftot] += alphamin;
-
-/*-- Identify smallest field-dependent, non-zero diagonal terms */
-        alphamin2 = BIG;
-        for (c = minindex2; c < ncoefftot; c++) {
-          cm = c + c*ncoefftot;
-          if (alpha[cm] < alphamin2 && alpha[cm] > TINY)
-            alphamin2 = alpha[cm];
-    }
-/*-- Crude Tikhonov regularization */
-        if (alphamin2 < BIG)
-          for (c = minindex2; c < ncoefftot; c++)
-            alpha[c + c*ncoefftot] += alphamin2;
 
         if (clapack_dposv(CblasRowMajor, CblasUpper,
                     ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot) != 0)
@@ -1486,6 +1451,105 @@ void	shrink_mat(double *alpha, double *beta, int ncoefftot,
     return;
 }
 
+
+/****** regul_mat ************************************************************
+PROTO	void	regul_mat(double *alpha, int ncoefftot)
+PURPOSE	Apply Thikonov regularization to a normal equation matrix
+INPUT	Ptr to an array of field groups,
+	number of groups,
+	ptr to the normal equation matrix,
+	matrix size.
+OUTPUT	-.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION	15/04/2020
+ ***/
+void	regul_mat(fgroupstruct **fgroups, int nfgroup,
+		double *alpha, int ncoefftot) {
+
+   fieldstruct	**fields;
+   double	alphamin, alphamin2, alphaminc, alphaminc2;
+   size_t	stncoefftot, cm;
+   int		c, f, g, index2, minindex2, nfield;
+
+  stncoefftot = (size_t)ncoefftot;
+
+// Identify starting index for field dependent parameters
+  minindex2 = ncoefftot;
+  for (g = 0; g < nfgroup; g++) {    
+    nfield = fgroups[g]->nfield;
+    fields = fgroups[g]->field;
+    for (f = 0; f < nfield; f++) {
+      index2 = fields[f]->index2;
+      if (index2 >= 0 && index2 < minindex2)
+        minindex2 = index2;
+    }
+  }
+
+  alphamin = alphamin2 = BIG;
+
+#ifdef MATSTORAGE_PACKED
+
+// Identify smallest constant non-zero diagonal terms
+  cm = 0;
+  for (c = 0; c < minindex2; c++) {
+    if (alpha[cm] < alphamin && alpha[cm] > TINY)
+      alphamin = alpha[cm];
+    cm += stncoefftot - c;
+  }
+  for (; c < ncoefftot; c++) {
+    if (alpha[cm] < alphamin2 && alpha[cm] > TINY)
+      alphamin2 = alpha[cm];
+    cm += stncoefftot - c;
+  }
+
+alphaminc = alphamin * ASTROM_REGULFACTOR;
+alphaminc2 *= alphamin2 * ASTROM_REGULFACTOR;
+
+// Crude Tikhonov regularization
+  if (alphamin < BIG) {
+    cm = 0;
+    for (c = 0; c < minindex2; c++) {
+      alpha[cm] += alphaminc;
+      cm += stncoefftot - c;
+    }
+  }
+  if (alphamin2 < BIG) {
+    cm = (minindex2 * (2 * ncoefftot + 1 - minindex2)) / 2;
+    for (c = minindex2; c < ncoefftot; c++) {
+      alpha[cm] += alphaminc2;
+      cm += stncoefftot - c;
+    }
+  }
+
+#else
+
+// Identify smallest constant non-zero diagonal terms
+  for (c = 0; c < minindex2; c++) {
+    cm = c + c*stncoefftot;
+    if (alpha[cm] < alphamin && alpha[cm] > TINY)
+      alphamin = alpha[cm];
+  }
+  for (c = minindex2; c < ncoefftot; c++) {
+    cm = c + c*stncoefftot;
+    if (alpha[cm] < alphamin2 && alpha[cm] > TINY)
+      alphamin2 = alpha[cm];
+  }
+
+alphaminc = alphamin * ASTROM_REGULFACTOR;
+alphaminc2 = alphamin2 * ASTROM_REGULFACTOR;
+// Crude Tikhonov regularization
+  if (alphamin < BIG)
+    for (c = 0; c < minindex2; c++)
+      alpha[c + c*stncoefftot] += alphaminc;
+  if (alphamin2 < BIG)
+    for (c = minindex2; c < ncoefftot; c++)
+      alpha[c + c*stncoefftot] += alphaminc2;
+
+#endif
+
+  return;
+}
 
 /****** compute jacobian ******************************************************
   PROTO	void compute_jacobian(samplestruct *sample, double *dprojdred)
