@@ -482,7 +482,6 @@ void	useprefs(void)
    FILE			*testfile;
    char			teststr[80],str[80],
 			*pstr;
-   unsigned short	ashort=1;
    int			i, flag;
 #ifdef USE_THREADS
    int			nproc;

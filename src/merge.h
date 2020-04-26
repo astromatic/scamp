@@ -44,8 +44,8 @@ typedef struct msample
   float		wcsposerr[NAXIS];	/* Errors on mean WCS positions */
   float		wcspostheta;		/* WCS error position angle */
   float		wcsposdisp[NAXIS];	/* Dispersion on mean WCS positions */
-  float		wcsprop[NAXIS];		/* Proper motion vectors in WCS */
-  float		wcsproperr[NAXIS];	/* Proper motion vector errors in WCS */
+  float		wcsprop[NAXIS];		/* Proper motion vectors in mas/yr */
+  float		wcsproperr[NAXIS];	/* Proper motion vector errors in mas/yr */
   float		wcsparal;		/* Parallax in mas */
   float		wcsparalerr;		/* Parallax error mas */
   float		wcschi2;		/* P. motion/parallax fit Chi2/d.o.f.*/

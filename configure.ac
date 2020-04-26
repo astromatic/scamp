@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
+#	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		29/03/2019
+#	Last modified:		26/04/2020
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard AstrOmatic source code...
-AC_INIT(SCAMP, 2.7.8, [astromatic@astromatic.net],
+AC_INIT(SCAMP, 2.9.0, [astromatic@astromatic.net],
 	scamp, [http://astromatic.net/software/scamp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR(autoconf)

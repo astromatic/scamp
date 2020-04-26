@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/05/2018
+*	Last modified:		15/04/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -60,6 +60,14 @@ keystruct       refkey[] = {
         &refsample.wcsposerr[0], H_FLOAT, T_FLOAT, "%12e", "deg"},
   {"ERRB_WORLD", "World RMS position error along minor axis",
         &refsample.wcsposerr[1], H_FLOAT, T_FLOAT, "%12e", "deg"},
+  {"PMALPHA_J2000", "RA component of proper motion vector",
+        &refsample.wcsprop[0], H_FLOAT, T_FLOAT, "%12e", "mas/yr"},
+  {"PMDELTA_J2000", "Declination component of proper motion vector",
+        &refsample.wcsprop[1], H_FLOAT, T_FLOAT, "%12e", "mas/yr"},
+  {"PMALPHAERR_J2000", "Proper motion uncertainty along RA",
+        &refsample.wcsproperr[0], H_FLOAT, T_FLOAT, "%12e", "mas/yr"},
+  {"PMDELTAERR_J2000", "Proper motion uncertainty along declination",
+        &refsample.wcsproperr[1], H_FLOAT, T_FLOAT, "%12e", "mas/yr"},
   {"MAG", "Generic magnitude",
         &refsample.mag, H_FLOAT, T_FLOAT, "%8.4f", "mag"},
   {"MAGERR", "Generic magnitude RMS error",
@@ -921,6 +929,10 @@ epoch, sample->mag, sample->magerr);
         sample->wcspos[lat] = delta;
         sample->wcsposerr[lng] = poserr[lng];
         sample->wcsposerr[lat] = poserr[lat];
+        sample->wcsprop[lng] = prop[lng];
+        sample->wcsprop[lat] = prop[lat];
+        sample->wcsproperr[lng] = properr[lng];
+        sample->wcsproperr[lat] = properr[lat];
         sample->epoch = epoch;
         sample->spread = sample->spreaderr = 0.0;
         sample->sexflags = 0;	/* SEx flags not relevant for ref. sources*/
@@ -981,7 +993,7 @@ INPUT   Catalog name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 22/10/2009
+VERSION 22/01/2019
 */
 void	save_astreffield(char *filename,  fieldstruct *reffield)
   {
@@ -1061,6 +1073,11 @@ void	save_astreffield(char *filename,  fieldstruct *reffield)
     for (n=set->nsample; n--;)
       {
       objsample = *(sample++);
+// Save proper motions in mas/yr
+      objsample.wcsprop[0] *= DEG / MAS;
+      objsample.wcsprop[1] *= DEG / MAS;
+      objsample.wcsproperr[0] *= DEG / MAS;
+      objsample.wcsproperr[1] *= DEG / MAS;
       write_obj(objtab, buf);
       }
     end_writeobj(cat, objtab, buf);
@@ -1223,7 +1240,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 12/11/2013
+VERSION 15/04/2020
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1237,14 +1254,16 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
    char			str[MAXCHAR];
    char			*buf;
    unsigned short	*flags;
-   float		*xm,*ym, *mag, *magerr, *obsdate, *erra,*errb;
-   double		*dxm, *dym, *dmag, *dmagerr, *dobsdate, *derra, *derrb,
+   float		*xm,*ym, *xpm,*ypm, *xpmerr,*ypmerr,
+			*mag, *magerr, *obsdate, *erra,*errb;
+   double		*dxm, *dym, *dxpm,*dypm, *dxpmerr,*dypmerr,
+			*dmag, *dmagerr, *dobsdate, *derra, *derrb,
 			x,y, dx,dy,dfac, ea,eb, maxradius2, mmag;
    int			n, nsample,nsamplemax, nobj, objflags, maglimflag;
 
 /* One needs 2 angular coordinates here! */
-  dxm = dym = dmag = derra = derrb = NULL;
-  xm = ym = mag = erra = errb = NULL;
+  dxm = dym = dxpm = dypm = dxpmerr = dypmerr = dmag = derra = derrb = NULL;
+  xm = ym = xpm = ypm = xpmerr = ypmerr = mag = erra = errb = NULL;
   maxradius2 = maxradius*maxradius;
   dfac = (lng!=lat)? cos(wcspos[lat]*DEG) : 1.0;
 
@@ -1305,6 +1324,38 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     derrb = (double *)key->ptr;
   else
     errb = (float *)key->ptr;
+
+  if ((key = name_to_key(keytab, prefs.astrefprop_key[0])))
+    {
+    if (key->ttype == T_DOUBLE)
+      dxpm = (double *)key->ptr;
+    else
+      xpm = (float *)key->ptr;
+    }
+
+  if ((key = name_to_key(keytab, prefs.astrefprop_key[1])))
+    {
+    if (key->ttype == T_DOUBLE)
+      dypm = (double *)key->ptr;
+    else
+      ypm = (float *)key->ptr;
+    }
+
+  if ((key = name_to_key(keytab, prefs.astrefproperr_key[0])))
+    {
+    if (key->ttype == T_DOUBLE)
+      dxpmerr = (double *)key->ptr;
+    else
+      xpmerr = (float *)key->ptr;
+    }
+
+  if ((key = name_to_key(keytab, prefs.astrefproperr_key[1])))
+    {
+    if (key->ttype == T_DOUBLE)
+      dypmerr = (double *)key->ptr;
+    else
+      ypmerr = (float *)key->ptr;
+    }
 
   if (!(key = name_to_key(keytab, prefs.astrefmag_key)))
     {
@@ -1425,6 +1476,12 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     ea = erra? *erra : *derra;
     eb = errb? *errb : *derrb;
     sample->wcsposerr[lng] = sample->wcsposerr[lat] = sqrt(ea*ea+eb*eb);
+    sample->wcsprop[lng] = (xpm ? *xpm : (dxpm ? *dxpm : 0.0)) * MAS / DEG;
+    sample->wcsprop[lat] = (ypm ? *ypm : (dypm ? *dypm : 0.0)) * MAS / DEG;
+    sample->wcsproperr[lng] = (xpmerr ? *xpmerr : (dxpmerr ? *dxpmerr : 0.0))
+				* MAS / DEG;
+    sample->wcsproperr[lat] = (ypmerr ? *ypmerr : (dypmerr ? *dypmerr : 0.0))
+				* MAS / DEG;
 /*-- In case of a contamination, position errors are easily doubled */
     if (flags && *flags>0)
       sample->wcsposerr[lng] = (sample->wcsposerr[lat] *= 2.0);

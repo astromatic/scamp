@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2016 -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/07/2017
+*	Last modified:		22/01/2019
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -90,6 +90,10 @@ typedef struct
   int		nastrefcent_key;	/* nb of params */
   char		*(astreferr_key[(NAXIS*(NAXIS+1))/2]);/* err.ellipse keywords*/
   int		nastreferr_key;		/* nb of params */
+  char		*(astrefprop_key[NAXIS]);/* Astrom ref. cat. PM keywords*/
+  int		nastrefprop_key;	/* nb of params */
+  char		*(astrefproperr_key[NAXIS]);/* PM err keywords*/
+  int		nastrefproperr_key;		/* nb of params */
   char		astrefmag_key[72];	/* Astrom ref. cat. mag. keyword */
   char		astrefmagerr_key[72];	/* Astrom ref. cat. mag. error keyword*/
   char		astrefobsdate_key[72];	/* Astrom ref. cat. obs. date keyword */

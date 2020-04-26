@@ -281,8 +281,8 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
       {
       mergedsample.wcspos[d] = msamp->wcspos[d];
       mergedsample.wcsposerr[d] = msamp->wcsposerr[d];
-      mergedsample.wcsprop[d] = msamp->wcsprop[d] * DEG/MAS;
-      mergedsample.wcsproperr[d] = msamp->wcsproperr[d] * DEG/MAS;
+      mergedsample.wcsprop[d] = msamp->wcsprop[d];
+      mergedsample.wcsproperr[d] = msamp->wcsproperr[d];
       }
     mergedsample.wcschi2 = msamp->wcschi2;
 
