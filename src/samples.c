@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2018 IAP/CNRS/SorbonneU
+ * Copyright:  (C) 2002-2020 IAP/CNRS/SorbonneU
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  29/03/2019
+ * Last modified:  15/04/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -686,7 +686,7 @@ void malloc_samples(setstruct *set, int nsample)
   OUTPUT  -.
   NOTES   -.
   AUTHOR  E. Bertin (IAP), S.Serre (LAB)
-  VERSION 17/07/2018
+  VERSION 15/04/2020
  */
 void realloc_samples(setstruct *set, int nsample)
 
@@ -704,15 +704,15 @@ void realloc_samples(setstruct *set, int nsample)
         QREALLOC(set->sample, samplestruct, nsample);
         sample = set->sample + set->nsamplemax;
         memset(sample, '\0', (nsample - set->nsamplemax)*sizeof(samplestruct));
-        for (n = nsample - set->nsamplemax; n--; sample++)
-            if (set->ncontext)
+        if (set->ncontext)
+            for (n = nsample - set->nsamplemax; n--; sample++)
                 QMALLOC(sample->context, double, set->ncontext);
     }
     else if (nsample<set->nsamplemax)
     {
         sample = set->sample + nsample;
-        for (n = set->nsamplemax - nsample; n--; sample++)
-            if (set->ncontext)
+        if (set->ncontext)
+            for (n = set->nsamplemax - nsample; n--; sample++)
                 free(sample->context);
         QREALLOC(set->sample, samplestruct, nsample);
     }

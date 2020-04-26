@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2017 IAP/CNRS/UPMC
+ * Copyright:  (C) 2002-2019 IAP/CNRS/UPMC
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  26/06/2017
+ * Last modified:  16/01/2019
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -75,6 +75,8 @@ typedef struct sample
     double epoch;   /* Epoch of observation */
     float  rawposerr[NAXIS]; /* Uncertainty on raw coordinates */
     float  wcsposerr[NAXIS]; /* Errors on WCS positions */
+    float  wcsprop[NAXIS];  /* World Coordinate proper motion */
+    float  wcsproperr[NAXIS];  /* World Coordinate proper motion uncertainties*/
     float  weight;   /* Relative weight in solutions */
     float  flux;   /* Flux */
     float  fluxerr;  /* Flux uncertainty (1-sigma) */
