@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright: (C) 2002-2016 IAP/CNRS/UPMC
+ * Copyright: (C) 2002-2020 IAP/CNRS/SorbonneU
  *
  * License: GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified: 07/05/2018
+ * Last modified: 27/04/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -132,7 +132,7 @@ void makeit(void)
 
     /*--------------------------- Read the Catalogs--------------------------- */
     NFPRINTF(OUTPUT, "");
-    QPRINTF(OUTPUT, "----- %d inputs:\n", nfield);
+    QPRINTF(OUTPUT, "----- %d %s:\n", nfield, nfield>1 ? "inputs" : "input");
 
 #ifdef USE_THREADS
     pthread_load_fields(fields, nfield);

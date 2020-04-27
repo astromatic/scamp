@@ -673,7 +673,7 @@ void print_fgroupinfo(fgroupstruct **pfgroup, int nfgroup)
   OUTPUT -.
   NOTES Global preferences are used.
   AUTHOR E. Bertin (IAP)
-  VERSION 27/04/2010
+  VERSION 27/04/2020
  ***/
 void print_instruinfo(void)
 {
@@ -684,7 +684,8 @@ void print_instruinfo(void)
     for (i=0; i<prefs.nastrinstrustr; i++)
     {
         QPRINTF(OUTPUT, "\nInstrument A%-2d:\n", i+1);
-        QPRINTF(OUTPUT, "%d extensions\n", prefs.nastrinstruext[i]);
+        QPRINTF(OUTPUT, "%d %s\n", prefs.nastrinstruext[i],
+		prefs.nastrinstruext[i]>1? "extensions":"extension");
         len = fitsfind(prefs.astrinstrustr[i], "END     ");
         for (l=0; l<len; l++)
         {
