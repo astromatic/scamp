@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,11 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-<<<<<<< HEAD
-*	Last modified:		14/03/2018
-=======
-*	Last modified:		12/03/2018
->>>>>>> 8f1783245ce2eede12ee3e190f5efd85e6fa7107
+*	Last modified:		27/04/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -98,10 +94,10 @@ int	main(int argc, char *argv[])
   strcpy(prefs.prefs_name, "scamp.conf");
   narg = nim = 0;
   listbuf = (char *)NULL;
-
+for (a=1; a<argc; a++)
   for (a=1; a<argc; a++)
     {
-    if (*(argv[a]) == '-')
+    if (argv[a] && *(argv[a]) == '-')
       {
       opt = (int)argv[a][1];
       if (strlen(argv[a])<4 || opt == '-')
@@ -138,17 +134,23 @@ int	main(int argc, char *argv[])
             error(EXIT_SUCCESS, "SYNTAX: ", SYNTAX);
           }
         }
-      else
-        {
+      else {
         argkey[narg] = &argv[a][1];
-        argval[narg++] = argv[++a];
+        if (!argv[a+1] || *argv[a+1] == '-') {
+          argval[narg++] = calloc(1,1);
+        } else
+          argval[narg++] = argv[++a];
         }       
       }
     else
       {
 /*---- The input image filename(s) */
-      for(; (a<argc) && (*argv[a]!='-'); a++)
+      for(; a<argc; a++)
         {
+        if (!argv[a])
+          continue;
+        if (*argv[a]=='-')
+          break;
         str = (*argv[a] == '@'? listbuf=list_to_str(argv[a]+1) : argv[a]);
         for (ntok=0; (str=strtok(ntok?NULL:str, notokstr)); nim++,ntok++)
           if (nim<MAXFILE)
