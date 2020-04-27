@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		15/04/2020
+*	Last modified:		27/04/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1240,7 +1240,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 15/04/2020
+VERSION 27/04/2020
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1262,8 +1262,9 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
    int			n, nsample,nsamplemax, nobj, objflags, maglimflag;
 
 /* One needs 2 angular coordinates here! */
-  dxm = dym = dxpm = dypm = dxpmerr = dypmerr = dmag = derra = derrb = NULL;
-  xm = ym = xpm = ypm = xpmerr = ypmerr = mag = erra = errb = NULL;
+  dxm = dym = dxpm = dypm = dxpmerr = dypmerr = dmag = derra = derrb \
+	= dmagerr = NULL;
+  xm = ym = xpm = ypm = xpmerr = ypmerr = mag = erra = errb = magerr = NULL;
   maxradius2 = maxradius*maxradius;
   dfac = (lng!=lat)? cos(wcspos[lat]*DEG) : 1.0;
 
@@ -1372,8 +1373,6 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     {
     sprintf(str, "%s parameter not found in catalog ", prefs.astrefmagerr_key);
     warning(str, rfilename);
-    dmagerr = NULL;
-    magerr = NULL;
     }
   else
     {
