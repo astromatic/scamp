@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  15/04/2020
+ * Last modified:  27/04/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -655,8 +655,8 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
   desired number of samples.
   OUTPUT  -.
   NOTES   -.
-  AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-  VERSION 02/03/99
+  AUTHOR  E. Bertin (IAP)
+  VERSION 27/04/2020
  */
 void malloc_samples(setstruct *set, int nsample)
 
@@ -665,11 +665,11 @@ void malloc_samples(setstruct *set, int nsample)
     int  n;
 
     QCALLOC(set->sample, samplestruct, nsample);
-    sample = set->sample;
-    for (n=nsample; n--; sample++)
-    {
-        if (set->ncontext)
+    if (set->ncontext) {
+        sample = set->sample;
+        for (n=nsample; n--; sample++) {
             QMALLOC(sample->context, double, set->ncontext);
+        }
     }
 
     set->nsamplemax = nsample;
@@ -730,8 +730,8 @@ void realloc_samples(setstruct *set, int nsample)
   desired number of samples.
   OUTPUT  -.
   NOTES   -.
-  AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-  VERSION 02/03/99
+  AUTHOR  E. Bertin (IAP)
+  VERSION 27/04/2020
  */
 void free_samples(setstruct *set)
 
@@ -740,8 +740,8 @@ void free_samples(setstruct *set)
     int  n;
 
     sample = set->sample;
-    for (n = set->nsamplemax; n--; sample++)
-        if (set->ncontext)
+    if (set->ncontext)
+        for (n = set->nsamplemax; n--; sample++)
             free(sample->context);
 
     free(set->sample);
@@ -999,7 +999,7 @@ int compwcs_samples(const void *sample1, const void *sample2)
   NOTES   Memory for the new samples is reallocated if needed. All input data are
   reordered.
   AUTHOR  E. Bertin (IAP)
-  VERSION 23/11/2010
+  VERSION 27/04/2020
  */
 void union_samples(samplestruct *samplein, setstruct *set,
         int nsamplein, double radius, unionmodenum mode)
@@ -1055,7 +1055,8 @@ void union_samples(samplestruct *samplein, setstruct *set,
                 if (!matchflag)
                 {
                     context = sample3->context;
-                    memcpy(sample3->context, samplein->context,
+                    if (set->ncontext)
+                        memcpy(sample3->context, samplein->context,
                             set->ncontext*sizeof(double));
                     *sample3 = *samplein;
                     sample3->context = context;
@@ -1097,7 +1098,8 @@ void union_samples(samplestruct *samplein, setstruct *set,
                 if (!matchflag)
                 {
                     context = sample3->context;
-                    memcpy(sample3->context, samplein->context,
+                    if (set->ncontext)
+                        memcpy(sample3->context, samplein->context,
                             set->ncontext*sizeof(double));
                     *sample3 = *samplein;
                     sample3->context = context;
@@ -1140,7 +1142,8 @@ void union_samples(samplestruct *samplein, setstruct *set,
                 if (!matchflag)
                 {
                     context = sample3->context;
-                    memcpy(sample3->context, samplein->context,
+                    if (set->ncontext)
+                        memcpy(sample3->context, samplein->context,
                             set->ncontext*sizeof(double));
                     *sample3 = *samplein;
                     sample3->context = context;
@@ -1172,8 +1175,8 @@ void union_samples(samplestruct *samplein, setstruct *set,
   number of samples.
   OUTPUT  -.
   NOTES   Memory for the new samples is reallocated if needed.
-  AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-  VERSION 09/08/2002
+  AUTHOR  E. Bertin (IAP)
+  VERSION 27/04/2020
  */
 void copy_samples(samplestruct *samplein, setstruct *set,
         int nsample)
@@ -1192,7 +1195,8 @@ void copy_samples(samplestruct *samplein, setstruct *set,
     for (i=0; i<nsample; i++)
     {
         context = sample->context;
-        memcpy(sample->context, samplein->context, set->ncontext*sizeof(double));
+        if (set->ncontext)
+            memcpy(sample->context, samplein->context, set->ncontext*sizeof(double));
         *sample = *(samplein++);
         sample->context = context;
         sample++;
@@ -1260,6 +1264,10 @@ void update_samples(setstruct *set, double radius)
 
         /*-- Update sample positional errors */
         samp = set->sample;
+#ifdef __INTEL_COMPILER
+// Turn off auto-vectorization because of an INTEL bug.
+#pragma novector
+#endif
         for (e=set->nsample; e--; samp++)
             for (i=0; i<naxis; i++)
                 samp->wcsposerr[i] = sqrtf(wcsastacc2[i]
