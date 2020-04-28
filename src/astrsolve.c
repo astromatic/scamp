@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		15/04/2020
+ *	Last modified:		28/04/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1462,7 +1462,7 @@ INPUT	Ptr to an array of field groups,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	15/04/2020
+VERSION	28/04/2020
  ***/
 void	regul_mat(fgroupstruct **fgroups, int nfgroup,
 		double *alpha, int ncoefftot) {
@@ -1504,7 +1504,7 @@ void	regul_mat(fgroupstruct **fgroups, int nfgroup,
   }
 
 alphaminc = alphamin * ASTROM_REGULFACTOR;
-alphaminc2 *= alphamin2 * ASTROM_REGULFACTOR;
+alphaminc2 = alphamin2 * ASTROM_REGULFACTOR;
 
 // Crude Tikhonov regularization
   if (alphamin < BIG) {
@@ -1515,7 +1515,7 @@ alphaminc2 *= alphamin2 * ASTROM_REGULFACTOR;
     }
   }
   if (alphamin2 < BIG) {
-    cm = (minindex2 * (2 * ncoefftot + 1 - minindex2)) / 2;
+    cm = (minindex2 * (2 * stncoefftot + 1 - minindex2)) / 2;
     for (c = minindex2; c < ncoefftot; c++) {
       alpha[cm] += alphaminc2;
       cm += stncoefftot - c;
@@ -1538,6 +1538,7 @@ alphaminc2 *= alphamin2 * ASTROM_REGULFACTOR;
 
 alphaminc = alphamin * ASTROM_REGULFACTOR;
 alphaminc2 = alphamin2 * ASTROM_REGULFACTOR;
+
 // Crude Tikhonov regularization
   if (alphamin < BIG)
     for (c = 0; c < minindex2; c++)
