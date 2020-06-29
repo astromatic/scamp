@@ -7,7 +7,7 @@
  *
  *	This file part of:	SCAMP
  *
- *	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
+ *	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
  *
  *	License:		GNU General Public License
  *
@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		18/08/2018
+ *	Last modified:		28/06/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -56,7 +56,7 @@
   OUTPUT  Pointer to an allocated array of merged samples (sources).
   NOTES   Global preferences are used.
   AUTHOR  E. Bertin (IAP)
-  VERSION 20/07/2018
+  VERSION 28/06/2020
  */
 msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
 
@@ -70,12 +70,12 @@ msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
     epoch,epochmin,epochmax, err2, spread, wspread,
     weight,weights, dummy;
     long			dptr;
-    short		sexflagmask;
+    unsigned short		sexflagmask;
     unsigned int		imaflagmask;
     int			d,f,i,k,n,p,s, nall,nphotok,nposok, npinstru, naxis,
                 nmsample, index, refflag;
 
-    sexflagmask = (short)prefs.astr_sexflagsmask;
+    sexflagmask = prefs.astr_sexflagsmask;
     imaflagmask = prefs.astr_imaflagsmask;
     naxis = fgroup->naxis;
     npinstru = prefs.nphotinstrustr;

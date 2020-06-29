@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2018 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2008-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/12/2018
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -79,7 +79,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	03/12/2018
+VERSION	28/06/2020
  ***/
 void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
   {
@@ -89,12 +89,12 @@ void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield)
    double	*ss[NAXIS],*sx[NAXIS],*sxx[NAXIS],*sy[NAXIS],*sxy[NAXIS],
 		sigma[NAXIS],
 		sig, a,b, wi,xi,yi, delta;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		*ncolshift[NAXIS],
 		d,f1,f2,n,s, naxis, nfield, instru1,instru2, ninstru;
 
-  sexflagmask = (short)prefs.astr_sexflagsmask | (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.astr_sexflagsmask | prefs.phot_sexflagsmask;
   imaflagmask = prefs.astr_imaflagsmask | prefs.phot_imaflagsmask;
   nfield = fgroup->nfield;
   naxis = fgroup->naxis;
@@ -248,7 +248,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	28/06/2020
  ***/
 void	astrprop_fgroup(fgroupstruct *fgroup)
   {
@@ -261,13 +261,13 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
    double	alpha[25], beta[5],
 		coord[NAXIS], coorderr[NAXIS], propmean[NAXIS],
 		wis, paral,paralerr, chi2,chi2min, propmod,propmodmin;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		d,f,s,m,n, naxis, nfield, nsamp,nsamp2, lng,lat, celflag,
 		propflag, paralflag, refflag, ncoeff,ncoeffp1,
 		nfree, nbad,nbadmax, bad, nfreemin, npropmean;
 
-  sexflagmask = (short)prefs.astr_sexflagsmask;
+  sexflagmask = prefs.astr_sexflagsmask;
   imaflagmask = prefs.astr_imaflagsmask;
   paralflag = prefs.parallax_flag;
   propflag = prefs.propmotion_flag;
@@ -466,12 +466,12 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
 		ecpos[NAXIS], pfac[NAXIS],a[25],b[5],
 		**csscale, **cszero,
 		sig, wi,yi, sy2, dt, bec,cbec,lec, dval, colour;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		d,j,k, f1,ff, naxis, nfield, ncoeff,nfree, ncoeffp1, lng,lat,
 		colcorflag,paralflag,meanflag,refflag;
 
-  sexflagmask = (short)prefs.astr_sexflagsmask;
+  sexflagmask = prefs.astr_sexflagsmask;
   imaflagmask = prefs.astr_imaflagsmask;
   nfield = fgroup->nfield;
   naxis = fgroup->naxis;

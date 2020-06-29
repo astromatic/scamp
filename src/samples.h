@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2019 IAP/CNRS/UPMC
+ * Copyright:  (C) 2002-2020 IAP/CNRS/SorbonneU
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  16/01/2019
+ * Last modified:  28/06/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -85,8 +85,8 @@ typedef struct sample
     float  fwhm;   /* Full Width at Half Maximum */
     float  spread;   /* SExtractor's SPREAD_MODEL */
     float  spreaderr;  /* SExtractor's SPREADERR_MODEL */
-    short  sexflags;  /* Source extraction flags */
-    short  scampflags;  /* SCAMP flags */  
+    unsigned short  sexflags;  /* Source extraction flags */
+    unsigned short  scampflags;  /* SCAMP flags */  
     unsigned int imaflags;  /* Image flags */
     double vector[3];       /* 3d vector from world coordinates */
 } samplestruct;

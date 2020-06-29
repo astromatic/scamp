@@ -1,13 +1,13 @@
 /**
 * @file		dgeomap.c
 * @brief	Manage differential geometry maps
-* @date		20/01/2015
+* @date		28/06/2020
 * @copyright
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 1993-2015 IAP/CNRS/UPMC
+*	Copyright:		(C) 1993-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -53,7 +53,7 @@ Write differential geometry maps for a given astrometric instrument
 @param[out] 		RETURN_OK if everything went fine,
 			RETURN_ERROR otherwise.
 @author 		E. Bertin (IAP)
-@date			20/01/2015
+@date			28/06/2020
  ***/
 int	dgeomap_instru(fieldstruct **fields, int nfield, int instru,
 			char *filename) {
@@ -74,7 +74,7 @@ int	dgeomap_instru(fieldstruct **fields, int nfield, int instru,
 			*dgeoin, *dgeoout, *line0, *line1, *pix, *pix0, *pix1,
 			*pixin, *pixout,
 			val0, val1, stepout, coeff, coeff0;
-   short		sexflagmask;
+   unsigned short	sexflagmask;
    unsigned int		imaflagmask;
    char			str[64];
    int			d,f,g,i,j,k,n,p,s, naxis, npixinx, npixiny, npixin,
@@ -82,7 +82,7 @@ int	dgeomap_instru(fieldstruct **fields, int nfield, int instru,
 			ngeopoint, ngeopointmax, nneighbour, stepin, nlineout;
 
 // SExtractor and image flags
-  sexflagmask = (short)prefs.astr_sexflagsmask;
+  sexflagmask = prefs.astr_sexflagsmask;
   imaflagmask = prefs.astr_imaflagsmask;
 
   nset = 0;

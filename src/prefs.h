@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/01/2019
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -69,8 +69,8 @@ typedef struct
   double	fwhm_thresh[2];		/* Minimum and maximum FWHM allowed */
   int		nfwhm_thresh;		/* nb of params */
   double	maxellip;		/* Maximum ellipticity allowed */
-  int		sexflags_mask;		/* Rejection mask on SEx FLAGS */
-  int		wflags_mask;		/* Rej. mask on SEx FLAGS_WEIGHT */
+  unsigned short sexflags_mask;		/* Rejection mask on SEx FLAGS */
+  unsigned short wflags_mask;		/* Rej. mask on SEx FLAGS_WEIGHT */
   unsigned int	imaflags_mask;		/* Rejection mask on SEx IMAFLAG_ISO */
 
 /* Reference catalogs */
@@ -159,8 +159,8 @@ typedef struct
   int		nmagzero_interr;		/* nb of params */
   double	magzero_referr[MAXPHOTINSTRU];	/* Photom.field ZP error RMS */
   int		nmagzero_referr;		/* nb of params */
-  int		phot_sexflagsmask;		/* Photom. mask on SEx FLAGS */
-  int		phot_imaflagsmask;		/* Photom. mask on image flags*/
+  unsigned short phot_sexflagsmask;		/* Photom. mask on SEx FLAGS */
+  unsigned int	phot_imaflagsmask;		/* Photom. mask on image flags*/
 
 /* Astrometric solution */
   projenum	projection_type[MAXFILE];	/* Celestial projection type */
@@ -189,8 +189,8 @@ typedef struct
   accuracyenum	astraccuracy_type;		/* Astrom. uncer. input type */
   char		astraccuracy_key[72];	/* Fits keyword for astrom. uncer. */
   double	astraccuracy;			/* Astrom. uncertainty floor */
-  int		astr_sexflagsmask;		/* Astrom. mask on SEx FLAGS */
-  int		astr_imaflagsmask;		/* Astrom. mask on image flags*/
+  unsigned short astr_sexflagsmask;		/* Astrom. mask on SEx FLAGS */
+  unsigned int	astr_imaflagsmask;		/* Astrom. mask on image flags*/
 /* Parallaxes */
   int		parallax_flag;			/* Compute parallaxes? */
 /* Proper motions */
