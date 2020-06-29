@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/06/2020
+*	Last modified:		29/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -58,7 +58,7 @@ pkeystruct key[] =
   {"AIRMASS_KEY", P_STRING, prefs.airmass_key},
   {"ASTR_ACCURACY", P_FLOAT, &prefs.astraccuracy,0,0, 0.0, 1e6},
   {"ASTR_FLAGSMASK", P_INT, &prefs.astr_sexflagsmask, 0,0xffff, 0.0,0.0},
-  {"ASTR_IMAFLAGSMASK", P_INT, &prefs.astr_imaflagsmask, 0,0xffffffff, 0.0,0.0},
+  {"ASTR_IMAFLAGSMASK", P_INT, &prefs.astr_imaflagsmask, 0,0x7fffffff, 0.0,0.0},
   {"ASTRACCURACY_KEY", P_STRING, prefs.astraccuracy_key},
   {"ASTRACCURACY_TYPE", P_KEY, &prefs.astraccuracy_type, 0,0, 0.0,0.0,
     "SIGMA-PIXEL", "SIGMA-ARCSEC", "TURBULENCE-ARCSEC", ""},
@@ -147,7 +147,7 @@ pkeystruct key[] =
    {"NORMAL","FOCAL_PLANE",""}},
   {"HEADER_NAME", P_STRINGLIST, prefs.head_name, 0,0, 0.0,0.0,
    {""}, 0, MAXFILE, &prefs.nhead_name},
-  {"IMAFLAGS_MASK", P_INT, &prefs.imaflags_mask, 0,0xffffffff, 0.0,0.0},
+  {"IMAFLAGS_MASK", P_INT, &prefs.imaflags_mask, 0,0x7fffffff, 0.0,0.0},
   {"INCLUDE_ASTREFCATALOG", P_BOOL, &prefs.astrefinprop_flag},
   {"MAGZERO_KEY", P_STRING, prefs.magzero_key},
   {"MAGZERO_OUT", P_FLOATLIST, prefs.magzero_out, 0,0, -1000.0,1000.0,
@@ -170,7 +170,7 @@ pkeystruct key[] =
   {"NTHREADS", P_INT, &prefs.nthreads, -THREADS_PREFMAX, THREADS_PREFMAX},
   {"PHOT_ACCURACY", P_FLOAT, &prefs.photaccuracy, 0,0, 0.0, 1.0},
   {"PHOT_FLAGSMASK", P_INT, &prefs.phot_sexflagsmask, 0,0xffff, 0.0,0.0},
-  {"PHOT_IMAFLAGSMASK", P_INT, &prefs.phot_imaflagsmask, 0,0xffffffff, 0.0,0.0},
+  {"PHOT_IMAFLAGSMASK", P_INT, &prefs.phot_imaflagsmask, 0,0x7fffffff, 0.0,0.0},
   {"PHOTCLIP_NSIGMA", P_FLOAT, &prefs.photclip_nsig, 0,0, 0.0,1e31},
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
   {"PHOTFLUXERR_KEY", P_STRING, prefs.photfluxerr_key},
