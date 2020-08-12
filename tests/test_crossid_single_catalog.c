@@ -12,6 +12,9 @@
 #include "../src/field.h"
 #include "../src/prefs.h"
 
+prefstruct	prefs;
+char		gstr[MAXCHAR];
+
 static char testfile[] = "extra/744331p.ascii";
 
 static int

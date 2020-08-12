@@ -3,7 +3,7 @@
  * \file        chealpixstore.c
  * \brief       Healpix pixels storage mechanism.
  * \author      Sébastien Serre
- * \date        07/05/2018
+ * \date        12/08/2020
  *
  * \copyright   Copyright (C) 2017 University of Bordeaux. All right reserved.
  *
@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "define.h"
+#include "globals.h"
 #include "chealpix.h"
 #include "chealpixstore.h"
 #include "field.h"

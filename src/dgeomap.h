@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2011-2015 IAP/CNRS/UPMC
+*	Copyright:		(C) 2011-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -51,9 +51,9 @@ typedef struct dgeopoint {
 
 /*------------------------------ Prototypes ---------------------------------*/
 
-int	dgeomap_compdx(const void *dgeopoint1, const void *dgeopoint2),
-	dgeomap_compdy(const void *dgeopoint1, const void *dgeopoint2),
-	dgeomap_instru(fieldstruct **fields, int nfield, int instru,
+extern int	dgeomap_compdx(const void *dgeopoint1, const void *dgeopoint2),
+		dgeomap_compdy(const void *dgeopoint1, const void *dgeopoint2),
+		dgeomap_instru(fieldstruct **fields, int nfield, int instru,
 			char *filename);
 
 #endif // _DGEOMAP_H_

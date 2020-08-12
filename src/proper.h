@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		06/10/2012
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,10 +45,10 @@
 
 
 /*-------------------------------- protos -----------------------------------*/
-int	astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod);
+extern int	astrpropclip_fgroup(fgroupstruct *fgroup, double maxpropmod);
 
-void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield),
-	astrconnect_fgroup(fgroupstruct *fgroup),
-	astrprop_fgroup(fgroupstruct *fgroup);
+extern void	astrcolshift_fgroup(fgroupstruct *fgroup, fieldstruct *reffield),
+		astrconnect_fgroup(fgroupstruct *fgroup),
+		astrprop_fgroup(fgroupstruct *fgroup);
 
 #endif // _PROPER_H_

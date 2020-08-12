@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  28/06/2020
+ * Last modified:  12/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -142,25 +142,27 @@ typedef struct set
 
 /*-------------------------------- protos -----------------------------------*/
 
-samplestruct *remove_sample(setstruct *set, int isample);
+extern samplestruct	*remove_sample(setstruct *set, int isample);
 
-setstruct *init_set(void),
-          *load_samples(char **filename, int ncat),
-          *read_samples(setstruct *set, tabstruct *tab, char *rfilename);
+extern setstruct	*init_set(void),
+          		*load_samples(char **filename, int ncat),
+          		*read_samples(setstruct *set, tabstruct *tab,
+          			char *rfilename);
 
-void  copy_samples(samplestruct *samplein, setstruct *set,
-        int nsample),
-      end_set(setstruct *set),
-      free_samples(setstruct *set),
-      locate_set(setstruct *set),
-      malloc_samples(setstruct *set, int nsample),
-      make_weights(setstruct *set, samplestruct *sample),
-      mix_samples(setstruct *set),
-      realloc_samples(setstruct *set, int nsample),
-      sort_samples(setstruct *set),
-      union_samples(samplestruct *samplein, setstruct *set,
-              int nsamplein, double radius, unionmodenum mode),
-      unlink_samples(setstruct *set),
-      update_samples(setstruct *set, double radius);
+extern void		copy_samples(samplestruct *samplein, setstruct *set,
+				int nsample),
+			end_set(setstruct *set),
+			free_samples(setstruct *set),
+			locate_set(setstruct *set),
+			malloc_samples(setstruct *set, int nsample),
+			make_weights(setstruct *set, samplestruct *sample),
+			mix_samples(setstruct *set),
+			realloc_samples(setstruct *set, int nsample),
+			sort_samples(setstruct *set),
+			union_samples(samplestruct *samplein, setstruct *set,
+				int nsamplein, double radius,
+				unionmodenum mode),
+			unlink_samples(setstruct *set),
+			update_samples(setstruct *set, double radius);
 
 #endif // _SAMPLES_H_

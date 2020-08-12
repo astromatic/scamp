@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		08/01/2020
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -95,7 +95,7 @@ extern void		compute_rawpos(wcsstruct *wcs, samplestruct *refsample,
 				double shear);
 
 #ifdef USE_THREADS
-void			*pthread_match_field(void *arg),
+extern void		*pthread_match_field(void *arg),
 			pthread_match_fields(fgroupstruct **fgroups,
 				fieldstruct **reffields, int ngroup);
 #endif // USE_THREADS

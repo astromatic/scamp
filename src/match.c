@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2018 IAP/CNRS/SorbonneU
+ * Copyright:  (C) 2002-2020 IAP/CNRS/SorbonneU
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  04/02/2020
+ * Last modified:  12/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -72,24 +72,23 @@
 #include "samples.h"
 #include "wcs/wcs.h"
 
+
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
-pthread_t  *thread;
-pthread_mutex_t matchmutex,matchsortmutex;
-threads_gate_t  *pthread_startgate, *pthread_stopgate;
-fgroupstruct  **pthread_fgroups;
-fieldstruct  **pthread_reffields;
-int   **pthread_fviewflag,
-      pthread_endflag, pthread_ngroup,
-      pthread_gindex, pthread_findex,
-      pthread_gviewindex,pthread_fviewindex;
+pthread_t	*match_thread;
+pthread_mutex_t	match_mutex, match_sortmutex;
+fgroupstruct	**pthread_match_fgroups;
+fieldstruct	**pthread_match_reffields;
+int		**pthread_match_fviewflag,
+		pthread_match_endflag, pthread_match_ngroup,
+		pthread_match_gindex, pthread_match_findex,
+		pthread_match_gviewindex, pthread_match_fviewindex;
 #endif
 
-int sort_coord;
-static int compmag(const void *sample1, const void *sample2);
-static int compraw(const void *sample1, const void *sample2);
-static void putgauss(float *histo, int width,int height, double x,double y,
-        double flux, double xsig, double ysig);
+static int	compmag(const void *sample1, const void *sample2);
+static int	compraw(const void *sample1, const void *sample2);
+static void	putgauss(float *histo, int width,int height, double x,double y,
+        	double flux, double xsig, double ysig);
 
 static const int pvmap[] =
 	{0, 2,1, 3, 6,5,4, 10,9,8,7, 11, 16,15,14,13,12, 22,21,20,19,18,17, 23,
@@ -1155,7 +1154,7 @@ double findcrosspeak(float *histo, int width, int height,
   OUTPUT Confidence level of the solution (in units of sigma).
   NOTES Uses the global preferences.
   AUTHOR E. Bertin (IAP)
-  VERSION 08/01/2020
+  VERSION 12/08/2020
  ***/
 void match_refine(setstruct *set, setstruct *refset, double matchresol,
         double *angle, double *scale,
@@ -1216,12 +1215,12 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
 
     /* Sort samples to accelerate cross-matching */
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_LOCK(&matchsortmutex);
+    QPTHREAD_MUTEX_LOCK(&match_sortmutex);
 #endif
     sort_coord = lat;
     qsort(refset->sample, nrefsample, sizeof(samplestruct), compraw);
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_UNLOCK(&matchsortmutex);
+    QPTHREAD_MUTEX_UNLOCK(&match_sortmutex);
 #endif
 
     /* Now the current field */
@@ -1236,12 +1235,12 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
 
     /* Sort samples to accelerate cross-matching */
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_LOCK(&matchsortmutex);
+    QPTHREAD_MUTEX_LOCK(&match_sortmutex);
 #endif
     sort_coord = lat;
     qsort(set->sample, nsample, sizeof(samplestruct), compraw);
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_UNLOCK(&matchsortmutex);
+    QPTHREAD_MUTEX_UNLOCK(&match_sortmutex);
 #endif
 
     /* Zero the matrices */
@@ -1957,7 +1956,7 @@ void	dxy_to_dll(wcsstruct *wcs, double dx, double dy,
       OUTPUT  -.
       NOTES   Relies on global variables.
       AUTHOR  E. Bertin (IAP)
-      VERSION 05/04/2016
+      VERSION 12/08/2020
      ***/
     void    *pthread_match_field(void *arg)
     {
@@ -1966,52 +1965,52 @@ void	dxy_to_dll(wcsstruct *wcs, double dx, double dy,
         gindex = findex = -1;
         proc = *((int *)arg);
         threads_gate_sync(pthread_startgate);
-        while (!pthread_endflag)
+        while (!pthread_match_endflag)
         {
-            QPTHREAD_MUTEX_LOCK(&matchmutex);
+            QPTHREAD_MUTEX_LOCK(&match_mutex);
             if (findex>-1)
                 /*---- Indicate that the field info is now suitable for viewing */
-                pthread_fviewflag[gindex][findex] = 1;
-            while (pthread_gviewindex<pthread_ngroup
-                    && pthread_fviewflag[pthread_gviewindex][pthread_fviewindex])
+                pthread_match_fviewflag[gindex][findex] = 1;
+            while (pthread_match_gviewindex < pthread_match_ngroup
+                    && pthread_match_fviewflag[pthread_match_gviewindex][pthread_match_fviewindex])
             {
-                if (!pthread_fviewindex)
+                if (!pthread_match_fviewindex)
                 {
                     NFPRINTF(OUTPUT, "");
                     QPRINTF(OUTPUT, " Group %2d: %8d standard%s in %s (band %s)\n",
-                            pthread_gviewindex+1,
-                            pthread_reffields[pthread_gviewindex]->nsample,
-                            pthread_reffields[pthread_gviewindex]->nsample>1?"s":"",
+                            pthread_match_gviewindex+1,
+                            pthread_match_reffields[pthread_match_gviewindex]->nsample,
+                            pthread_match_reffields[pthread_match_gviewindex]->nsample>1?"s":"",
                             astrefcats[prefs.astrefcat].name,
                             astrefcats[prefs.astrefcat].bandname);
                     QIPRINTF(OUTPUT, "              instruments  pos.angle   scale    "
                             "cont.        shift        cont.");
                 }
                 print_matchinfo(
-                        pthread_fgroups[pthread_gviewindex]->field[pthread_fviewindex++]);
-                if (pthread_fviewindex >= pthread_fgroups[pthread_gviewindex]->nfield)
+                        pthread_match_fgroups[pthread_match_gviewindex]->field[pthread_match_fviewindex++]);
+                if (pthread_match_fviewindex >= pthread_match_fgroups[pthread_match_gviewindex]->nfield)
                 {
-                    pthread_fviewindex = 0;
-                    pthread_gviewindex++;
+                    pthread_match_fviewindex = 0;
+                    pthread_match_gviewindex++;
                 }
             }
-            if (pthread_gindex<pthread_ngroup)
+            if (pthread_match_gindex<pthread_match_ngroup)
             {
-                gindex = pthread_gindex;
-                findex = pthread_findex++;
-                if (pthread_findex>=pthread_fgroups[gindex]->nfield)
+                gindex = pthread_match_gindex;
+                findex = pthread_match_findex++;
+                if (pthread_match_findex>=pthread_match_fgroups[gindex]->nfield)
                 {
-                    pthread_findex = 0;
-                    pthread_gindex++;
+                    pthread_match_findex = 0;
+                    pthread_match_gindex++;
                 }
-                QPTHREAD_MUTEX_UNLOCK(&matchmutex);
+                QPTHREAD_MUTEX_UNLOCK(&match_mutex);
                 /*---- Match field */
-                match_field(pthread_fgroups[gindex]->field[findex],
-                        pthread_reffields[gindex]);
+                match_field(pthread_match_fgroups[gindex]->field[findex],
+                        pthread_match_reffields[gindex]);
             }
             else
             {
-                QPTHREAD_MUTEX_UNLOCK(&matchmutex);
+                QPTHREAD_MUTEX_UNLOCK(&match_mutex);
                 /*---- Wait for the input buffer to be updated */
                 threads_gate_sync(pthread_stopgate);
                 /* ( Master thread process loads and saves new data here ) */
@@ -2037,7 +2036,7 @@ void	dxy_to_dll(wcsstruct *wcs, double dx, double dy,
       OUTPUT -.
       NOTES Uses the global preferences.
       AUTHOR E. Bertin (IAP)
-      VERSION 28/09/2004
+      VERSION 12/08/2020
      ***/
     void pthread_match_fields(fgroupstruct **fgroups,
             fieldstruct **reffields, int ngroup)
@@ -2048,20 +2047,20 @@ void	dxy_to_dll(wcsstruct *wcs, double dx, double dy,
 
         /* Number of active threads */
         nproc = prefs.nthreads;
-        pthread_fgroups = fgroups;
-        pthread_reffields = reffields;
-        pthread_ngroup = ngroup;
+        pthread_match_fgroups = fgroups;
+        pthread_match_reffields = reffields;
+        pthread_match_ngroup = ngroup;
         /* Compute the total number of fields to consider */
-        QMALLOC(pthread_fviewflag, int *, ngroup);
+        QMALLOC(pthread_match_fviewflag, int *, ngroup);
         for (g=0; g<ngroup; g++)
         {
-            QCALLOC(pthread_fviewflag[g], int, fgroups[g]->nfield);
+            QCALLOC(pthread_match_fviewflag[g], int, fgroups[g]->nfield);
         }
         /* Set up multi-threading stuff */
         QMALLOC(proc, int, nproc);
-        QMALLOC(thread, pthread_t, nproc);
-        QPTHREAD_MUTEX_INIT(&matchsortmutex, NULL);
-        QPTHREAD_MUTEX_INIT(&matchmutex, NULL);
+        QMALLOC(match_thread, pthread_t, nproc);
+        QPTHREAD_MUTEX_INIT(&match_sortmutex, NULL);
+        QPTHREAD_MUTEX_INIT(&match_mutex, NULL);
         QPTHREAD_ATTR_INIT(&pthread_attr);
         QPTHREAD_ATTR_SETDETACHSTATE(&pthread_attr, PTHREAD_CREATE_JOINABLE);
         pthread_startgate = threads_gate_init(nproc+1, NULL);
@@ -2070,34 +2069,34 @@ void	dxy_to_dll(wcsstruct *wcs, double dx, double dy,
         for (p=0; p<nproc; p++)
         {
             proc[p] = p;
-            QPTHREAD_CREATE(&thread[p], &pthread_attr, &pthread_match_field, &proc[p]);
+            QPTHREAD_CREATE(&match_thread[p], &pthread_attr, &pthread_match_field, &proc[p]);
         }
-        QPTHREAD_MUTEX_LOCK(&matchmutex);
-        pthread_findex=pthread_gindex = pthread_fviewindex=pthread_gviewindex = 0;
-        pthread_endflag = 0;
-        QPTHREAD_MUTEX_UNLOCK(&matchmutex);
+        QPTHREAD_MUTEX_LOCK(&match_mutex);
+        pthread_match_findex=pthread_match_gindex = pthread_match_fviewindex=pthread_match_gviewindex = 0;
+        pthread_match_endflag = 0;
+        QPTHREAD_MUTEX_UNLOCK(&match_mutex);
         NFPRINTF(OUTPUT, "Starting field matching...");
         /* Release threads!! */
         threads_gate_sync(pthread_startgate);
         /* ( Slave threads process the current buffer data here ) */
         threads_gate_sync(pthread_stopgate);
-        pthread_endflag = 1;
+        pthread_match_endflag = 1;
         /* (Re-)activate existing threads... */
         threads_gate_sync(pthread_startgate);
         /* ... and shutdown all threads */
         for (p=0; p<nproc; p++)
-            QPTHREAD_JOIN(thread[p], NULL);
+            QPTHREAD_JOIN(match_thread[p], NULL);
         /* Clean up multi-threading stuff */
         threads_gate_end(pthread_startgate);
         threads_gate_end(pthread_stopgate);
-        QPTHREAD_MUTEX_DESTROY(&matchsortmutex);
-        QPTHREAD_MUTEX_DESTROY(&matchmutex);
+        QPTHREAD_MUTEX_DESTROY(&match_sortmutex);
+        QPTHREAD_MUTEX_DESTROY(&match_mutex);
         QPTHREAD_ATTR_DESTROY(&pthread_attr);
         for (g=0; g<ngroup; g++)
-            free(pthread_fviewflag[g]);
-        free(pthread_fviewflag);
+            free(pthread_match_fviewflag[g]);
+        free(pthread_match_fviewflag);
         free(proc);
-        free(thread);
+        free(match_thread);
     }
 
 #endif

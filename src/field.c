@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2017 IAP/CNRS/UPMC
+ * Copyright:  (C) 2002-2020 IAP/CNRS/SorbonneU
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  07/05/2018
+ * Last modified:  12/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -51,13 +51,12 @@
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
-pthread_t  *thread;
-pthread_mutex_t instrumutex, readmutex, sortmutex;
-threads_gate_t  *pthread_startgate, *pthread_stopgate;
-fieldstruct  **pthread_fields;
-int   *pthread_fviewflag,
-      pthread_endflag, pthread_nfield,
-      pthread_findex, pthread_fviewindex;
+pthread_t	*field_thread;
+pthread_mutex_t field_instrumutex, field_readmutex, field_sortmutex;
+fieldstruct	**pthread_field_fields;
+int		*pthread_field_fviewflag,
+		pthread_field_endflag, pthread_field_nfield,
+		pthread_field_findex, pthread_field_fviewindex;
 #endif
 
 
@@ -249,7 +248,7 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
         warning("CHECKPLOT field colour out of range, defaulted to ", "15");
 
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_LOCK(&instrumutex);
+    QPTHREAD_MUTEX_LOCK(&field_instrumutex);
 #endif
     /* Compare the dummy astrometric FITS header to the ones previously stored */
     for (j=0; j<prefs.nastrinstrustr; j++)
@@ -298,7 +297,7 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     }
     free(photombuf);
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_UNLOCK(&instrumutex);
+    QPTHREAD_MUTEX_UNLOCK(&field_instrumutex);
 #endif
 
     /* For every header the catalog contains */
@@ -650,7 +649,7 @@ double   dhmedian(double *ra, int n)
   OUTPUT  -.
   NOTES   Relies on global variables.
   AUTHOR  E. Bertin (IAP)
-  VERSION 23/03/2016
+  VERSION 12/08/2020
  ***/
 void    *pthread_load_field(void *arg)
 {
@@ -659,28 +658,28 @@ void    *pthread_load_field(void *arg)
     findex = -1;
     proc = *((int *)arg);
     threads_gate_sync(pthread_startgate);
-    while (!pthread_endflag)
+    while (!pthread_field_endflag)
     {
-        QPTHREAD_MUTEX_LOCK(&readmutex);
+        QPTHREAD_MUTEX_LOCK(&field_readmutex);
         if (findex>-1)
             /*---- Indicate that the field info is now suitable for viewing */
-            pthread_fviewflag[findex] = 1;
-        while (pthread_fviewindex<pthread_nfield
-                && pthread_fviewflag[pthread_fviewindex])
-            print_fieldinfo(pthread_fields[pthread_fviewindex++]);
-        if (pthread_findex<pthread_nfield)
+            pthread_field_fviewflag[findex] = 1;
+        while (pthread_field_fviewindex<pthread_field_nfield
+                && pthread_field_fviewflag[pthread_field_fviewindex])
+            print_fieldinfo(pthread_field_fields[pthread_field_fviewindex++]);
+        if (pthread_field_findex<pthread_field_nfield)
         {
-            findex = pthread_findex++;
-            QPTHREAD_MUTEX_UNLOCK(&readmutex);
+            findex = pthread_field_findex++;
+            QPTHREAD_MUTEX_UNLOCK(&field_readmutex);
             /*---- Load catalogs */
-            pthread_fields[findex] = load_field(prefs.file_name[findex], findex,
+            pthread_field_fields[findex] = load_field(prefs.file_name[findex], findex,
                     prefs.ahead_name[findex]);
             /*---- Compute basic field astrometric features (center, field size,...) */
-            locate_field(pthread_fields[findex]);
+            locate_field(pthread_field_fields[findex]);
         }
         else
         {
-            QPTHREAD_MUTEX_UNLOCK(&readmutex);
+            QPTHREAD_MUTEX_UNLOCK(&field_readmutex);
             /*---- Wait for the input buffer to be updated */
             threads_gate_sync(pthread_stopgate);
             /* ( Master thread process loads and saves new data here ) */
@@ -701,7 +700,7 @@ void    *pthread_load_field(void *arg)
   OUTPUT  -.
   NOTES   Relies on global variables.
   AUTHOR  E. Bertin (IAP)
-  VERSION 25/06/2012
+  VERSION 12/08/2020
  ***/
 void    pthread_load_fields(fieldstruct **fields, int nfield)
 {
@@ -713,15 +712,15 @@ void    pthread_load_fields(fieldstruct **fields, int nfield)
     nproc = prefs.nthreads;
     if (nproc>MAXNTHREADS_LOAD)
         nproc = MAXNTHREADS_LOAD;
-    pthread_fields = fields;
-    pthread_nfield = nfield;
-    QCALLOC(pthread_fviewflag, int, nfield);
+    pthread_field_fields = fields;
+    pthread_field_nfield = nfield;
+    QCALLOC(pthread_field_fviewflag, int, nfield);
     /* Set up multi-threading stuff */
     QMALLOC(proc, int, nproc);
-    QMALLOC(thread, pthread_t, nproc);
-    QPTHREAD_MUTEX_INIT(&readmutex, NULL);
-    QPTHREAD_MUTEX_INIT(&instrumutex, NULL);
-    QPTHREAD_MUTEX_INIT(&sortmutex, NULL);
+    QMALLOC(field_thread, pthread_t, nproc);
+    QPTHREAD_MUTEX_INIT(&field_readmutex, NULL);
+    QPTHREAD_MUTEX_INIT(&field_instrumutex, NULL);
+    QPTHREAD_MUTEX_INIT(&field_sortmutex, NULL);
     QPTHREAD_ATTR_INIT(&pthread_attr);
     QPTHREAD_ATTR_SETDETACHSTATE(&pthread_attr, PTHREAD_CREATE_JOINABLE);
     pthread_startgate = threads_gate_init(nproc+1, NULL);
@@ -730,31 +729,32 @@ void    pthread_load_fields(fieldstruct **fields, int nfield)
     for (p=0; p<nproc; p++)
     {
         proc[p] = p;
-        QPTHREAD_CREATE(&thread[p], &pthread_attr, &pthread_load_field, &proc[p]);
+        QPTHREAD_CREATE(&field_thread[p], &pthread_attr, &pthread_load_field,
+        		&proc[p]);
     }
-    QPTHREAD_MUTEX_LOCK(&readmutex);
-    pthread_findex = pthread_fviewindex = 0;
-    pthread_endflag = 0;
-    QPTHREAD_MUTEX_UNLOCK(&readmutex);
+    QPTHREAD_MUTEX_LOCK(&field_readmutex);
+    pthread_field_findex = pthread_field_fviewindex = 0;
+    pthread_field_endflag = 0;
+    QPTHREAD_MUTEX_UNLOCK(&field_readmutex);
     /* Release threads!! */
     threads_gate_sync(pthread_startgate);
     /* ( Slave threads process the current buffer data here ) */
     threads_gate_sync(pthread_stopgate);
-    pthread_endflag = 1;
+    pthread_field_endflag = 1;
     /* (Re-)activate existing threads... */
     threads_gate_sync(pthread_startgate);
     /* ... and shutdown all threads */
     for (p=0; p<nproc; p++)
-        QPTHREAD_JOIN(thread[p], NULL);
+        QPTHREAD_JOIN(field_thread[p], NULL);
     /* Clean up multi-threading stuff */
     threads_gate_end(pthread_startgate);
     threads_gate_end(pthread_stopgate);
-    QPTHREAD_MUTEX_DESTROY(&readmutex);
-    QPTHREAD_MUTEX_DESTROY(&instrumutex);
+    QPTHREAD_MUTEX_DESTROY(&field_readmutex);
+    QPTHREAD_MUTEX_DESTROY(&field_instrumutex);
     QPTHREAD_ATTR_DESTROY(&pthread_attr);
-    free(pthread_fviewflag);
+    free(pthread_field_fviewflag);
     free(proc);
-    free(thread);
+    free(field_thread);
 }
 
 
@@ -766,13 +766,13 @@ void    pthread_load_fields(fieldstruct **fields, int nfield)
   OUTPUT  -.
   NOTES   Relies on global variables.
   AUTHOR  E. Bertin (IAP)
-  VERSION 18/09/2006
+  VERSION 12/08/2020
  ***/
 void    pthread_end_fields(fieldstruct **fields, int nfield)
 {
     int  f;
 
-    QPTHREAD_MUTEX_DESTROY(&sortmutex);
+    QPTHREAD_MUTEX_DESTROY(&field_sortmutex);
     for (f=0; f<nfield; f++)
         end_field(fields[f]);
     free(fields);
