@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /usr/bin/python
 # -*- coding: utf-8 -*-
 import math,os,subprocess,sys
 import numpy as np
@@ -68,9 +68,6 @@ sigma_ref = scamp_meanrms(fgroups.array["AstromSigma_Reference_HighSN"][0])
 scamp_test("Reference dispersion: " + str(sigma_ref) + " expected: < 0.097", sigma_ref < 0.097)
 
 # Exit with status and message
-if status == 0:
-  print("All OK.")
-else:
-  print("%d errors." %status)
+print("All OK." if status == 0 else "%d errors." %status)
 sys.exit(status)
 
