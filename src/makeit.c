@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified: 27/04/2020
+ * Last modified: 12/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,7 +68,8 @@
 #include "crossid.h"
 #include "chealpix.h"
 
-time_t thetime, thetime2;
+time_t		thetime, thetime2;
+char		gstr[MAXCHAR];
 
 /********************************** makeit ***********************************/
 void makeit(void)

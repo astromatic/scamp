@@ -1,13 +1,13 @@
 /**
 * @file		pqueue.h
 * @brief	Include file for pqueue.c.
-* @date		27/11/2014
+* @date		12/08/2020
 * @copyright
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2014 IAP/CNRS/UPMC
+*	Copyright:		(C) 2014-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -51,13 +51,13 @@ typedef struct pqueue {
 
 //------------------------------ Prototypes -----------------------------------
 
-pqueuestruct	*pqueue_new(void);
+extern pqueuestruct	*pqueue_new(void);
 
-void		*pqueue_pullelement(pqueuestruct *queue);
+extern void		*pqueue_pullelement(pqueuestruct *queue);
 
-int		pqueue_insertelement(pqueuestruct *queue,
+extern int		pqueue_insertelement(pqueuestruct *queue,
 				void *element, int priority);
 
-void		pqueue_end(pqueuestruct *queue);
+extern void		pqueue_end(pqueuestruct *queue);
 
 #endif // _PQUEUE_H_

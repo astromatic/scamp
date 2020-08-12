@@ -13,6 +13,8 @@
 #include "../src/prefs.h"
 
 static char testfile[] = "extra/744331p.ascii";
+prefstruct	prefs;
+char		gstr[MAXCHAR];
 
 static int
 realloc_samples_x(setstruct *set, int splsize)

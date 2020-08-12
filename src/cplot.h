@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		09/07/2014
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -182,6 +182,6 @@ extern int		cplot_aderrhisto1d(fgroupstruct *fgroup,
 				int instru);
 
 
-char			*cplot_degtosexal(char *str, double alpha,double step),
+extern char		*cplot_degtosexal(char *str, double alpha,double step),
 			*cplot_degtosexde(char *str, double delta,double step);
 #endif // _CPLOT_H_

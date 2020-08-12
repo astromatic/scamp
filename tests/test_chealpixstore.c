@@ -15,11 +15,15 @@
  * s5->field3->epoch 10
  *
  */
+ 
+
 #include <assert.h>
 #include <stdio.h>
 
 #include "../src/samples.h"
 #include "../src/chealpixstore.h"
+
+char		gstr[MAXCHAR];
 
 int main(int argc, char **argv)
 {

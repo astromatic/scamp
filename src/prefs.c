@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/02/2020
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -61,6 +61,10 @@
 #include 	"prefs.h"
 #include	"preflist.h"
 #include	"fitswcs.h"
+
+int		findkeys(char *str, char key[][32], int mode);
+
+prefstruct	prefs;
 
 /********************************* dumpprefs ********************************/
 /*

@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		28/06/2020
+ *	Last modified:		12/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -78,20 +78,19 @@
 #define	NMAT_MUTEX	32
 #define	NMAT_MUTEX2	32
 pthread_t		*thread;
-pthread_mutex_t	matmutex[NMAT_MUTEX],matmutex2[NMAT_MUTEX2],
-                fillastromutex, nconstastromutex;
-threads_gate_t		*pthread_startgate, *pthread_stopgate;
+pthread_mutex_t		matmutex[NMAT_MUTEX], matmutex2[NMAT_MUTEX2],
+			fillastromutex, nconstastromutex;
 fgroupstruct		**pthread_fgroups;
 double			*pthread_alpha, *pthread_beta;
 
 int			*pthread_nconst,
-            pthread_endflag, pthread_ngroup, pthread_ncoefftot,
-            pthread_gindex, pthread_findex, pthread_sindex;
+			pthread_endflag, pthread_ngroup, pthread_ncoefftot,
+			pthread_gindex, pthread_findex, pthread_sindex;
 
-void		pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
-        int ncoefftot, int *nconst,
-        double *alpha, double *beta),
-            *pthread_fillastromatrix_thread(void *arg);
+void			pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
+				int ncoefftot, int *nconst,
+				double *alpha, double *beta),
+			*pthread_fillastromatrix_thread(void *arg);
 #endif
 
 static void	fill_astromatrix(setstruct *set, double *alpha, double *beta,

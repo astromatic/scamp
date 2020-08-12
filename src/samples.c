@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  27/04/2020
+ * Last modified:  12/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -52,13 +52,15 @@
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
-extern pthread_mutex_t sortmutex;
+pthread_mutex_t sample_sortmutex;
 #endif
+
+int 		sort_coord;
 
 int compraw_samples(const void *, const void *);
 int compproj_samples(const void *, const void *);
 int compwcs_samples(const void *, const void *);
-int sort_coord;
+
 
 /****** read_samples *********************************************************
   PROTO setstruct *read_samples(setstruct *set, tabstruct *tab,char *rfilename)
@@ -858,8 +860,8 @@ void end_set(setstruct *set)
   INPUT   set structure pointer.
   OUTPUT  -.
   NOTES   Not reentrant (yet).
-  AUTHOR  E. Bertin (IAP, Leiden observatory & ESO)
-  VERSION 28/12/2004
+  AUTHOR  E. Bertin (IAP)
+  VERSION 12/08/2020
  */
 void sort_samples(setstruct *set)
 
@@ -871,12 +873,12 @@ void sort_samples(setstruct *set)
     naxis = set->naxis;
     /* Sort sources in latitude */
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_LOCK(&sortmutex);
+    QPTHREAD_MUTEX_LOCK(&sample_sortmutex);
 #endif
     sort_coord = (set->lat<0)? set->naxis-1 : set->lat;
     qsort(set->sample, set->nsample, sizeof(samplestruct), compproj_samples);
 #ifdef USE_THREADS
-    QPTHREAD_MUTEX_UNLOCK(&sortmutex);
+    QPTHREAD_MUTEX_UNLOCK(&sample_sortmutex);
 #endif
     projmin = set->projposmin;
     projmax = set->projposmax;

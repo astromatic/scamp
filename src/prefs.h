@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/06/2020
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -233,7 +233,7 @@ typedef struct
   int		ndets;				/* Final number of sources */
   }	prefstruct;
 
-prefstruct	prefs;
+extern prefstruct	prefs;
 
 /*-------------------------------- protos -----------------------------------*/
 extern char	*list_to_str(char *listname);

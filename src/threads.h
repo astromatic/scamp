@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -132,12 +132,15 @@ typedef struct _threads_gate_t
   } threads_gate_t;
 
 /*----------------------------- Global variables ----------------------------*/
- int		nproc;	/* Number of child threads */
+ extern int		nproc;	/* Number of child threads */
+#ifdef USE_THREADS
+ extern threads_gate_t  *pthread_startgate, *pthread_stopgate;
+#endif
 
 /*--------------------------------- Functions -------------------------------*/
-threads_gate_t	*threads_gate_init(int nthreads, void (*func)(void));
+threads_gate_t		*threads_gate_init(int nthreads, void (*func)(void));
 
-void		threads_gate_end(threads_gate_t *gate),
-		threads_gate_sync(threads_gate_t *gate);
+ extern void		threads_gate_end(threads_gate_t *gate),
+			threads_gate_sync(threads_gate_t *gate);
 
 #endif // _THREADS_H_

@@ -1,13 +1,13 @@
 /**
 * @file		quadtree.h
 * @brief	Include file for quadtree.c.
-* @date		10/12/2014
+* @date		12/08/2020
 * @copyright
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2014 IAP/CNRS/UPMC
+*	Copyright:		(C) 2014-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -57,15 +57,15 @@ typedef struct tree {
 
 //------------------------------ Prototypes -----------------------------------
 
-treestruct	*tree_newtree(double *min, double *max);
+extern treestruct	*tree_newtree(double *min, double *max);
 
-treenodestruct	*tree_endnode(treenodestruct *node),
-		*tree_newnode(treenodestruct *parentnode);
+extern treenodestruct	*tree_endnode(treenodestruct *node),
+			*tree_newnode(treenodestruct *parentnode);
 
-int		tree_distance(treenodestruct *node, unsigned int *index),
-		tree_insertleaf(treestruct *tree, double *coords, void *leaf),
-		tree_knn(treestruct *tree, double *coords, int k, void **kleaf);
+extern int		tree_distance(treenodestruct *node, unsigned int *index),
+			tree_insertleaf(treestruct *tree, double *coords, void *leaf),
+			tree_knn(treestruct *tree, double *coords, int k, void **kleaf);
 
-void		tree_endtree(treestruct *tree);
+extern	void		tree_endtree(treestruct *tree);
 
 #endif // _QUADTREE_H_

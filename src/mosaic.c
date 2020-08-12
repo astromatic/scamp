@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2014 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/05/2014
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -64,13 +64,14 @@
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
- pthread_t		*thread;
- pthread_mutex_t	adjmutex;
- threads_gate_t		*pthread_startgate, *pthread_stopgate;
- fieldstruct		**pthread_fields;
- int			*pthread_sviewflag,
-			pthread_endflag, pthread_nset, pthread_nfield,
-			pthread_lindex, pthread_sindex, pthread_sviewindex;
+ pthread_t		*mosaic_thread;
+ pthread_mutex_t	mosaic_adjmutex;
+ fieldstruct		**pthread_mosaic_fields;
+ int			*pthread_mosaic_sviewflag,
+			pthread_mosaic_endflag, pthread_mosaic_nset,
+			pthread_mosaic_nfield,
+			pthread_mosaic_lindex, pthread_mosaic_sindex,
+			pthread_mosaic_sviewindex;
 #endif
 
 /****** adjust_mosaic ********************************************************
@@ -361,7 +362,7 @@ INPUT   Pointer to the thread number.
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/09/2004
+VERSION 12/08/2020
  ***/
 void    *pthread_adjust_set(void *arg)
   {
@@ -371,29 +372,29 @@ void    *pthread_adjust_set(void *arg)
   sindex = -1;
   proc = *((int *)arg);
   threads_gate_sync(pthread_startgate);
-  while (!pthread_endflag)
+  while (!pthread_mosaic_endflag)
     {
-    QPTHREAD_MUTEX_LOCK(&adjmutex);
+    QPTHREAD_MUTEX_LOCK(&mosaic_adjmutex);
     if (sindex>-1)
 /*---- Indicate that the field info is now suitable for viewing */
-      pthread_sviewflag[sindex] = 1;
-    while (pthread_sviewindex<pthread_nset
-	&& pthread_sviewflag[pthread_sviewindex])
+      pthread_mosaic_sviewflag[sindex] = 1;
+    while (pthread_mosaic_sviewindex < pthread_mosaic_nset
+	&& pthread_mosaic_sviewflag[pthread_mosaic_sviewindex])
       {
       sprintf(str, "Instrument A%-2d: Adjusting set %d/%d",
-	pthread_lindex+1, ++pthread_sviewindex, pthread_nset);
+	pthread_mosaic_lindex+1, ++pthread_mosaic_sviewindex, pthread_mosaic_nset);
       NFPRINTF(OUTPUT, str);
       }
-    if (pthread_sindex<pthread_nset)
+    if (pthread_mosaic_sindex < pthread_mosaic_nset)
       {
-      sindex = pthread_sindex++;
-      QPTHREAD_MUTEX_UNLOCK(&adjmutex);
+      sindex = pthread_mosaic_sindex++;
+      QPTHREAD_MUTEX_UNLOCK(&mosaic_adjmutex);
 /*---- Adjust set */
-      adjust_set(pthread_fields, pthread_nfield, sindex);
+      adjust_set(pthread_mosaic_fields, pthread_mosaic_nfield, sindex);
       }
     else
       {
-      QPTHREAD_MUTEX_UNLOCK(&adjmutex);
+      QPTHREAD_MUTEX_UNLOCK(&mosaic_adjmutex);
 /*---- Wait for the input buffer to be updated */
       threads_gate_sync(pthread_stopgate);
 /* ( Master thread process loads and saves new data here ) */
@@ -418,7 +419,7 @@ INPUT   Pointer to field structure pointers,
 OUTPUT  -.
 NOTES   Relies on global variables.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/09/2004
+VERSION 12/08/2020
  ***/
 void    pthread_adjust_sets(fieldstruct **fields, int nfield, int l)
   {
@@ -428,14 +429,14 @@ void    pthread_adjust_sets(fieldstruct **fields, int nfield, int l)
 
 /* Number of active threads */
   nproc = prefs.nthreads;
-  pthread_fields = fields;
-  pthread_nfield = nfield;
-  pthread_nset = fields[0]->nset;
-  QCALLOC(pthread_sviewflag, int, pthread_nset);
+  pthread_mosaic_fields = fields;
+  pthread_mosaic_nfield = nfield;
+  pthread_mosaic_nset = fields[0]->nset;
+  QCALLOC(pthread_mosaic_sviewflag, int, pthread_mosaic_nset);
 /* Set up multi-threading stuff */
   QMALLOC(proc, int, nproc);
-  QMALLOC(thread, pthread_t, nproc);
-  QPTHREAD_MUTEX_INIT(&adjmutex, NULL);
+  QMALLOC(mosaic_thread, pthread_t, nproc);
+  QPTHREAD_MUTEX_INIT(&mosaic_adjmutex, NULL);
   QPTHREAD_ATTR_INIT(&pthread_attr);
   QPTHREAD_ATTR_SETDETACHSTATE(&pthread_attr, PTHREAD_CREATE_JOINABLE);
   pthread_startgate = threads_gate_init(nproc+1, NULL);
@@ -444,31 +445,31 @@ void    pthread_adjust_sets(fieldstruct **fields, int nfield, int l)
   for (p=0; p<nproc; p++)
     {
     proc[p] = p;
-    QPTHREAD_CREATE(&thread[p], &pthread_attr, &pthread_adjust_set, &proc[p]);
+    QPTHREAD_CREATE(&mosaic_thread[p], &pthread_attr, &pthread_adjust_set, &proc[p]);
     }
-  QPTHREAD_MUTEX_LOCK(&adjmutex);
-  pthread_sindex = pthread_sviewindex = 0;
-  pthread_endflag = 0;
-  pthread_lindex = l;
-  QPTHREAD_MUTEX_UNLOCK(&adjmutex);
+  QPTHREAD_MUTEX_LOCK(&mosaic_adjmutex);
+  pthread_mosaic_sindex = pthread_mosaic_sviewindex = 0;
+  pthread_mosaic_endflag = 0;
+  pthread_mosaic_lindex = l;
+  QPTHREAD_MUTEX_UNLOCK(&mosaic_adjmutex);
 /* Release threads!! */
   threads_gate_sync(pthread_startgate);
 /* ( Slave threads process the current buffer data here ) */
   threads_gate_sync(pthread_stopgate);
-  pthread_endflag = 1;
+  pthread_mosaic_endflag = 1;
 /* (Re-)activate existing threads... */
   threads_gate_sync(pthread_startgate);
 /* ... and shutdown all threads */
   for (p=0; p<nproc; p++)
-    QPTHREAD_JOIN(thread[p], NULL);
+    QPTHREAD_JOIN(mosaic_thread[p], NULL);
 /* Clean up multi-threading stuff */
   threads_gate_end(pthread_startgate);
   threads_gate_end(pthread_stopgate);
-  QPTHREAD_MUTEX_DESTROY(&adjmutex);
+  QPTHREAD_MUTEX_DESTROY(&mosaic_adjmutex);
   QPTHREAD_ATTR_DESTROY(&pthread_attr);
-  free(pthread_sviewflag);
+  free(pthread_mosaic_sviewflag);
   free(proc);
-  free(thread);
+  free(mosaic_thread);
   }
 
 #endif

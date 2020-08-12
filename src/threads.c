@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *				(C) Mark Hays (original tutorial)
 *
 *	License:		GNU General Public License
@@ -24,7 +24,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/10/2010
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -45,7 +45,11 @@
 #include "globals.h"
 #include "fits/fitscat.h"
 
+ int		nproc;	/* Number of child threads */
+
+/*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
+threads_gate_t  *pthread_startgate, *pthread_stopgate;
 
 /******* threads_gate_init ***************************************************
 PROTO	threads_gate_t *threads_gate_init(int nthreads, void (*func)(void))

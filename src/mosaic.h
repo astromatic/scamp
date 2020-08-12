@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -39,7 +39,7 @@ extern void	adjust_mosaic(fieldstruct **fields, int nfield),
 		adjust_set(fieldstruct **fields, int nfield, int s),
 		crval_to_crpix(wcsstruct *wcs, double *wcspos);	
 #ifdef USE_THREADS
-void		*pthread_adjust_set(void *arg),
+extern void	*pthread_adjust_set(void *arg),
 		pthread_adjust_sets(fieldstruct **fields, int nfield, int l);
 #endif // USE_THREADS
 #endif // _MOSAIC_H_

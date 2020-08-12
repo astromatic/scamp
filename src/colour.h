@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2011 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/02/2011
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -42,7 +42,7 @@
 
 /*-------------------------------- protos -----------------------------------*/
 
-double	colour_findpc(double *covmat, double *vec, int nmat);
+extern double	colour_findpc(double *covmat, double *vec, int nmat);
 
-void	colour_fgroup(fgroupstruct **fgroups, int ngroup);
+extern void	colour_fgroup(fgroupstruct **fgroups, int ngroup);
 #endif // _COLOUR_H_

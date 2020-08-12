@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/06/2020
+*	Last modified:		12/08/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -62,7 +62,7 @@ typedef struct msample
 
 /*-------------------------------- protos -----------------------------------*/
 
-msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield);
+extern msamplestruct	*merge_fgroup(fgroupstruct *fgroup, fieldstruct *reffield);
 ;
 
 #endif // _MERGE_H_
