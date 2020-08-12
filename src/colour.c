@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2008-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2008-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -68,7 +68,7 @@ NOTES	Uses the global preferences. Input structures must have gone through
 	reproj_fgroup() and crossid_fgroup() first, and preferably through
 	astrsolve_fgroups and photsolve_fgroups() too.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	28/06/2020
  ***/
 void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
   {
@@ -80,11 +80,11 @@ void	colour_fgroup(fgroupstruct **fgroups, int ngroup)
    double		*colmat,*wcolmat, *mcol,*wmcol, *col,*wcol, *mag,*wmag,
 			sum,wsum, weight, cweight, err2;
    float		colour;
-   short		sexflagmask;
+   unsigned short	sexflagmask;
    unsigned int		imaflagmask;
    int			c,f,g,m,n,s, b1, b2, c1,c2, band, ncolour, ninstru;
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   ninstru = prefs.nphotinstrustr;
   ncolour = (ninstru * (ninstru-1)) / 2;

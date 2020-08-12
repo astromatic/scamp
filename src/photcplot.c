@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2019 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/12/2019
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -254,7 +254,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/12/2019
+VERSION	28/06/2020
  ***/
 int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -277,13 +277,13 @@ int	cplot_photerrhisto(fgroupstruct *fgroup, fieldstruct *reffield,
    PLINT	lwid;
 
    char		xlabel[80], ylabel[80], str[80];
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		d,f,i, s,n,
 		nsamp, firstflag, instru, ninstru, npinstru,
 		ix,iy, nx,ny;
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   ninstru = prefs.nphotinstrustr;
   npinstru = 0;
@@ -543,7 +543,7 @@ INPUT	Pointer to the field group,
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	crossid_fgroup() must have been run on all groups first.
 AUTHOR	E. Bertin (IAP), C. MARMO (IAP)
-VERSION	13/12/2019
+VERSION	28/06/2020
  ***/
 int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 				double hsn_thresh)
@@ -564,13 +564,13 @@ int	cplot_photerrhistomag(fgroupstruct *fgroup, fieldstruct *reffield,
 		maxlim, cy, z;
    PLINT	lwid;
    char		xlabel[80], ylabel[80], str[80];
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		f,i, s,n,
 		nsamp, firstflag, instru, ninstru, npinstru,
 		ix,iy, nx,ny;
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   ninstru = prefs.nphotinstrustr;
   npinstru = 0;

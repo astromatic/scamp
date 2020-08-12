@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		28/04/2020
+ *	Last modified:		28/06/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -587,7 +587,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   OUTPUT	-.
   NOTES	-.
   AUTHOR	E. Bertin (IAP)
-  VERSION	07/12/2013
+  VERSION	28/06/2020
  ***/
 void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
         int ncoefftot,
@@ -603,20 +603,21 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
     *cc,*cco,*ccoa, *cc2,*cco2,*ccoa2, *x, *jac,*jact,
     *basis,*basis2, *czero, *cscale,
     sigma2,sigma3, weight, weightfac;
-    short		sexflagmask;
+    unsigned short	sexflagmask;
+    unsigned int	imaflagmask;
     int			*coeffindex,*coeffindex2,
                 *ci,*cio,*cioa, *ci2,*cio2,*cioa2,
                 nlsamp,nlsampmax, nscoeffmax, nscoeffmax2, instru,
                 index,indext,index2,indext2, redflag, naxis, ncontext,
                 npcoeff,ncoeff,nicoeff, npcoeff2,ncoeff2,nicoeff2,
-                nsamp, imaflagmask,
+                nsamp,
                 cx,cy, c, d, d1,d2, p, lng,lat;
 
 #ifdef USE_THREADS
     int			imut=0;
 #endif
 
-    sexflagmask = (short)prefs.astr_sexflagsmask;
+    sexflagmask = prefs.astr_sexflagsmask;
     imaflagmask = prefs.astr_imaflagsmask;
     naxis = set->naxis;
     npcoeff = poly->ncoeff;

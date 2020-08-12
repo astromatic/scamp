@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/06/2020
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -61,7 +61,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 05/06/2020
+VERSION 28/06/2020
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -94,7 +94,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
    char			str[80],
 			*buf, *rfilename;
    long			dptr;
-   short		sexflagmask;
+   unsigned short	sexflagmask;
    unsigned int		imaflagmask;
    int			nmag[MAXPHOTINSTRU],
 			d,f,i,k,m,n,p,s, nall,nphotok,nposok, npinstru, naxis,
@@ -103,7 +103,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   if (prefs.mergedcat_type == CAT_NONE)
     return;
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   naxis = fgroup->naxis;
   refmergedsample.nband = npinstru = prefs.nphotinstrustr;

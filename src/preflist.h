@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/08/2018
+*	Last modified:		29/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -57,8 +57,8 @@ pkeystruct key[] =
   {"AHEADER_SUFFIX", P_STRING, prefs.ahead_suffix},
   {"AIRMASS_KEY", P_STRING, prefs.airmass_key},
   {"ASTR_ACCURACY", P_FLOAT, &prefs.astraccuracy,0,0, 0.0, 1e6},
-  {"ASTR_FLAGSMASK", P_INT, &prefs.astr_sexflagsmask, 0,0xff, 0.0,0.0},
-  {"ASTR_IMAFLAGSMASK", P_INT, &prefs.astr_imaflagsmask, 0,0xff, 0.0,0.0},
+  {"ASTR_FLAGSMASK", P_INT, &prefs.astr_sexflagsmask, 0,0xffff, 0.0,0.0},
+  {"ASTR_IMAFLAGSMASK", P_INT, &prefs.astr_imaflagsmask, 0,0x7fffffff, 0.0,0.0},
   {"ASTRACCURACY_KEY", P_STRING, prefs.astraccuracy_key},
   {"ASTRACCURACY_TYPE", P_KEY, &prefs.astraccuracy_type, 0,0, 0.0,0.0,
     "SIGMA-PIXEL", "SIGMA-ARCSEC", "TURBULENCE-ARCSEC", ""},
@@ -134,7 +134,7 @@ pkeystruct key[] =
   {"EXPOTIME_KEY", P_STRING, prefs.expotime_key},
   {"EXTINCT_KEY", P_STRING, prefs.extcoeff_key},
   {"FIXFOCALPLANE_NMIN", P_INT, &prefs.fixfocalplane_nmin, 0, 65535, 0.0, 0.0},
-  {"FLAGS_MASK", P_INT, &prefs.sexflags_mask, 0,0xff, 0.0,0.0},
+  {"FLAGS_MASK", P_INT, &prefs.sexflags_mask, 0,0xffff, 0.0,0.0},
   {"FOCDISTORT_DEGREE", P_INT, &prefs.focal_deg, 1,16,0.0,0.0},
   {"FULLOUTCAT_NAME", P_STRING, prefs.fullcat_name},
   {"FULLOUTCAT_TYPE", P_KEY, &prefs.fullcat_type, 0,0, 0.0,0.0,
@@ -169,8 +169,8 @@ pkeystruct key[] =
     0, MAXASTRINSTRU, &prefs.nmosaic_type},
   {"NTHREADS", P_INT, &prefs.nthreads, -THREADS_PREFMAX, THREADS_PREFMAX},
   {"PHOT_ACCURACY", P_FLOAT, &prefs.photaccuracy, 0,0, 0.0, 1.0},
-  {"PHOT_FLAGSMASK", P_INT, &prefs.phot_sexflagsmask, 0,0xff, 0.0,0.0},
-  {"PHOT_IMAFLAGSMASK", P_INT, &prefs.phot_imaflagsmask, 0,0xff, 0.0,0.0},
+  {"PHOT_FLAGSMASK", P_INT, &prefs.phot_sexflagsmask, 0,0xffff, 0.0,0.0},
+  {"PHOT_IMAFLAGSMASK", P_INT, &prefs.phot_imaflagsmask, 0,0x7fffffff, 0.0,0.0},
   {"PHOTCLIP_NSIGMA", P_FLOAT, &prefs.photclip_nsig, 0,0, 0.0,1e31},
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
   {"PHOTFLUXERR_KEY", P_STRING, prefs.photfluxerr_key},
@@ -200,7 +200,7 @@ pkeystruct key[] =
     0, MAXASTRINSTRU, &prefs.nstability_type},
   {"VERBOSE_TYPE", P_KEY, &prefs.verbose_type, 0,0, 0.0,0.0,
    {"QUIET","NORMAL","LOG", "FULL",""}},
-  {"WEIGHTFLAGS_MASK", P_INT, &prefs.wflags_mask, 0,0xff, 0.0,0.0},
+  {"WEIGHTFLAGS_MASK", P_INT, &prefs.wflags_mask, 0,0xffff, 0.0,0.0},
   {"WRITE_XML", P_BOOL, &prefs.xml_flag},
   {"XML_NAME", P_STRING, prefs.xml_name},
   {"XSL_URL", P_STRING, prefs.xsl_name},
