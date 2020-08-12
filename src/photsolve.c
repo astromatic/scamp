@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		11/04/2018
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -112,7 +112,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	28/06/2020
  ***/
 void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
   {
@@ -126,7 +126,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 		*coeffval,*coeffconst, *coeffval2,*coeffconst2, 
 		sigma2,sigma3, sigmaoverlap, sigmaref,
 		weight, weightref, mag;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		*ci,*cio,*cioa,
 		*ci2,*cio2,*cioa2,
@@ -137,7 +137,7 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 		nlsampmax, offlag, photcode, nsamp2, nsamp3;
 
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   alpha = beta = NULL;	/* To avoid gcc -Wall warnings*/
   naxis = fgroups[0]->naxis;
@@ -432,7 +432,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	compmags_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/10/2012
+VERSION	28/06/2020
  ***/
 void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
   {
@@ -443,13 +443,13 @@ void	photstats_fgroup(fgroupstruct *fgroup, int instru, double hsn_thresh)
    long double	lsig, lsig_hsn, lchi2, lchi2_hsn;
    double	mean,mean_hsn, dm, sn2, chi2, meanr, sig2;
    long long	ndeg,ndeg_hsn;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		f,n,s, nfield,nsamp, nsource,nsource_hsn,
 		nmean,nmean_hsn, nmatch,nmatch_hsn,
 		nmeanr;
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   lsig = lsig_hsn = 0.0;
   lchi2 = lchi2_hsn = 0.0;
@@ -676,7 +676,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	photstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	28/06/2020
  ***/
 int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
   {
@@ -685,11 +685,11 @@ int	photclip_fgroup(fgroupstruct *fgroup, int instru, double nsigma)
    setstruct	*set;
    samplestruct	*samp,*samp2;
    double	dm, clip, mean;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		f,n,s, nfield,nsamp, nmean, nclip;
 
-  sexflagmask = (short)prefs.phot_sexflagsmask;
+  sexflagmask = prefs.phot_sexflagsmask;
   imaflagmask = prefs.phot_imaflagsmask;
   clip = fgroup->sig_intmagerr[instru] > 0.0 ? nsigma*nsigma
 		*fgroup->sig_intmagerr[instru]*fgroup->sig_intmagerr[instru]

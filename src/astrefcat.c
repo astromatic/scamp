@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/04/2020
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1240,7 +1240,7 @@ OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
 AUTHOR  E. Bertin (IAP)
-VERSION 27/04/2020
+VERSION 28/06/2020
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1253,13 +1253,14 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
    samplestruct		*sample;
    char			str[MAXCHAR];
    char			*buf;
-   unsigned short	*flags;
+   unsigned short	*flags,
+			objflags;
    float		*xm,*ym, *xpm,*ypm, *xpmerr,*ypmerr,
 			*mag, *magerr, *obsdate, *erra,*errb;
    double		*dxm, *dym, *dxpm,*dypm, *dxpmerr,*dypmerr,
 			*dmag, *dmagerr, *dobsdate, *derra, *derrb,
 			x,y, dx,dy,dfac, ea,eb, maxradius2, mmag;
-   int			n, nsample,nsamplemax, nobj, objflags, maglimflag;
+   int			n, nsample,nsamplemax, nobj, maglimflag;
 
 /* One needs 2 angular coordinates here! */
   dxm = dym = dxpm = dypm = dxpmerr = dypmerr = dmag = derra = derrb \

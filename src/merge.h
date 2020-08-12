@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2013 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/11/2013
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -55,8 +55,8 @@ typedef struct msample
   float		colour;			/* Colour index */
   float		spread;			/* SPREAD_MODEL weighted average*/
   float		spreaderr;		/* SPREAD_MODEL uncertainty */
-  short		sexflags;		/* Merged SExtractor flags */
-  short		scampflags;		/* Merged SCAMP flags */
+  unsigned short sexflags;		/* Merged SExtractor flags */
+  unsigned short scampflags;		/* Merged SCAMP flags */
   unsigned int	imaflags;		/* Merged image flags */
   }	msamplestruct;
 

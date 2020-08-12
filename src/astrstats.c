@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		30/04/2018
+*	Last modified:		28/06/2020
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -59,7 +59,7 @@ INPUT	ptr to a group of fields pointers,
 OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/11/2013
+VERSION	28/06/2020
  ***/
 void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 			double hsn_thresh)
@@ -76,12 +76,12 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 		corr,corr_hsn,
 		dx, sn2;
    long long	ndeg, ndeg_hsn;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		i,f,n,s, naxis,nfield,nsamp, nsource,nsource_hsn,
 		nmean,nmean_hsn, nmatch,nmatch_hsn;
 
-  sexflagmask = (short)prefs.astr_sexflagsmask;
+  sexflagmask = prefs.astr_sexflagsmask;
   imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroup->naxis;
   nfield = fgroup->nfield;
@@ -442,7 +442,7 @@ OUTPUT	-.
 NOTES	Input structures must have gone through crossid_fgroup() and
 	astrstats_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	30/04/2018
+VERSION	28/06/2020
  ***/
 int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
 				double nsigma)
@@ -453,11 +453,11 @@ int	astrclip_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
    samplestruct	*samp,*sampr,*samp2, *prevsamp2;
    double	clipi[NAXIS],clipr[NAXIS], meani[NAXIS],meanr[NAXIS],
 		dx,dr2, ksig2;
-   short	sexflagmask;
+   unsigned short sexflagmask;
    unsigned int	imaflagmask;
    int		i,f,n,s, naxis,nfield,nsamp, flag, nmeani,nmeanr, nclipi,nclipr;
 
-  sexflagmask = (short)prefs.astr_sexflagsmask;
+  sexflagmask = prefs.astr_sexflagsmask;
   imaflagmask = prefs.astr_imaflagsmask;
   naxis = fgroup->naxis;
 

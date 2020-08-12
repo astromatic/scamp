@@ -95,8 +95,9 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     unsigned int  *imaflags;
     int   *lxm,*lym,
           i, n, nsample,nsamplemax, nnobjflag,
-          nobj, headflag, head0flag, errorflag, fflag, sexflags;
-    unsigned short *flags, *wflags;
+          nobj, headflag, head0flag, errorflag, fflag;
+    unsigned short *flags, *wflags,
+		sexflags;
     short  *sxm,*sym;
 
 #ifdef WFCAM_FIX
