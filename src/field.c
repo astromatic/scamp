@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  12/08/2020
+ * Last modified:  19/08/2020
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -51,12 +51,13 @@
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
-pthread_t	*field_thread;
-pthread_mutex_t field_instrumutex, field_readmutex, field_sortmutex;
-fieldstruct	**pthread_field_fields;
-int		*pthread_field_fviewflag,
-		pthread_field_endflag, pthread_field_nfield,
-		pthread_field_findex, pthread_field_fviewindex;
+pthread_t		*field_thread;
+pthread_mutex_t		field_instrumutex, field_readmutex;
+extern pthread_mutex_t	sample_sortmutex;
+fieldstruct		**pthread_field_fields;
+int			*pthread_field_fviewflag,
+			pthread_field_endflag, pthread_field_nfield,
+			pthread_field_findex, pthread_field_fviewindex;
 #endif
 
 
@@ -720,7 +721,7 @@ void    pthread_load_fields(fieldstruct **fields, int nfield)
     QMALLOC(field_thread, pthread_t, nproc);
     QPTHREAD_MUTEX_INIT(&field_readmutex, NULL);
     QPTHREAD_MUTEX_INIT(&field_instrumutex, NULL);
-    QPTHREAD_MUTEX_INIT(&field_sortmutex, NULL);
+    QPTHREAD_MUTEX_INIT(&sample_sortmutex, NULL);
     QPTHREAD_ATTR_INIT(&pthread_attr);
     QPTHREAD_ATTR_SETDETACHSTATE(&pthread_attr, PTHREAD_CREATE_JOINABLE);
     pthread_startgate = threads_gate_init(nproc+1, NULL);
@@ -772,7 +773,7 @@ void    pthread_end_fields(fieldstruct **fields, int nfield)
 {
     int  f;
 
-    QPTHREAD_MUTEX_DESTROY(&field_sortmutex);
+    QPTHREAD_MUTEX_DESTROY(&sample_sortmutex);
     for (f=0; f<nfield; f++)
         end_field(fields[f]);
     free(fields);
