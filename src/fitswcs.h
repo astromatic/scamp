@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/12/2019
+*	Last modified:		06/01/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -78,6 +78,7 @@ typedef struct wcs
   double	crder[NAXIS];		/* FITS CRDER parameters */
   double	csyer[NAXIS];		/* FITS CSYER parameters */
   double	cd[NAXIS*NAXIS];	/* FITS CD matrix */
+  double	cd2[NAXIS*NAXIS];	/* 2nd "celestial" CD matrix */
   double	*projp;			/* FITS PV/PROJP mapping parameters */
   int		nprojp;			/* number of useful projp parameters */
   double	longpole,latpole;	/* FITS LONGPOLE and LATPOLE */

@@ -107,7 +107,7 @@ OUTPUT	pointer to a WCS structure.
 NOTES	If a pointer is set to null, the corresponding variables are set to
 	default values.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/08/2006
+VERSION	06/01/2020
  ***/
 wcsstruct	*create_wcs(char **ctype, double *crval, double *crpix,
 			double *cdelt, int *naxisn, int naxis)
@@ -138,7 +138,11 @@ wcsstruct	*create_wcs(char **ctype, double *crval, double *crpix,
     wcs->cd[l*(naxis+1)] = cdelt? cdelt[l] : 1.0;
     }
 
+  wcs->cd2[0] = wcs->cd2[3] = 1.0;
+  wcs->cd2[1] = wcs->cd2[2] = 0.0;
+
   wcs->epoch = wcs->equinox = 2000.0;
+
   QCALLOC(wcs->wcsprm, struct wcsprm, 1);
 
 /* Test if the WCS is recognized and a celestial pair is found */
@@ -240,6 +244,7 @@ void	init_wcs(wcsstruct *wcs)
   wcs->prj->r0 = wcs->r0;
   wcs->prj->tnx_lngcor = wcs->tnx_lngcor;
   wcs->prj->tnx_latcor = wcs->tnx_latcor;
+  wcs->prj->cd2 = wcs->cd2;
   if (lng>=0)
     {
     n = 0;
@@ -604,6 +609,9 @@ wcsstruct	*read_wcs(tabstruct *tab)
             }
       }
     }
+
+  wcs->cd2[0] = wcs->cd2[3] = 1.0;
+  wcs->cd2[1] = wcs->cd2[2] = 0.0;
 
 /* Initialize other WCS structures */
   init_wcs(wcs);

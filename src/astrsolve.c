@@ -114,132 +114,125 @@ static void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
   AUTHOR	E. Bertin (IAP)
   VERSION	24/03/2020
  ***/
-void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
-{
-   fieldstruct		**fields,**fields2,
-			*field,*field2;
-    setstruct		*set,*set2;
-    samplestruct	*samp;
-    polystruct		*poly, *poly2;
-    char		str[64],
-			**contextname,
-			lap_equed;
-    double		cmin[MAXCONTEXT],cmax[MAXCONTEXT],
-			cscale[MAXCONTEXT], czero[MAXCONTEXT],
-    *alpha, *beta,
-    alphamin, alphamin2, dval;
-    size_t		size;
-    int			group2[NAXIS],
-			*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
-    c,cm,f,f2,g,g2,i,n,s,s2,sm, nfield,nfield2,
-    ninstru, instru, naxis, ncoeff, ncoeff2, ncoefftot,
-    npcoeff, npcoeff2,
-    d, index, index2, minindex2,
-    ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
-    startindex2, nmiss;
+void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
+
+   fieldstruct	**fields,**fields2,
+		*field,*field2;
+   setstruct	*set,*set2;
+   samplestruct	*samp;
+   polystruct	*poly, *poly2;
+   char		str[64],
+		**contextname,
+		lap_equed;
+   double	cmin[MAXCONTEXT],cmax[MAXCONTEXT],
+		cscale[MAXCONTEXT], czero[MAXCONTEXT],
+		*alpha, *beta,
+		alphamin, alphamin2, dval;
+   size_t	size;
+   int		group2[NAXIS],
+		*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
+		c,cm,f,f2,g,g2,i,n,s,s2,sm, nfield,nfield2,
+		ninstru, instru, naxis, ncoeff, ncoeff2, ncoefftot,
+		npcoeff, npcoeff2,
+		d, index, index2, minindex2,
+		ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
+		startindex2, nmiss;
 
 #if defined(HAVE_LAPACKE)
-    lapack_int		*lap_ipiv;
+  lapack_int		*lap_ipiv;
 #endif
 
-    /* Set number of threads (may be changed later in the code) */
+// Set number of threads (may be changed later in the code)
 #ifdef HAVE_MKL
-    mkl_set_num_threads(prefs.nthreads);
+  mkl_set_num_threads(prefs.nthreads);
 #elif HAVE_OPENBLASP
-    openblas_set_num_threads(prefs.nthreads);
+  openblas_set_num_threads(prefs.nthreads);
 #endif
 
-    /* Compute weight factors for each set based on the relative number of */
-    /* astrometric references and detections */
-    NFPRINTF(OUTPUT, "Initializing detection weight factors...");
-    astrweight_fgroups(fgroups, nfgroup);
+// Compute weight factors for each set based on the relative number of
+// astrometric references and detections
+  NFPRINTF(OUTPUT, "Initializing detection weight factors...");
+  astrweight_fgroups(fgroups, nfgroup);
 
-    NFPRINTF(OUTPUT, "Initializing the global astrometry matrix...");
+  NFPRINTF(OUTPUT, "Initializing the global astrometry matrix...");
 
-    naxis = fgroups[0]->naxis;
+  naxis = fgroups[0]->naxis;
 
-    /* CONTEXT polynomial */
-    poly = poly_init(prefs.context_group, prefs.ncontext_name, prefs.group_deg,
+// CONTEXT polynomial
+  poly = poly_init(prefs.context_group, prefs.ncontext_name, prefs.group_deg,
             prefs.ngroup_deg);
 
-    /* Linear field-dependent polynomial */
-    for (d=0; d<naxis; d++)
-        group2[d] = 1;
-    groupdeg2 = prefs.focal_deg;
-    poly2 = poly_init(group2, naxis, &groupdeg2, 1);
+// Linear field-dependent polynomial
+  for (d=0; d<naxis; d++)
+    group2[d] = 1;
+  groupdeg2 = prefs.focal_deg;
+  poly2 = poly_init(group2, naxis, &groupdeg2, 1);
 
-    /* Use a different index for each instrument */
-    ninstru = prefs.nastrinstrustr;
-    if (!ninstru)
-        ninstru = 1;
-    QCALLOC(findex, int, ninstru+1);
-    QCALLOC(findex2, int, ninstru+1);
-    QCALLOC(nsetmax, int, ninstru+1);
+// Use a different index for each instrument
+  ninstru = prefs.nastrinstrustr;
+  if (!ninstru)
+    ninstru = 1;
+  QCALLOC(findex, int, ninstru+1);
+  QCALLOC(findex2, int, ninstru+1);
+  QCALLOC(nsetmax, int, ninstru+1);
 
-    /* Compute the total number of fields and the max number of sets per field */
-    ncontext = fgroups[0]->field[0]->set[0]->ncontext;
-    contextname = fgroups[0]->field[0]->set[0]->contextname;
+// Compute the total number of fields and the max number of sets per field
+  ncontext = fgroups[0]->field[0]->set[0]->ncontext;
+  contextname = fgroups[0]->field[0]->set[0]->contextname;
 
-    for (c=0; c<ncontext; c++)
-    {
-        cmin[c] = BIG;
-        cmax[c] = -BIG;
-    }
+  for (c=0; c<ncontext; c++) {
+    cmin[c] = BIG;
+    cmax[c] = -BIG;
+  }
 
-    for (g=0 ; g<nfgroup; g++)
-    {
-        nfield = fgroups[g]->nfield;
-        fields = fgroups[g]->field;
-        for (f=0; f<nfield; f++)
-        {
-            field=fields[f];
-            instru = field->astromlabel;
-            /*---- Index current field */
-            if (field->nset > nsetmax[instru])
-                nsetmax[instru] = field->nset;
-            switch(prefs.stability_type[instru])
-            {
-                case STABILITY_INSTRUMENT:
-                    field->index = 0;
-                    field->index2 = findex2[instru+1]++ - 1;
-                    findex[instru+1] = nsetmax[instru];
-                    break;
-                case STABILITY_EXPOSURE:
-                    field->index = findex[instru+1];
-                    findex[instru+1] += field->nset;
-                    field->index2 = -1;
-                    findex2[instru+1] = -1;
-                    break;
-                case STABILITY_PREDISTORTED:
-                    field->index = -1;
-                    findex[instru+1] = 0;
-                    field->index2 = findex2[instru+1]++;
-                    break;
-                default:
-                    break;
-            }
-            /*---- Index sets */
-            for (s=0; s<field->nset; s++)
-            {
-                set = field->set[s];
-                set->index = s;
-                /*------ Compute normalization factors for context values */
-                samp = set->sample;
-                for (n=set->nsample; n--;)
-                {
-                    for (c=0; c<ncontext; c++)
-                    {
-                        dval = samp->context[c];
-                        /*---------- Update min and max */
-                        if (dval<cmin[c])
-                            cmin[c] = dval;
-                        if (dval>cmax[c])
-                            cmax[c] = dval;
-                    }
-                }
-            }
+  for (g=0 ; g<nfgroup; g++) {
+    nfield = fgroups[g]->nfield;
+    fields = fgroups[g]->field;
+    for (f=0; f<nfield; f++) {
+      field=fields[f];
+      instru = field->astromlabel;
+//---- Index current field
+      if (field->nset > nsetmax[instru])
+        nsetmax[instru] = field->nset;
+      switch(prefs.stability_type[instru]) {
+        case STABILITY_INSTRUMENT:
+          field->index = 0;
+          field->index2 = findex2[instru+1]++ - 1;
+          findex[instru+1] = nsetmax[instru];
+          break;
+        case STABILITY_EXPOSURE:
+          field->index = findex[instru+1];
+          findex[instru+1] += field->nset;
+          field->index2 = -1;
+          findex2[instru+1] = -1;
+          break;
+        case STABILITY_PREDISTORTED:
+           field->index = -1;
+           findex[instru+1] = 0;
+           field->index2 = findex2[instru+1]++;
+           break;
+        default:
+          break;
+      }
+//---- Index sets
+      for (s=0; s<field->nset; s++) {
+        set = field->set[s];
+        set->index = s;
+//------ Compute normalization factors for context values
+        samp = set->sample;
+        for (n=set->nsample; n--;) {
+          for (c=0; c<ncontext; c++) {
+            dval = samp->context[c];
+//---------- Update min and max
+            if (dval<cmin[c])
+              cmin[c] = dval;
+            if (dval>cmax[c])
+              cmax[c] = dval;
+          }
         }
+      }
     }
+  }
 
     /* Compute context rescaling coefficients (to avoid dynamic range problems) */
     cx = cy = -1;

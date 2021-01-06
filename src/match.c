@@ -1479,11 +1479,11 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES -.
       AUTHOR E. Bertin (IAP)
-      VERSION 04/02/2020
+      VERSION 06/01/2021
      ***/
     void update_wcsas(wcsstruct *wcs, double angle, double scale)
     {
-        double a[NAXIS*NAXIS],b[NAXIS*NAXIS],
+        double a[4],b[4],
         *c,*at, *pv1, *pv2, *pvt1, *pvt2,
         val, cas, sas, fascale, sgn;
         int  i,j,k, lng,lat,naxis, npv;
@@ -1518,27 +1518,21 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
           free(pvt1);
           free(pvt2);
         } else {
+          c = wcs->cd2;
+          b[0] = cas;
+          b[1] = -sas*sgn;
+          b[2] = sas;
+          b[3] = cas*sgn;
+
         /* A = B*C */
-          for (i=0; i<naxis; i++)
-              b[i+i*naxis] = 1.0;
-          b[lng+lng*naxis] = cas;
-          b[lat+lng*naxis] = -sas*sgn;
-          b[lng+lat*naxis] = sas;
-          b[lat+lat*naxis] = cas*sgn;
           at = a;
-          c = wcs->cd;
-          for (j=0; j<naxis; j++)
-              for (i=0; i<naxis; i++)
-              {
-                  val = 0.0;
-                  for (k=0; k<naxis; k++)
-                      val += b[k+j*naxis]*c[i+k*naxis];
-                  *(at++) = val;
-              }
+          for (j=0; j<2; j++)
+            for (i=0; i<2; i++)
+              *(at++) = b[j*2]*c[i] + b[1+j*2]*c[i+2];
 
           at = a;
-          for (i=0; i<naxis*naxis; i++)
-              *(c++) = *(at++);
+          for (i=0; i<4; i++)
+            *(c++) = *(at++);
         }
         /* Initialize other WCS structures */
         init_wcs(wcs);
@@ -1560,11 +1554,11 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES -.
       AUTHOR E. Bertin (IAP)
-      VERSION 16/02/2010
+      VERSION 06/01/2021
      ***/
     void update_wcsss(wcsstruct *wcs, double sangle, double ratio)
     {
-        double a[NAXIS*NAXIS],b[NAXIS*NAXIS],
+        double a[4],b[4],
         *c,*at,
         val, cas, sas;
         int  i,j,k, lng,lat,naxis;
@@ -1576,28 +1570,22 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         if (lng == lat)
             return;
 
-        c = wcs->cd;
-        /* A = B*C */
         /* The B matrix is made of 2 numbers */
         cas = cos(2*sangle*DEG);
         sas = sin(2*sangle*DEG);
-        for (i=0; i<naxis; i++)
-            b[i+i*naxis] = 1.0;
-        b[lng+lng*naxis] = 1.0 + ratio*(1.0+cas)/2.0;
-        b[lat+lng*naxis] = b[lng+lat*naxis] = ratio*sas/2.0;
-        b[lat+lat*naxis] = 1.0 + ratio*(1.0-cas)/2.0;
+
+        /* A = B*C */
+        c = wcs->cd2;
+        b[0] = 1.0 + ratio*(1.0+cas)/2.0;
+        b[1] = b[2] = ratio*sas/2.0;
+        b[3] = 1.0 + ratio*(1.0-cas)/2.0;
         at = a;
-        for (j=0; j<naxis; j++)
-            for (i=0; i<naxis; i++)
-            {
-                val = 0.0;
-                for (k=0; k<naxis; k++)
-                    val += b[k+j*naxis]*c[i+k*naxis];
-                *(at++) = val;
-            }
+        for (j=0; j<2; j++)
+          for (i=0; i<2; i++)
+            *(at++) = b[j*2]*c[i] + b[1+j*2]*c[i+2];
 
         at = a;
-        for (i=0; i<naxis*naxis; i++)
+        for (i=0; i<4; i++)
             *(c++) = *(at++);
 
         /* Initialize other WCS structures */
@@ -1620,13 +1608,14 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES -.
       AUTHOR E. Bertin (IAP)
-      VERSION 11/03/2005
+      VERSION 06/01/2021
      ***/
     void compute_wcsss(wcsstruct *wcs, double *sangle, double *shear)
     {
         double a11,a12,a21,a22, x,y;
         int  lng,lat,naxis;
 
+/*
         lng = wcs->lng;
         lat = wcs->lat;
         naxis = wcs->naxis;
@@ -1640,6 +1629,12 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
         a12 = wcs->cd[lng*naxis+lat];
         a21 = wcs->cd[lat*naxis+lng];
         a22 = wcs->cd[lat*naxis+lat];
+*/
+        a11 = wcs->cd2[0];
+        a12 = wcs->cd2[1];
+        a21 = wcs->cd2[2];
+        a22 = wcs->cd2[3];
+
         /* Handle flipped case */
         if (a11*a22-a12*a21<0.0)
         {
@@ -1702,7 +1697,7 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
       OUTPUT -.
       NOTES The new celestial position is an approximation of the exact one.
       AUTHOR E. Bertin (IAP)
-      VERSION 04/02/2020
+      VERSION 06/01/2021
      ***/
     void update_wcsll(wcsstruct *wcs, double dlng, double dlat)
     {
@@ -1736,8 +1731,6 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
                         - sin(wcspos[lat]*DEG)*cos(dalpha)))/DEG
             : 0.0;
 
-        /* A = B*C */
-        c = wcs->cd;
         /* The B matrix is made of 2 numbers */
         cas = cos(-angle*DEG);
         sas = sin(-angle*DEG);
@@ -1757,6 +1750,22 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
           free(pvt1);
           free(pvt2);
         } else {
+          c = wcs->cd2;
+          b[0] = cas;
+          b[1] = -sas;
+          b[2] = sas;
+          b[3] = cas;
+          at = a;
+          for (j=0; j<2; j++)
+            for (i=0; i<2; i++)
+              *(at++) = b[j*2]*c[i] + b[1+j*2]*c[i+2];
+
+          at = a;
+          for (i=0; i<4; i++)
+            *(c++) = *(at++);
+          /* A = B*C */
+/*
+          c = wcs->cd;
           for (i=0; i<naxis; i++)
               b[i+i*naxis] = 1.0;
           b[lng+lng*naxis] = cas;
@@ -1776,6 +1785,7 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
           at = a;
           for (i=0; i<naxis*naxis; i++)
               *(c++) = *(at++);
+*/
         }
 
         /* Initialize other WCS structures */

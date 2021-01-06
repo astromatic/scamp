@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic WCS library
 *
-*	Copyright:		(C) 2000-2019 IAP/CNRS/UPMC
+*	Copyright:		(C) 2000-2021 IAP/CNRS/SorbonneU
 *				(C) 1995-1999 Mark Calabretta (original version)
 *
 *	Licenses:		GNU General Public License
@@ -24,7 +24,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		16/11/2019
+*	Last modified:		06/01/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 /*============================================================================
@@ -412,7 +412,8 @@ struct prjprm *prj;
 double *x, *y;
 
 {
-   double r, s, xp[2];
+   double	*cd2 = prj->cd2,
+		r, s, xc[2], xp[2], invd;
 
    if (abs(prj->flag) != PRJSET) {
       if(tanset(prj)) return 1;
@@ -424,15 +425,23 @@ double *x, *y;
    r =  prj->r0*wcs_cosd(theta)/s;
    xp[0] =  r*wcs_sind(phi);
    xp[1] = -r*wcs_cosd(phi);
+   if (cd2) {
+     invd = 1.0 / (cd2[0]*cd2[3] - cd2[1]*cd2[2]);
+     xc[0] =  invd * (cd2[3] * xp[0] - cd2[1] * xp[1]);
+     xc[1] =  invd * (cd2[0] * xp[1] - cd2[2] * xp[0]);
+   } else {
+     xc[0] = xp[0];
+     xc[1] = xp[1];
+   }
    if (prj->n) {
      if ((prj->inv_x) && (prj->inv_y)) {
-       *x = prj->inv_x? poly_func(prj->inv_x, xp) : xp[0];
-       *y = prj->inv_y? poly_func(prj->inv_y, xp) : xp[1];
+       *x = prj->inv_x? poly_func(prj->inv_x, xc) : xc[0];
+       *y = prj->inv_y? poly_func(prj->inv_y, xc) : xc[1];
      } else
-       pv_to_raw(prj, xp[0],xp[1], x,y);
+       pv_to_raw(prj, xc[0],xc[1], x,y);
    } else {
-     *x = xp[0];
-     *y = xp[1];
+     *x = xc[0];
+     *y = xc[1];
    }
 
    if (prj->flag == PRJSET && s < 0.0) {
@@ -451,19 +460,27 @@ struct prjprm *prj;
 double *phi, *theta;
 
 {
-   double	xp,yp, rp;
+   double	*cd2 = prj->cd2,
+		xp,yp, xc,yc, rp;
 
    if (abs(prj->flag) != PRJSET) {
       if (tanset(prj)) return 1;
    }
 
    if (prj->n)
-     raw_to_pv(prj, x,y, &xp, &yp);
+     raw_to_pv(prj, x,y, &xc, &yc);
    else
      {
-     xp = x;
-     yp = y;
+     xc = x;
+     yc = y;
      }
+   if (cd2) {
+     xp = cd2[0] * xc + cd2[1] * yc;
+     yp = cd2[2] * xc + cd2[3] * yc;
+   } else {
+   xp = xc;
+   yp = yc;
+   }
    rp = sqrt(xp*xp+yp*yp);
    if (rp == 0.0) {
       *phi = 0.0;
