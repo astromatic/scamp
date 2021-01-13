@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 1993-2019 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 1993-2021 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/12/2019
+*	Last modified:		13/01/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -637,37 +637,34 @@ INPUT	tab structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/11/2013
+VERSION	13/01/2021
  ***/
-void	write_wcs(tabstruct *tab, wcsstruct *wcs)
+void	write_wcs(tabstruct *tab, wcsstruct *wcs) {
 
-  {
-   double	mjd;
+   double	*cd2, *cd3, *projp, *projp2,
+   		mjd;
    char		str[MAXCHARS];
-   int		j, l, naxis;
+   int		j, l, p, naxis, lng, lat, cdflag;
 
   naxis = wcs->naxis;
   addkeywordto_head(tab, "BITPIX  ", "Bits per pixel");
   fitswrite(tab->headbuf, "BITPIX  ", &tab->bitpix, H_INT, T_LONG);
   addkeywordto_head(tab, "NAXIS   ", "Number of axes");
   fitswrite(tab->headbuf, "NAXIS   ", &wcs->naxis, H_INT, T_LONG);
-  for (l=0; l<naxis; l++)
-    {
+  for (l=0; l<naxis; l++) {
     sprintf(str, "NAXIS%-3d", l+1);
     addkeywordto_head(tab, str, "Number of pixels along this axis");
     fitswrite(tab->headbuf, str, &wcs->naxisn[l], H_INT, T_LONG);
-    }
+  }
   addkeywordto_head(tab, "EQUINOX ", "Mean equinox");
   fitswrite(tab->headbuf, "EQUINOX ", &wcs->equinox, H_FLOAT, T_DOUBLE);
-  if (wcs->obsdate!=0.0)
-    {
+  if (wcs->obsdate!=0.0) {
     mjd = (wcs->obsdate-2000.0)*365.25 + MJD2000;
     addkeywordto_head(tab, "MJD-OBS ", "Modified Julian date at start");
     fitswrite(tab->headbuf, "MJD-OBS ", &mjd, H_EXPO,T_DOUBLE);
-    }
+  }
   addkeywordto_head(tab, "RADESYS ", "Astrometric system");
-  switch(wcs->radecsys)
-    {
+  switch(wcs->radecsys) {
     case RDSYS_ICRS:
       fitswrite(tab->headbuf, "RADESYS ", "ICRS", H_STRING, T_STRING);
       break;
@@ -685,9 +682,44 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
       break;
     default:
       error(EXIT_FAILURE, "*Error*: unknown RADESYS type in write_wcs()", "");
-    }
-  for (l=0; l<naxis; l++)
-    {
+  }
+    
+// Apply 2nd "celestial" CD matrix
+  cd2 = wcs->cd2;
+  lng = wcs->lng;
+  lat = wcs->lat;
+
+  // We need a buffer for linear algebra
+  projp = wcs->projp;
+  QMEMCPY(projp, projp2, double, naxis*100);
+
+  cdflag = 1;
+  for (p=100; p--;) {
+    j = p + lng * 100;
+    projp2[j] = cd2[0] * projp[j] + cd2[1] * projp[p + lat * 100] ;
+    if (fabs(projp2[j]) > TINY)
+      cdflag = 0;
+  }
+  for (p=100; p--;) {
+    j = p + lat * 100;
+    projp2[j] = cd2[2] * projp[p + lng * 100] + cd2[3] * projp[j] ;
+    if (fabs(projp2[j]) > TINY)
+      cdflag = 0;
+  }
+
+  QMEMCPY(wcs->cd, cd3, double, naxis * 2);
+  if ((cdflag)) {
+    cd3[lng + naxis * lng] = cd2[0] * wcs->cd[lng + naxis * lng]
+    				+ cd2[1] * wcs->cd[lng + naxis * lat];
+    cd3[lat + naxis * lng] = cd2[0] * wcs->cd[lat + naxis * lng]
+    				+ cd2[1] * wcs->cd[lat + naxis * lat];
+    cd3[lng + naxis * lat] = cd2[2] * wcs->cd[lng + naxis * lng]
+    				+ cd2[3] * wcs->cd[lng + naxis * lat];
+    cd3[lat + naxis * lat] = cd2[2] * wcs->cd[lat + naxis * lng]
+    				+ cd2[3] * wcs->cd[lat + naxis * lat];
+  }
+
+  for (l=0; l<naxis; l++) {
     sprintf(str, "CTYPE%-3d", l+1);
     addkeywordto_head(tab, str, "WCS projection type for this axis");
     fitswrite(tab->headbuf, str, wcs->ctype[l], H_STRING, T_STRING);
@@ -700,20 +732,22 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
     sprintf(str, "CRPIX%-3d", l+1);
     addkeywordto_head(tab, str, "Reference pixel on this axis");
     fitswrite(tab->headbuf, str, &wcs->crpix[l], H_EXPO, T_DOUBLE);
-    for (j=0; j<naxis; j++)
-      {
+    for (j=0; j<naxis; j++) {
       sprintf(str, "CD%d_%d", l+1, j+1);
       addkeywordto_head(tab, str, "Linear projection matrix");
-      fitswrite(tab->headbuf, str, &wcs->cd[l*naxis+j], H_EXPO, T_DOUBLE);
-      }
-    for (j=0; j<100; j++)
-      if (fabs(wcs->projp[j+100*l]) > TINY)
-        {
-        sprintf(str, "PV%d_%d", l+1, j);
-        addkeywordto_head(tab, str, "Projection distortion parameter");
-        fitswrite(tab->headbuf, str, &wcs->projp[j+100*l], H_EXPO, T_DOUBLE);
-        }
+      fitswrite(tab->headbuf, str, &cd3[l*naxis+j], H_EXPO, T_DOUBLE);
     }
+    if (!(cdflag))
+      for (p=0; p<100; p++)
+        if (fabs(projp2[p+100*l]) > TINY) {
+          sprintf(str, "PV%d_%d", l+1, p);
+          addkeywordto_head(tab, str, "Projection distortion parameter");
+          fitswrite(tab->headbuf, str, &projp2[p+100*l], H_EXPO, T_DOUBLE);
+        }
+  }
+
+  free(projp2);
+  free(cd3);
 
 /* Update the tab data */
   readbasic_head(tab);
