@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		13/01/2021
+*	Last modified:		03/02/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -637,9 +637,19 @@ INPUT	tab structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	13/01/2021
+VERSION	03/02/2021
  ***/
 void	write_wcs(tabstruct *tab, wcsstruct *wcs) {
+
+   static const int pvxy[] = {
+	0,2,1,3,
+	6,5,4,
+	10,9,8,7,11,
+	16,15,14,13,12,
+	22,21,20,19,18,17,23,
+	30,29,28,27,26,25,24,
+	38,37,36,35,34,33,32,31,39
+   };
 
    double	*cd2, *cd3, *projp, *projp2,
    		mjd;
@@ -694,15 +704,15 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs) {
   QMEMCPY(projp, projp2, double, naxis*100);
 
   cdflag = 1;
-  for (p=100; p--;) {
+  for (p=40; p--;) {
     j = p + lng * 100;
-    projp2[j] = cd2[0] * projp[j] + cd2[1] * projp[p + lat * 100] ;
+    projp2[j] = cd2[0] * projp[j] + cd2[1] * projp[pvxy[p] + lat * 100] ;
     if (fabs(projp2[j]) > TINY)
       cdflag = 0;
   }
-  for (p=100; p--;) {
+  for (p=40; p--;) {
     j = p + lat * 100;
-    projp2[j] = cd2[2] * projp[p + lng * 100] + cd2[3] * projp[j] ;
+    projp2[j] = cd2[2] * projp[pvxy[p] + lng * 100] + cd2[3] * projp[j] ;
     if (fabs(projp2[j]) > TINY)
       cdflag = 0;
   }

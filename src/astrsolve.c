@@ -1199,14 +1199,16 @@ void	pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
 void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
         setstruct *set)
 {
-    static const int pvindex[8][8] =	{{0,1,4,7,12,17,24,31},
+    static const int pvindex[8][8] =	{
+        {0,1,4,7,12,17,24,31},
         {2,5,8,13,18,25,32,0},
         {6,9,14,19,26,33,0,0},
         {10,15,20,27,34,0,0,0},
         {16,21,28,35,0,0,0,0},
         {22,29,36,0,0,0,0,0},
         {30,37,0,0,0,0,0,0},
-        {38,0,0,0,0,0,0,0}};
+        {38,0,0,0,0,0,0,0}
+        };
 
     wcsstruct	*wcs;
     samplestruct	*sample;
