@@ -46,6 +46,10 @@
 #include ATLAS_LAPACK_H
 #endif
 
+#ifdef HAVE_ACCELERATE
+#include ACCELERATE_H
+#endif
+
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #endif
@@ -1315,6 +1319,17 @@ void match_refine(setstruct *set, setstruct *refset, double matchresol,
     {
         LAPACKE_dpotrs(LAPACK_COL_MAJOR, 'U', 3, 1, alpha, 3, blng, 3);
         LAPACKE_dpotrs(LAPACK_COL_MAJOR, 'U', 3, 1, alpha, 3, blat, 3);
+#elif defined(HAVE_ACCELERATE)
+  int info;
+  int N=3;
+  int LDA=3;
+  int LDB=3;
+  int NRHS=1;
+  char* upper_or_lower="U";
+  if (dpotrf_(upper_or_lower, &N, alpha, &LDA, &info) == 0)
+    {
+    dpotrs_(upper_or_lower, &N, &NRHS, alpha, &LDA, blng, &LDB, &info);
+    dpotrs_(upper_or_lower, &N, &NRHS, alpha, &LDA, blat, &LDB, &info);
 #else
         if (clapack_dpotrf(CblasRowMajor, CblasUpper, 3, alpha, 3) == 0)
         {
