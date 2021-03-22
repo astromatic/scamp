@@ -13,3 +13,6 @@ cd "$WORK_DIR"
 ./autogen.sh
 ./configure
 make
+
+# run the tests
+make check
