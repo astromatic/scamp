@@ -53,6 +53,7 @@
 /tests/test_crossid_single_catalog
 /tests/test_crossid_single_catalog_moving
 /tests/*.o
+/tests/*.trs
 /tests/Makefile
 /tests/Makefile.in
 /tests/*.log
