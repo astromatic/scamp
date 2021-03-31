@@ -7,7 +7,7 @@
  *
  *	This file part of:	SCAMP
  *
- *	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+ *	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU
  *
  *	License:		GNU General Public License
  *
@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		12/08/2020
+ *	Last modified:		31/03/2021
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -73,48 +73,63 @@
 #include "threads.h"
 #endif
 
-/*------------------- global variables for multithreading -------------------*/
+//------------------- global variables for multithreading -------------------
 #ifdef USE_THREADS
 #define	NMAT_MUTEX	32
 #define	NMAT_MUTEX2	32
+
 pthread_t		*thread;
 pthread_mutex_t		matmutex[NMAT_MUTEX], matmutex2[NMAT_MUTEX2],
 			fillastromutex, nconstastromutex;
-fgroupstruct		**pthread_fgroups;
-double			*pthread_alpha, *pthread_beta;
 
-int			*pthread_nconst,
-			pthread_endflag, pthread_ngroup, pthread_ncoefftot,
+int			pthread_endflag,
 			pthread_gindex, pthread_findex, pthread_sindex;
 
-void			pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
-				int ncoefftot, int *nconst,
-				double *alpha, double *beta),
-			*pthread_fillastromatrix_thread(void *arg);
+void			pthread_astrom_eval(fgroupstruct **fgroups,
+				int ngroup, int ncoefftot, int *nconst,
+				double *params),
+			*pthread_astrom_eval_thread(void *arg);
 #endif
 
-static void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
-        int ncoefftot,
-        polystruct *poly, polystruct *poly2,
-        int *nconst),
-            add_alphamat(double *alpha, int naxis, int ncoefftot,
-                    double weight, int *ci, double *cv, int ncoeff,
-                    int *ci2, double *cv2, int ncoeff2),
-            add_betamat(double *beta, int naxis,
-                    double weight, int *ci, double *cv, double *cc, int ncoeff);
+
+//--------------------------- global variables  ---------------------------
+
+fgroupstruct		**astrom_fgroups;
+polystruct		*astrom_poly, *astrom_poly2;
+
+double			*astrom_coeffs,
+			*astrom_dcoeffs;
+
+int			*astrom_nconst,
+			astrom_nfgroup, astrom_ncoefftot;
+
+
+static double	astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
+			const int ncoefftot, const double step),
+		astrom_eval_update(setstruct *set, const double *coeffs,
+			double *dcoeffs, int ncoefftot,
+			polystruct *poly, polystruct *poly2, int *nconst);
+
+static int	add_params(double *params, int naxis, double weight,
+			int *ci, double *cv, double *cc, int ncoeff);
+
+static void	astrom_add_dcoeffs(double *dcoeffs, int naxis,
+        		double weight, int *ci, double *cv, double *cc,
+        		int ncoeff);
 
 /****** astrsolve_fgroups *****************************************************
-  PROTO	void astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
-  PURPOSE	Compute a global astrometric solution among a group of fields.
-  INPUT	ptr to an array of group of fields pointers,
-  number of groups.
-  OUTPUT	-.
-  NOTES	Uses the global preferences. Input structures must have gone through
-  crossid_fgroup() first.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	24/03/2020
+PROTO	void astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
+PURPOSE	Compute a global astrometric solution among a group of fields.
+INPUT	ptr to an array of group of fields pointers,
+	number of groups.
+OUTPUT	-.
+NOTES	Uses the global preferences. Input structures must have gone through
+	crossid_fgroup() first.
+AUTHOR	E. Bertin (IAP)
+VERSION	24/02/2021
  ***/
-void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
+void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
+			 int nfgroup) {
 
    fieldstruct	**fields,**fields2,
 		*field,*field2;
@@ -126,8 +141,8 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
 		lap_equed;
    double	cmin[MAXCONTEXT],cmax[MAXCONTEXT],
 		cscale[MAXCONTEXT], czero[MAXCONTEXT],
-		*alpha, *beta,
-		alphamin, alphamin2, dval;
+		*coeffs, *dcoeffs,
+		dval;
    size_t	size;
    int		group2[NAXIS],
 		*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
@@ -136,18 +151,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
 		npcoeff, npcoeff2,
 		d, index, index2, minindex2,
 		ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
-		startindex2, nmiss;
-
-#if defined(HAVE_LAPACKE)
-  lapack_int		*lap_ipiv;
-#endif
-
-// Set number of threads (may be changed later in the code)
-#ifdef HAVE_MKL
-  mkl_set_num_threads(prefs.nthreads);
-#elif HAVE_OPENBLASP
-  openblas_set_num_threads(prefs.nthreads);
-#endif
+		startindex2, nmiss, it;
 
 // Compute weight factors for each set based on the relative number of
 // astrometric references and detections
@@ -234,379 +238,268 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
     }
   }
 
-    /* Compute context rescaling coefficients (to avoid dynamic range problems) */
-    cx = cy = -1;
-    for (c=0; c<ncontext; c++)
-    {
-        czero[c] = cmin[c];
-        cscale[c] =  (dval = cmax[c] - cmin[c]) != 0.0 ? 1.0/dval : 1.0;
-        if (contextname)
-        {
-            /*---- Identify X_IMAGE and Y_IMAGE parameters (will be processed separately)*/
-            if (!strcmp(contextname[c], "X_IMAGE")
-                    || !strcmp(contextname[c], "XWIN_IMAGE")
-                    || !strcmp(contextname[c], "XPSF_IMAGE")
-                    || !strcmp(contextname[c], "XMODEL_IMAGE")
-                    || !strcmp(contextname[c], "XPEAK_IMAGE")
-                    || !strcmp(set->contextname[c], prefs.centroid_key[0]))
-                cx = c;
-            else if (!strcmp(contextname[c], "Y_IMAGE")
-                    || !strcmp(contextname[c], "YWIN_IMAGE")
-                    || !strcmp(contextname[c], "YPSF_IMAGE")
-                    || !strcmp(contextname[c], "YMODEL_IMAGE")
-                    || !strcmp(contextname[c], "YPEAK_IMAGE")
-                    || !strcmp(set->contextname[c], prefs.centroid_key[1]))
-                cy = c;
+// Compute context rescaling coefficients (to avoid dynamic range problems)
+  cx = cy = -1;
+  for (c=0; c<ncontext; c++) {
+    czero[c] = cmin[c];
+    cscale[c] =  (dval = cmax[c] - cmin[c]) != 0.0 ? 1.0/dval : 1.0;
+    if (contextname) {
+//---- Identify X_IMAGE and Y_IMAGE parameters (will be processed separately)
+      if (!strcmp(contextname[c], "X_IMAGE")
+		|| !strcmp(contextname[c], "XWIN_IMAGE")
+		|| !strcmp(contextname[c], "XPSF_IMAGE")
+		|| !strcmp(contextname[c], "XMODEL_IMAGE")
+		|| !strcmp(contextname[c], "XPEAK_IMAGE")
+		|| !strcmp(set->contextname[c], prefs.centroid_key[0]))
+        cx = c;
+      else if (!strcmp(contextname[c], "Y_IMAGE")
+		|| !strcmp(contextname[c], "YWIN_IMAGE")
+		|| !strcmp(contextname[c], "YPSF_IMAGE")
+		|| !strcmp(contextname[c], "YMODEL_IMAGE")
+		|| !strcmp(contextname[c], "YPEAK_IMAGE")
+		|| !strcmp(set->contextname[c], prefs.centroid_key[1]))
+        cy = c;
+    }
+  }
+
+// Compute the required number of coefficients
+  npcoeff = poly->ncoeff;
+  ncoeff = npcoeff*naxis;
+  nicoeff = ncoeff*naxis;
+  npcoeff2 = poly2->ncoeff;
+  ncoeff2 = npcoeff2*naxis;
+  nicoeff2 = ncoeff2*naxis;
+
+  ncoefftot = startindex2 = 0;
+
+  for (i=0; i<ninstru; i++) {
+    if (prefs.stability_type[instru]!=STABILITY_PREDISTORTED)
+	findex2[i+1]--;	// Remove first field (too many degrees of freedom)
+//------ Set the extra exposure-dependent parameter flag
+    if (findex[i+1]>0)
+      ncoefftot += ncoeff*findex[i+1];
+    startindex2 += ncoeff*findex[i+1];
+    if (findex2[i+1]>0)
+      ncoefftot += ncoeff2*findex2[i+1];
+    if (i) {
+      findex[i] += findex[i-1];
+      findex2[i] += findex2[i-1];
+    }
+
+  }
+
+// Compute the "definitive" index for each set
+  for (g=0 ; g<nfgroup; g++) {
+    nfield = fgroups[g]->nfield;
+    fields = fgroups[g]->field;
+    for (f=0; f<nfield; f++) {
+      field=fields[f];
+      instru = field->astromlabel;
+      index = ncoeff*(field->index+findex[instru]);
+      index2 = (field->index2 <0)? -1
+		: startindex2 + ncoeff2*(field->index2+findex2[instru]);
+      field->index2 = index2;
+      field->ncoeff2 = ncoeff2;
+      for (s=0; s<field->nset; s++) {
+        set = field->set[s];
+        set->index = field->index<0? -1 : index + set->index*ncoeff;
+        set->index2 = index2;
+        set->nconst = 0;
+        set->ncoeff = ncoeff;
+//------ Take the opportunity to set the context scales and offset
+        for (c=0; c<ncontext; c++) {
+          set->contextoffset[c] = czero[c];
+          set->contextscale[c] = cscale[c];
         }
+        set->contextx = cx;
+        set->contexty = cy;
+      }
     }
+ }
 
-    /* Compute the required number of coefficients */
-    npcoeff = poly->ncoeff;
-    ncoeff = npcoeff*naxis;
-    nicoeff = ncoeff*naxis;
-    npcoeff2 = poly2->ncoeff;
-    ncoeff2 = npcoeff2*naxis;
-    nicoeff2 = ncoeff2*naxis;
+// Distortion coefficients ordered as :
+// Local reduced coordinate (NAXISn)
+//   Instru               (ninstru at most)
+//   (if stability_type == EXPOSURE)
+//     Field
+//       Set
+//         Polynomial term
+//           Projected coordinate (NAXISn)
+//   (else)
+//     Set
+//       Polynomial term
+//         Projected coordinate (NAXISn)
+//     Extra field
+//       Field polynom term
+//         Projected coordinate (NAXISn)
+//   (endif)
 
-    ncoefftot = startindex2 = 0;
+  QCALLOC(nconst, int, ncoefftot);
+  QCALLOC(coeffs, double, ncoefftot);
+  QCALLOC(dcoeffs, double, ncoefftot);
 
-    for (i=0; i<ninstru; i++)
-    {
-        if (prefs.stability_type[instru]!=STABILITY_PREDISTORTED)
-            findex2[i+1]--;	/* Remove first field (too many degrees of freedom) */
-        /*-- Set the extra exposure-dependent parameter flag */
-        if (findex[i+1]>0)
-            ncoefftot += ncoeff*findex[i+1];
-        startindex2 += ncoeff*findex[i+1];
-        if (findex2[i+1]>0)
-            ncoefftot += ncoeff2*findex2[i+1];
-        if (i)
-        {
-            findex[i] += findex[i-1];
-            findex2[i] += findex2[i-1];
-        }
+  astrom_fgroups = fgroups;
+  astrom_nfgroup = nfgroup;
+  astrom_ncoefftot = ncoefftot;
+  astrom_nconst = nconst;
+  astrom_coeffs = coeffs;
+  astrom_dcoeffs = dcoeffs;
+  astrom_poly = poly;
+  astrom_poly2 = poly2;
 
-    }
 
-    /* Compute the "definitive" index for each set */
-    for (g=0 ; g<nfgroup; g++)
-    {
-        nfield = fgroups[g]->nfield;
-        fields = fgroups[g]->field;
-        for (f=0; f<nfield; f++)
-        {
-            field=fields[f];
-            instru = field->astromlabel;
-            index = ncoeff*(field->index+findex[instru]);
-            index2 = (field->index2 <0)? -1
-                : startindex2 + ncoeff2*(field->index2+findex2[instru]);
-            field->index2 = index2;
-            field->ncoeff2 = ncoeff2;
-            for (s=0; s<field->nset; s++)
-            {
-                set = field->set[s];
-                set->index = field->index<0? -1 : index + set->index*ncoeff;
-                set->index2 = index2;
-                set->nconst = 0;
-                set->ncoeff = ncoeff;
-                /*------ Take the opportunity to set the context scales and offset */
-                for (c=0; c<ncontext; c++)
-                {
-                    set->contextoffset[c] = czero[c];
-                    set->contextscale[c] = cscale[c];
-                }
-                set->contextx = cx;
-                set->contexty = cy;
-            }
-        }
-    }
+  for (it=0; it<ASTROM_MAXITER; it++) {
 
-    QCALLOC(nconst, int, ncoefftot);
-
-#ifdef MATSTORAGE_PACKED
-    size = ((size_t)(ncoefftot+1)*ncoefftot)/2 * sizeof(double);
-#else
-    size= (size_t)ncoefftot*ncoefftot * sizeof(double);
-#endif
-
-    if ((alpha = mmap(NULL, size,PROT_WRITE|PROT_READ,
-#ifdef MAP_ANONYMOUS
-                    MAP_PRIVATE|MAP_ANONYMOUS,	/* Linux */
-#else
-                    MAP_PRIVATE|MAP_ANON,		/* BSD, OSX */
-#endif
-                    -1,0))==(void *)-1)
-    {
-        sprintf(gstr, "alpha ((ncoefftot+1)*ncoefftot)/2 =%ld bytes) "
-                "at line %d in module " __FILE__ " !", size, __LINE__);
-        error(EXIT_FAILURE, "Could not allocate memory for ", gstr);\
-    }
-
-    QCALLOC(beta, double, ncoefftot);
+    sprintf(str, "Solving astrometry: iteration #%d", it + 1);
+    NFPRINTF(OUTPUT, str);
+    for (g=0; g<nfgroup; g++)
+      reproj_fgroup(fgroups[g], reffields[g], REPROJ_NONE);
 
 #ifdef USE_THREADS
-    pthread_fill_astromatrix(fgroups, nfgroup, ncoefftot, nconst, alpha, beta);
+    pthread_astrom_eval(fgroups, nfgroup, ncoefftot, nconst, dcoeffs);
 #else
-
-    /* Matrix parameters will be ordered as :   */
-    /* Local reduced coordinate (NAXISn)        */
-    /*   Instru               (ninstru at most) */
-    /*   (if stability_type == EXPOSURE)        */
-    /*     Field                                */
-    /*       Set                                */
-    /*         Polynom term                     */
-    /*           Projected coordinate (NAXISn)  */
-    /*   (else)                                 */
-    /*     Set                                  */
-    /*       Polynom term                       */
-    /*         Projected coordinate (NAXISn)    */
-    /*     Extra field                          */
-    /*       Field polynom term                 */
-    /*         Projected coordinate (NAXISn)    */
-    /*   (endif)                                */
-
-    /* Go through all groups, all fields, all sets, all samples */
-    for (g=0; g<nfgroup; g++)
-    {
-        nfield = fgroups[g]->nfield;
-        fields = fgroups[g]->field;
-        for (f=0; f<nfield; f++)
-        {
-            sprintf(str, "Filling the global astrometry matrix: "
-                    "group %d/%d, field %d/%d",
-                    g+1, nfgroup, f+1, nfield);
-            NFPRINTF(OUTPUT, str);
-            field = fields[f];
-            for (s=0; s<field->nset; s++)
-            {
-                set = field->set[s];
-                fill_astromatrix(set, alpha, beta, ncoefftot, poly,poly2, nconst);
-            }
+//-- Go through all groups, all fields, all sets, all samples
+    for (g=0; g<nfgroup; g++) {
+      nfield = fgroups[g]->nfield;
+      fields = fgroups[g]->field;
+      for (f=0; f<nfield; f++) {
+        field = fields[f];
+        for (s=0; s<field->nset; s++) {
+          set = field->set[s];
+          astrom_eval(set, dcoeffs, ncoefftot, poly,poly2, nconst);
         }
+      }
     }
-
 #endif
+//-- Gradient descent
+    for (c=0; c<ncoefftot; c++)
+      coeffs[c] = ASTROM_UPDATEFACTOR * dcoeffs[c];  
 
-    /* Check that there are enough constraints for each set... */
-    /* And remove unconstrained degrees of freedom if necessary */
-    /* Warning: ordering of instructions important to avoid overwriting indices! */
-    /* First: exposure-independent coefficients */
-    NFPRINTF(OUTPUT, "Fixing the degrees of freedom");
-    for (g=0; g<nfgroup; g++)
-    {    
-        nfield = fgroups[g]->nfield;
-        fields = fgroups[g]->field;
-        for (f=0; f<nfield; f++)
-        {
-            field = fields[f];
-            if (field->index >= 0)
-            {
-                for (s=0; s<field->nset; s++)
-                {
-                    set = field->set[s];
-                    index = set->index;
-                    if (nconst[index] < set->ncoeff)
-                    {
-                        if (field->nset > 1)
-                            sprintf(str,"set #%d of instrument A%d ",s+1,field->astromlabel+1);
-                        else
-                            sprintf(str, "instrument A%d ", field->astromlabel+1);
-                        warning("Not enough matched detections in ", str);
-                        nmiss = set->ncoeff - nconst[index];
-                        /*---------- Trim the matrices */
-                        shrink_mat(alpha,beta, ncoefftot, index+nconst[index], nmiss);
-                        /*---------- Shift all other indexes above */
-                        nc = nconst + index + nconst[index];
-                        nc2 = nc + nmiss;
-                        for (i=ncoefftot-index-set->ncoeff; i--;)
-                            *(nc++) = *(nc2++);
-                        for (g2=0; g2<nfgroup; g2++)
-                        {    
-                            nfield2 = fgroups[g2]->nfield;
-                            fields2 = fgroups[g2]->field;
-                            for (f2=0; f2<nfield2; f2++)
-                            {
-                                field2 = fields2[f2];
-                                if (field2->index2>=0)
-                                    field2->index2 -= nmiss;
-                                for (s2=0; s2<field2->nset; s2++)
-                                {
-                                    set2 = field2->set[s2];
-                                    if (set2->ncoeff && set2->index == index)
-                                        set2->ncoeff -= nmiss;
-                                    if (set2->index > index)
-                                        set2->index -= nmiss;
-                                    if (set2->index2>=0)
-                                        set2->index2 -= nmiss;
-                                }
-                            }
-                        }
-                        ncoefftot -= nmiss;
-                    }
-                }
-            }
+//-- Fill the astrom structures with the derived parameters
+    for (g=0; g<nfgroup; g++) {
+      nfield = fgroups[g]->nfield;
+      fields = fgroups[g]->field;
+      for (f=0; f<nfield; f++) {
+        field = fields[f];
+        for (s=0; s<field->nset; s++) {
+          set = field->set[s];
+          mat_to_wcs(poly, poly2, coeffs, set);
         }
+      }
     }
+  }
 
-    /* Second: exposure dependent coefficients */
-    for (g=0; g<nfgroup; g++)
-    {    
-        nfield = fgroups[g]->nfield;
-        fields = fgroups[g]->field;
-        for (f=0; f<nfield; f++)
-        {
-            field = fields[f];
-            index2 = field->index2;
-            if (index2 >= 0 && nconst[index2] < field->ncoeff2)
-            {
-                nmiss = field->ncoeff2 - nconst[index2];
-                /*------ Trim the matrices */
-                shrink_mat(alpha,beta, ncoefftot, index2, nmiss);
-                /*------ Shift all other indexes above */
-                nc = nconst + index2 + nconst[index2];
-                nc2 = nc + nmiss;
-                for (i=ncoefftot-index2-field->ncoeff2; i--;)
-                    *(nc++) = *(nc2++);
-                for (g2=0; g2<nfgroup; g2++)
-                {    
-                    nfield2 = fgroups[g2]->nfield;
-                    fields2 = fgroups[g2]->field;
-                    for (f2=0; f2<nfield2; f2++)
-                    {
-                        field2 = fields2[f2];
-                        if (field2->ncoeff2 && field2->index2 == index2)
-                            field2->ncoeff2 -= nmiss;
-                        if (field2->index2>=0 && field2->index2 > index2)
-                        {
-                            field2->index2 -= nmiss;
-                            for (s2=0; s2<field2->nset; s2++)
-                            {
-                                set2 = field2->set[s2];
-                                if (set2->index2 > index2)
-                                    set2->index2 -= nmiss;
-                            }
-                        }
-                    }
-                }
-                ncoefftot -= nmiss;
-            }
-        }
+  poly_end(poly);
+  poly_end(poly2);
+  free(coeffs);
+  free(nconst);
+  free(findex);
+  free(findex2);
+  free(nsetmax);
+
+  return;
+}
+
+/****** astrom_eval ***************************************************
+PROTO	double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
+		const int ncoefftot, const double step)
+PURPOSE Compute current chi2 and chi2 gradient for astrometry.
+INPUT	Ptr to data,
+	ptr to the vector of coefficients,
+	ptr to the computed gradient (on return)
+	total number of coefficients,
+	input step from the line search routine.
+OUTPUT	Current chi2 value.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION 31/03/2021
+ ***/
+static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
+		const int ncoefftot, const double step) {
+
+   fgroupstruct	**fgroups;
+   fieldstruct	**fields,
+   		*field;
+   setstruct	*set;
+   polystruct	*poly, *poly2;
+   double	chi2;
+   int		*nconst,
+   		nfgroup, nfield, naxis, f, g, s;
+
+
+  naxis = astrom_fgroups[0]->naxis;
+
+  nfgroup = astrom_nfgroup;
+  poly = astrom_poly;
+  poly2 = astrom_poly2;
+  nconst = astrom_nconst;
+
+  chi2 = 0.0;
+// Go through all groups, all fields, all sets, all samples
+  for (g=0; g<nfgroup; g++) {
+    nfield = fgroups[g]->nfield;
+    fields = fgroups[g]->field;
+    for (f=0; f<nfield; f++) {
+      field = fields[f];
+      for (s=0; s<field->nset; s++) {
+        set = field->set[s];
+        chi2 += astrom_eval_update(set, coeffs, dcoeffs, ncoefftot, poly, poly2,
+        	nconst);
+      }
     }
+  }
 
-    /* Solve! */
-    NFPRINTF(OUTPUT, "Solving the global astrometry matrix...");
-    if (ncoefftot)
-    {
-        regul_mat(fgroups, nfgroup, alpha, ncoefftot);
-
-#if defined(HAVE_LAPACKE)
-        QMALLOC(lap_ipiv, lapack_int, ncoefftot);
-
-#ifdef MATSTORAGE_PACKED
-        if (LAPACKE_dspsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, lap_ipiv,
-                    beta, ncoefftot) != 0)
-            warning("Not a positive definite matrix", " in astrometry solver");
-        /*
-           if (LAPACKE_dppsv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
-           beta, ncoefftot) !=0)
-         */
-#else
-        if (LAPACKE_dsysv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, lap_ipiv,
-                    beta, ncoefftot) != 0)
-            warning("Not a positive definite matrix", " in astrometry solver");
-        /*
-           if (LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoefftot, 1, alpha, ncoefftot,
-           beta, ncoefftot) !=0)
-         */
-#endif
-        free(lap_ipiv);
-
-
-#else
-
-        if (clapack_dposv(CblasRowMajor, CblasUpper,
-                    ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot) != 0)
-            warning("Not a positive definite matrix", " in astrometry solver");
-#endif
-
-#ifdef HAVE_MKL
-        mkl_free_buffers();	/* Avoid MKL memory leaks */
-#endif
-    }    
-
-    /* Fill the astrom structures with the derived parameters */
-    for (g=0; g<nfgroup; g++)
-    {    
-        nfield = fgroups[g]->nfield;
-        fields = fgroups[g]->field;
-        for (f=0; f<nfield; f++)
-        {
-            field=fields[f];
-            for (s=0; s<field->nset; s++)
-            {
-                set = field->set[s];
-                mat_to_wcs(poly, poly2, beta, set);
-            }
-        }
-    }
-
-    poly_end(poly);
-    poly_end(poly2);
-    munmap(alpha,size);
-    free(beta);
-    free(nconst);
-    free(findex);
-    free(findex2);
-    free(nsetmax);
-
-    return;
+  return chi2;    
 }
 
 
-/****** fill_astromatrix ******************************************************
-  PROTO	void fill_astromatrix(setstruct *set, double *alpha, double *beta,
-  int ncoefftot,
-  polystruct *poly, polystruct *poly2, int *nconst)
-  PURPOSE	Fill the normal equation matrix for astrometry with elements from a
-  given set.
-  INPUT	Ptr to the set structure,
-  ptr to the alpha matrix,
-  ptr to the beta matrix.
-  matrix size,
-  pointer to the 1st polynomial (steady, instrument-dependent),
-  pointer to the 2nd polynomial (variable, exposure-dependent),
-  pointer to the number of constraints per chip/exposure.
-  OUTPUT	-.
-  NOTES	-.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	28/06/2020
+/****** astrom_eval_update ***************************************************
+PROTO	double astrom_eval_update(setstruct *set, double *coeffs,
+		double *dcoeffs, int ncoefftot,
+		polystruct *poly, polystruct *poly2, int *nconst)
+PURPOSE Provide contributions to the astrometry chi2 and chi2 gradient from
+	detections of a given set.
+INPUT	Ptr to the set structure,
+	ptr to the array of coefficients,
+	ptr to the chi2 gradient (content modified in output),
+	total number of coefficients,
+	pointer to the 1st polynomial (steady, instrument-dependent),
+	pointer to the 2nd polynomial (variable, exposure-dependent),
+	pointer to the number of constraints per chip/exposure.
+OUTPUT	Contribution to the total chi2.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION 31/03/2021
  ***/
-void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
-        int ncoefftot,
-        polystruct *poly, polystruct *poly2, int *nconst)
-{
-    fieldstruct		*field2;
-    setstruct		*set2;
-    samplestruct		*samp,*samp2,*samp3;
-    double		dprojdred[NAXIS*NAXIS], context[MAXCONTEXT],
-    redpos[NAXIS],
-    *coeffval, *coeffval2, *coeffconst,*coeffconst2,
-    *cv, *cvo,*cvoa, *cv2,*cvo2,*cvoa2,
-    *cc,*cco,*ccoa, *cc2,*cco2,*ccoa2, *x, *jac,*jact,
-    *basis,*basis2, *czero, *cscale,
-    sigma2,sigma3, weight, weightfac;
-    unsigned short	sexflagmask;
-    unsigned int	imaflagmask;
-    int			*coeffindex,*coeffindex2,
-                *ci,*cio,*cioa, *ci2,*cio2,*cioa2,
-                nlsamp,nlsampmax, nscoeffmax, nscoeffmax2, instru,
-                index,indext,index2,indext2, redflag, naxis, ncontext,
-                npcoeff,ncoeff,nicoeff, npcoeff2,ncoeff2,nicoeff2,
-                nsamp,
-                cx,cy, c, d, d1,d2, p, lng,lat;
+static double	astrom_eval_update(setstruct *set, const double *coeffs,
+		double *dcoeffs,
+		int ncoefftot, polystruct *poly, polystruct *poly2,
+		int *nconst) {
+
+   fieldstruct		*field2;
+   setstruct		*set2;
+   samplestruct	*samp,*samp2,*samp3;
+   double		dprojdred[NAXIS*NAXIS], context[MAXCONTEXT],
+			redpos[NAXIS],
+			*coeffval, *coeffval2, *coeffconst,*coeffconst2,
+			*cv, *cva,*cvb, *cv2,*cva2,*cvb2,
+			*cc,*cca,*ccb, *cc2,*cca2,*ccb2, *ccat, *ccbt,
+			*co, *co2, *x,
+			*basis,*basis2, *czero, *cscale,
+			dx, sigma2,sigma3, weight, weightfac, val, chi2;
+   float		*jac,*jact;
+   unsigned short	sexflagmask;
+   unsigned int	imaflagmask;
+   int			*coeffindex,*coeffindex2,
+			*ci,*cia,*cib, *ci2,*cia2,*cib2,
+			nlsamp,nlsampmax, nscoeffmax, nscoeffmax2, instru,
+			index,indext,index2,indext2, redflag, naxis, ncontext,
+			npcoeff,ncoeff,nicoeff, npcoeff2,ncoeff2,nicoeff2,
+			nsamp,
+			cx,cy, c, d, d1,d2, i, p, lng,lat;
 
 #ifdef USE_THREADS
-    int			imut=0;
+   int			imut=0;
 #endif
 
     sexflagmask = prefs.astr_sexflagsmask;
@@ -619,10 +512,11 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
     ncoeff2 = npcoeff2*naxis;
     nicoeff2 = ncoeff2*naxis;
 
+    chi2 = 0.0;
     nlsampmax = 0;
     ncontext = set->ncontext;
     coeffval = coeffval2 = coeffconst = coeffconst2 = (double *)NULL;
-    coeffindex = coeffindex2 = (int *)NULL;      /* To avoid gcc -Wall warnings*/
+    coeffindex = coeffindex2 = (int *)NULL;      // To avoid gcc -Wall warnings
     czero = set->contextoffset;
     cscale = set->contextscale;
     cx = set->contextx;
@@ -630,445 +524,343 @@ void	fill_astromatrix(setstruct *set, double *alpha, double *beta,
     lng = set->lng;
     lat = set->lat;
     samp = set->sample;
-    for (nsamp=set->nsample; nsamp--; samp++)
-    {
-        /*-- Care only about one end of the series of linked detections */
-        if (samp->prevsamp && !samp->nextsamp)
-        {
-            samp2 = samp;
-            /*---- Count the samples in the pair-list */
-            for (nlsamp=1; (samp2=samp2->prevsamp);)
-                if (!(samp2->sexflags & sexflagmask)
-                        && !(samp2->imaflags & imaflagmask))
-                    nlsamp++;
-            /*---- Allocate memory for storing list sample information */
-            if (nlsamp>nlsampmax)
-            {
-                if (nlsampmax)
-                {
-                    free(coeffindex);
-                    free(coeffval);
-                    free(coeffconst);
-                    free(coeffindex2);
-                    free(coeffval2);
-                    free(coeffconst2);
-                }
-                nlsampmax = nlsamp;
-                nscoeffmax = nicoeff*nlsamp;
-                QMALLOC(coeffindex, int, nscoeffmax);
-                QMALLOC(coeffval, double, nscoeffmax);
-                QMALLOC(coeffconst, double, nscoeffmax);
-                nscoeffmax2 = nicoeff2*nlsamp;
-                QMALLOC(coeffindex2, int, nscoeffmax2);
-                QMALLOC(coeffval2, double, nscoeffmax2);
-                QMALLOC(coeffconst2, double, nscoeffmax2);
-            }
-            /*---- Fill list-sample coefficients */
-            ci = coeffindex;
-            ci2 = coeffindex2;
-            cv = coeffval;
-            cv2 = coeffval2;
-            cc = coeffconst;
-            cc2 = coeffconst2;
-            for (samp2 = samp; samp2; samp2=samp2->prevsamp)
-            {
-                /*------ Drop it if the object is saturated or truncated */
-                if ((samp2->sexflags & sexflagmask)
-                        || (samp2->imaflags & imaflagmask))
-                    continue;
-                cio = ci;
-                cio2 = ci2;
-                cvo = cv;
-                cvo2 = cv2;
-                cco = cc;
-                cco2 = cc2;
-                set2 = samp2->set;
-                field2 = set2->field;
-                instru = field2->astromlabel;
-                /*------ Negative indices are for the reference field */
-                if (instru>=0)
-                {
-                    index = set2->index;
-                    index2 = set2->index2;
-#ifdef USE_THREADS
-                    QPTHREAD_MUTEX_LOCK(&nconstastromutex);
-#endif
-                    set2->nconst += naxis;
-                    if (index>=0)
-                        nconst[index]+=naxis;
-                    if (index2>=0)
-                        nconst[index2]+=naxis;
-#ifdef USE_THREADS
-                    QPTHREAD_MUTEX_UNLOCK(&nconstastromutex);
-#endif
-                }
-                else
-                    index = index2 = -1;
-
-                /*------ Compute the value of the basis functions at each sample */
-                if (instru >= 0)
-                {
-                    redflag = 0;
-                    for (c=0; c<ncontext; c++)
-                    {
-                        if (c==cx || c==cy)
-                        {
-                            /*------------ Image coordinates receive a special treatment */
-                            if (!redflag)
-                            {
-                                raw_to_red(set2->wcs, samp2->vrawpos, redpos);
-                                redflag = 1;
-                            }
-                            context[c] = redpos[c==cx?lng:lat];
-                        }
-                        else
-                            context[c] = (samp2->context[c]-czero[c])*cscale[c];
-                    }
-                    /*-------- The basis functions are computed from reduced context values*/
-                    if (index>=0)
-                        poly_func(poly, context);
-                    /*-------- Compute the local Jacobian matrix */
-                    compute_jacobian(samp2,dprojdred);
-                    if (index2>=0)
-                    {
-                        if (!redflag)
-                            raw_to_red(set2->wcs, samp2->vrawpos, redpos);
-                        poly_func(poly2, redpos);
-                    }
-                }
-
-                /*------ Pre-compute numbers that will be used in the beta matrix  */
-                /*------ The innermost index of the jac array is the numerator of the */
-                /*------ Jacobian operator */
-                x = samp2->projpos;
-                /*------ Fill something equivalent to a row of a design matrix */
-                for (d2=0; d2<naxis; x++, d2++)
-                {
-                    indext = index;
-                    basis = poly->basis;
-                    jac = dprojdred+d2;
-                    for (p=npcoeff; p--; basis++)
-                    {
-                        jact = jac;
-                        for (d1=naxis; d1--; jact+=naxis)
-                        {
-                            *(ci++) = indext;
-                            *(cv++) = *jact**basis;
-                            *(cc++) = *x;
-                            if (!(++indext))
-                                indext--;
-                        }
-                    }
-                    /*-------- Now the extra field-dependent parameters */
-                    indext2 = index2;
-                    basis2 = poly2->basis;
-                    for (p=npcoeff2; p--; basis2++)
-                    {
-                        jact = jac;
-                        for (d1=naxis; d1--; jact+=naxis)
-                        {
-                            *(ci2++) = indext2;
-                            *(cv2++) = *jact**basis2;
-                            *(cc2++) = *x;
-                            if (!(++indext2))
-                                indext2--;
-                        }
-                    }
-                }
-                /*------ Compute the relative positional variance for this source */
-                sigma2 = 0.0;
-                for (d=0; d<naxis; d++)
-                    sigma2 += samp2->wcsposerr[d]*samp2->wcsposerr[d];
-                /*------ Add extra-weight to the reference to compensate for all the overlaps */
-                weightfac = nlsamp*prefs.astref_weight;
-                /*------ Now fill the matrices */
-                cvoa = coeffval;
-                cioa = coeffindex;
-                ccoa = coeffconst;
-                cvoa2 = coeffval2;
-                cioa2 = coeffindex2;
-                ccoa2 = coeffconst2;
-                for (samp3 = samp; samp3 != samp2; samp3=samp3->prevsamp)
-                {
-                    /*------ Drop it if the object is saturated or truncated */
-                    if ((samp3->sexflags & sexflagmask)
-                            || (samp3->imaflags & imaflagmask))
-                        continue;
-
-                    /*-------- Compute the relative weight of the pair */
-                    sigma3 = 0.0;
-                    for (d=0; d<naxis; d++)
-                        sigma3 += samp3->wcsposerr[d]*samp3->wcsposerr[d];
-                    weight = (instru<0 ? samp3->set->weightfac*weightfac : 1.0)
-                        /(sigma3+sigma2);
-
-                    /*-------- Fill the matrices */
-                    /*-------- First, the contribution from the 1st detection itself */
-#ifdef USE_THREADS
-                    if (*cio>=0)
-                    {
-                        imut = (*cio/ncoeff)%NMAT_MUTEX;
-                        QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
-                    }
-#endif
-                    add_alphamat(alpha,naxis,ncoefftot,weight,
-                            cio,cvo,ncoeff, cio,cvo,ncoeff);
-                    add_alphamat(alpha,naxis,ncoefftot,weight,
-                            cio,cvo,ncoeff, cio2,cvo2,ncoeff2);
-                    if (*cioa>=*cio)
-                        add_alphamat(alpha,naxis,ncoefftot,-weight,
-                                cio,cvo,ncoeff, cioa,cvoa,ncoeff);
-                    add_alphamat(alpha,naxis,ncoefftot,-weight,
-                            cio,cvo,ncoeff, cioa2,cvoa2,ncoeff2);
-                    add_betamat(beta,naxis,weight, cio,cvo,cco,ncoeff);
-                    add_betamat(beta,naxis,-weight, cio,cvo,ccoa,ncoeff);
-#ifdef USE_THREADS
-                    if (*cio>=0)
-                    {
-                        QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
-                    }
-                    if (*cio2>=0)
-                    {
-                        imut = (*cio2/ncoeff)%NMAT_MUTEX2;
-                        QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
-                    }
-#endif
-                    add_alphamat(alpha,naxis,ncoefftot,weight,
-                            cio2,cvo2,ncoeff2, cio2,cvo2,ncoeff2);
-                    if (*cioa2>=*cio2)
-                        add_alphamat(alpha,naxis,ncoefftot,-weight,
-                                cio2,cvo2,ncoeff2,  cioa2,cvoa2,ncoeff2);
-                    add_betamat(beta,naxis,weight, cio2,cvo2,cco2,ncoeff2);
-                    add_betamat(beta,naxis,-weight, cio2,cvo2,ccoa2,ncoeff2);
-
-                    /*-------- Next, the contribution from the 2nd detection itself */
-#ifdef USE_THREADS
-                    if (*cio2>=0)
-                    {
-                        QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
-                    }
-                    if (*cioa>=0)
-                    {
-                        imut = (*cioa/ncoeff)%NMAT_MUTEX;
-                        QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
-                    }
-#endif
-                    add_alphamat(alpha,naxis,ncoefftot,weight,
-                            cioa,cvoa,ncoeff, cioa,cvoa,ncoeff);
-                    add_alphamat(alpha,naxis,ncoefftot,weight,
-                            cioa,cvoa,ncoeff, cioa2,cvoa2,ncoeff2);
-                    if (*cio>=*cioa)
-                        add_alphamat(alpha,naxis,ncoefftot,-weight,
-                                cioa,cvoa,ncoeff, cio,cvo,ncoeff);
-                    add_alphamat(alpha,naxis,ncoefftot,-weight,
-                            cioa,cvoa,ncoeff, cio2,cvo2,ncoeff2);
-                    add_betamat(beta,naxis,weight, cioa,cvoa,ccoa,ncoeff);
-                    add_betamat(beta,naxis,-weight, cioa,cvoa,cco,ncoeff);
-#ifdef USE_THREADS
-                    if (*cioa>=0)
-                    {
-                        QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
-                    }
-                    if (*cioa2>=0)
-                    {
-                        imut = (*cioa2/ncoeff)%NMAT_MUTEX2;
-                        QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
-                    }
-#endif
-                    add_alphamat(alpha,naxis,ncoefftot,weight,
-                            cioa2,cvoa2,ncoeff2, cioa2,cvoa2,ncoeff2);
-                    add_betamat(beta,naxis,weight, cioa2,cvoa2,ccoa2,ncoeff2);
-
-                    /*-------- Next, the crossed contributions */
-                    if (*cio2>=*cioa2)
-                        add_alphamat(alpha,naxis,ncoefftot,-weight,
-                                cioa2,cvoa2,ncoeff2, cio2,cvo2,ncoeff2);
-                    add_betamat(beta,naxis,-weight, cioa2,cvoa2,cco2,ncoeff2);
-#ifdef USE_THREADS
-                    if (*cioa2>=0)
-                    {
-                        QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
-                    }
-#endif
-                    cvoa += nicoeff;
-                    cioa += nicoeff;
-                    ccoa += nicoeff;
-                    cvoa2 += nicoeff2;
-                    cioa2 += nicoeff2;
-                    ccoa2 += nicoeff2;
-                }
-            }
+    for (nsamp=set->nsample; nsamp--; samp++) {
+//---- Care only about one end of the series of linked detections
+      if (!samp->prevsamp || samp->nextsamp)
+        continue;
+      samp2 = samp;
+//---- Count the samples in the pair-list
+      for (nlsamp=1; (samp2=samp2->prevsamp);)
+        if (!(samp2->sexflags & sexflagmask)
+        	&& !(samp2->imaflags & imaflagmask))
+           nlsamp++;
+//---- Allocate memory for storing list sample information
+      if (nlsamp > nlsampmax) {
+        if ((nlsampmax)) {
+          free(coeffindex);
+          free(coeffval);
+          free(coeffconst);
+          free(coeffindex2);
+          free(coeffval2);
+          free(coeffconst2);
         }
-    }
-
-    if (nlsampmax)
-    {
-        free(coeffindex);
-        free(coeffval);
-        free(coeffconst);
-        free(coeffindex2);
-        free(coeffval2);
-        free(coeffconst2);
-    }
-
-    return;
-}
-
-
-/****** add_alphamat ******************************************************
-  PROTO	void add_alphamat(double *alpha, int naxis, int ncoefftot,
-  double weight, int *ci, double *cv, int ncoeff,
-  int *ci2, double *cv2, int ncoeff2)
-  PURPOSE	Add a product contribution to a normal equation matrix.
-  INPUT	ptr to the alpha matrix,
-  number of dimensions,
-  total size of the matrices
-  weight of the contribution (can be negative for cross-products),
-  index array for the first component,
-  basis array for the first component,
-  constraint array for the first component,
-  size of the first component arrays,
-  index array for the second component,
-  basis array for the second component,
-  size of the second component arrays,
-  OUTPUT	-.
-  NOTES	-.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	20/12/2011
- ***/
-static void add_alphamat(double *alpha, int naxis, int ncoefftot,
-        double weight, int *ci, double *cv, int ncoeff,
-        int *ci2, double *cv2, int ncoeff2)
-{
-    double	*cvo,
-            weight2;
-    size_t	rowp;
-    int		*cio,
-            d, p, q, lim, i1,i2;
-
-    if (*ci < 0 || *ci2 < 0)
-        return;
-
-
-    for (d=naxis; d--; ci2+=ncoeff2, cv2+=ncoeff2)
-        for (p=ncoeff; p--; ci++, cv++)
-        {
-            i1 = *ci;
-            i2 = *ci2;
-            cvo = cv2;
-            weight2 = weight**cv;
-#ifdef MATSTORAGE_PACKED
-            rowp = ((size_t)(2*ncoefftot-i1-1)*i1)/2 + (size_t)i2;
-#else
-            rowp = (size_t)ncoefftot*i1 + (size_t)i2;
+        nlsampmax = nlsamp;
+        nscoeffmax = nicoeff*nlsamp;
+        QMALLOC(coeffindex, int, nscoeffmax);
+        QMALLOC(coeffval, double, nscoeffmax);
+        QMALLOC(coeffconst, double, nscoeffmax);
+        nscoeffmax2 = nicoeff2*nlsamp;
+        QMALLOC(coeffindex2, int, nscoeffmax2);
+        QMALLOC(coeffval2, double, nscoeffmax2);
+        QMALLOC(coeffconst2, double, nscoeffmax2);
+      }
+//---- Fill list-sample coefficients
+      ci = coeffindex;
+      ci2 = coeffindex2;
+      cv = coeffval;
+      cv2 = coeffval2;
+      cc = coeffconst;
+      cc2 = coeffconst2;
+      for (samp2 = samp; samp2; samp2=samp2->prevsamp) {
+//------ Drop it if the object is saturated or truncated
+        if ((samp2->sexflags & sexflagmask) || (samp2->imaflags & imaflagmask))
+            continue;
+        cia = ci;
+        cia2 = ci2;
+        cva = cv;
+        cva2 = cv2;
+        cca = cc;
+        cca2 = cc2;
+        set2 = samp2->set;
+        field2 = set2->field;
+        instru = field2->astromlabel;
+//------ Negative indices are for the reference field
+        if (instru>=0) {
+          index = set2->index;
+          index2 = set2->index2;
+#ifdef USE_THREADS
+          QPTHREAD_MUTEX_LOCK(&nconstastromutex);
 #endif
-#pragma nounroll
-#pragma ivdep
-            for (q=ncoeff2; q--; rowp++,i2++,cvo++)
-                if (i2>=i1)
-                    alpha[rowp] += weight2**cvo;
+          set2->nconst += naxis;
+          if (index>=0)
+            nconst[index]+=naxis;
+          if (index2>=0)
+            nconst[index2]+=naxis;
+#ifdef USE_THREADS
+          QPTHREAD_MUTEX_UNLOCK(&nconstastromutex);
+#endif
+        } else
+          index = index2 = -1;
+
+//------ Compute the value of the basis functions at each sample
+        if (instru >= 0) {
+          redflag = 0;
+          for (c=0; c<ncontext; c++) {
+            if (c==cx || c==cy) {
+//------------ Image coordinates receive a special treatment
+              if (!redflag) {
+                raw_to_red(set2->wcs, samp2->vrawpos, redpos);
+                redflag = 1;
+              }
+              context[c] = redpos[c==cx?lng:lat];
+            } else
+              context[c] = (samp2->context[c]-czero[c])*cscale[c];
+          }
+//-------- The basis functions are computed from reduced context values
+          if (index>=0)
+            poly_func(poly, context);
+          if (index2>=0) {
+            if (!redflag)
+              raw_to_red(set2->wcs, samp2->vrawpos, redpos);
+            poly_func(poly2, redpos);
+          }
         }
 
-    return;
+//------ Pre-compute numbers that will be used in the dcoeffs vector
+//------ The innermost index of the jac array is the numerator of the
+//------ Jacobian operator
+        x = samp2->projpos;
+//------ Fill something equivalent to a row of a design matrix
+        for (d2=0; d2<naxis; d2++) {
+          indext = index;
+          dx = *(x++);
+          co = (double *)coeffs + index;
+          basis = poly->basis;
+          jac = samp2->dprojdred + d2;
+          for (p=npcoeff; p--; basis++) {
+            jact = jac;
+            for (d1=naxis; d1--; jact+=naxis) {
+              *(ci++) = indext;
+              *(cv++) = (val = *jact * *basis);
+              if ((++indext))
+                dx += val * *(co++);
+              else
+                indext--;
+              }
+          }
+//-------- Now the extra field-dependent parameters
+          indext2 = index2;
+          co2 = (double *)coeffs + index2;
+          basis2 = poly2->basis;
+          for (p=npcoeff2; p--; basis2++) {
+            jact = jac;
+            for (d1=naxis; d1--; jact+=naxis) {
+              *(ci2++) = indext2;
+              *(cv2++) = (val = *jact * *basis2);
+              if ((++indext2))
+                dx += val * *(co2++);
+              else
+                indext2--;
+            }
+          }
+          for (i=nicoeff; i--;)
+            *(cc++) = dx;
+          for (i=nicoeff2; i--;)
+            *(cc2++) = dx;
+        }
+//------ Compute the relative positional variance for this source
+        sigma2 = 0.0;
+        for (d=0; d<naxis; d++)
+          sigma2 += samp2->wcsposerr[d]*samp2->wcsposerr[d];
+//------ Add extra-weight to the reference to compensate for all the overlaps
+        weightfac = nlsamp*prefs.astref_weight;
+//------ Now fill the array
+        cvb = coeffval;
+        cib = coeffindex;
+        ccb = coeffconst;
+        cvb2 = coeffval2;
+        cib2 = coeffindex2;
+        ccb2 = coeffconst2;
+        for (samp3 = samp; samp3 != samp2; samp3=samp3->prevsamp) {
+//-------- Drop it if the object is saturated or truncated
+          if ((samp3->sexflags & sexflagmask)
+          	|| (samp3->imaflags & imaflagmask))
+            continue;
+
+//-------- Compute the relative weight of the pair
+          sigma3 = 0.0;
+          for (d=0; d<naxis; d++)
+            sigma3 += samp3->wcsposerr[d]*samp3->wcsposerr[d];
+          weight = (instru<0 ? samp3->set->weightfac*weightfac : 1.0)
+			/(sigma3+sigma2);
+
+//-------- Compute contribution from the pair to the chi2
+          ccat = cca;
+          ccbt = ccb;
+          for (d=naxis; d--; ccat += nicoeff, ccbt += nicoeff)
+            chi2 += weight * (*ccat - *ccbt)  * (*ccat - *ccbt);
+          ccat = cca2;
+          ccbt = ccb2;
+          for (d=naxis; d--; ccat += nicoeff2, ccbt += nicoeff2)
+            chi2 += weight * (*ccat - *ccbt)  * (*ccat - *ccbt);
+
+//-------- Fill the matrices
+//-------- First, the contributions involving Jacobians for star A
+#ifdef USE_THREADS
+          if (*cia >= 0) {
+            imut = (*cia/ncoeff)%NMAT_MUTEX;
+             QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
+          }
+#endif
+          astrom_add_dcoeffs(dcoeffs,naxis,weight, cia,cva,cca,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cia,cva,ccb,ncoeff);
+#ifdef USE_THREADS
+          if (*cia >= 0) {
+            QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
+          }
+          if (*cia2 >= 0) {
+            imut = (*cia2/ncoeff)%NMAT_MUTEX2;
+          }
+#endif
+            astrom_add_dcoeffs(dcoeffs,naxis,weight, cia2,cva2,cca2,ncoeff2);
+            astrom_add_dcoeffs(dcoeffs,naxis,-weight, cia2,cva2,ccb2,ncoeff2);
+
+//-------- Second, the contributions involving Jacobians for star B
+#ifdef USE_THREADS
+            if (*cia2 >= 0) {
+              QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
+            }
+            if (*cib >= 0) {
+              imut = (*cib/ncoeff)%NMAT_MUTEX;
+              QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
+            }
+#endif
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cib,cvb,cca,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,weight, cib,cvb,ccb,ncoeff);
+#ifdef USE_THREADS
+          if (*cib >= 0) {
+            QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
+          }
+          if (*cib2 >= 0) {
+            imut = (*cib2/ncoeff)%NMAT_MUTEX2;
+            QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
+          }
+#endif
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight,cib2,cvb2,cca2,ncoeff2);
+          astrom_add_dcoeffs(dcoeffs,naxis,weight,cib2,cvb2,ccb2,ncoeff2);
+
+#ifdef USE_THREADS
+          if (*cib2 >= 0) {
+             QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
+          }
+#endif
+          cvb += nicoeff;
+          cib += nicoeff;
+          ccb += nicoeff;
+          cvb2 += nicoeff2;
+          cib2 += nicoeff2;
+          ccb2 += nicoeff2;
+        }
+      }
+    }
+
+    if (nlsampmax) {
+      free(coeffindex);
+      free(coeffval);
+      free(coeffconst);
+      free(coeffindex2);
+      free(coeffval2);
+      free(coeffconst2);
+    }
+
+  return chi2;
 }
 
 
-/****** add_betamat ******************************************************
-  PROTO	void add_betabat(double *alpha, int naxis,
-  double weight, int *ci, double *cv, double *cc, int ncoeff)
-  PURPOSE	Add a product contribution to the right-hand matrix of normal
-  equations.
-  INPUT	ptr to the right-hand matrix,
-  number of dimensions,
-  weight of the contribution (can be negative for cross-products),
-  index array,
-  basis array,
-  constraint array,
-  size of the first component arrays.
-  OUTPUT	-.
-  NOTES	-.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	04/04/2013
+/****** astrom_add_dcoeffs ***************************************************
+PROTO	void astrom_add_dcoeffs(double *dcoeffs, int naxis,
+		double weight, int *ci, double *cv, double *cc, int ncoeff)
+PURPOSE	Add a product contribution to the chi2 gradient.
+INPUT	ptr to the gradient (modified in output),
+	number of dimensions,
+	weight of the contribution (can be negative for cross-products),
+	index array,
+	basis array,
+	constraint array,
+	size of the first component arrays.
+OUTPUT	-.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION	31/03/2021
  ***/
-static void add_betamat(double *beta, int naxis,
-        double weight, int *ci, double *cv, double *cc, int ncoeff)
-{
-    int		d, p;
+static void astrom_add_dcoeffs(double *dcoeffs, int naxis,
+        double weight, int *ci, double *cv, double *cc, int ncoeff) {
 
-    if (*ci < 0)
-        return;
+   int		d, p;
 
-    for (d=naxis; d--;)
-#pragma ivdep
-        for (p=ncoeff; p--;)
-            beta[*(ci++)] -= weight**(cv++)**(cc++);
-
+  if (*ci < 0)
     return;
+
+  for (d=naxis; d--;)
+#pragma ivdep
+    for (p=ncoeff; p--;)
+      dcoeffs[*(ci++)] += 2.0 * weight * *(cc++) * *(cv++);
+
+  return;
 }
 
 
 #ifdef USE_THREADS
 
-/****** pthread_fillastromatrix_thread ***************************************
-  PROTO   void *pthread_fillastromatrix_thread(void *arg)
+/****** pthread_astrom_eval_thread ***************************************
+  PROTO   void *pthread_astrom_eval_thread(void *arg)
   PURPOSE thread that takes care of fill the astrometry matrix.
   INPUT   Pointer to the thread number.
   OUTPUT  -.
   NOTES   Relies on global variables.
   AUTHOR  E. Bertin (IAP)
-  VERSION 18/05/2012
+  VERSION 23/03/2021
  ***/
-void    *pthread_fillastromatrix_thread(void *arg)
-{
+void    *pthread_astrom_eval_thread(void *arg) {
+
     polystruct	*poly,*poly2;
-    char		str[128];
+    char	str[128];
     int		group2[NAXIS],
-    findex, gindex, sindex, proc, naxis, groupdeg2,
-    d;
+		findex, gindex, sindex, proc, naxis, groupdeg2, d;
 
     gindex = findex = -1;
     proc = *((int *)arg);
-    naxis = pthread_fgroups[0]->naxis;
+    naxis = astrom_fgroups[0]->naxis;
     for (d=0; d<naxis; d++)
         group2[d] = 1;
     groupdeg2 = prefs.focal_deg;
-    poly = poly_init(prefs.context_group, prefs.ncontext_name,
-            prefs.group_deg, prefs.ngroup_deg);
-    poly2 = poly_init(group2, naxis, &groupdeg2, 1);
+    poly = astrom_poly;
+    poly2 = astrom_poly2;
     threads_gate_sync(pthread_startgate);
     while (!pthread_endflag)
     {
         QPTHREAD_MUTEX_LOCK(&fillastromutex);
-        if (pthread_gindex<pthread_ngroup)
+        if (pthread_gindex < astrom_nfgroup)
         {
             gindex = pthread_gindex;
             findex = pthread_findex;
             sindex = pthread_sindex++;
-            if (pthread_sindex>=pthread_fgroups[gindex]->field[findex]->nset)
+            if (pthread_sindex>=astrom_fgroups[gindex]->field[findex]->nset)
             {
                 pthread_sindex = 0;
                 pthread_findex++;
             }
-            if (pthread_findex>=pthread_fgroups[gindex]->nfield)
+            if (pthread_findex>=astrom_fgroups[gindex]->nfield)
             {
                 pthread_findex = 0;
                 pthread_gindex++;
             }
+/*
             if (!sindex)
             {
                 sprintf(str, "Filling the global astrometry matrix: "
                         "group %d/%d, field %d/%d",
-                        gindex+1, pthread_ngroup,
-                        findex+1, pthread_fgroups[gindex]->nfield);
+                        gindex+1, astrom_ngroup,
+                        findex+1, astrom_fgroups[gindex]->nfield);
                 NFPRINTF(OUTPUT, str);
             }
+*/
             QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
 
             /*---- Fetch field data */
-            fill_astromatrix(pthread_fgroups[gindex]->field[findex]->set[sindex],
-                    pthread_alpha, pthread_beta, pthread_ncoefftot,
-                    poly, poly2, pthread_nconst);
-
+            astrom_eval_update(astrom_fgroups[gindex]->field[findex]->set[sindex],
+                    astrom_coeffs, astrom_dcoeffs, astrom_ncoefftot,
+                    poly, poly2, astrom_nconst);
         }
         else
         {
@@ -1089,23 +881,22 @@ void    *pthread_fillastromatrix_thread(void *arg)
 }
 
 
-/****** pthread_fill_astromatrix **********************************************
-  PROTO   void pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
-  int ncoefftot, int *nconst, double *alpha, double *beta)
+/****** pthread_astrom_eval **********************************************
+  PROTO   double pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
+  int ncoefftot, int *nconst, double *coeffs)
   PURPOSE	Start multithreaded filling of the astrometry matrix
   INPUT	ptr to the array of groups of fields,
   number of groups involved,
   matrix size,
   pointer to an array of constraint counts,
-  pointer of pointer to the normal equation alpha matrix (output),
   pointer of pointer to the beta vector matrix (output).
   OUTPUT	-.
   NOTES	Uses the global preferences.
   AUTHOR	E. Bertin (IAP)
   VERSION	08/03/2007
  ***/
-void	pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
-        int ncoefftot, int *nconst, double *alpha, double *beta)
+void	pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
+        int ncoefftot, int *nconst, double *params)
 {
     static pthread_attr_t	pthread_attr;
     int				*proc,
@@ -1113,12 +904,6 @@ void	pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
 
     /* Number of active threads */
     nproc = prefs.nthreads;
-    pthread_fgroups = fgroups;
-    pthread_ngroup = ngroup;
-    pthread_ncoefftot = ncoefftot;
-    pthread_nconst = nconst;
-    pthread_alpha = alpha;
-    pthread_beta = beta;
     /* Set up multi-threading stuff */
     QMALLOC(proc, int, nproc);
     QMALLOC(thread, pthread_t, nproc);
@@ -1142,14 +927,13 @@ void	pthread_fill_astromatrix(fgroupstruct **fgroups, int ngroup,
     {
         proc[p] = p;
         QPTHREAD_CREATE(&thread[p], &pthread_attr,
-                &pthread_fillastromatrix_thread, &proc[p]);
+                &pthread_astrom_eval_thread, &proc[p]);
     }
 
     QPTHREAD_MUTEX_LOCK(&fillastromutex);
     pthread_gindex = pthread_findex = pthread_sindex = 0;
     pthread_endflag = 0;
     QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
-    NFPRINTF(OUTPUT, "Starting fetching to matrix...");
     /* Release threads!! */
     threads_gate_sync(pthread_startgate);
     /* ( Slave threads process the current buffer data here ) */
@@ -1272,7 +1056,8 @@ void mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
     {
         for (d=0; d<naxis; d++)
             if (!wcs->nprojp)
-                projp[1+100*d] += 1.0;	/* Default to the linear term */
+                projp[1+100*d] += 1.0;	// Default to the linear term
+
         /*-- Compute the array of exponents of polynom terms */
         powerst = powers = poly_powers(poly);
         mat1 = mat + set->index;	/* Instrument-dependent section in solution */
@@ -1548,173 +1333,169 @@ alphaminc2 = alphamin2 * ASTROM_REGULFACTOR;
 }
 
 /****** compute jacobian ******************************************************
-  PROTO	void compute_jacobian(samplestruct *sample, double *dprojdred)
-  PURPOSE	Compute the Jacobian matrices required for solving the astrometric
-  equations.
-  INPUT	ptr to the sample structure,
-  ptr to the dproj/dred Jacobian (or NULL if no computation needed).
-  OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
-  NOTES	Memory must have been allocated (naxis*naxis*sizeof(double)) for the
-  Jacobian array.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	30/12/2003
+PROTO	void compute_jacobian(samplestruct *sample)
+PURPOSE Compute the Jacobian matrices required for solving the astrometric
+	equations.
+INPUT	ptr to the sample structure,
+	ptr to the dproj/dred Jacobian (or NULL if no computation needed).
+OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
+NOTES	Memory must have been allocated (naxis*naxis*sizeof(double)) for the
+	Jacobian array.
+AUTHOR	E. Bertin (IAP)
+VERSION 03/03/2021
  ***/
-int	compute_jacobian(samplestruct *sample, double *dprojdred)
-{
-    wcsstruct	*wcs;
-    fgroupstruct	*fgroup;
-    fieldstruct	*field;
-    setstruct	*set;
-    double	rawpos[NAXIS], rawpos2[NAXIS], redpos[NAXIS], wcspos[NAXIS],
-    projpos1[NAXIS], projpos2[NAXIS];
-    int		i,j, naxis;
+int	compute_jacobian(samplestruct *sample) {
+
+   wcsstruct	*wcs;
+   fgroupstruct *fgroup;
+   fieldstruct	*field;
+   setstruct	*set;
+   double	rawpos[NAXIS], rawpos2[NAXIS], redpos[NAXIS], wcspos[NAXIS],
+		projpos1[NAXIS], projpos2[NAXIS];
+   float	*dprojdred;
+   int		i,j, naxis;
+
 
     if (!(set=sample->set) || !(field=set->field) || !(fgroup=field->fgroup)
             || !(wcs=fgroup->wcs))
         return RETURN_ERROR;
+
     naxis = wcs->naxis;
     for (i=0; i<naxis; i++)
         rawpos[i] = sample->vrawpos[i];
-    for (i=0; i<naxis; i++)
-    {
-        /*-- Compute terms of the Jacobian dproj/dred matrix */
-        /*-- Things are a bit tortuous because it is computed with respect */
-        /*-- to reduced coordinates ("in projected degrees")*/
-        raw_to_red(set->wcs, rawpos, redpos);
-        redpos[i] -= 0.5*ARCSEC/DEG;
-        red_to_raw(set->wcs, redpos, rawpos2);
-        raw_to_wcs(set->wcs, rawpos2, wcspos);
-        wcs_to_raw(wcs, wcspos, projpos1);
-        redpos[i] += 1.0*ARCSEC/DEG;
-        red_to_raw(set->wcs, redpos, rawpos2);
-        raw_to_wcs(set->wcs, rawpos2, wcspos);
-        wcs_to_raw(wcs, wcspos, projpos2);
-        for (j=0; j<naxis; j++)
-            *(dprojdred++) = 1.0*(projpos2[j] - projpos1[j])/(1*ARCSEC/DEG);
+    dprojdred = sample->dprojdred;
+    for (i=0; i<naxis; i++) {
+//---- Compute terms of the Jacobian dproj/dred matrix
+//---- Things are a bit tortuous because it is computed with respect
+//---- to reduced coordinates ("in projected degrees")
+      raw_to_red(set->wcs, rawpos, redpos);
+      redpos[i] -= 0.5 * ARCSEC/DEG;
+      red_to_raw(set->wcs, redpos, rawpos2);
+      raw_to_wcs(set->wcs, rawpos2, wcspos);
+      wcs_to_raw(wcs, wcspos, projpos1);
+      redpos[i] += 1.0 * ARCSEC/DEG;
+      red_to_raw(set->wcs, redpos, rawpos2);
+      raw_to_wcs(set->wcs, rawpos2, wcspos);
+      wcs_to_raw(wcs, wcspos, projpos2);
+      for (j=0; j<naxis; j++)
+        *(dprojdred++) = 1.0 * (projpos2[j] - projpos1[j])/(1.0 * ARCSEC/DEG);
     }
 
-    return RETURN_OK;
+  return RETURN_OK;
 }
 
 
 /****** reproj_fgroup *******************************************************
-  PROTO	void reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
-  int propflag)
-  PURPOSE	Perform re-projection of sources in a group of fields.
-  INPUT	pointer to the group of fields,
-  pointer to the reference field,
-  proper motion correction flag.
-  OUTPUT	-.
-  NOTES	Uses the global preferences.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	19/02/2018
+PROTO	void reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
+		int flags)
+PURPOSE Perform re-projection of sources in a group of fields.
+INPUT	pointer to the group of fields,
+	pointer to the reference field,
+	proper motion correction flag.
+OUTPUT	-.
+NOTES	Uses the global preferences.
+AUTHOR	E. Bertin (IAP)
+VERSION 03/03/2021
  ***/
-void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield, int propflag)
-{
-    fieldstruct		**field;
-    wcsstruct		*wcs;
-    setstruct		**pset,
-                    *set;
-    msamplestruct	*msamp;
-    samplestruct	*samp;
-    double		wcspos[NAXIS],
-    *projposmin,*projposmax,
-    prop2, properr2, rprop;
-    int			i,f,s, lng,lat, nsamp, nfield, naxis;
+void	reproj_fgroup(fgroupstruct *fgroup, fieldstruct *reffield, int flags) {
 
-    field = fgroup->field;
-    nfield = fgroup->nfield;
-    naxis = fgroup->naxis;
+   fieldstruct		**field;
+   wcsstruct		*wcs;
+   setstruct		**pset,
+			*set;
+   msamplestruct	*msamp;
+   samplestruct	*samp;
+   double		wcspos[NAXIS],
+			*projposmin,*projposmax,
+			prop2, properr2, rprop;
+   int			i,f,s, lng,lat, nsamp, nfield, naxis,
+   			propflag, jacflag;
 
-    wcs = fgroup->wcs;
-    projposmin = fgroup->projposmin;
-    projposmax = fgroup->projposmax;
-    for (i=0; i<naxis; i++)
-    {
-        projposmin[i] = projposmin[i] = BIG;
-        projposmax[i] = projposmax[i] = -BIG;
-    }
 
-    for (f=0; f<nfield; f++)
-    {
-        pset = field[f]->set;
-        for (s=field[f]->nset; s--; pset++)
-        {
-            set = *pset;
-            lng = set->lng;
-            lat = set->lat;
-            samp = set->sample;
-            for (nsamp=set->nsample; nsamp--; samp++)
-            {
-                raw_to_wcs(set->wcs, samp->rawpos, samp->wcspos);
-                if (propflag && samp->msamp)
-                    /*-------- Correct for proper motions if asked to */
-                {
-                    msamp = samp->msamp;
-                    for (i=0; i<naxis; i++)
-                    {
-                        wcspos[i] = samp->wcspos[i];
-                        if ((properr2=msamp->wcsprop[i]*msamp->wcsprop[i]*msamp->wcschi2) > TINY
-                                && (prop2=msamp->wcsprop[i]*msamp->wcsprop[i]) > TINY)
-                        {
-                            rprop = msamp->wcsprop[i] * prop2 / (prop2 + properr2);
-                            wcspos[i] += (msamp->epoch - samp->epoch)
-                                * (i==lng?rprop/cos(samp->wcspos[lat]*DEG) : rprop);
-                        }
-                    }
-                    wcs_to_raw(set->wcs, wcspos, samp->vrawpos);
-                    /*-------- Compute new projection */
-                    wcs_to_raw(wcs, wcspos, samp->projpos);
-                }
-                else
-                {
-                    for (i=0; i<naxis; i++)
-                        samp->vrawpos[i] = samp->rawpos[i];
-                    /*-------- Compute new projection */
-                    wcs_to_raw(wcs, samp->wcspos, samp->projpos);
-                }
+  propflag = flags & REPROJ_PROPER_MOTION;
+  jacflag = flags & REPROJ_JACOBIAN;
+  field = fgroup->field;
+  nfield = fgroup->nfield;
+  naxis = fgroup->naxis;
+  wcs = fgroup->wcs;
+  projposmin = fgroup->projposmin;
+  projposmax = fgroup->projposmax;
+  for (i=0; i<naxis; i++) {
+    projposmin[i] = projposmin[i] = BIG;
+    projposmax[i] = projposmax[i] = -BIG;
+  }
+
+  for (f=0; f<nfield; f++) {
+    pset = field[f]->set;
+    for (s=field[f]->nset; s--; pset++) {
+      set = *pset;
+      lng = set->lng;
+      lat = set->lat;
+      samp = set->sample;
+      for (nsamp=set->nsample; nsamp--; samp++) {
+        raw_to_wcs(set->wcs, samp->rawpos, samp->wcspos);
+        if (propflag && samp->msamp) {
+//-------- Correct for proper motions if asked to
+          msamp = samp->msamp;
+          for (i=0; i<naxis; i++) {
+            wcspos[i] = samp->wcspos[i];
+            if ((properr2 =
+             	msamp->wcsprop[i]*msamp->wcsprop[i]*msamp->wcschi2) > TINY
+		&& (prop2=msamp->wcsprop[i]*msamp->wcsprop[i]) > TINY) {
+              rprop = msamp->wcsprop[i] * prop2 / (prop2 + properr2);
+              wcspos[i] += (msamp->epoch - samp->epoch)
+			* (i==lng?rprop/cos(samp->wcspos[lat]*DEG) : rprop);
             }
-            /*---- Compute the boundaries of projected positions for the whole group */
-            sort_samples(set);
-            for (i=0; i<naxis; i++)
-            {
-                if (projposmin[i] > set->projposmin[i])
-                    projposmin[i] = set->projposmin[i];
-                if (projposmax[i] < set->projposmax[i])
-                    projposmax[i] = set->projposmax[i];
-            }
+          }
+          wcs_to_raw(set->wcs, wcspos, samp->vrawpos);
+//-------- Compute new projection
+          wcs_to_raw(wcs, wcspos, samp->projpos);
+        } else {
+          for (i=0; i<naxis; i++)
+            samp->vrawpos[i] = samp->rawpos[i];
+//---------- Compute new projection
+          wcs_to_raw(wcs, samp->wcspos, samp->projpos);
         }
+        if (jacflag)
+          compute_jacobian(samp);
+      }
+//---- Compute the boundaries of projected positions for the whole group
+      sort_samples(set);
+      for (i=0; i<naxis; i++) {
+        if (projposmin[i] > set->projposmin[i])
+          projposmin[i] = set->projposmin[i];
+        if (projposmax[i] < set->projposmax[i])
+          projposmax[i] = set->projposmax[i];
+      }
     }
+  }
 
-    if (reffield)
-    {
-        set = reffield->set[0];
-        samp = set->sample;
-        for (nsamp=set->nsample; nsamp--; samp++)
-        {
-            if (propflag && samp->msamp)
-                /*----- Correct for proper motions if asked to */
-            {
-                msamp = samp->msamp;
-                for (i=0; i<naxis; i++)
-                {
-                    wcspos[i] = samp->wcspos[i];
-                    if ((properr2=msamp->wcsprop[i]*msamp->wcsprop[i]*msamp->wcschi2) > TINY
-                            && (prop2=msamp->wcsprop[i]*msamp->wcsprop[i]) > TINY)
-                    {
-                        rprop = msamp->wcsprop[i] * prop2 / (prop2 + properr2);
-                        wcspos[i] += (msamp->epoch - samp->epoch)
-                            * (i==lng?rprop/cos(samp->wcspos[lat]*DEG) : rprop);
-                    }
-                }
-                wcs_to_raw(wcs, wcspos, samp->projpos);
-            }
-            else
-                wcs_to_raw(wcs, samp->wcspos, samp->projpos);
+  if (reffield) {
+    set = reffield->set[0];
+    samp = set->sample;
+    for (nsamp=set->nsample; nsamp--; samp++) {
+      if (propflag && samp->msamp) {
+//------ Correct for proper motions if asked to */
+        msamp = samp->msamp;
+        for (i=0; i<naxis; i++) {
+          wcspos[i] = samp->wcspos[i];
+          if ((properr2 =
+          	msamp->wcsprop[i]*msamp->wcsprop[i]*msamp->wcschi2) > TINY
+			&& (prop2=msamp->wcsprop[i]*msamp->wcsprop[i]) > TINY) {
+            rprop = msamp->wcsprop[i] * prop2 / (prop2 + properr2);
+            wcspos[i] += (msamp->epoch - samp->epoch)
+		* (i==lng?rprop/cos(samp->wcspos[lat]*DEG) : rprop);
+          }
         }
+        wcs_to_raw(wcs, wcspos, samp->projpos);
+      } else
+        wcs_to_raw(wcs, samp->wcspos, samp->projpos);
+    if (jacflag)
+      compute_jacobian(samp);
     }
+  }
 
-    return;
+  return;
 }
 
 

@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		23/03/2020
+*	Last modified:		03/03/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -34,22 +34,32 @@
 #include "fgroup.h"
 #include "field.h"
 
-/*----------------------------- Internal constants --------------------------*/
+//----------------------------- Internal constants --------------------------
 
-#define	ASTREF_WEIGHTFACTOR	1.0	/* Fudge factor applied to ref.weights*/
-#define	ASTROM_REGULFACTOR	0.001	/* Fudge factor applied to regul. */
+#define ASTROM_MAXITER		100	// Maximum number of solution iterations
+#define ASTROM_UPDATEFACTOR	1e-29	// Gradient factor at each iteration
+#define ASTREF_WEIGHTFACTOR	1.0	// Fudge factor for reference weights
+#define ASTROM_REGULFACTOR	0.001	// Fudge factor for regularization
 
-/*--------------------------- structure definitions -------------------------*/
-/*---------------------------------- protos --------------------------------*/
-extern int	compute_jacobian(samplestruct *sample, double *dprojdred);
+//-------------------------------- flags ------------------------------------
+
+#define 	REPROJ_NONE		0x0000	// No extra computation
+#define 	REPROJ_PROPER_MOTION	0x0001	// Compute proper motions
+#define 	REPROJ_JACOBIAN	0x0002	// Compute Jacobians
+
+
+//--------------------------- structure definitions -------------------------
+//---------------------------------- protos --------------------------------
+extern int	compute_jacobian(samplestruct *sample);
 
 extern void	astr_orthopoly(polystruct *poly),
-		astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup),
+		astrsolve_fgroups(fgroupstruct **fgroups,
+				fieldstruct **reffields, int nfgroup),
 		astrweight_fgroups(fgroupstruct **fgroups, int nfgroup),
 		mat_to_wcs(polystruct *poly, polystruct *poly2, double *mat,
 				setstruct *set),
 		reproj_fgroup(fgroupstruct *fgroup,fieldstruct *field,
-				int propflag),
+				int flags),
 		regul_mat(fgroupstruct **fgroups, int nfgroup,
 			double *alpha, int ncoefftot),
 		shrink_mat(double *alpha, double *beta, int ncoefftot,

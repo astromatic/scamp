@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2017 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/06/2017
+*	Last modified:		03/03/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -33,12 +33,12 @@
 #include "fits/fitscat.h"
 #include "field.h"
 
-/*----------------------------- Internal constants --------------------------*/
-#define		MAXASTRINSTRU	2048	/* Max. number of astrom. instruments*/
-#define		MAXPHOTINSTRU	2048	/* Max. number of photom. instruments*/
-#define		MAXNGROUP	65536	/* Max. number of groups (arbitrary) */
+//----------------------------- Internal constants --------------------------
+#define	MAXASTRINSTRU	2048	// Maximum number of astrom. instruments
+#define	MAXPHOTINSTRU	2048	// Maximum number of photom. instruments
+#define	MAXNGROUP	65536	// Maximum number of groups (arbitrary)
 
-/*--------------------------------- typedefs --------------------------------*/
+//--------------------------------- typedefs --------------------------------
 typedef struct fgroup
   {
   int		no;			/* Group ID (number) */

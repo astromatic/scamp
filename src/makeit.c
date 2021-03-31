@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright: (C) 2002-2020 IAP/CNRS/SorbonneU
+ * Copyright: (C) 2002-2021 IAP/CNRS/SorbonneU
  *
  * License: GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified: 12/08/2020
+ * Last modified: 03/03/2021
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -250,7 +250,7 @@ void makeit(void)
     for (g=0; g<ngroup; g++)
     {
         /*-- Reproject all fields from a group to a common projection */
-        reproj_fgroup(fgroups[g], reffields[g], 0);
+        reproj_fgroup(fgroups[g], reffields[g], REPROJ_JACOBIAN);
         /*-- Perform cross-identifications across catalogs */
         sprintf(str, "Making preliminary cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
@@ -260,14 +260,14 @@ void makeit(void)
     if (prefs.solvastrom_flag)
     {
         /*-- Compute global astrometric solution: 1st iteration */
-        astrsolve_fgroups(fgroups, ngroup);
+        astrsolve_fgroups(fgroups, reffields, ngroup);
 
         NFPRINTF(OUTPUT, "");
         QPRINTF(OUTPUT, " \n----- Astrometric clipping:\n\n");
         for (g=0; g<ngroup; g++)
         {
             /*---- Reproject all fields from a group to a common projection (update) */
-            reproj_fgroup(fgroups[g], reffields[g], 0);
+            reproj_fgroup(fgroups[g], reffields[g], REPROJ_JACOBIAN);
             /*---- Perform cross-identifications across catalogs */
             sprintf(str, "Making cross-identifications in group %d", g+1);
             NFPRINTF(OUTPUT, str);
@@ -285,7 +285,7 @@ void makeit(void)
         }
 
         /*-- Compute global astrometric solution: 2nd iteration */
-        astrsolve_fgroups(fgroups, ngroup);
+        astrsolve_fgroups(fgroups, reffields, ngroup);
     }
 
     /* Display internal astrometric stats */
@@ -301,7 +301,7 @@ void makeit(void)
     for (g=0; g<ngroup; g++)
     {
         /*-- Reproject all fields from a group to a common projection (update) */
-        reproj_fgroup(fgroups[g], reffields[g], 0);
+        reproj_fgroup(fgroups[g], reffields[g], REPROJ_JACOBIAN);
         /*-- Perform cross-identifications across catalogs */
         sprintf(str, "Making cross-identifications in group %d", g+1);
         NFPRINTF(OUTPUT, str);
@@ -470,7 +470,8 @@ void makeit(void)
         }
         for (g=0; g<ngroup; g++)
             /*---- Reproject to a common projection while correcting for proper motions */
-            reproj_fgroup(fgroups[g], reffields[g], 1);
+            reproj_fgroup(fgroups[g], reffields[g],
+            		REPROJ_PROPER_MOTION|REPROJ_JACOBIAN);
         NFPRINTF(OUTPUT, "Pairing detections...");
 
        for (g=0; g<ngroup; g++)
@@ -480,7 +481,7 @@ void makeit(void)
         for (g=0; g<ngroup; g++)
             merge_fgroup(fgroups[g], reffields[g]);
         /*-- Compute global astrometric solution: 3rd iteration */
-        astrsolve_fgroups(fgroups, ngroup);
+        astrsolve_fgroups(fgroups, reffields, ngroup);
     }
 
     /* Compute final proper motions and parallaxes */
@@ -510,7 +511,9 @@ void makeit(void)
             }
             for (g=0; g<ngroup; g++)
                 /*---- Reproject all fields from a group to a common projection (update) */
-                reproj_fgroup(fgroups[g], reffields[g], prefs.propmotioncorr_flag);
+                reproj_fgroup(fgroups[g], reffields[g],
+                	prefs.propmotioncorr_flag?
+                		REPROJ_PROPER_MOTION : REPROJ_NONE);
         }
 
     /* Save headers */
