@@ -7,7 +7,7 @@
  *
  *	This file part of:	SCAMP
  *
- *	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU
+ *	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
  *
  *	License:		GNU General Public License
  *
@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		31/03/2021
+ *	Last modified:		07/04/2021
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -80,22 +80,24 @@
 
 pthread_t		*thread;
 pthread_mutex_t		matmutex[NMAT_MUTEX], matmutex2[NMAT_MUTEX2],
-			fillastromutex, nconstastromutex;
+			fillastromutex, chi2astromutex, nconstastromutex;
+
+double			pthread_chi2;
 
 int			pthread_endflag,
 			pthread_gindex, pthread_findex, pthread_sindex;
 
-void			pthread_astrom_eval(fgroupstruct **fgroups,
+static double		pthread_astrom_eval(fgroupstruct **fgroups,
 				int ngroup, int ncoefftot, int *nconst,
-				double *params),
-			*pthread_astrom_eval_thread(void *arg);
+				double *params);
+
+static void		*pthread_astrom_eval_thread(void *arg);
 #endif
 
 
 //--------------------------- global variables  ---------------------------
 
 fgroupstruct		**astrom_fgroups;
-polystruct		*astrom_poly, *astrom_poly2;
 
 double			*astrom_coeffs,
 			*astrom_dcoeffs;
@@ -142,7 +144,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
    double	cmin[MAXCONTEXT],cmax[MAXCONTEXT],
 		cscale[MAXCONTEXT], czero[MAXCONTEXT],
 		*coeffs, *dcoeffs,
-		dval;
+		dval, chi2;
    size_t	size;
    int		group2[NAXIS],
 		*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
@@ -344,47 +346,34 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
   astrom_nconst = nconst;
   astrom_coeffs = coeffs;
   astrom_dcoeffs = dcoeffs;
-  astrom_poly = poly;
-  astrom_poly2 = poly2;
 
-
+  chi2 = 0.0;
   for (it=0; it<ASTROM_MAXITER; it++) {
 
-    sprintf(str, "Solving astrometry: iteration #%d", it + 1);
+    sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g\n", it + 1, chi2);
     NFPRINTF(OUTPUT, str);
-    for (g=0; g<nfgroup; g++)
-      reproj_fgroup(fgroups[g], reffields[g], REPROJ_NONE);
 
+    chi2 = 0.0;
 #ifdef USE_THREADS
-    pthread_astrom_eval(fgroups, nfgroup, ncoefftot, nconst, dcoeffs);
+    chi2 = pthread_astrom_eval(fgroups, nfgroup, ncoefftot, nconst, dcoeffs);
 #else
-//-- Go through all groups, all fields, all sets, all samples
-    for (g=0; g<nfgroup; g++) {
-      nfield = fgroups[g]->nfield;
-      fields = fgroups[g]->field;
-      for (f=0; f<nfield; f++) {
-        field = fields[f];
-        for (s=0; s<field->nset; s++) {
-          set = field->set[s];
-          astrom_eval(set, dcoeffs, ncoefftot, poly,poly2, nconst);
-        }
-      }
-    }
+    chi2 = astrom_eval(set, dcoeffs, ncoefftot, poly,poly2, nconst);
 #endif
 //-- Gradient descent
     for (c=0; c<ncoefftot; c++)
-      coeffs[c] = ASTROM_UPDATEFACTOR * dcoeffs[c];  
+      coeffs[c] -= ASTROM_UPDATEFACTOR * dcoeffs[c];  
 
-//-- Fill the astrom structures with the derived parameters
-    for (g=0; g<nfgroup; g++) {
-      nfield = fgroups[g]->nfield;
-      fields = fgroups[g]->field;
-      for (f=0; f<nfield; f++) {
-        field = fields[f];
-        for (s=0; s<field->nset; s++) {
-          set = field->set[s];
-          mat_to_wcs(poly, poly2, coeffs, set);
-        }
+  }
+
+// Fill the astrom structures with the derived parameters
+  for (g=0; g<nfgroup; g++) {
+    nfield = fgroups[g]->nfield;
+    fields = fgroups[g]->field;
+    for (f=0; f<nfield; f++) {
+      field = fields[f];
+      for (s=0; s<field->nset; s++) {
+        set = field->set[s];
+        mat_to_wcs(poly, poly2, coeffs, set);
       }
     }
   }
@@ -412,7 +401,7 @@ INPUT	Ptr to data,
 OUTPUT	Current chi2 value.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 31/03/2021
+VERSION 07/04/2021
  ***/
 static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
 		const int ncoefftot, const double step) {
@@ -423,15 +412,20 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
    setstruct	*set;
    polystruct	*poly, *poly2;
    double	chi2;
-   int		*nconst,
-   		nfgroup, nfield, naxis, f, g, s;
+   int		group2[NAXIS],
+   		*nconst,
+   		nfgroup, groupdeg2, nfield, naxis, f, g, s, d;
 
 
   naxis = astrom_fgroups[0]->naxis;
 
   nfgroup = astrom_nfgroup;
-  poly = astrom_poly;
-  poly2 = astrom_poly2;
+  poly = poly_init(prefs.context_group, prefs.ncontext_name,
+            prefs.group_deg, prefs.ngroup_deg);
+  for (d=0; d<naxis; d++)
+    group2[d] = 1;
+  groupdeg2 = prefs.focal_deg;
+  poly2 = poly_init(group2, naxis, &groupdeg2, 1);
   nconst = astrom_nconst;
 
   chi2 = 0.0;
@@ -448,6 +442,9 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
       }
     }
   }
+
+  poly_end(poly);
+  poly_end(poly2);
 
   return chi2;    
 }
@@ -469,7 +466,7 @@ INPUT	Ptr to the set structure,
 OUTPUT	Contribution to the total chi2.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 31/03/2021
+VERSION 07/04/2021
  ***/
 static double	astrom_eval_update(setstruct *set, const double *coeffs,
 		double *dcoeffs,
@@ -478,7 +475,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 
    fieldstruct		*field2;
    setstruct		*set2;
-   samplestruct	*samp,*samp2,*samp3;
+   samplestruct	*samp,*samp2, *sampa, *sampb;
    double		dprojdred[NAXIS*NAXIS], context[MAXCONTEXT],
 			redpos[NAXIS],
 			*coeffval, *coeffval2, *coeffconst,*coeffconst2,
@@ -486,7 +483,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 			*cc,*cca,*ccb, *cc2,*cca2,*ccb2, *ccat, *ccbt,
 			*co, *co2, *x,
 			*basis,*basis2, *czero, *cscale,
-			dx, sigma2,sigma3, weight, weightfac, val, chi2;
+			dx, sigmaa,sigmab, weight, weightfac, val, chi2;
    float		*jac,*jact;
    unsigned short	sexflagmask;
    unsigned int	imaflagmask;
@@ -561,9 +558,9 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
       cv2 = coeffval2;
       cc = coeffconst;
       cc2 = coeffconst2;
-      for (samp2 = samp; samp2; samp2=samp2->prevsamp) {
+      for (sampa = samp; sampa; sampa=sampa->prevsamp) {
 //------ Drop it if the object is saturated or truncated
-        if ((samp2->sexflags & sexflagmask) || (samp2->imaflags & imaflagmask))
+        if ((sampa->sexflags & sexflagmask) || (sampa->imaflags & imaflagmask))
             continue;
         cia = ci;
         cia2 = ci2;
@@ -571,7 +568,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
         cva2 = cv2;
         cca = cc;
         cca2 = cc2;
-        set2 = samp2->set;
+        set2 = sampa->set;
         field2 = set2->field;
         instru = field2->astromlabel;
 //------ Negative indices are for the reference field
@@ -599,19 +596,19 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
             if (c==cx || c==cy) {
 //------------ Image coordinates receive a special treatment
               if (!redflag) {
-                raw_to_red(set2->wcs, samp2->vrawpos, redpos);
+                raw_to_red(set2->wcs, sampa->vrawpos, redpos);
                 redflag = 1;
               }
               context[c] = redpos[c==cx?lng:lat];
             } else
-              context[c] = (samp2->context[c]-czero[c])*cscale[c];
+              context[c] = (sampa->context[c]-czero[c])*cscale[c];
           }
 //-------- The basis functions are computed from reduced context values
           if (index>=0)
             poly_func(poly, context);
           if (index2>=0) {
             if (!redflag)
-              raw_to_red(set2->wcs, samp2->vrawpos, redpos);
+              raw_to_red(set2->wcs, sampa->vrawpos, redpos);
             poly_func(poly2, redpos);
           }
         }
@@ -619,14 +616,14 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 //------ Pre-compute numbers that will be used in the dcoeffs vector
 //------ The innermost index of the jac array is the numerator of the
 //------ Jacobian operator
-        x = samp2->projpos;
+        x = sampa->projpos;
 //------ Fill something equivalent to a row of a design matrix
         for (d2=0; d2<naxis; d2++) {
           indext = index;
           dx = *(x++);
           co = (double *)coeffs + index;
           basis = poly->basis;
-          jac = samp2->dprojdred + d2;
+          jac = sampa->dprojdred + d2;
           for (p=npcoeff; p--; basis++) {
             jact = jac;
             for (d1=naxis; d1--; jact+=naxis) {
@@ -653,15 +650,15 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
                 indext2--;
             }
           }
-          for (i=nicoeff; i--;)
+          for (i=ncoeff; i--;)
             *(cc++) = dx;
-          for (i=nicoeff2; i--;)
+          for (i=ncoeff2; i--;)
             *(cc2++) = dx;
         }
 //------ Compute the relative positional variance for this source
-        sigma2 = 0.0;
+        sigmaa = 0.0;
         for (d=0; d<naxis; d++)
-          sigma2 += samp2->wcsposerr[d]*samp2->wcsposerr[d];
+          sigmaa += sampa->wcsposerr[d]*sampa->wcsposerr[d];
 //------ Add extra-weight to the reference to compensate for all the overlaps
         weightfac = nlsamp*prefs.astref_weight;
 //------ Now fill the array
@@ -671,27 +668,27 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
         cvb2 = coeffval2;
         cib2 = coeffindex2;
         ccb2 = coeffconst2;
-        for (samp3 = samp; samp3 != samp2; samp3=samp3->prevsamp) {
+        for (sampb = samp; sampb != sampa; sampb=sampb->prevsamp) {
 //-------- Drop it if the object is saturated or truncated
-          if ((samp3->sexflags & sexflagmask)
-          	|| (samp3->imaflags & imaflagmask))
+          if ((sampb->sexflags & sexflagmask)
+          	|| (sampb->imaflags & imaflagmask))
             continue;
 
 //-------- Compute the relative weight of the pair
-          sigma3 = 0.0;
+          sigmab = 0.0;
           for (d=0; d<naxis; d++)
-            sigma3 += samp3->wcsposerr[d]*samp3->wcsposerr[d];
-          weight = (instru<0 ? samp3->set->weightfac*weightfac : 1.0)
-			/(sigma3+sigma2);
+            sigmab += sampb->wcsposerr[d]*sampb->wcsposerr[d];
+          weight = (instru<0 ? sampb->set->weightfac*weightfac : 1.0)
+			/(sigmaa+sigmab);
 
 //-------- Compute contribution from the pair to the chi2
           ccat = cca;
           ccbt = ccb;
-          for (d=naxis; d--; ccat += nicoeff, ccbt += nicoeff)
+          for (d=naxis; d--; ccat += ncoeff, ccbt += ncoeff)
             chi2 += weight * (*ccat - *ccbt)  * (*ccat - *ccbt);
           ccat = cca2;
           ccbt = ccb2;
-          for (d=naxis; d--; ccat += nicoeff2, ccbt += nicoeff2)
+          for (d=naxis; d--; ccat += ncoeff2, ccbt += ncoeff2)
             chi2 += weight * (*ccat - *ccbt)  * (*ccat - *ccbt);
 
 //-------- Fill the matrices
@@ -699,7 +696,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 #ifdef USE_THREADS
           if (*cia >= 0) {
             imut = (*cia/ncoeff)%NMAT_MUTEX;
-             QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
+            QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
           }
 #endif
           astrom_add_dcoeffs(dcoeffs,naxis,weight, cia,cva,cca,ncoeff);
@@ -710,6 +707,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
           }
           if (*cia2 >= 0) {
             imut = (*cia2/ncoeff)%NMAT_MUTEX2;
+            QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
           }
 #endif
             astrom_add_dcoeffs(dcoeffs,naxis,weight, cia2,cva2,cca2,ncoeff2);
@@ -725,8 +723,8 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
               QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
             }
 #endif
-          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cib,cvb,cca,ncoeff);
           astrom_add_dcoeffs(dcoeffs,naxis,weight, cib,cvb,ccb,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cib,cvb,cca,ncoeff);
 #ifdef USE_THREADS
           if (*cib >= 0) {
             QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
@@ -736,8 +734,8 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
             QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
           }
 #endif
-          astrom_add_dcoeffs(dcoeffs,naxis,-weight,cib2,cvb2,cca2,ncoeff2);
-          astrom_add_dcoeffs(dcoeffs,naxis,weight,cib2,cvb2,ccb2,ncoeff2);
+//          astrom_add_dcoeffs(dcoeffs,naxis,-weight,cib2,cvb2,cca2,ncoeff2);
+//          astrom_add_dcoeffs(dcoeffs,naxis,weight,cib2,cvb2,ccb2,ncoeff2);
 
 #ifdef USE_THREADS
           if (*cib2 >= 0) {
@@ -803,48 +801,46 @@ static void astrom_add_dcoeffs(double *dcoeffs, int naxis,
 #ifdef USE_THREADS
 
 /****** pthread_astrom_eval_thread ***************************************
-  PROTO   void *pthread_astrom_eval_thread(void *arg)
-  PURPOSE thread that takes care of fill the astrometry matrix.
-  INPUT   Pointer to the thread number.
-  OUTPUT  -.
-  NOTES   Relies on global variables.
-  AUTHOR  E. Bertin (IAP)
-  VERSION 23/03/2021
- ***/
-void    *pthread_astrom_eval_thread(void *arg) {
+PROTO	void *pthread_astrom_eval_thread(void *arg)
+PURPOSE	thread that takes care of fill the astrometry matrix.
+INPUT	Pointer to the thread number.
+OUTPUT	-.
+NOTES	Relies on global variables.
+AUTHOR	E. Bertin (IAP)
+VERSION	07/04/2021
+***/
+static void    *pthread_astrom_eval_thread(void *arg) {
 
-    polystruct	*poly,*poly2;
-    char	str[128];
-    int		group2[NAXIS],
+  polystruct	*poly,*poly2;
+  double	chi2;
+  char		str[128];
+  int		group2[NAXIS],
 		findex, gindex, sindex, proc, naxis, groupdeg2, d;
 
-    gindex = findex = -1;
-    proc = *((int *)arg);
-    naxis = astrom_fgroups[0]->naxis;
-    for (d=0; d<naxis; d++)
-        group2[d] = 1;
-    groupdeg2 = prefs.focal_deg;
-    poly = astrom_poly;
-    poly2 = astrom_poly2;
-    threads_gate_sync(pthread_startgate);
-    while (!pthread_endflag)
-    {
-        QPTHREAD_MUTEX_LOCK(&fillastromutex);
-        if (pthread_gindex < astrom_nfgroup)
-        {
-            gindex = pthread_gindex;
-            findex = pthread_findex;
-            sindex = pthread_sindex++;
-            if (pthread_sindex>=astrom_fgroups[gindex]->field[findex]->nset)
-            {
-                pthread_sindex = 0;
-                pthread_findex++;
-            }
-            if (pthread_findex>=astrom_fgroups[gindex]->nfield)
-            {
-                pthread_findex = 0;
-                pthread_gindex++;
-            }
+  gindex = findex = -1;
+  proc = *((int *)arg);
+  naxis = astrom_fgroups[0]->naxis;
+  for (d=0; d<naxis; d++)
+    group2[d] = 1;
+  groupdeg2 = prefs.focal_deg;
+  poly = poly_init(prefs.context_group, prefs.ncontext_name,
+            prefs.group_deg, prefs.ngroup_deg);
+  poly2 = poly_init(group2, naxis, &groupdeg2, 1);
+  threads_gate_sync(pthread_startgate);
+  while (!pthread_endflag) {
+    QPTHREAD_MUTEX_LOCK(&fillastromutex);
+    if (pthread_gindex < astrom_nfgroup) {
+      gindex = pthread_gindex;
+      findex = pthread_findex;
+      sindex = pthread_sindex++;
+      if (pthread_sindex>=astrom_fgroups[gindex]->field[findex]->nset) {
+        pthread_sindex = 0;
+        pthread_findex++;
+      }
+      if (pthread_findex>=astrom_fgroups[gindex]->nfield) {
+        pthread_findex = 0;
+        pthread_gindex++;
+      }
 /*
             if (!sindex)
             {
@@ -855,113 +851,116 @@ void    *pthread_astrom_eval_thread(void *arg) {
                 NFPRINTF(OUTPUT, str);
             }
 */
-            QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
+      QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
 
-            /*---- Fetch field data */
-            astrom_eval_update(astrom_fgroups[gindex]->field[findex]->set[sindex],
-                    astrom_coeffs, astrom_dcoeffs, astrom_ncoefftot,
-                    poly, poly2, astrom_nconst);
-        }
-        else
-        {
-            QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
-            /*---- Wait for the input buffer to be updated */
-            threads_gate_sync(pthread_stopgate);
-            /* ( Master thread process loads and saves new data here ) */
-            threads_gate_sync(pthread_startgate);
-        }
+//---- Fetch field data
+      chi2 = astrom_eval_update(
+      		astrom_fgroups[gindex]->field[findex]->set[sindex],
+		astrom_coeffs, astrom_dcoeffs, astrom_ncoefftot,
+		poly, poly2, astrom_nconst);
+      QPTHREAD_MUTEX_LOCK(&chi2astromutex);
+      pthread_chi2 += chi2;
+      QPTHREAD_MUTEX_UNLOCK(&chi2astromutex);
+    } else {
+      QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
+//---- Wait for the input buffer to be updated */
+      threads_gate_sync(pthread_stopgate);
+//---- ( Master thread process loads and saves new data here )
+      threads_gate_sync(pthread_startgate);
     }
+  }
 
-    poly_end(poly);
-    poly_end(poly2);
+  poly_end(poly);
+  poly_end(poly2);
 
-    pthread_exit(NULL);
+  pthread_exit(NULL);
 
-    return (void *)NULL;
+  return (void *)NULL;
 }
 
 
 /****** pthread_astrom_eval **********************************************
-  PROTO   double pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
-  int ncoefftot, int *nconst, double *coeffs)
-  PURPOSE	Start multithreaded filling of the astrometry matrix
-  INPUT	ptr to the array of groups of fields,
-  number of groups involved,
-  matrix size,
-  pointer to an array of constraint counts,
-  pointer of pointer to the beta vector matrix (output).
-  OUTPUT	-.
-  NOTES	Uses the global preferences.
-  AUTHOR	E. Bertin (IAP)
-  VERSION	08/03/2007
- ***/
-void	pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
-        int ncoefftot, int *nconst, double *params)
-{
-    static pthread_attr_t	pthread_attr;
-    int				*proc,
-                    p, i;
+PROTO	double	pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
+				int ncoefftot, int *nconst, double *coeffs)
+PURPOSE	Start multithreaded filling of the astrometry matrix
+INPUT	ptr to the array of groups of fields,
+	number of groups involved,
+	matrix size,
+	pointer to an array of constraint counts,
+	pointer of pointer to the beta vector matrix (output).
+	OUTPUT	-.
+NOTES	Uses the global preferences.
+AUTHOR	E. Bertin (IAP)
+VERSION	07/04/2021
+***/
+static double	pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
+			int ncoefftot, int *nconst, double *params) {
 
-    /* Number of active threads */
-    nproc = prefs.nthreads;
-    /* Set up multi-threading stuff */
-    QMALLOC(proc, int, nproc);
-    QMALLOC(thread, pthread_t, nproc);
-    QPTHREAD_MUTEX_INIT(&fillastromutex, NULL);
-    QPTHREAD_MUTEX_INIT(&nconstastromutex, NULL);
-    for (i=0; i<NMAT_MUTEX; i++)
-    {
-        QPTHREAD_MUTEX_INIT(&matmutex[i], NULL);
-    }
-    for (i=0; i<NMAT_MUTEX2; i++)
-    {
-        QPTHREAD_MUTEX_INIT(&matmutex2[i], NULL);
-    }
-    QPTHREAD_ATTR_INIT(&pthread_attr);
-    QPTHREAD_ATTR_SETDETACHSTATE(&pthread_attr, PTHREAD_CREATE_JOINABLE);
-    pthread_startgate = threads_gate_init(nproc+1, NULL);
-    pthread_stopgate = threads_gate_init(nproc+1, NULL);
+  static pthread_attr_t	pthread_attr;
+  int			*proc,
+			p, i;
 
-    /* Start the reading threads */
-    for (p=0; p<nproc; p++)
-    {
-        proc[p] = p;
-        QPTHREAD_CREATE(&thread[p], &pthread_attr,
-                &pthread_astrom_eval_thread, &proc[p]);
-    }
+// Number of active threads
+  nproc = prefs.nthreads;
+// Set up multi-threading stuff
+  QMALLOC(proc, int, nproc);
+  QMALLOC(thread, pthread_t, nproc);
+  QPTHREAD_MUTEX_INIT(&fillastromutex, NULL);
+  QPTHREAD_MUTEX_INIT(&chi2astromutex, NULL);
+  QPTHREAD_MUTEX_INIT(&nconstastromutex, NULL);
+  for (i=0; i<NMAT_MUTEX; i++) {
+    QPTHREAD_MUTEX_INIT(&matmutex[i], NULL);
+  }
+  for (i=0; i<NMAT_MUTEX2; i++) {
+    QPTHREAD_MUTEX_INIT(&matmutex2[i], NULL);
+  }
+  QPTHREAD_ATTR_INIT(&pthread_attr);
+  QPTHREAD_ATTR_SETDETACHSTATE(&pthread_attr, PTHREAD_CREATE_JOINABLE);
+  pthread_startgate = threads_gate_init(nproc+1, NULL);
+  pthread_stopgate = threads_gate_init(nproc+1, NULL);
+  pthread_gindex = pthread_findex = pthread_sindex = 0;
+  pthread_endflag = 0;
+  pthread_chi2 = 0.0;
 
-    QPTHREAD_MUTEX_LOCK(&fillastromutex);
-    pthread_gindex = pthread_findex = pthread_sindex = 0;
-    pthread_endflag = 0;
-    QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
-    /* Release threads!! */
-    threads_gate_sync(pthread_startgate);
-    /* ( Slave threads process the current buffer data here ) */
-    threads_gate_sync(pthread_stopgate);
-    pthread_endflag = 1;
-    /* (Re-)activate existing threads... */
-    threads_gate_sync(pthread_startgate);
-    /* ... and shutdown all threads */
-    for (p=0; p<nproc; p++)
-        QPTHREAD_JOIN(thread[p], NULL);
+// Start the reading threads
+  for (p=0; p<nproc; p++) {
+    proc[p] = p;
+    QPTHREAD_CREATE(
+    		&thread[p],
+    		&pthread_attr,
+		&pthread_astrom_eval_thread,
+		&proc[p]
+    );
+  }
 
-    /* Clean up multi-threading stuff */
-    threads_gate_end(pthread_startgate);
-    threads_gate_end(pthread_stopgate);
-    pthread_mutex_destroy(&fillastromutex);
-    pthread_mutex_destroy(&nconstastromutex);
-    for (i=0; i<NMAT_MUTEX; i++)
-        pthread_mutex_destroy(&matmutex[i]);
-    for (i=0; i<NMAT_MUTEX2; i++)
-        pthread_mutex_destroy(&matmutex2[i]);
-    QPTHREAD_ATTR_DESTROY(&pthread_attr);
+// Release threads!!
+  threads_gate_sync(pthread_startgate);
+// ( Slave threads process the current buffer data here )
+  threads_gate_sync(pthread_stopgate);
+  pthread_endflag = 1;
+// (Re-)activate existing threads... */
+  threads_gate_sync(pthread_startgate);
+// ... and shutdown all threads */
+  for (p=0; p<nproc; p++)
+    QPTHREAD_JOIN(thread[p], NULL);
 
-    free(proc);
-    free(thread);
+// Clean up multi-threading stuff */
+  threads_gate_end(pthread_startgate);
+  threads_gate_end(pthread_stopgate);
+  pthread_mutex_destroy(&fillastromutex);
+  pthread_mutex_destroy(&chi2astromutex);
+  pthread_mutex_destroy(&nconstastromutex);
+  for (i=0; i<NMAT_MUTEX; i++)
+    pthread_mutex_destroy(&matmutex[i]);
+  for (i=0; i<NMAT_MUTEX2; i++)
+    pthread_mutex_destroy(&matmutex2[i]);
+  QPTHREAD_ATTR_DESTROY(&pthread_attr);
 
-    return;
+  free(proc);
+  free(thread);
+
+  return pthread_chi2;
 }
-
 
 #endif
 

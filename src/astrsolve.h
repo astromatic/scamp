@@ -36,8 +36,8 @@
 
 //----------------------------- Internal constants --------------------------
 
-#define ASTROM_MAXITER		100	// Maximum number of solution iterations
-#define ASTROM_UPDATEFACTOR	1e-29	// Gradient factor at each iteration
+#define ASTROM_MAXITER		500	// Maximum number of solution iterations
+#define ASTROM_UPDATEFACTOR	1e-24	// Gradient factor at each iteration
 #define ASTREF_WEIGHTFACTOR	1.0	// Fudge factor for reference weights
 #define ASTROM_REGULFACTOR	0.001	// Fudge factor for regularization
 
