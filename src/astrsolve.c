@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		07/04/2021
+ *	Last modified:		14/04/2021
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -53,6 +53,10 @@
 
 #ifdef HAVE_OPENBLASP
 #include BLAS_H
+#endif
+
+#ifdef HAVE_LBFGS
+#include LBFGS_H
 #endif
 
 #include <sys/mman.h>
@@ -87,9 +91,9 @@ double			pthread_chi2;
 int			pthread_endflag,
 			pthread_gindex, pthread_findex, pthread_sindex;
 
-static double		pthread_astrom_eval(fgroupstruct **fgroups,
-				int ngroup, int ncoefftot, int *nconst,
-				double *params);
+static double		pthread_astrom_eval(void *extra,
+				const double *coeffs, double *dcoeffs,
+				const int ncoefftot, const double step);
 
 static void		*pthread_astrom_eval_thread(void *arg);
 #endif
@@ -119,6 +123,19 @@ static void	astrom_add_dcoeffs(double *dcoeffs, int naxis,
         		double weight, int *ci, double *cv, double *cc,
         		int ncoeff);
 
+
+#ifdef HAVE_LBFGS
+static int astrom_progress(void *extra,
+				const lbfgsfloatval_t *coeffs,
+				const lbfgsfloatval_t *dcoeffs,
+				const lbfgsfloatval_t chi2,
+				const lbfgsfloatval_t xnorm,
+				const lbfgsfloatval_t gnorm,
+				const lbfgsfloatval_t step,
+				int ncoefftot, int niter, int neval
+			);
+#endif
+	
 /****** astrsolve_fgroups *****************************************************
 PROTO	void astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 PURPOSE	Compute a global astrometric solution among a group of fields.
@@ -128,22 +145,30 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	24/02/2021
+VERSION	14/04/2021
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 			 int nfgroup) {
 
-   fieldstruct	**fields,**fields2,
-		*field,*field2;
-   setstruct	*set,*set2;
-   samplestruct	*samp;
-   polystruct	*poly, *poly2;
-   char		str[64],
-		**contextname,
-		lap_equed;
+   fieldstruct		**fields,**fields2,
+			*field,*field2;
+   setstruct		*set,*set2;
+   samplestruct		*samp;
+   polystruct		*poly, *poly2;
+#ifdef HAVE_LBFGS
+   lbfgsfloatval_t	*coeffs, *dcoeffs;
+   int			ret;
+   lbfgs_parameter_t	lbfgs_param;
+   void			*extra;
+#else
+   double		*coeffs, *dcoeffs;
+#endif
+
+   char			str[64],
+			**contextname,
+			lap_equed;
    double	cmin[MAXCONTEXT],cmax[MAXCONTEXT],
 		cscale[MAXCONTEXT], czero[MAXCONTEXT],
-		*coeffs, *dcoeffs,
 		dval, chi2;
    size_t	size;
    int		group2[NAXIS],
@@ -160,7 +185,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
   NFPRINTF(OUTPUT, "Initializing detection weight factors...");
   astrweight_fgroups(fgroups, nfgroup);
 
-  NFPRINTF(OUTPUT, "Initializing the global astrometry matrix...");
+  NFPRINTF(OUTPUT, "Initializing global astrometry parameters ...");
 
   naxis = fgroups[0]->naxis;
 
@@ -336,18 +361,43 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 //         Projected coordinate (NAXISn)
 //   (endif)
 
+// Setup variables and parameter for the astrometric solution
+
   QCALLOC(nconst, int, ncoefftot);
-  QCALLOC(coeffs, double, ncoefftot);
-  QCALLOC(dcoeffs, double, ncoefftot);
 
   astrom_fgroups = fgroups;
   astrom_nfgroup = nfgroup;
   astrom_ncoefftot = ncoefftot;
   astrom_nconst = nconst;
+  chi2 = 0.0;
+
+  NFPRINTF(OUTPUT, "Solving astrometry ...");
+
+#ifdef HAVE_LBFGS
+  astrom_coeffs = coeffs = lbfgs_malloc(ncoefftot);
+  astrom_dcoeffs = dcoeffs = lbfgs_malloc(ncoefftot);
+
+  lbfgs_parameter_init(&lbfgs_param);
+  lbfgs_param.min_step = 1e-50;
+  lbfgs_param.max_step = 1e+50;
+
+#ifdef USE_THREADS
+  ret = lbfgs(ncoefftot, coeffs, &chi2, astrom_eval, astrom_progress,
+  		NULL, &lbfgs_param);
+#else
+  ret = lbfgs(ncoefftot, coeffs, &chi2, astrom_eval, astrom_progress,
+  		NULL, &lbfgs_param);
+#endif
+
+//  printf("\n%d   %d\n\n", ret, LBFGSERR_INVALID_MAXSTEP);
+
+#else
+
+  QCALLOC(coeffs, double, ncoefftot);
+  QCALLOC(dcoeffs, double, ncoefftot);
   astrom_coeffs = coeffs;
   astrom_dcoeffs = dcoeffs;
 
-  chi2 = 0.0;
   for (it=0; it<ASTROM_MAXITER; it++) {
 
     sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g\n", it + 1, chi2);
@@ -364,6 +414,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
       coeffs[c] -= ASTROM_UPDATEFACTOR * dcoeffs[c];  
 
   }
+#endif
 
 // Fill the astrom structures with the derived parameters
   for (g=0; g<nfgroup; g++) {
@@ -380,7 +431,15 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 
   poly_end(poly);
   poly_end(poly2);
+
+#ifdef HAVE_LFBGS
+  lbfgs_free(coeffs);
+  lbfgs_free(dcoeffs);
+#else
   free(coeffs);
+  free(dcoeffs);
+#endif
+
   free(nconst);
   free(findex);
   free(findex2);
@@ -388,6 +447,58 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 
   return;
 }
+
+
+#ifdef HAVE_LBFGS
+
+/****** astrom_progress ***************************************************
+PROTO	int astrom_progress(void *extra,
+				const lbfgsfloatval_t *coeffs,
+				const lbfgsfloatval_t *dcoeffs,
+				const lbfgsfloatval_t chi2,
+				const lbfgsfloatval_t xnorm,
+				const lbfgsfloatval_t gnorm,
+				const lbfgsfloatval_t step,
+				int ncoefftot, int niter, int neval
+			)
+PURPOSE Display progress in the astrometric solution
+INPUT	Ptr to extra data,
+	ptr to the vector of coefficients,
+	ptr to the computed gradient,
+	current chi2,
+	current Euclidean norm of the coefficient vector,
+	current Euclidean norm of the gradient,
+	current line-search step,
+	number of coefficients,
+	current iteration count,
+	number of evaluations for this iteration.
+OUTPUT	Zero to continue the optimization process; returning a non-zero value
+	will cancel the optimization process.
+NOTES	-.
+AUTHOR	E. Bertin (IAP)
+VERSION 14/04/2021
+ ***/
+static int astrom_progress(void *extra,
+				const lbfgsfloatval_t *coeffs,
+				const lbfgsfloatval_t *dcoeffs,
+				const lbfgsfloatval_t chi2,
+				const lbfgsfloatval_t xnorm,
+				const lbfgsfloatval_t gnorm,
+				const lbfgsfloatval_t step,
+				int ncoefftot, int niter, int neval
+			) {
+
+   char			str[80];
+
+  sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g / step = %g\n",
+    		niter, chi2, step);
+  NFPRINTF(OUTPUT, str);
+
+  return 0;
+}
+
+#endif
+
 
 /****** astrom_eval ***************************************************
 PROTO	double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
@@ -401,7 +512,7 @@ INPUT	Ptr to data,
 OUTPUT	Current chi2 value.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 07/04/2021
+VERSION 14/04/2021
  ***/
 static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
 		const int ncoefftot, const double step) {
@@ -418,7 +529,7 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
 
 
   naxis = astrom_fgroups[0]->naxis;
-
+  fgroups = astrom_fgroups;
   nfgroup = astrom_nfgroup;
   poly = poly_init(prefs.context_group, prefs.ncontext_name,
             prefs.group_deg, prefs.ngroup_deg);
@@ -445,6 +556,7 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
 
   poly_end(poly);
   poly_end(poly2);
+//printf("\n%g\n\n", chi2);
 
   return chi2;    
 }
@@ -880,22 +992,22 @@ static void    *pthread_astrom_eval_thread(void *arg) {
 
 
 /****** pthread_astrom_eval **********************************************
-PROTO	double	pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
-				int ncoefftot, int *nconst, double *coeffs)
-PURPOSE	Start multithreaded filling of the astrometry matrix
-INPUT	ptr to the array of groups of fields,
-	number of groups involved,
-	matrix size,
-	pointer to an array of constraint counts,
-	pointer of pointer to the beta vector matrix (output).
-	OUTPUT	-.
-NOTES	Uses the global preferences.
+PROTO	double pthread_astrom_eval(void *extra, const double *coeffs,
+		double *dcoeffs, const int ncoefftot, const double step)
+PURPOSE Compute current chi2 and chi2 gradient for astrometry.
+INPUT	Ptr to data,
+	ptr to the vector of coefficients,
+	ptr to the computed gradient (on return)
+	total number of coefficients,
+	input step from the line search routine.
+OUTPUT	Current chi2 value.
+NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	07/04/2021
-***/
-static double	pthread_astrom_eval(fgroupstruct **fgroups, int ngroup,
-			int ncoefftot, int *nconst, double *params) {
-
+VERSION 14/04/2021
+ ***/
+static double	pthread_astrom_eval(void *extra, const double *coeffs,
+		double *dcoeffs, const int ncoefftot, const double step) {
+		
   static pthread_attr_t	pthread_attr;
   int			*proc,
 			p, i;

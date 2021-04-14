@@ -7,7 +7,7 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+#	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +22,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP.  If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		19/08/2020
+#	Last modified:		14/04/2021
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,7 +31,7 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard AstrOmatic source code...
-AC_INIT(SCAMP, 2.9.3, [astromatic@astromatic.net],
+AC_INIT(SCAMP, 3.0.0, [astromatic@astromatic.net],
 	scamp, [http://astromatic.net/software/scamp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR(autoconf)
@@ -54,6 +54,7 @@ sinclude(acx_openblas.m4)
 sinclude(acx_curl.m4)
 sinclude(acx_fftw.m4)
 sinclude(acx_mkl.m4)
+sinclude(acx_lbfgs.m4)
 sinclude(acx_plplot.m4)
 sinclude(acx_prog_cc_optim.m4)
 sinclude(acx_pthread.m4)
@@ -190,6 +191,15 @@ AC_ARG_WITH(openblas-incdir,
 	[AS_HELP_STRING([--with-openblas-incdir=<OpenBLAS header dir>],
 	[Provide an alternative path to the OpenBLAS header directory])])
 
+# Provide special options for the L-BFGS library
+AC_ARG_WITH(lbfgs-libdir,
+	[AS_HELP_STRING([--with-lbfgs-libdir=<L-BFGS library path>],
+	[Provide an alternative path to the L-BFGS library])])
+AC_ARG_WITH(lbfgs-incdir,
+	[AS_HELP_STRING([--with-lbfgs-incdir=<L-BFGS include dir>],
+	[Provide an alternative path to the L-BFGS include directory])])
+
+
 # Provide special options for PLPlot
 AC_MSG_CHECKING([whether PLPlot is enabled])
 AC_ARG_ENABLE(plplot,
@@ -313,6 +323,15 @@ else
     )
   fi
 fi
+
+############## handle the L-BFGS library (Limited memory BFGS) ###############
+ACX_LBFGS($with_lbfgs_libdir,$with_lbfgs_incdir,
+	[AM_CPPFLAGS="$AM_CPPFLAGS $LBFGS_CFLAGS"]
+	[LIBS="$LBFGS_LIBS $LIBS"]
+	if test "$LBFGS_WARN" != ""; then
+	  AC_MSG_WARN([$LBFGS_WARN])
+	fi,
+	AC_MSG_ERROR([$LBFGS_ERROR Exiting.]))
 
 ################# handle the cURL library (HTTP queries) ##################
 ACX_CURL($with_curl_libdir,$with_curl_incdir,

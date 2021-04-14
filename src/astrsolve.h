@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/03/2021
+*	Last modified:		14/04/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -43,9 +43,9 @@
 
 //-------------------------------- flags ------------------------------------
 
-#define 	REPROJ_NONE		0x0000	// No extra computation
-#define 	REPROJ_PROPER_MOTION	0x0001	// Compute proper motions
-#define 	REPROJ_JACOBIAN	0x0002	// Compute Jacobians
+#define REPROJ_NONE		0x0000	// No extra computation
+#define REPROJ_PROPER_MOTION	0x0001	// Compute proper motions
+#define REPROJ_JACOBIAN		0x0002	// Compute Jacobians
 
 
 //--------------------------- structure definitions -------------------------
