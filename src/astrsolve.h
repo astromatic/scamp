@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		14/04/2021
+*	Last modified:		02/06/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -36,8 +36,8 @@
 
 //----------------------------- Internal constants --------------------------
 
-#define ASTROM_MAXITER		500	// Maximum number of solution iterations
-#define ASTROM_UPDATEFACTOR	1e-24	// Gradient factor at each iteration
+#define ASTROM_MAXITER		1000	// Maximum number of solution iterations
+#define ASTROM_UPDATEFACTOR	1e-12	// Gradient factor at each iteration
 #define ASTREF_WEIGHTFACTOR	1.0	// Fudge factor for reference weights
 #define ASTROM_REGULFACTOR	0.001	// Fudge factor for regularization
 

@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		14/04/2021
+ *	Last modified:		05/05/2021
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -89,7 +89,8 @@ pthread_mutex_t		matmutex[NMAT_MUTEX], matmutex2[NMAT_MUTEX2],
 double			pthread_chi2;
 
 int			pthread_endflag,
-			pthread_gindex, pthread_findex, pthread_sindex;
+			pthread_gindex, pthread_findex, pthread_sindex,
+			pthread_nchi2;
 
 static double		pthread_astrom_eval(void *extra,
 				const double *coeffs, double *dcoeffs,
@@ -114,13 +115,14 @@ static double	astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
 			const int ncoefftot, const double step),
 		astrom_eval_update(setstruct *set, const double *coeffs,
 			double *dcoeffs, int ncoefftot,
-			polystruct *poly, polystruct *poly2, int *nconst);
+			polystruct *poly, polystruct *poly2, int *nconst,
+			int *nchi2);
 
 static int	add_params(double *params, int naxis, double weight,
 			int *ci, double *cv, double *cc, int ncoeff);
 
 static void	astrom_add_dcoeffs(double *dcoeffs, int naxis,
-        		double weight, int *ci, double *cv, double *cc,
+        		double weight, int *ci, double *cc, double *cv,
         		int ncoeff);
 
 
@@ -145,7 +147,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	14/04/2021
+VERSION	12/05/2021
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 			 int nfgroup) {
@@ -178,7 +180,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 		npcoeff, npcoeff2,
 		d, index, index2, minindex2,
 		ncontext, cx,cy, nicoeff, nicoeff2, groupdeg2,
-		startindex2, nmiss, it;
+		startindex2, nmiss, it, nchi2;
 
 // Compute weight factors for each set based on the relative number of
 // astrometric references and detections
@@ -378,18 +380,18 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
   astrom_dcoeffs = dcoeffs = lbfgs_malloc(ncoefftot);
 
   lbfgs_parameter_init(&lbfgs_param);
-  lbfgs_param.min_step = 1e-50;
-  lbfgs_param.max_step = 1e+50;
+//  lbfgs_param.min_step = 1e-15;
+//  lbfgs_param.max_step = 1e+10;
 
 #ifdef USE_THREADS
-  ret = lbfgs(ncoefftot, coeffs, &chi2, astrom_eval, astrom_progress,
-  		NULL, &lbfgs_param);
+  ret = lbfgs(ncoefftot, coeffs, &chi2, pthread_astrom_eval, astrom_progress,
+  		&nchi2, &lbfgs_param);
 #else
   ret = lbfgs(ncoefftot, coeffs, &chi2, astrom_eval, astrom_progress,
-  		NULL, &lbfgs_param);
+  		&nchi2, &lbfgs_param);
 #endif
 
-//  printf("\n%d   %d\n\n", ret, LBFGSERR_INVALID_MAXSTEP);
+//  printf("\n%d   %d\n\n", ret, LBFGSERR_ROUNDING_ERROR);
 
 #else
 
@@ -397,24 +399,21 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
   QCALLOC(dcoeffs, double, ncoefftot);
   astrom_coeffs = coeffs;
   astrom_dcoeffs = dcoeffs;
-
   for (it=0; it<ASTROM_MAXITER; it++) {
-
-    sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g\n", it + 1, chi2);
-    NFPRINTF(OUTPUT, str);
-
-    chi2 = 0.0;
-#ifdef USE_THREADS
-    chi2 = pthread_astrom_eval(fgroups, nfgroup, ncoefftot, nconst, dcoeffs);
-#else
-    chi2 = astrom_eval(set, dcoeffs, ncoefftot, poly,poly2, nconst);
-#endif
 //-- Gradient descent
     for (c=0; c<ncoefftot; c++)
       coeffs[c] -= ASTROM_UPDATEFACTOR * dcoeffs[c];  
 
-  }
+#ifdef USE_THREADS
+    chi2 = pthread_astrom_eval(&nchi2, coeffs, dcoeffs, ncoefftot, 0.0);
+#else
+    chi2 = astrom_eval(&nchi2, coeffs, dcoeffs, ncoefftot, 0.0);
 #endif
+    sprintf(str, "Solving astrometry: iteration #%d / chi2 = %.10g / %d\n", it + 1, chi2, nchi2);
+    NFPRINTF(OUTPUT, str);
+}
+#endif
+
 
 // Fill the astrom structures with the derived parameters
   for (g=0; g<nfgroup; g++) {
@@ -492,6 +491,7 @@ static int astrom_progress(void *extra,
 
   sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g / step = %g\n",
     		niter, chi2, step);
+    		printf("coucou\n");
   NFPRINTF(OUTPUT, str);
 
   return 0;
@@ -512,7 +512,7 @@ INPUT	Ptr to data,
 OUTPUT	Current chi2 value.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 14/04/2021
+VERSION 12/05/2021
  ***/
 static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
 		const int ncoefftot, const double step) {
@@ -524,10 +524,10 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
    polystruct	*poly, *poly2;
    double	chi2;
    int		group2[NAXIS],
-   		*nconst,
-   		nfgroup, groupdeg2, nfield, naxis, f, g, s, d;
+   		*nconst, *nchi2,
+   		nfgroup, groupdeg2, nfield, naxis, f, g, s, d, dnchi2;
 
-
+  nchi2 = extra;
   naxis = astrom_fgroups[0]->naxis;
   fgroups = astrom_fgroups;
   nfgroup = astrom_nfgroup;
@@ -538,8 +538,10 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
   groupdeg2 = prefs.focal_deg;
   poly2 = poly_init(group2, naxis, &groupdeg2, 1);
   nconst = astrom_nconst;
+  memset(dcoeffs, 0, ncoefftot*sizeof(double));
 
   chi2 = 0.0;
+  *nchi2 = 0;
 // Go through all groups, all fields, all sets, all samples
   for (g=0; g<nfgroup; g++) {
     nfield = fgroups[g]->nfield;
@@ -549,23 +551,23 @@ static double astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
       for (s=0; s<field->nset; s++) {
         set = field->set[s];
         chi2 += astrom_eval_update(set, coeffs, dcoeffs, ncoefftot, poly, poly2,
-        	nconst);
+        	nconst, &dnchi2);
+        *nchi2 += dnchi2;
       }
     }
   }
 
   poly_end(poly);
   poly_end(poly2);
-//printf("\n%g\n\n", chi2);
 
-  return chi2;    
+  return chi2;
 }
 
 
 /****** astrom_eval_update ***************************************************
 PROTO	double astrom_eval_update(setstruct *set, double *coeffs,
 		double *dcoeffs, int ncoefftot,
-		polystruct *poly, polystruct *poly2, int *nconst)
+		polystruct *poly, polystruct *poly2, int *nconst, int *nchi2)
 PURPOSE Provide contributions to the astrometry chi2 and chi2 gradient from
 	detections of a given set.
 INPUT	Ptr to the set structure,
@@ -574,19 +576,22 @@ INPUT	Ptr to the set structure,
 	total number of coefficients,
 	pointer to the 1st polynomial (steady, instrument-dependent),
 	pointer to the 2nd polynomial (variable, exposure-dependent),
-	pointer to the number of constraints per chip/exposure.
+	pointer to the number of constraints per chip/exposure,
+	number of pairs involved in the contributions to the total chi2 (output).
 OUTPUT	Contribution to the total chi2.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 07/04/2021
+VERSION 12/05/2021
  ***/
 static double	astrom_eval_update(setstruct *set, const double *coeffs,
 		double *dcoeffs,
 		int ncoefftot, polystruct *poly, polystruct *poly2,
-		int *nconst) {
+		int *nconst, int *nchi2) {
 
-   fieldstruct		*field2;
-   setstruct		*set2;
+   wcsstruct		*wcs;
+   fgroupstruct		*fgroup;
+   fieldstruct		*field, *fielda;
+   setstruct		*seta;
    samplestruct	*samp,*samp2, *sampa, *sampb;
    double		dprojdred[NAXIS*NAXIS], context[MAXCONTEXT],
 			redpos[NAXIS],
@@ -595,7 +600,8 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 			*cc,*cca,*ccb, *cc2,*cca2,*ccb2, *ccat, *ccbt,
 			*co, *co2, *x,
 			*basis,*basis2, *czero, *cscale,
-			dx, sigmaa,sigmab, weight, weightfac, val, chi2;
+			dx, sigmaa,sigmab, weight, weightfac, val, chi2,
+			pixscale2;
    float		*jac,*jact;
    unsigned short	sexflagmask;
    unsigned int	imaflagmask;
@@ -605,7 +611,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 			index,indext,index2,indext2, redflag, naxis, ncontext,
 			npcoeff,ncoeff,nicoeff, npcoeff2,ncoeff2,nicoeff2,
 			nsamp,
-			cx,cy, c, d, d1,d2, i, p, lng,lat;
+			cx,cy, c, d, d1,d2, i, p, lng,lat, dnchi2;
 
 #ifdef USE_THREADS
    int			imut=0;
@@ -622,6 +628,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
     nicoeff2 = ncoeff2*naxis;
 
     chi2 = 0.0;
+    dnchi2 = 0;
     nlsampmax = 0;
     ncontext = set->ncontext;
     coeffval = coeffval2 = coeffconst = coeffconst2 = (double *)NULL;
@@ -632,6 +639,12 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
     cy = set->contexty;
     lng = set->lng;
     lat = set->lat;
+
+    if (!(field=set->field) || !(fgroup=field->fgroup) || !(wcs=fgroup->wcs))
+        error(EXIT_FAILURE, "*Internal Error*:",
+        	"No WCS found for set reprojection in astrom_eval_update()");
+    pixscale2 = wcs->pixscale * wcs->pixscale;
+
     samp = set->sample;
     for (nsamp=set->nsample; nsamp--; samp++) {
 //---- Care only about one end of the series of linked detections
@@ -680,17 +693,18 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
         cva2 = cv2;
         cca = cc;
         cca2 = cc2;
-        set2 = sampa->set;
-        field2 = set2->field;
-        instru = field2->astromlabel;
+        seta = sampa->set;
+        fielda = seta->field;
+        instru = fielda->astromlabel;
+
 //------ Negative indices are for the reference field
         if (instru>=0) {
-          index = set2->index;
-          index2 = set2->index2;
+          index = seta->index;
+          index2 = seta->index2;
 #ifdef USE_THREADS
           QPTHREAD_MUTEX_LOCK(&nconstastromutex);
 #endif
-          set2->nconst += naxis;
+          seta->nconst += naxis;
           if (index>=0)
             nconst[index]+=naxis;
           if (index2>=0)
@@ -708,7 +722,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
             if (c==cx || c==cy) {
 //------------ Image coordinates receive a special treatment
               if (!redflag) {
-                raw_to_red(set2->wcs, sampa->vrawpos, redpos);
+                raw_to_red(seta->wcs, sampa->vrawpos, redpos);
                 redflag = 1;
               }
               context[c] = redpos[c==cx?lng:lat];
@@ -720,7 +734,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
             poly_func(poly, context);
           if (index2>=0) {
             if (!redflag)
-              raw_to_red(set2->wcs, sampa->vrawpos, redpos);
+              raw_to_red(seta->wcs, sampa->vrawpos, redpos);
             poly_func(poly2, redpos);
           }
         }
@@ -732,7 +746,7 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
 //------ Fill something equivalent to a row of a design matrix
         for (d2=0; d2<naxis; d2++) {
           indext = index;
-          dx = *(x++);
+          dx = 0.0;
           co = (double *)coeffs + index;
           basis = poly->basis;
           jac = sampa->dprojdred + d2;
@@ -762,11 +776,13 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
                 indext2--;
             }
           }
+          dx += *(x++);
           for (i=ncoeff; i--;)
             *(cc++) = dx;
           for (i=ncoeff2; i--;)
             *(cc2++) = dx;
         }
+
 //------ Compute the relative positional variance for this source
         sigmaa = 0.0;
         for (d=0; d<naxis; d++)
@@ -785,24 +801,19 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
           if ((sampb->sexflags & sexflagmask)
           	|| (sampb->imaflags & imaflagmask))
             continue;
-
 //-------- Compute the relative weight of the pair
           sigmab = 0.0;
           for (d=0; d<naxis; d++)
             sigmab += sampb->wcsposerr[d]*sampb->wcsposerr[d];
           weight = (instru<0 ? sampb->set->weightfac*weightfac : 1.0)
-			/(sigmaa+sigmab);
+			* pixscale2 /(sigmaa+sigmab);
 
 //-------- Compute contribution from the pair to the chi2
           ccat = cca;
           ccbt = ccb;
           for (d=naxis; d--; ccat += ncoeff, ccbt += ncoeff)
             chi2 += weight * (*ccat - *ccbt)  * (*ccat - *ccbt);
-          ccat = cca2;
-          ccbt = ccb2;
-          for (d=naxis; d--; ccat += ncoeff2, ccbt += ncoeff2)
-            chi2 += weight * (*ccat - *ccbt)  * (*ccat - *ccbt);
-
+          dnchi2 += 2;
 //-------- Fill the matrices
 //-------- First, the contributions involving Jacobians for star A
 #ifdef USE_THREADS
@@ -811,8 +822,8 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
             QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
           }
 #endif
-          astrom_add_dcoeffs(dcoeffs,naxis,weight, cia,cva,cca,ncoeff);
-          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cia,cva,ccb,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,weight, cia,cca,cva,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cia,ccb,cva,ncoeff);
 #ifdef USE_THREADS
           if (*cia >= 0) {
             QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
@@ -822,37 +833,37 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
             QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
           }
 #endif
-            astrom_add_dcoeffs(dcoeffs,naxis,weight, cia2,cva2,cca2,ncoeff2);
-            astrom_add_dcoeffs(dcoeffs,naxis,-weight, cia2,cva2,ccb2,ncoeff2);
+          astrom_add_dcoeffs(dcoeffs,naxis,weight, cia2,cca2,cva2,ncoeff2);
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cia2,ccb2,cva2,ncoeff2);
 
 //-------- Second, the contributions involving Jacobians for star B
 #ifdef USE_THREADS
-            if (*cia2 >= 0) {
-              QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
-            }
-            if (*cib >= 0) {
-              imut = (*cib/ncoeff)%NMAT_MUTEX;
-              QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
-            }
+          if (*cia2 >= 0) {
+            QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
+          }
+          if (*cib >= 0) {
+            imut = (*cib/ncoeff)%NMAT_MUTEX;
+            QPTHREAD_MUTEX_LOCK(&matmutex[imut]);
+          }
 #endif
-          astrom_add_dcoeffs(dcoeffs,naxis,weight, cib,cvb,ccb,ncoeff);
-          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cib,cvb,cca,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,weight, cib,ccb,cvb,ncoeff);
+          astrom_add_dcoeffs(dcoeffs,naxis,-weight, cib,cca,cvb,ncoeff);
 #ifdef USE_THREADS
           if (*cib >= 0) {
             QPTHREAD_MUTEX_UNLOCK(&matmutex[imut]);
           }
-          if (*cib2 >= 0) {
-            imut = (*cib2/ncoeff)%NMAT_MUTEX2;
-            QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
-          }
+//          if (*cib2 >= 0) {
+//            imut = (*cib2/ncoeff)%NMAT_MUTEX2;
+//            QPTHREAD_MUTEX_LOCK(&matmutex2[imut]);
+//          }
 #endif
-//          astrom_add_dcoeffs(dcoeffs,naxis,-weight,cib2,cvb2,cca2,ncoeff2);
-//          astrom_add_dcoeffs(dcoeffs,naxis,weight,cib2,cvb2,ccb2,ncoeff2);
+//          astrom_add_dcoeffs(dcoeffs,naxis,-weight,cib2,cca2,cvb2,ncoeff2);
+//          astrom_add_dcoeffs(dcoeffs,naxis,weight,cib2,ccb2,cvb2,ncoeff2);
 
 #ifdef USE_THREADS
-          if (*cib2 >= 0) {
-             QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
-          }
+//          if (*cib2 >= 0) {
+//             QPTHREAD_MUTEX_UNLOCK(&matmutex2[imut]);
+//          }
 #endif
           cvb += nicoeff;
           cib += nicoeff;
@@ -873,13 +884,14 @@ static double	astrom_eval_update(setstruct *set, const double *coeffs,
       free(coeffconst2);
     }
 
+  *nchi2 = dnchi2;
   return chi2;
 }
 
 
 /****** astrom_add_dcoeffs ***************************************************
 PROTO	void astrom_add_dcoeffs(double *dcoeffs, int naxis,
-		double weight, int *ci, double *cv, double *cc, int ncoeff)
+		double weight, int *ci, double *cc, double *cv, int ncoeff)
 PURPOSE	Add a product contribution to the chi2 gradient.
 INPUT	ptr to the gradient (modified in output),
 	number of dimensions,
@@ -891,10 +903,10 @@ INPUT	ptr to the gradient (modified in output),
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	31/03/2021
+VERSION	05/05/2021
  ***/
 static void astrom_add_dcoeffs(double *dcoeffs, int naxis,
-        double weight, int *ci, double *cv, double *cc, int ncoeff) {
+        double weight, int *ci, double *cc, double *cv,int ncoeff) {
 
    int		d, p;
 
@@ -919,7 +931,7 @@ INPUT	Pointer to the thread number.
 OUTPUT	-.
 NOTES	Relies on global variables.
 AUTHOR	E. Bertin (IAP)
-VERSION	07/04/2021
+VERSION	12/05/2021
 ***/
 static void    *pthread_astrom_eval_thread(void *arg) {
 
@@ -927,7 +939,7 @@ static void    *pthread_astrom_eval_thread(void *arg) {
   double	chi2;
   char		str[128];
   int		group2[NAXIS],
-		findex, gindex, sindex, proc, naxis, groupdeg2, d;
+		findex, gindex, sindex, proc, naxis, groupdeg2, d, nchi2;
 
   gindex = findex = -1;
   proc = *((int *)arg);
@@ -969,9 +981,10 @@ static void    *pthread_astrom_eval_thread(void *arg) {
       chi2 = astrom_eval_update(
       		astrom_fgroups[gindex]->field[findex]->set[sindex],
 		astrom_coeffs, astrom_dcoeffs, astrom_ncoefftot,
-		poly, poly2, astrom_nconst);
+		poly, poly2, astrom_nconst, &nchi2);
       QPTHREAD_MUTEX_LOCK(&chi2astromutex);
       pthread_chi2 += chi2;
+      pthread_nchi2 += nchi2;
       QPTHREAD_MUTEX_UNLOCK(&chi2astromutex);
     } else {
       QPTHREAD_MUTEX_UNLOCK(&fillastromutex);
@@ -1003,14 +1016,17 @@ INPUT	Ptr to data,
 OUTPUT	Current chi2 value.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 14/04/2021
+VERSION 12/05/2021
  ***/
 static double	pthread_astrom_eval(void *extra, const double *coeffs,
 		double *dcoeffs, const int ncoefftot, const double step) {
 		
   static pthread_attr_t	pthread_attr;
-  int			*proc,
+  int			*proc, *nchi2,
 			p, i;
+
+  nchi2 = extra;
+  memset(dcoeffs, 0, ncoefftot*sizeof(double));
 
 // Number of active threads
   nproc = prefs.nthreads;
@@ -1033,6 +1049,7 @@ static double	pthread_astrom_eval(void *extra, const double *coeffs,
   pthread_gindex = pthread_findex = pthread_sindex = 0;
   pthread_endflag = 0;
   pthread_chi2 = 0.0;
+  pthread_nchi2 = 0;
 
 // Start the reading threads
   for (p=0; p<nproc; p++) {
@@ -1071,6 +1088,7 @@ static double	pthread_astrom_eval(void *extra, const double *coeffs,
   free(proc);
   free(thread);
 
+  *nchi2 = pthread_nchi2;
   return pthread_chi2;
 }
 
@@ -1453,7 +1471,7 @@ OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	Memory must have been allocated (naxis*naxis*sizeof(double)) for the
 	Jacobian array.
 AUTHOR	E. Bertin (IAP)
-VERSION 03/03/2021
+VERSION 12/05/2021
  ***/
 int	compute_jacobian(samplestruct *sample) {
 
@@ -1489,7 +1507,7 @@ int	compute_jacobian(samplestruct *sample) {
       raw_to_wcs(set->wcs, rawpos2, wcspos);
       wcs_to_raw(wcs, wcspos, projpos2);
       for (j=0; j<naxis; j++)
-        *(dprojdred++) = 1.0 * (projpos2[j] - projpos1[j])/(1.0 * ARCSEC/DEG);
+        *(dprojdred++) = (projpos2[j] - projpos1[j]) / (1.0 * ARCSEC/DEG);
     }
 
   return RETURN_OK;
