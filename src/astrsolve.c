@@ -86,11 +86,13 @@ pthread_t		*thread;
 pthread_mutex_t		matmutex[NMAT_MUTEX], matmutex2[NMAT_MUTEX2],
 			fillastromutex, chi2astromutex, nconstastromutex;
 
-double			pthread_chi2;
+double			*pthread_coeffs,
+			*pthread_dcoeffs,
+			pthread_chi2;
 
 int			pthread_endflag,
 			pthread_gindex, pthread_findex, pthread_sindex,
-			pthread_nchi2;
+			pthread_nchi2, pthread_ncoefftot;
 
 static double		pthread_astrom_eval(void *extra,
 				const double *coeffs, double *dcoeffs,
@@ -104,11 +106,8 @@ static void		*pthread_astrom_eval_thread(void *arg);
 
 fgroupstruct		**astrom_fgroups;
 
-double			*astrom_coeffs,
-			*astrom_dcoeffs;
-
 int			*astrom_nconst,
-			astrom_nfgroup, astrom_ncoefftot;
+			astrom_nfgroup;
 
 
 static double	astrom_eval(void *extra, const double *coeffs, double *dcoeffs,
@@ -163,7 +162,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
    lbfgs_parameter_t	lbfgs_param;
    void			*extra;
 #else
-   double		*coeffs, *dcoeffs;
+   double		*coeffs, *dcoeffs, *ocoeffs, *odcoeffs;
 #endif
 
    char			str[64],
@@ -171,7 +170,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 			lap_equed;
    double	cmin[MAXCONTEXT],cmax[MAXCONTEXT],
 		cscale[MAXCONTEXT], czero[MAXCONTEXT],
-		dval, chi2;
+		dval, chi2, ochi2, fac;
    size_t	size;
    int		group2[NAXIS],
 		*findex, *findex2, *nsetmax, *nconst,*nc,*nc2,
@@ -369,19 +368,20 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 
   astrom_fgroups = fgroups;
   astrom_nfgroup = nfgroup;
-  astrom_ncoefftot = ncoefftot;
   astrom_nconst = nconst;
   chi2 = 0.0;
 
   NFPRINTF(OUTPUT, "Solving astrometry ...");
 
 #ifdef HAVE_LBFGS
-  astrom_coeffs = coeffs = lbfgs_malloc(ncoefftot);
-  astrom_dcoeffs = dcoeffs = lbfgs_malloc(ncoefftot);
+  coeffs = lbfgs_malloc(ncoefftot);
+  dcoeffs = lbfgs_malloc(ncoefftot);
 
   lbfgs_parameter_init(&lbfgs_param);
-//  lbfgs_param.min_step = 1e-15;
-//  lbfgs_param.max_step = 1e+10;
+//  lbfgs_param.min_step = 1e-40;
+  lbfgs_param.max_step = 1e+50;
+// printf("%g \n\n", lbfgs_param.xtol);
+  lbfgs_param.max_iterations = ASTROM_MAXITER;
 
 #ifdef USE_THREADS
   ret = lbfgs(ncoefftot, coeffs, &chi2, pthread_astrom_eval, astrom_progress,
@@ -391,25 +391,42 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
   		&nchi2, &lbfgs_param);
 #endif
 
-//  printf("\n%d   %d\n\n", ret, LBFGSERR_ROUNDING_ERROR);
+  printf("\n%d   %d\n\n", ret, LBFGSERR_ROUNDING_ERROR);
 
 #else
 
   QCALLOC(coeffs, double, ncoefftot);
+  QCALLOC(ocoeffs, double, ncoefftot);
   QCALLOC(dcoeffs, double, ncoefftot);
-  astrom_coeffs = coeffs;
-  astrom_dcoeffs = dcoeffs;
+  QCALLOC(odcoeffs, double, ncoefftot);
+  fac = ASTROM_UPDATEFACTOR;
+  chi2 = ochi2 = 0.0;
   for (it=0; it<ASTROM_MAXITER; it++) {
 //-- Gradient descent
-    for (c=0; c<ncoefftot; c++)
-      coeffs[c] -= ASTROM_UPDATEFACTOR * dcoeffs[c];  
+    if (chi2 <= ochi2) {
+      fac *= 1.1;
+      for (c=0; c<ncoefftot; c++) {
+        ocoeffs[c] = coeffs[c];
+        coeffs[c] -= fac * (0.5 * dcoeffs[c] + 0.5 * odcoeffs[c]);  
+      }
+    } else {
+      fac /= 2.0;
+      for (c=0; c<ncoefftot; c++) {
+        coeffs[c] = ocoeffs[c];
+        dcoeffs[c] = odcoeffs[c];
+      }
+    }
 
+  for (c=0; c<ncoefftot; c++)
+    odcoeffs[c] = dcoeffs[c];
+  ochi2 = chi2;
+  
 #ifdef USE_THREADS
     chi2 = pthread_astrom_eval(&nchi2, coeffs, dcoeffs, ncoefftot, 0.0);
 #else
     chi2 = astrom_eval(&nchi2, coeffs, dcoeffs, ncoefftot, 0.0);
 #endif
-    sprintf(str, "Solving astrometry: iteration #%d / chi2 = %.10g / %d\n", it + 1, chi2, nchi2);
+    sprintf(str, "Solving astrometry: iteration #%d / chi2 = %.10g / %d", it + 1, chi2, nchi2);
     NFPRINTF(OUTPUT, str);
 }
 #endif
@@ -431,12 +448,14 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
   poly_end(poly);
   poly_end(poly2);
 
-#ifdef HAVE_LFBGS
+#ifdef HAVE_LBFGS
   lbfgs_free(coeffs);
   lbfgs_free(dcoeffs);
 #else
   free(coeffs);
+  free(ocoeffs);
   free(dcoeffs);
+  free(odcoeffs);
 #endif
 
   free(nconst);
@@ -489,9 +508,8 @@ static int astrom_progress(void *extra,
 
    char			str[80];
 
-  sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g / step = %g\n",
+  sprintf(str, "Solving astrometry: iteration #%d / chi2 = %g / step = %g",
     		niter, chi2, step);
-    		printf("coucou\n");
   NFPRINTF(OUTPUT, str);
 
   return 0;
@@ -931,7 +949,7 @@ INPUT	Pointer to the thread number.
 OUTPUT	-.
 NOTES	Relies on global variables.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/05/2021
+VERSION	09/06/2021
 ***/
 static void    *pthread_astrom_eval_thread(void *arg) {
 
@@ -980,7 +998,7 @@ static void    *pthread_astrom_eval_thread(void *arg) {
 //---- Fetch field data
       chi2 = astrom_eval_update(
       		astrom_fgroups[gindex]->field[findex]->set[sindex],
-		astrom_coeffs, astrom_dcoeffs, astrom_ncoefftot,
+		pthread_coeffs, pthread_dcoeffs, pthread_ncoefftot,
 		poly, poly2, astrom_nconst, &nchi2);
       QPTHREAD_MUTEX_LOCK(&chi2astromutex);
       pthread_chi2 += chi2;
@@ -1016,7 +1034,7 @@ INPUT	Ptr to data,
 OUTPUT	Current chi2 value.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION 12/05/2021
+VERSION 09/06/2021
  ***/
 static double	pthread_astrom_eval(void *extra, const double *coeffs,
 		double *dcoeffs, const int ncoefftot, const double step) {
@@ -1028,8 +1046,13 @@ static double	pthread_astrom_eval(void *extra, const double *coeffs,
   nchi2 = extra;
   memset(dcoeffs, 0, ncoefftot*sizeof(double));
 
+  pthread_coeffs = coeffs;
+  pthread_dcoeffs = dcoeffs;
+  pthread_ncoefftot = ncoefftot;
+
 // Number of active threads
   nproc = prefs.nthreads;
+
 // Set up multi-threading stuff
   QMALLOC(proc, int, nproc);
   QMALLOC(thread, pthread_t, nproc);
@@ -1089,6 +1112,7 @@ static double	pthread_astrom_eval(void *extra, const double *coeffs,
   free(thread);
 
   *nchi2 = pthread_nchi2;
+ 
   return pthread_chi2;
 }
 
