@@ -22,7 +22,7 @@
  *	You should have received a copy of the GNU General Public License
  *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- *	Last modified:		05/05/2021
+ *	Last modified:		30/06/2021
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -146,7 +146,7 @@ OUTPUT	-.
 NOTES	Uses the global preferences. Input structures must have gone through
 	crossid_fgroup() first.
 AUTHOR	E. Bertin (IAP)
-VERSION	12/05/2021
+VERSION	30/06/2021
  ***/
 void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 			 int nfgroup) {
@@ -376,12 +376,18 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, fieldstruct **reffields,
 #ifdef HAVE_LBFGS
   coeffs = lbfgs_malloc(ncoefftot);
   dcoeffs = lbfgs_malloc(ncoefftot);
+  for (i=0; i<ncoefftot; i++)
+    coeffs[i] = dcoeffs[i] = 0.0;
+
 
   lbfgs_parameter_init(&lbfgs_param);
-//  lbfgs_param.min_step = 1e-40;
+  lbfgs_param.min_step = 1e-40;
   lbfgs_param.max_step = 1e+50;
 // printf("%g \n\n", lbfgs_param.xtol);
   lbfgs_param.max_iterations = ASTROM_MAXITER;
+  lbfgs_param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;
+  lbfgs_param.orthantwise_c = 1.0;
+  lbfgs_param.m = 2;
 
 #ifdef USE_THREADS
   ret = lbfgs(ncoefftot, coeffs, &chi2, pthread_astrom_eval, astrom_progress,
