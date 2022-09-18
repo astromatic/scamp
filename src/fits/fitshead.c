@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic FITS/LDAC library
 *
-*	Copyright:		(C) 1995-2017 IAP/CNRS/UPMC
+*	Copyright:		(C) 1995-2022 IAP/CNRS/SorbonneU/CFHT
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		19/02/2017
+*	Last modified:		11/01/2022
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -100,8 +100,8 @@ PURPOSE	Read the current FITS header basic keywords.
 INPUT	pointer to catstruct.
 OUTPUT	-.
 NOTES	-.
-AUTHORS	E. Bertin (IAP), M.Kuemmel (LMU)
-VERSION	19/02/2017
+AUTHORS	E. Bertin (IAP/SorbonneU), M.Kuemmel (LMU)
+VERSION	11/01/2022
  ***/
 void	readbasic_head(tabstruct *tab)
 
@@ -115,16 +115,16 @@ void	readbasic_head(tabstruct *tab)
   filename = (tab->cat? tab->cat->filename : strcpy(name, "internal header"));
 
 /* Tile-compressed binary tables*/
-  comptileflag = (fitsread(tab->headbuf, "ZIMAGE  ", str, H_STRING, T_STRING)
+  comptileflag = (fitsread(tab->headbuf, "ZIMAGE  ", str, H_STRING,T_STRING, 80)
 	== RETURN_OK);
 
   if (fitsread(tab->headbuf, comptileflag? "ZBITPIX " : "BITPIX  " ,
-	&tab->bitpix, H_INT, T_LONG) == RETURN_ERROR)
+	&tab->bitpix, H_INT, T_LONG, 0) == RETURN_ERROR)
     error(EXIT_FAILURE, "*Error*: Corrupted FITS header in ", filename);
 
   tab->bytepix = tab->bitpix>0?(tab->bitpix/8):(-tab->bitpix/8);
 
-  if (fitsread(tab->headbuf, "NAXIS   ", &tab->naxis, H_INT, T_LONG)
+  if (fitsread(tab->headbuf, "NAXIS   ", &tab->naxis, H_INT, T_LONG, 0)
 	==RETURN_ERROR)
     error(EXIT_FAILURE, "*Error*: Corrupted FITS header in ", filename);
 
@@ -138,8 +138,8 @@ void	readbasic_head(tabstruct *tab)
     for (i=0; i<tab->naxis && i<999; i++)
       {
       sprintf(key, comptileflag ? "ZNAXIS%-2d" : "NAXIS%-3d", i+1);
-      if (fitsread(tab->headbuf, key, &tab->naxisn[i], H_INT, T_LONG)
-		==RETURN_ERROR)
+      if (fitsread(tab->headbuf, key, &tab->naxisn[i], H_INT, T_LONG, 0)
+		== RETURN_ERROR)
         error(EXIT_FAILURE, "*Error*: incoherent FITS header in ", filename);
       tabsize *= tab->naxisn[i];
       }
@@ -147,36 +147,38 @@ void	readbasic_head(tabstruct *tab)
 
 /*random groups parameters (optional)*/
   tab->pcount = 0;
-  fitsread(tab->headbuf, "PCOUNT  ", &tab->pcount, H_INT, T_LONG);
+  fitsread(tab->headbuf, "PCOUNT  ", &tab->pcount, H_INT, T_LONG, 0);
   tab->gcount = 1;
-  fitsread(tab->headbuf, "GCOUNT  ", &tab->gcount, H_INT, T_LONG);
+  fitsread(tab->headbuf, "GCOUNT  ", &tab->gcount, H_INT, T_LONG, 0);
 
 /*number of fields (only for tables)*/
   tab->tfields = 0;
-  fitsread(tab->headbuf, "TFIELDS ", &tab->tfields, H_INT, T_LONG);
+  fitsread(tab->headbuf, "TFIELDS ", &tab->tfields, H_INT, T_LONG, 0);
 
 /*in case of a non-primary header*/
   tab->xtension[0] = (char)'\0';
-  fitsread(tab->headbuf, "XTENSION", tab->xtension, H_STRING, T_STRING);
+  fitsread(tab->headbuf, "XTENSION", tab->xtension, H_STRING, T_STRING, 80);
   tab->extname[0] = (char)'\0';
-  fitsread(tab->headbuf, "EXTNAME ", tab->extname, H_STRING, T_STRING);
+  fitsread(tab->headbuf, "EXTNAME ", tab->extname, H_STRING, T_STRING, 80);
 
   tab->tabsize = tab->bytepix*tab->gcount*((size_t)tab->pcount+tabsize);
 
 /* Scaling parameters for basic FITS integer arrays */
   tab->bscale = 1.0;
-  fitsread(tab->headbuf, "BSCALE ", &tab->bscale, H_FLOAT, T_DOUBLE);
+  fitsread(tab->headbuf, "BSCALE ", &tab->bscale, H_FLOAT, T_DOUBLE, 0);
   tab->bzero = 0.0;
-  fitsread(tab->headbuf, "BZERO  ", &tab->bzero, H_FLOAT, T_DOUBLE);
+  fitsread(tab->headbuf, "BZERO  ", &tab->bzero, H_FLOAT, T_DOUBLE, 0);
   tab->blankflag =
-    (fitsread(tab->headbuf,"BLANK   ",&tab->blank,H_INT,T_LONG) == RETURN_OK)?
+    (fitsread(tab->headbuf,"BLANK   ", &tab->blank,H_INT, T_LONG, 0)
+    		== RETURN_OK)?
 	1 : 0;
 
 /* Custom basic FITS parameters */
   tab->bitsgn = (tab->bitpix==BP_BYTE) ? 0 : 1;
-  fitsread(tab->headbuf, "BITSGN  ", &tab->bitsgn, H_INT, T_LONG);
+  fitsread(tab->headbuf, "BITSGN  ", &tab->bitsgn, H_INT, T_LONG, 0);
 
-  if (fitsread(tab->headbuf, "IMAGECOD", str, H_STRING, T_STRING)==RETURN_OK)
+  if (fitsread(tab->headbuf, "IMAGECOD", str, H_STRING, T_STRING, 80)
+  	== RETURN_OK)
     {
     if (!strcmp(str, "NONE"))
       tab->compress_type = COMPRESS_NONE;
@@ -189,7 +191,8 @@ void	readbasic_head(tabstruct *tab)
     }
 
 /* Checksum */
-  if (fitsread(tab->headbuf, "DATASUM ", str, H_STRING, T_STRING)==RETURN_OK)
+  if (fitsread(tab->headbuf, "DATASUM ", str, H_STRING, T_STRING, 80)
+  	== RETURN_OK)
     tab->bodysum = (unsigned int)atoi(str);
 
   return;
@@ -203,8 +206,8 @@ INPUT	pointer to tabstruct.
 OUTPUT	RETURN_OK if a binary table was found and mapped, RETURN_ERROR
 	otherwise.
 NOTES	-.
-AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	20/07/2010
+AUTHOR	E. Bertin (IAP & CFHT)
+VERSION	11/01/2022
  ***/
 int	readbintabparam_head(tabstruct *tab)
 
@@ -250,22 +253,23 @@ int	readbintabparam_head(tabstruct *tab)
 /*--map binary-table fields*/
 
     sprintf(strk, "TTYPE%-3d", i+1);
-    if (fitsread(tab->headbuf, strk, key->name, H_STRING, T_STRING)
+    if (fitsread(tab->headbuf, strk, key->name, H_STRING, T_STRING, 80)
 	!= RETURN_OK) {
       error(EXIT_FAILURE,
 	"*Error*: Incorrect FITS binary-table header in ", cat->filename); 
     }
-    fitsread(tab->headbuf, strk, key->comment, H_HCOMMENT, T_STRING);
+    fitsread(tab->headbuf, strk, key->comment, H_HCOMMENT, T_STRING, 80);
 
     sprintf(strk, "TUNIT%-3d", i+1);
-    fitsread(tab->headbuf, strk, key->unit, H_STRING, T_STRING);
+    fitsread(tab->headbuf, strk, key->unit, H_STRING, T_STRING, 80);
     sprintf(strk, "TDISP%-3d", i+1);
-    fitsread(tab->headbuf, strk, key->printf, H_STRING, T_STRING);
+    fitsread(tab->headbuf, strk, key->printf, H_STRING, T_STRING, 80);
     if (*key->printf)
       tdisptoprintf(key->printf, key->printf);
 
     sprintf(strk, "TFORM%-3d", i+1);
-    if (fitsread(tab->headbuf, strk, strf, H_STRING, T_STRING) != RETURN_OK) {
+    if (fitsread(tab->headbuf, strk, strf, H_STRING, T_STRING, 80)
+    	!= RETURN_OK) {
       error(EXIT_FAILURE,
 	"*Error*: Incorrect FITS binary-table header in ", cat->filename); 
     }
@@ -295,7 +299,8 @@ int	readbintabparam_head(tabstruct *tab)
     if ((naxisn[0] = key->nbytes/t_size[key->ttype]) > 1)
       {
       sprintf(strk, "TDIM%-3d", i+1);
-      if (fitsread(tab->headbuf, strk, strf, H_STRING, T_STRING) == RETURN_OK)
+      if (fitsread(tab->headbuf, strk, strf, H_STRING, T_STRING, 80)
+      	== RETURN_OK)
         {
         str = strf;
         for (j=0; (naxisn[j]=(int)strtol(str+1, &str, 10)); j++);

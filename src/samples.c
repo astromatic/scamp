@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2020 IAP/CNRS/SorbonneU
+ * Copyright:  (C) 2002-2022 IAP/CNRS/SorbonneU/CFHT
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  12/08/2020
+ * Last modified:  11/01/2022
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -72,7 +72,7 @@ int compwcs_samples(const void *, const void *);
   NOTES   The filename is used for error messages only. Global preferences are
   used.
   AUTHOR  E. Bertin (IAP)
-  VERSION  29/03/2019
+  VERSION  11/01/2022
  */
 setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
 
@@ -339,9 +339,11 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
             contexttyp[i] = T_DOUBLE;
             if (headflag)
             {
-                errorflag = fitsread(head, *kstr+1, context[i], H_FLOAT,T_DOUBLE);
+                errorflag = fitsread(head, *kstr+1, context[i],
+                	H_FLOAT, T_DOUBLE, 0);
                 if (errorflag==RETURN_ERROR && head0flag)
-                    errorflag = fitsread(head0, *kstr+1, context[i],H_FLOAT,T_DOUBLE);
+                    errorflag = fitsread(head0, *kstr+1, context[i],
+                    	H_FLOAT, T_DOUBLE, 0);
                 if (errorflag==RETURN_ERROR)
                 {
                     sprintf(str, "*Error*: %s parameter not found in the header of ",
@@ -370,27 +372,28 @@ setstruct *read_samples(setstruct *set, tabstruct *tab, char *rfilename)
     if (headflag)
     {
         if (fitsread(head, prefs.astraccuracy_key, &set->astraccuracy,
-                    H_FLOAT, T_DOUBLE) != RETURN_OK)
+                    H_FLOAT, T_DOUBLE, 0) != RETURN_OK)
             set->astraccuracy = prefs.astraccuracy;
         if (fitsread(head, prefs.airmass_key, &set->airmass,
-                    H_FLOAT, T_DOUBLE) != RETURN_OK)
+                    H_FLOAT, T_DOUBLE, 0) != RETURN_OK)
             set->airmass = 1.0;
         set->airmass = fabs(set->airmass);
         if (fitsread(head, prefs.expotime_key, &set->expotime,
-                    H_FLOAT, T_DOUBLE) != RETURN_OK)
+                    H_FLOAT, T_DOUBLE, 0) != RETURN_OK)
             set->expotime = 1.0;
         set->epochmin = set->wcs->obsdate;
         set->epochmax = set->epochmin==0.0? 0.0 : set->epochmin+set->expotime/YEAR;
         set->epoch = set->epochmin==0.0? 0.0 : set->epochmin+set->expotime/2.0/YEAR;
         if (fitsread(head, prefs.extcoeff_key, &set->extcoeff,
-                    H_FLOAT, T_DOUBLE) != RETURN_OK)
+                    H_FLOAT, T_DOUBLE, 0) != RETURN_OK)
             set->extcoeff = 0.0;
         set->extcoeff = fabs(set->extcoeff);
         if (fitsread(head, prefs.magzero_key, &set->magzero,
-                    H_FLOAT, T_DOUBLE) != RETURN_OK)
+                    H_FLOAT, T_DOUBLE, 0) != RETURN_OK)
             set->magzero = 0.0;
         /*-- Photometric flag must not be unset by other sets of the same field */
-        fitsread(head, prefs.photomflag_key,&set->field->photomflag,H_BOOL,T_LONG);
+        fitsread(head, prefs.photomflag_key, &set->field->photomflag,
+        	H_BOOL, T_LONG, 0);
     }
 
     nnobjflag = 0;

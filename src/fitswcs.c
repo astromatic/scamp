@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 1993-2021 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 1993-2022 IAP/CNRS/SorbonneU/CFHT
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/02/2021
+*	Last modified:		11/01/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -333,24 +333,24 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/05/2018
+VERSION	11/01/2022
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
   {
 #define	FITSREADF(buf, k, val, def) \
-		{if (fitsread(buf,k, &val, H_FLOAT,T_DOUBLE) != RETURN_OK) \
+		{if (fitsread(buf,k, &val, H_FLOAT,T_DOUBLE, 0) != RETURN_OK) \
 		   val = def; \
 		}
 
 #define	FITSREADI(buf, k, val, def) \
-		{if (fitsread(buf,k, &val, H_INT,T_LONG) != RETURN_OK) \
+		{if (fitsread(buf,k, &val, H_INT,T_LONG, 0) != RETURN_OK) \
 		   val = def; \
 		}
 
-#define	FITSREADS(buf, k, str, def) \
-		{if (fitsread(buf,k,str, H_STRING,T_STRING) != RETURN_OK) \
-		   strcpy(str, (def)); \
+#define	FITSREADS(buf, k, str, def, maxchar) \
+		{if (fitsread(buf,k,str, H_STRING,T_STRING, maxchar) != RETURN_OK) \
+		   strncpy(str, (def), maxchar); \
 		}
    char		str[MAXCHARS];
    char		wstr1[TNX_MAXCHARS], wstr2[TNX_MAXCHARS];
@@ -364,7 +364,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
   buf = tab->headbuf;
   filename = (tab->cat? tab->cat->filename : strcpy(name, "internal header"));
 
-  FITSREADS(buf, "OBJECT  ", str, "Unnamed");
+  FITSREADS(buf, "OBJECT  ", str, "Unnamed", MAXCHARS);
 
   QCALLOC(wcs, wcsstruct, 1);
   if (tab->naxis > NAXIS)
@@ -381,10 +381,10 @@ wcsstruct	*read_wcs(tabstruct *tab)
     {
     wcs->naxisn[l] = tab->naxisn[l];
     sprintf(str, "CTYPE%-3d", l+1);
-    FITSREADS(buf, str, str, "");
+    FITSREADS(buf, str, str, "", MAXCHARS);
     strncpy(wcs->ctype[l], str, 8);
     sprintf(str, "CUNIT%-3d", l+1);
-    FITSREADS(buf, str, str, "deg");
+    FITSREADS(buf, str, str, "deg", MAXCHARS);
     strncpy(wcs->cunit[l], str, 32);
     sprintf(str, "CRVAL%-3d", l+1);
     FITSREADF(buf, str, wcs->crval[l], 0.0);
@@ -463,7 +463,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
     else
       {
 /*---- Search for an observation date expressed in "civilian" format */
-      FITSREADS(buf, "DATE-OBS", str, "");
+      FITSREADS(buf, "DATE-OBS", str, "", MAXCHARS);
       if (*str)
         {
 /*------ Decode DATE-OBS format: DD/MM/YYThh:mm:ss[.sss] or YYYY-MM-DDThh:mm:ss[.sss] */
@@ -498,9 +498,10 @@ wcsstruct	*read_wcs(tabstruct *tab)
 
     FITSREADF(buf, "EPOCH", wcs->epoch, 2000.0);
     FITSREADF(buf, "EQUINOX", wcs->equinox, wcs->epoch);
-    if (fitsread(buf, "RADESYS", str, H_STRING,T_STRING) != RETURN_OK)
+    if (fitsread(buf, "RADESYS", str, H_STRING,T_STRING, 80) != RETURN_OK)
       FITSREADS(buf, "RADECSYS", str,
-	wcs->equinox >= 2000.0? "ICRS" : (wcs->equinox<1984.0? "FK4" : "FK5"));
+	wcs->equinox >= 2000.0? "ICRS" : (wcs->equinox<1984.0? "FK4" : "FK5"),
+	80);
     if (!strcmp(str, "ICRS"))
       wcs->radecsys = RDSYS_ICRS;
     else if (!strcmp(str, "FK5"))
@@ -549,14 +550,19 @@ wcsstruct	*read_wcs(tabstruct *tab)
 /*------ First we need to concatenate strings */
         pstr = wstr1;
         sprintf(str, "WAT1_001");
-        for (j=2; fitsread(buf,str,pstr,H_STRINGS,T_STRING)==RETURN_OK; j++)
+        for (j=2;
+        	fitsread(buf, str, pstr, H_STRINGS, T_STRING, TNX_MAXCHARS)
+        	== RETURN_OK;
+        	j++)
 	  {
           sprintf(str, "WAT1_%03d", j);
           pstr += strlen(pstr);
 	  }
         pstr = wstr2;
         sprintf(str, "WAT2_001");
-        for (j=2; fitsread(buf,str,pstr,H_STRINGS,T_STRING)==RETURN_OK; j++)
+        for (j=2; fitsread(buf, str, pstr, H_STRINGS, T_STRING, TNX_MAXCHARS)
+        	==RETURN_OK;
+        	j++)
 	  {
           sprintf(str, "WAT2_%03d", j);
           pstr += strlen(pstr);
@@ -589,7 +595,8 @@ wcsstruct	*read_wcs(tabstruct *tab)
       }
     else
       {
-      if (fitsread(buf, "LONPOLE",&wcs->longpole,H_FLOAT,T_DOUBLE) != RETURN_OK)
+      if (fitsread(buf, "LONPOLE",&wcs->longpole, H_FLOAT, T_DOUBLE, 0)
+		!= RETURN_OK)
         FITSREADF(buf, "LONGPOLE", wcs->longpole, 999.0);
       FITSREADF(buf, "LATPOLE ", wcs->latpole, 999.0);
 /*---- Old convention */

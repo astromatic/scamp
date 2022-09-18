@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2022 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		29/06/2020
+*	Last modified:		16/09/2022
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,7 +67,8 @@ pkeystruct key[] =
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A2", "USNO-B1", "GSC-2.3", "2MASS", "DENIS-3",
     "UCAC-4", "URAT-1", "SDSS-R9", "SDSS-R12", "NOMAD-1", "PPMX", "CMC-15",
-    "TYCHO-2", "IGSL", "ALLWISE", "GAIA-DR1", "GAIA-DR2", "PANSTARRS-1", ""}},
+    "TYCHO-2", "IGSL", "ALLWISE", "GAIA-DR1", "GAIA-DR2", "GAIA-EDR3",
+    "PANSTARRS-1", ""}},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
@@ -231,8 +232,8 @@ char *default_prefs[] =
 "ASTREF_CATALOG         2MASS           # NONE,FILE,USNO-A2,USNO-B1,GSC-2.3,",
 "                                       # TYCHO-2,UCAC-4,URAT-1,NOMAD-1,PPMX,",
 "                                       # CMC-15,2MASS,DENIS-3,SDSS-R9,SDSS-R12,",
-"                                       # IGSL,GAIA-DR1,GAIA-DR2,PANSTARRS-1,",
-"                                       # or ALLWISE",
+"                                       # IGSL,GAIA-DR1,GAIA-DR2,GAIA-EDR3,",
+"                                       # PANSTARRS-1, or ALLWISE",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
 "*ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",

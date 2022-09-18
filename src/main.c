@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/04/2020
+*	Last modified:		10/02/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -136,7 +136,8 @@ for (a=1; a<argc; a++)
         }
       else {
         argkey[narg] = &argv[a][1];
-        if (!argv[a+1] || *argv[a+1] == '-') {
+        if (!argv[a+1]	// Manage keywords with missing value
+        	|| (*argv[a+1] == '-' && (argv[a+2] && *argv[a+2] != '-'))) {
           argval[narg++] = calloc(1,1);
         } else
           argval[narg++] = argv[++a];

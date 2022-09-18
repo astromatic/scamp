@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic FITS/LDAC library
 *
-*	Copyright:		(C) 1995-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 1995-2022 IAP/CNRS/SorbonneU/CFHT
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		11/02/2020
+*	Last modified:		11/01/2022
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -285,7 +285,7 @@ extern int	about_cat(catstruct *cat, FILE *stream),
 		fitspick(char *fitsbuf, char *keyword, void *ptr,
 			h_type *htype, t_type *ttype, char *comment),
 		fitsread(char *fitsbuf, char *keyword, void *ptr,
-			h_type htype, t_type ttype),
+			h_type htype, t_type ttype, int maxchar),
 		fitsremove(char *fitsbuf, char *keyword),
 		fitswrite(char *fitsbuf, char *keyword, void *ptr,
 			h_type htype, t_type ttype),
