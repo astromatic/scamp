@@ -327,7 +327,7 @@ fi
 ################# handle the cURL library (HTTP queries) ##################
 ACX_CURL($with_curl_libdir,$with_curl_incdir,
 	[AM_CPPFLAGS="$AM_CPPFLAGS $CURL_CFLAGS"]
-	[LIBS="$CURL_LIBS $LIBS"]
+	[LIBS="$LIBS $CURL_LIBS"]
 	if test "$CURL_WARN" != ""; then
 	  AC_MSG_WARN([$CURL_WARN])
 	fi,
@@ -360,9 +360,9 @@ fi
 if test "$enable_best_link" = "yes"; then
   if test "$enable_iccx" = "yes"; then
     AM_LDFLAGS="-static-intel -qopenmp-link=static -shared-libgcc \
-	-static-libtool-libs -avoid-version $AM_LDFLAGS"
+	 -avoid-version $AM_LDFLAGS"
   else
-    AM_LDFLAGS="-shared-libgcc -static-libtool-libs -avoid-version $AM_LDFLAGS"
+    AM_LDFLAGS="-shared-libgcc -avoid-version $AM_LDFLAGS"
   fi
 fi
 
