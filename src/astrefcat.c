@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/12/2020
+*	Last modified:		22/09/2023
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -201,6 +201,13 @@ astrefstruct	astrefcats[] =
 	{"G", "BP", "RP", ""},
 	3, 0},
 
+  {"GAIA-DR3", "I/355/gaiadr3", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
+		"Gmag","e_Gmag","BPmag","e_BPmag","RPmag","e_RPmag",""},
+	{"Gmag", "BPmag","RPmag",""},
+	{"G", "BP", "RP", ""},
+	3, 0},
+
   {"PANSTARRS-1", "II/349", {"Qual", "RAJ2000","DEJ2000","e_RAJ2000","e_DEJ2000",
 		"Epoch", "gmag","e_gmag","rmag","e_rmag","imag","e_imag",
 		"zmag","e_zmag","ymag","e_ymag",""},
@@ -234,7 +241,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	01/12/2020
+VERSION	22/09/2023
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius)
@@ -810,6 +817,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
         case ASTREFCAT_GAIADR2:
         case ASTREFCAT_GAIAEDR3:
+        case ASTREFCAT_GAIADR3:
 /*-------- Reject duplicated sources */
           sflag = cols[cindex++];
 /*
