@@ -180,6 +180,13 @@ astrefstruct	astrefcats[] =
 	{"J", "H", "Ks", "W1", "W2", "W3", "W4", ""}, 
 	7, 3},
 
+  {"UNWISE", "II/363/unwise", {"FlagsW1","FlagsW2","RAJ2000","DEJ2000",
+		"e_XposW1","e_XposW2","e_YposW1","e_YposW2","FW1","e_FW1",
+		"FW2","e_FW2",""},
+	{"FW1", "FW2", ""},
+	{"W1", "W2", ""},
+	2, 0},
+
   {"GAIA-DR1", "I/337/gaia", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
 		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
 		"<FG>","e_<FG>","<Gmag>",""},
@@ -772,11 +779,37 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             smagerr = cols[cindex++];
             if (smag[4] <= ' ' || smagerr[4] <= ' ') {
               mag[b] = magerr[b] = 99.0;
-}
-            else {
+            } else {
               mag[b] = atof(smag);
               magerr[b] = atof(smagerr);
             }
+          }
+          break;
+
+        case ASTREFCAT_UNWISE:
+/*-------- Avoid contaminated observations */
+          flag1 = atoi(cols[cindex++]);
+          flag2 = atoi(cols[cindex++]);
+          if (flag1 !=0 && flag2 !=0)
+            continue;
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+/*-------- Convert position uncertainties (in units of 2.75") to degrees */
+          poserra = atof(cols[cindex++]);
+          poserrb = atof(cols[cindex++]);
+          poserr[lng] = (poserra > TINY ? poserra : poserrb) * 2.75*ARCSEC/DEG;
+          poserra = atof(cols[cindex++]);
+          poserrb = atof(cols[cindex++]);
+          poserr[lat] = (poserra > TINY ? poserra : poserrb) * 2.75*ARCSEC/DEG;
+          epoch = 2000.0;
+          for (b=0; b<nband; b++) {
+            flux = atof(cols[cindex++]);
+            fluxerr = atof(cols[cindex++]);
+            if (flux > 0.0) {
+              mag[b] = 22.5 - 2.5*log10(flux);
+              magerr[b] = 1.0857 * fluxerr / flux;
+            } else
+              mag[b] = magerr[b] = 99.0;
           }
           break;
 
