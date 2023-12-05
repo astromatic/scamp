@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2022 IAP/CNRS/SorbonneU/CFHT
+ * Copyright:  (C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  11/01/2022
+ * Last modified:  05/12/2023
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -588,7 +588,31 @@ void print_fieldinfo(fieldstruct *field)
 }
 
 
-/****** dhmedian ******************************************************
+/****** get_field_meanepoch *************************************************
+  PROTO	double get_fields_meanepoch(fieldstruct **fields, int nfield)
+  PURPOSE	Return the average epoch of all input fields.
+  INPUT Pointer to field structure pointers,
+  	Number of fields.
+  OUTPUT	Average epoch of input fields.
+  NOTES -.
+  AUTHOR E. Bertin (DAp/CEA/UParisSaclay)
+  VERSION 05/12/2023
+ ***/
+double	get_fields_meanepoch(fieldstruct **fields, int nfield)
+
+{
+    double	epoch = 0.0;
+    int	f;
+
+    for (f=0; f<nfield; f++) {
+        epoch += fields[f]->epoch;
+    }
+	
+    return nfield ? epoch / (double)nfield : 0.0;
+}
+
+
+/****** dhmedian ************************************************************
   PROTO double   dhmedian(double *ra, int n)
   PURPOSE Compute the median of an array of doubles, using the Heapsort
   algorithm (based on Num.Rec algo.).

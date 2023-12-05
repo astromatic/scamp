@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		22/09/2023
+*	Last modified:		05/12/2023
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -237,21 +237,22 @@ const int	astref_naxisn[NAXIS] = {16384, 16384};
 
 /****** get_astreffield *********************************************************
 PROTO   fieldstruct *get_astreffield(astrefenum refcat, double *wcspos,
-				int lng, int lat, int naxis, double maxradius)
+				int lng, int lat, int naxis, double maxradius, double epoch_in)
 PURPOSE	Download reference catalog.
 INPUT   Catalog name,
 	Coordinate vector of the center,
 	Longitude index,
 	Latitude index,
 	Number of axes (dimensions),
-	Search radius (in degrees).
+	Search radius (in degrees),
+	Epoch (in years AC).
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	22/09/2023
+VERSION	05/12/2023
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
-				int lng, int lat, int naxis, double maxradius)
+				int lng, int lat, int naxis, double maxradius, double epoch_in)
   {
    astrefstruct	*astrefcat;
    fieldstruct	*field,*tfield;
@@ -269,7 +270,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		flag1,flag2, smode;
    double	poserr[NAXIS], prop[NAXIS], properr[NAXIS],
 		mag[MAX_BAND], magerr[MAX_BAND], flux, fluxerr, epoch,
-		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt;
+		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt,
+		prop2, properr2, rprop;
    int		b,c,d,i,n,s,
 		nsample,nsamplemax, nobs, mode, qual, band, nband, cindex;
 
@@ -861,7 +863,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           delta = atof(cols[cindex++]);
           poserr[lng] = atof(cols[cindex++])*MAS/DEG;
           poserr[lat] = atof(cols[cindex++])*MAS/DEG;
-          epoch = atof(cols[cindex++]);
+          epoch = (refcat==ASTREFCAT_GAIADR3) ?
+			GAIA_DR3_EPOCH : atof(cols[cindex++]);
           sprop[lng] = cols[cindex++];
           sprop[lat] = cols[cindex++];
           sproperr[lng] = cols[cindex++];
@@ -881,8 +884,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             smagerr = cols[cindex++];
             if (smag[4] <= ' ' || smagerr[4] <= ' ') {
               mag[b] = magerr[b] = 99.0;
-}
-            else {
+            } else {
               mag[b] = atof(smag);
               magerr[b] = atof(smagerr);
             }
@@ -913,6 +915,17 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         default:
           break;
         }
+
+/*---- Correct position for epoch if asked to */
+      if (prefs.astrefepoch_type != ASTREFEPOCH_ORIGINAL
+      	&& (properr2=properr[lng]*properr[lng] + properr[lat]*properr[lat]) > TINY
+      	&& (prop2=prop[lng]*prop[lng] + prop[lat]*prop[lat]) > TINY) {
+        rprop = (prefs.astrefregul_type == ASTREFREGUL_TIKHONOV)?
+        	prop2 / (prop2 + properr2) : 1.0;
+		cpt = cos(delta * DEG);
+		alpha += prop[lng] * (epoch_in - epoch) / (cpt > TINY ? cpt : 1.0);
+		delta += prop[lat] * (epoch_in - epoch);
+      }
 
       if (!(n%10000))
         {

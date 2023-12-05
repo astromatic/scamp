@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright: (C) 2002-2020 IAP/CNRS/SorbonneU
+ * Copyright: (C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
  *
  * License: GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified: 12/08/2020
+ * Last modified: 05/12/2023
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -79,7 +79,7 @@ void makeit(void)
     fieldstruct **fields, **reffields;
     setstruct *set;
     struct tm *tm;
-    double alpha,delta;
+    double alpha,delta, epoch_mean;
     char *pstr,
          sign;
     int i,f,g, nfield, ngroup, nsample, nclip, hh,mm,dd,dm;
@@ -164,6 +164,8 @@ void makeit(void)
     print_fgroupinfo(fgroups, ngroup);
 
     adjust_mosaic(fields, nfield);
+    /* Get mean epoch of input fields */
+	epoch_mean = get_fields_meanepoch(fields, nfield);
 
 #ifdef HAVE_PLPLOT
     /* Plot fields on the sky */
@@ -182,7 +184,9 @@ void makeit(void)
         {
             reffields[g] = get_astreffield(prefs.astrefcat,
                     fgroups[g]->meanwcspos, fgroups[g]->lng, fgroups[g]->lat,
-                    fgroups[g]->naxis, fgroups[g]->maxradius+prefs.radius_maxerr);
+                    fgroups[g]->naxis, fgroups[g]->maxradius+prefs.radius_maxerr,
+                    prefs.astrefepoch_type == ASTREFEPOCH_MANUAL?
+                    prefs.astref_epoch : epoch_mean);
             if (reffields[g])
             {
                 NFPRINTF(OUTPUT, "");

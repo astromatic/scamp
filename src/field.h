@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- ** Copyright:  (C) 2002-2017 IAP/CNRS/UPMC
+ ** Copyright:  (C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  07/05/2018
+ * Last modified:  05/12/2023
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -126,7 +126,8 @@ extern fieldstruct *inherit_field(char *filename, fieldstruct *reffield,
        *load_field(char *filename, int fieldindex,
                char *hfilename);
 
-extern double  dhmedian(double *ra, int n);
+extern double  dhmedian(double *ra, int n),
+       get_fields_meanepoch(fieldstruct **fields, int nfield);
 
 extern void  end_field(fieldstruct *field),
        locate_field(fieldstruct *field),
