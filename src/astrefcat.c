@@ -271,7 +271,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
    double	poserr[NAXIS], prop[NAXIS], properr[NAXIS],
 		mag[MAX_BAND], magerr[MAX_BAND], flux, fluxerr, epoch,
 		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt,
-		prop2, properr2, rprop;
+		prop2, properr2, propfac;
    int		b,c,d,i,n,s,
 		nsample,nsamplemax, nobs, mode, qual, band, nband, cindex;
 
@@ -920,11 +920,11 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
       if (prefs.astrefepoch_type != ASTREFEPOCH_ORIGINAL
       	&& (properr2=properr[lng]*properr[lng] + properr[lat]*properr[lat]) > TINY
       	&& (prop2=prop[lng]*prop[lng] + prop[lat]*prop[lat]) > TINY) {
-        rprop = (prefs.astrefregul_type == ASTREFREGUL_TIKHONOV)?
-        	prop2 / (prop2 + properr2) : 1.0;
+        propfac = (prefs.astrefregul_type == ASTREFREGUL_TIKHONOV)?
+        	(epoch_in - epoch) * prop2 / (prop2 + properr2) : (epoch_in - epoch);
 		cpt = cos(delta * DEG);
-		alpha += prop[lng] * (epoch_in - epoch) / (cpt > TINY ? cpt : 1.0);
-		delta += prop[lat] * (epoch_in - epoch);
+		alpha += prop[lng] * propfac / (cpt > TINY ? cpt : 1.0);
+		delta += prop[lat] * propfac;
       }
 
       if (!(n%10000))
