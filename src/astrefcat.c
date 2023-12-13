@@ -917,14 +917,27 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         }
 
 /*---- Correct position for epoch if asked to */
-      if (prefs.astrefepoch_type != ASTREFEPOCH_ORIGINAL
-      	&& (properr2=properr[lng]*properr[lng] + properr[lat]*properr[lat]) > TINY
-      	&& (prop2=prop[lng]*prop[lng] + prop[lat]*prop[lat]) > TINY) {
-        propfac = (prefs.astrefregul_type == ASTREFREGUL_TIKHONOV)?
-        	(epoch_in - epoch) * prop2 / (prop2 + properr2) : (epoch_in - epoch);
-		cpt = cos(delta * DEG);
-		alpha += prop[lng] * propfac / (cpt > TINY ? cpt : 1.0);
-		delta += prop[lat] * propfac;
+      if (prefs.astrefepoch_type != ASTREFEPOCH_ORIGINAL) {
+   
+      	if ((properr2=properr[lng]*properr[lng] + properr[lat]*properr[lat]) > TINY) {
+          prop2 = prop[lng]*prop[lng] + prop[lat]*prop[lat];
+          propfac = (prefs.astrefregul_type == ASTREFREGUL_TIKHONOV)?
+            (epoch_in - epoch) * prop2 / (prop2 + properr2) : (epoch_in - epoch);
+          // Compute 1 / cos Dec
+          cpt = cos(delta * DEG);
+		  alpha += prop[lng] * propfac * (cpt > TINY ? 1.0/cpt : 1.0);
+		  delta += prop[lat] * propfac;
+		  // Add in quadrature positional uncertainties added by PM correction
+          poserr[lng] = sqrt(poserr[lng]*poserr[lng]
+            + properr[lng]*properr[lng] * propfac*propfac);
+          poserr[lng] = sqrt(poserr[lat]*poserr[lat]
+            + properr[lng]*properr[lng] * propfac*propfac);
+        } else {
+          // Add in quadrature positional uncert. contributed by unknown PM correction
+          propfac = (epoch_in - epoch) * RMS_PROP;
+          poserr[lng] = sqrt(poserr[lng]*poserr[lng] + propfac*propfac);
+          poserr[lat] = sqrt(poserr[lat]*poserr[lat] + propfac*propfac);
+        }
       }
 
       if (!(n%10000))

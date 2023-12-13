@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/12/2023
+*	Last modified:		13/12/2023
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -50,6 +50,7 @@
 #define		UCAC_MAGERR		0.12		/* Just a default value */
 #define		DEFAULT_MAGERR	0.1		/* Just a default value */
 #define		GAIA_DR3_EPOCH	2016.0
+#define		RMS_PROP	(10*MAS/DEG)    /* Typical proper motion value */
 
 #define		ASTREF_ASSOCRADIUS	(0.2*ARCSEC/DEG)
 
