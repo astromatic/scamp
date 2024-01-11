@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic FITS/LDAC library
 *
-*	Copyright:		(C) 1995-2012 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 1995-2022 IAP/CNRS/SorbonneU/CFHT
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		30/11/2012
+*	Last modified:		11/01/2022
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -38,7 +38,7 @@
 #include	"fitscat_defs.h"
 #include	"fitscat.h"
 
-char	histokeys[][12] = {"COMMENT ", "HISTORY ", "        ", ""};
+char	histokeys[][12] = {"COMMENT ", "HISTORY ", "CONTINUE", "        ", ""};
 
 /****** fitsadd ***************************************************************
 PROTO	int fitsadd(char *fitsbuf, char *keyword, char *comment)
@@ -324,30 +324,32 @@ int	fitspick(char *fitsline, char *keyword, void *ptr, h_type *htype,
 
 /****** fitsread **************************************************************
 PROTO	int fitsread(char *fitsbuf, char *keyword, void *ptr, h_type htype,
-			t_type ttype)
+			t_type ttype, int maxchar)
 PURPOSE	Read a FITS keyword in a fits header.
 INPUT	pointer to the FITS buffer,
 	name of the keyword to be read,
 	pointer where to put the read data,
 	h_type of the data to be read (see fitscat.h),
 	t_type of the data to be read (see fitscat.h).
+	maximum number of characters for strings and comment (including '\0')
 OUTPUT	RETURN_OK if the keyword was found, RETURN_ERROR otherwise.
 NOTES	The buffer MUST contain the ``END     '' keyword.
 AUTHOR	E. Bertin (IAP & Leiden observatory)
-VERSION	13/06/2012
+VERSION	11/01/2022
  ***/
 int	fitsread(char *fitsbuf, char *keyword, void *ptr, h_type htype,
-		t_type ttype)
+		t_type ttype, int maxchar)
 
   {
    int		i,pos;
-   char		s[4], str[82];
-   char		*st, *st2;
+   char		s[4], str[84], str2[84];
+   char		*fitsbufpos, *st, *st2;
 
   if ((pos = fitsfind(fitsbuf, keyword)) < 0)
     return RETURN_ERROR;
 
-  strncpy(str,fitsbuf+80*pos,80);
+  fitsbufpos = fitsbuf + 80*pos;
+  strncpy(str, fitsbufpos,80);
   str[80] = '\0';
 
   switch(htype)
@@ -383,9 +385,13 @@ int	fitsread(char *fitsbuf, char *keyword, void *ptr, h_type htype,
 #endif
 			break;
 
-    case H_STRING:	st = ptr;
+    case H_STRING:	if (maxchar <= 1)
+			  return RETURN_ERROR;
+			st = ptr;
 			st2= str+10;
 			for (i=70; i-- && *(st2++)!=(char)'\'';);
+			if (i > maxchar - 1)
+			  i = maxchar - 1;
 			while (i-->0)
 			  {
 			  if (*st2 == '\'' && *(++st2) != '\'')
@@ -396,24 +402,47 @@ int	fitsread(char *fitsbuf, char *keyword, void *ptr, h_type htype,
 			  {
 			  *(st--) = (char)'\0';
 			  } while (st>(char *)ptr && (*st == (char)' '));
+                        for (st2 = st; st2 >= (char *)ptr && *st2 == ' '; st2--);
+//----------------------  Recursive search for subsequent CONTINUEd string
+			if (*st2 == (char)'&') {
+                          *st2 = (char)'\0';
+			  if (fitsfind((fitsbufpos += 80), "CONTINUE") == 0) {
+			    fitsread(fitsbufpos, "CONTINUE", st2,
+				H_STRING, T_STRING,
+				maxchar - (st2 - (char *)ptr));
+			  }
+                        }
 			break;
 
-    case H_STRINGS:	st = ptr;
+    case H_STRINGS:	if (maxchar <= 1)
+			  return RETURN_ERROR;
+			st = ptr;
 			st2= str+10;
 			for (i=70; i-- && *(st2++)!=(char)'\'';);
-			while (i-->0)
-			  {
+			if (i > maxchar - 1)
+			  i = maxchar - 1;
+			while (i-- > 0) {
 			  if (*st2 == '\'' && *(++st2) != '\'')
 			    break;
 			  *(st++) = *(st2++);
-			  }
+			}
 			*st = (char)'\0';
+                        for (st2 = st; st2 >= (char *)ptr && *st2 == ' '; st2--);
+//----------------------  Recursive search for subsequent CONTINUEd string
+			if (*st2 == (char)'&') {
+                          *st2 = (char)'\0';
+			  if (fitsfind((fitsbufpos += 80), "CONTINUE") == 0) {
+			    fitsread(fitsbufpos, "CONTINUE", st2,
+				H_STRING, T_STRING,
+				maxchar - (st2 - (char *)ptr));
+			  }
+                        }
 			break;
 
-    case H_COMMENT:	strcpy(ptr,str+9);
+    case H_COMMENT:	strncpy(ptr, str+9, maxchar);
 			break;
 
-    case H_HCOMMENT:	strcpy(ptr,str+33);
+    case H_HCOMMENT:	strncpy(ptr, str+33, maxchar);
 			break;
 
     default:		error(EXIT_FAILURE,

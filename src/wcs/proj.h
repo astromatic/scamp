@@ -56,7 +56,7 @@
 *
 *   Author: Mark Calabretta, Australia Telescope National Facility
 *   IRAF's TNX added by E.Bertin 2000/03/28
-*   $Id: proj.h,v 1.1.1.1 2012/12/04 16:33:26 bertin Exp $
+*   $Id: proj.h,v 1.1.1.1 2021/01/06 16:33:26 bertin Exp $
 *===========================================================================*/
 
 #ifndef WCSLIB_PROJ
@@ -70,7 +70,8 @@ struct prjprm {
    int flag;
    int n;
    double r0;
-   double p[200];
+   double p[200];	// PV parameters
+   double *cd2;		// 2nd "celestial" CD matrix (used externally)
    double w[10];
    struct tnxaxis	*tnx_latcor;
    struct tnxaxis	*tnx_lngcor;

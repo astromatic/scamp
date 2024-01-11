@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/08/2020
+*	Last modified:		05/12/2023
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -86,6 +86,9 @@ typedef struct
   char		astref_bandname[MAXCHAR];/* Astrometric ref. band name */
   double	astref_maglim[2];	/* Selection magnitude range */
   int		nastref_maglim;		/* nb of params */
+  astrefepochenum	astrefepoch_type;	/* Type of change of reference epoch */
+  double	astref_epoch;		/* Manual setting for reference epoch */
+  astrefregulenum	astrefregul_type; /* PM regularization type for new epoch */
   char		*(astrefcent_key[NAXIS]);/* Astrom ref. cat. centroid keywords*/
   int		nastrefcent_key;	/* nb of params */
   char		*(astreferr_key[(NAXIS*(NAXIS+1))/2]);/* err.ellipse keywords*/

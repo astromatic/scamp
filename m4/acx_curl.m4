@@ -7,7 +7,7 @@ dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
 dnl	This file part of:	AstrOmatic software
 dnl
-dnl	Copyright:		(C) 2003-2015 Emmanuel Bertin -- IAP/CNRS/UPMC
+dnl	Copyright:		(C) 2003-2023 Emmanuel Bertin -- IAP/CFHT/CNRS/UPMC
 dnl
 dnl	License:		GNU General Public License
 dnl
@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		15/07/2015
+dnl	Last modified:		15/02/2023
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -47,14 +47,15 @@ CURL_LIBS=""
 OLIBS="$LIBS"
 LIBS=""
 acx_curl_ok=yes
-acx_curlconfig_ok=no
 if test x$2 = x && test x$1 = x; then
   AC_CHECK_PROG(acx_curlconfig_ok, [curl-config], [yes], [no])
-  if test x"$acx_curlconfig_ok" = xyes; then
-    [CURL_CFLAGS=`curl-config --cflags`]
+  if test x$acx_curlconfig_ok = xyes; then
+    [CURL_CFLAGS=` --cflags`]
     [CURL_LIBS=`curl-config --libs`]
     AC_DEFINE(CURL_H, "curl/curl.h", [cURL header filename.])
   fi
+else
+  acx_curlconfig_ok=no
 fi
 if test x$acx_curlconfig_ok = xno; then
   if test x$2 = x; then

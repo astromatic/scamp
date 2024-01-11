@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/12/2020
+*	Last modified:		05/12/2023
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -67,13 +67,16 @@ pkeystruct key[] =
   {"ASTREF_CATALOG", P_KEY, &prefs.astrefcat, 0,0, 0.0,0.0,
    {"NONE", "FILE", "USNO-A2", "USNO-B1", "GSC-2.3", "2MASS", "DENIS-3",
     "UCAC-4", "URAT-1", "SDSS-R9", "SDSS-R12", "NOMAD-1", "PPMX", "CMC-15",
-    "TYCHO-2", "IGSL", "ALLWISE", "GAIA-DR1", "GAIA-DR2", "GAIA-EDR3",
-    "PANSTARRS-1", ""}},
+    "TYCHO-2", "IGSL", "ALLWISE", "UNWISE", "GAIA-DR1", "GAIA-DR2", "GAIA-EDR3",
+    "GAIA-DR3", "PANSTARRS-1", ""}},
+  {"ASTREF_EPOCH", P_FLOAT, &prefs.astref_epoch, 0,0, -1e6,1e6},
   {"ASTREF_WEIGHT", P_FLOAT, &prefs.astref_weight, 0,0, 1e-6,1e6},
   {"ASTREFCAT_NAME", P_STRINGLIST, prefs.astref_name, 0,0,0.0,0.0,
     {""}, 0, MAXNGROUP, &prefs.nastref_name},
   {"ASTREFCENT_KEYS", P_STRINGLIST, prefs.astrefcent_key, 0,0, 0.0,0.0,
    {""}, 2, NAXIS, &prefs.nastrefcent_key},
+  {"ASTREFEPOCH_TYPE", P_KEY, &prefs.astrefepoch_type, 0,0, 0.0,0.0,
+   {"ORIGINAL", "MANUAL", "FIELDS_AVERAGE", ""}},
   {"ASTREFERR_KEYS", P_STRINGLIST, prefs.astreferr_key, 0,0, 0.0,0.0,
    {""}, 2, (NAXIS*(NAXIS+1))/2, &prefs.nastreferr_key},
   {"ASTREFPROP_KEYS", P_STRINGLIST, prefs.astrefprop_key, 0,0, 0.0,0.0,
@@ -85,6 +88,8 @@ pkeystruct key[] =
   {"ASTREFOBSDATE_KEY", P_STRING, prefs.astrefobsdate_key},
   {"ASTREFMAG_LIMITS", P_FLOATLIST, prefs.astref_maglim, 0,0, -99.0,99.0,
     {""}, 2, 2, &prefs.nastref_maglim},
+  {"ASTREFREGUL_TYPE", P_KEY, &prefs.astrefregul_type, 0,0, 0.0,0.0,
+   {"NONE", "TIKHONOV", ""}},
   {"ASTRINSTRU_KEY", P_STRINGLIST, prefs.astrinstru_key, 0,0, 0.0,0.0,
    {""}, 0, 35, &prefs.nastrinstru_key},
   {"CENTROID_KEYS", P_STRINGLIST, prefs.centroid_key, 0,0,0.0,0.0,
@@ -233,7 +238,8 @@ char *default_prefs[] =
 "                                       # TYCHO-2,UCAC-4,URAT-1,NOMAD-1,PPMX,",
 "                                       # CMC-15,2MASS,DENIS-3,SDSS-R9,SDSS-R12,",
 "                                       # IGSL,GAIA-DR1,GAIA-DR2,GAIA-EDR3,",
-"                                       # PANSTARRS-1, or ALLWISE",
+"                                       # GAIA-DR3,PANSTARRS-1, ALLWISE,",
+"                                       # or UNWISE",
 "ASTREF_BAND            DEFAULT         # Photom. band for astr.ref.magnitudes",
 "                                       # or DEFAULT, BLUEST, or REDDEST",
 "*ASTREFCAT_NAME         astrefcat.cat   # Local astrometric reference catalogs",
@@ -247,6 +253,11 @@ char *default_prefs[] =
 "*ASTREFMAGERR_KEY       MAGERR          # Local ref.cat. mag. error parameter",
 "*ASTREFOBSDATE_KEY      OBSDATE         # Local ref.cat. obs. date parameter",
 "ASTREFMAG_LIMITS       -99.0,99.0      # Select magnitude range in ASTREF_BAND",
+"*ASTREFEPOCH_TYPE       ORIGINAL        # Epoch of reference positions: ORIGINAL,",
+"*                                       # MANUAL, or FIELDS_AVERAGE",
+"*ASTREF_EPOCH           2000.0          # Epoch for reference catalog if MANUAL",
+"*ASTREFREGUL_TYPE       NONE            # Proper motion regularization for new",
+"*                                       # epochs: NONE, or TIKHONOV",
 "SAVE_REFCATALOG        N               # Save ref catalogs in FITS-LDAC format?",
 "REFOUT_CATPATH         .               # Save path for reference catalogs",
 " ",

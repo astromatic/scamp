@@ -7,7 +7,7 @@
  *
  * This file part of: SCAMP
  *
- * Copyright:  (C) 2002-2020 IAP/CNRS/SorbonneU
+ * Copyright:  (C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
  *
  * License:  GNU General Public License
  *
@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  19/08/2020
+ * Last modified:  05/12/2023
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -62,15 +62,15 @@ int			*pthread_field_fviewflag,
 
 
 /****** load_field ***********************************************************
-  PROTO   fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
-  PURPOSE Read catalog(s) and load field data.
-  INPUT   Character string that contains the file name.
-  OUTPUT  A pointer to the created field structure.
-  NOTES   Global preferences are used. The function is not reentrant because
-  of static variables (prefs structure members are updated),
-  FITS header filename (null=none).
-  AUTHOR  E. Bertin (IAP)
-  VERSION 23/03/2016
+PROTO	fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
+PURPOSE	Read catalog(s) and load field data.
+INPUT	Character string that contains the file name.
+OUTPUT	A pointer to the created field structure.
+NOTES	Global preferences are used. The function is not reentrant because
+	of static variables (prefs structure members are updated),
+	FITS header filename (null=none).
+AUTHOR	E. Bertin (IAP & CFHT)
+VERSION	11/01/2022
  */
 fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
 {
@@ -145,7 +145,7 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     /* Give a "colour" to the present field */
     field->cplot_colour = 15;
     fitsread(cat->tab->headbuf, prefs.cplot_colourkey, &field->cplot_colour,
-            H_INT,T_LONG);
+            H_INT, T_LONG, 0);
     /* Put an astrometric label to the present field */
     field->astromlabel = 0;
     /* Create a dummy FITS header to store all keyword values */
@@ -203,12 +203,12 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
             field->headflag |= !read_aschead(field->hfilename, n, imatab);
             if (!imatab->headbuf
                     || fitsread(imatab->headbuf, "OBJECT  ", field->ident,
-                        H_STRING,T_STRING)!= RETURN_OK)
+                        H_STRING, T_STRING, MAXCHAR) != RETURN_OK)
                 strcpy(field->ident, "no ident");
             set[n]->imatab = imatab;
             if (field->cplot_colour==15)
                 fitsread(imatab->headbuf, prefs.cplot_colourkey, &field->cplot_colour,
-                        H_INT,T_LONG);
+                        H_INT, T_LONG, 0);
             /*---- Try to read the astrometric label again */
             for (s=0; s<prefs.nastrinstru_key; s++)
             {
@@ -309,7 +309,8 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
             for (d=0; d<NAXIS; d++)
             {
                 sprintf(keystr, "CTYPE%1d  ", d+1);
-                if (fitsread(set[i]->imatab->headbuf, keystr, str, H_STRING,T_STRING)
+                if (fitsread(set[i]->imatab->headbuf, keystr, str,
+                	H_STRING,T_STRING, 16)
                         == RETURN_OK
                         && (pstr=strrchr(str, '-')))
                 {
@@ -587,7 +588,31 @@ void print_fieldinfo(fieldstruct *field)
 }
 
 
-/****** dhmedian ******************************************************
+/****** get_field_meanepoch *************************************************
+  PROTO	double get_fields_meanepoch(fieldstruct **fields, int nfield)
+  PURPOSE	Return the average epoch of all input fields.
+  INPUT Pointer to field structure pointers,
+  	Number of fields.
+  OUTPUT	Average epoch of input fields.
+  NOTES -.
+  AUTHOR E. Bertin (DAp/CEA/UParisSaclay)
+  VERSION 05/12/2023
+ ***/
+double	get_fields_meanepoch(fieldstruct **fields, int nfield)
+
+{
+    double	epoch = 0.0;
+    int	f;
+
+    for (f=0; f<nfield; f++) {
+        epoch += fields[f]->epoch;
+    }
+	
+    return nfield ? epoch / (double)nfield : 0.0;
+}
+
+
+/****** dhmedian ************************************************************
   PROTO double   dhmedian(double *ra, int n)
   PURPOSE Compute the median of an array of doubles, using the Heapsort
   algorithm (based on Num.Rec algo.).

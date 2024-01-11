@@ -83,18 +83,19 @@ locations:
    $ ./configure
 
 Compared to "gcc" and the librairies above, the combination of the
-Intel compiler ("icc") and the MKL (Math Kernel Library) libraries
-can give the SCAMP executable a significant boost in performance,
-thanks to better vectorized code, and reduced memory usage. If "icc"
-and the MKL (Math Kernel Library) are installed on your system [4],
-you can take advantage of those using instead
+Intel compiler ("icc" or "icx") and the MKL (Math Kernel Library)
+libraries can give the SCAMP executable a significant boost in
+performance, thanks to better vectorized code, and reduced memory
+usage. If "icc" (or "icx") and the MKL (Math Kernel Library) are
+installed on your system [4], you can take advantage of those using
+instead
 
    $ ./configure --enable-mkl
 
 Additionally, if the SCAMP binary is to be run on a different
-machine that does not have "icc" and the MKL (Math Kernel Library)
-installed (e.g., a cluster computing node), you must configure a
-partially statically linked executable using
+machine that does not have "icc" (or "icx") and the MKL installed
+(e.g., a cluster computing node), you must configure a partially
+statically linked executable using
 
    $ ./configure --enable-mkl --enable-auto-flags --enable-best-link
 
@@ -126,6 +127,5 @@ path).
     options "--enable-threads --enable-float".
 
 [4] The Linux versions of the Intel compiler and MKL (Math
-    Kernel Library) are available for free to academic researchers,
-    students, educators and open source contributors.
+    Kernel Library) are now available for free on Intel's website.
 

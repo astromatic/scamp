@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		01/12/2020
+*	Last modified:		05/12/2023
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -180,6 +180,13 @@ astrefstruct	astrefcats[] =
 	{"J", "H", "Ks", "W1", "W2", "W3", "W4", ""}, 
 	7, 3},
 
+  {"UNWISE", "II/363/unwise", {"FlagsW1","FlagsW2","RAJ2000","DEJ2000",
+		"e_XposW1","e_XposW2","e_YposW1","e_YposW2","FW1","e_FW1",
+		"FW2","e_FW2",""},
+	{"FW1", "FW2", ""},
+	{"W1", "W2", ""},
+	2, 0},
+
   {"GAIA-DR1", "I/337/gaia", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
 		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
 		"<FG>","e_<FG>","<Gmag>",""},
@@ -195,6 +202,13 @@ astrefstruct	astrefcats[] =
 	3, 0},
 
   {"GAIA-EDR3", "I/350/gaiaedr3", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
+		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
+		"Gmag","e_Gmag","BPmag","e_BPmag","RPmag","e_RPmag",""},
+	{"Gmag", "BPmag","RPmag",""},
+	{"G", "BP", "RP", ""},
+	3, 0},
+
+  {"GAIA-DR3", "I/355/gaiadr3", {"Dup", "RA_ICRS","DE_ICRS","e_RA_ICRS","e_DE_ICRS",
 		"Epoch","pmRA","pmDE","e_pmRA","e_pmDE",
 		"Gmag","e_Gmag","BPmag","e_BPmag","RPmag","e_RPmag",""},
 	{"Gmag", "BPmag","RPmag",""},
@@ -223,21 +237,22 @@ const int	astref_naxisn[NAXIS] = {16384, 16384};
 
 /****** get_astreffield *********************************************************
 PROTO   fieldstruct *get_astreffield(astrefenum refcat, double *wcspos,
-				int lng, int lat, int naxis, double maxradius)
+				int lng, int lat, int naxis, double maxradius, double epoch_in)
 PURPOSE	Download reference catalog.
 INPUT   Catalog name,
 	Coordinate vector of the center,
 	Longitude index,
 	Latitude index,
 	Number of axes (dimensions),
-	Search radius (in degrees).
+	Search radius (in degrees),
+	Epoch (in years AC).
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	01/12/2020
+VERSION	05/12/2023
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
-				int lng, int lat, int naxis, double maxradius)
+				int lng, int lat, int naxis, double maxradius, double epoch_in)
   {
    astrefstruct	*astrefcat;
    fieldstruct	*field,*tfield;
@@ -255,7 +270,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		flag1,flag2, smode;
    double	poserr[NAXIS], prop[NAXIS], properr[NAXIS],
 		mag[MAX_BAND], magerr[MAX_BAND], flux, fluxerr, epoch,
-		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt;
+		alpha,delta, dist, poserra,poserrb,poserrtheta, cpt,spt,
+		prop2, properr2, propfac;
    int		b,c,d,i,n,s,
 		nsample,nsamplemax, nobs, mode, qual, band, nband, cindex;
 
@@ -765,11 +781,37 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             smagerr = cols[cindex++];
             if (smag[4] <= ' ' || smagerr[4] <= ' ') {
               mag[b] = magerr[b] = 99.0;
-}
-            else {
+            } else {
               mag[b] = atof(smag);
               magerr[b] = atof(smagerr);
             }
+          }
+          break;
+
+        case ASTREFCAT_UNWISE:
+/*-------- Avoid contaminated observations */
+          flag1 = atoi(cols[cindex++]);
+          flag2 = atoi(cols[cindex++]);
+          if (flag1 !=0 && flag2 !=0)
+            continue;
+          alpha = atof(cols[cindex++]);
+          delta = atof(cols[cindex++]);
+/*-------- Convert position uncertainties (in units of 2.75") to degrees */
+          poserra = atof(cols[cindex++]);
+          poserrb = atof(cols[cindex++]);
+          poserr[lng] = (poserra > TINY ? poserra : poserrb) * 2.75*ARCSEC/DEG;
+          poserra = atof(cols[cindex++]);
+          poserrb = atof(cols[cindex++]);
+          poserr[lat] = (poserra > TINY ? poserra : poserrb) * 2.75*ARCSEC/DEG;
+          epoch = 2000.0;
+          for (b=0; b<nband; b++) {
+            flux = atof(cols[cindex++]);
+            fluxerr = atof(cols[cindex++]);
+            if (flux > 0.0) {
+              mag[b] = 22.5 - 2.5*log10(flux);
+              magerr[b] = 1.0857 * fluxerr / flux;
+            } else
+              mag[b] = magerr[b] = 99.0;
           }
           break;
 
@@ -810,6 +852,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 
         case ASTREFCAT_GAIADR2:
         case ASTREFCAT_GAIAEDR3:
+        case ASTREFCAT_GAIADR3:
 /*-------- Reject duplicated sources */
           sflag = cols[cindex++];
 /*
@@ -820,7 +863,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
           delta = atof(cols[cindex++]);
           poserr[lng] = atof(cols[cindex++])*MAS/DEG;
           poserr[lat] = atof(cols[cindex++])*MAS/DEG;
-          epoch = atof(cols[cindex++]);
+          epoch = (refcat==ASTREFCAT_GAIADR3) ?
+			GAIA_DR3_EPOCH : atof(cols[cindex++]);
           sprop[lng] = cols[cindex++];
           sprop[lat] = cols[cindex++];
           sproperr[lng] = cols[cindex++];
@@ -840,8 +884,7 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
             smagerr = cols[cindex++];
             if (smag[4] <= ' ' || smagerr[4] <= ' ') {
               mag[b] = magerr[b] = 99.0;
-}
-            else {
+            } else {
               mag[b] = atof(smag);
               magerr[b] = atof(smagerr);
             }
@@ -872,6 +915,30 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
         default:
           break;
         }
+
+/*---- Correct position for epoch if asked to */
+      if (prefs.astrefepoch_type != ASTREFEPOCH_ORIGINAL) {
+   
+      	if ((properr2=properr[lng]*properr[lng] + properr[lat]*properr[lat]) > TINY) {
+          prop2 = prop[lng]*prop[lng] + prop[lat]*prop[lat];
+          propfac = (prefs.astrefregul_type == ASTREFREGUL_TIKHONOV)?
+            (epoch_in - epoch) * prop2 / (prop2 + properr2) : (epoch_in - epoch);
+          // Compute 1 / cos Dec
+          cpt = cos(delta * DEG);
+		  alpha += prop[lng] * propfac * (cpt > TINY ? 1.0/cpt : 1.0);
+		  delta += prop[lat] * propfac;
+		  // Add in quadrature positional uncertainties added by PM correction
+          poserr[lng] = sqrt(poserr[lng]*poserr[lng]
+            + properr[lng]*properr[lng] * propfac*propfac);
+          poserr[lng] = sqrt(poserr[lat]*poserr[lat]
+            + properr[lng]*properr[lng] * propfac*propfac);
+        } else {
+          // Add in quadrature positional uncert. contributed by unknown PM correction
+          propfac = (epoch_in - epoch) * RMS_PROP;
+          poserr[lng] = sqrt(poserr[lng]*poserr[lng] + propfac*propfac);
+          poserr[lat] = sqrt(poserr[lat]*poserr[lat] + propfac*propfac);
+        }
+      }
 
       if (!(n%10000))
         {

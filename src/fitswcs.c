@@ -7,7 +7,7 @@
 *
 *	This file part of:	AstrOmatic software
 *
-*	Copyright:		(C) 1993-2019 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 1993-2022 IAP/CNRS/SorbonneU/CFHT
 *
 *	License:		GNU General Public License
 *
@@ -23,7 +23,7 @@
 *	along with AstrOmatic software.
 *	If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		02/12/2019
+*	Last modified:		11/01/2021
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -107,7 +107,7 @@ OUTPUT	pointer to a WCS structure.
 NOTES	If a pointer is set to null, the corresponding variables are set to
 	default values.
 AUTHOR	E. Bertin (IAP)
-VERSION	09/08/2006
+VERSION	06/01/2020
  ***/
 wcsstruct	*create_wcs(char **ctype, double *crval, double *crpix,
 			double *cdelt, int *naxisn, int naxis)
@@ -138,7 +138,11 @@ wcsstruct	*create_wcs(char **ctype, double *crval, double *crpix,
     wcs->cd[l*(naxis+1)] = cdelt? cdelt[l] : 1.0;
     }
 
+  wcs->cd2[0] = wcs->cd2[3] = 1.0;
+  wcs->cd2[1] = wcs->cd2[2] = 0.0;
+
   wcs->epoch = wcs->equinox = 2000.0;
+
   QCALLOC(wcs->wcsprm, struct wcsprm, 1);
 
 /* Test if the WCS is recognized and a celestial pair is found */
@@ -240,6 +244,7 @@ void	init_wcs(wcsstruct *wcs)
   wcs->prj->r0 = wcs->r0;
   wcs->prj->tnx_lngcor = wcs->tnx_lngcor;
   wcs->prj->tnx_latcor = wcs->tnx_latcor;
+  wcs->prj->cd2 = wcs->cd2;
   if (lng>=0)
     {
     n = 0;
@@ -328,24 +333,24 @@ INPUT	tab structure.
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	04/05/2018
+VERSION	11/01/2022
  ***/
 wcsstruct	*read_wcs(tabstruct *tab)
 
   {
 #define	FITSREADF(buf, k, val, def) \
-		{if (fitsread(buf,k, &val, H_FLOAT,T_DOUBLE) != RETURN_OK) \
+		{if (fitsread(buf,k, &val, H_FLOAT,T_DOUBLE, 0) != RETURN_OK) \
 		   val = def; \
 		}
 
 #define	FITSREADI(buf, k, val, def) \
-		{if (fitsread(buf,k, &val, H_INT,T_LONG) != RETURN_OK) \
+		{if (fitsread(buf,k, &val, H_INT,T_LONG, 0) != RETURN_OK) \
 		   val = def; \
 		}
 
-#define	FITSREADS(buf, k, str, def) \
-		{if (fitsread(buf,k,str, H_STRING,T_STRING) != RETURN_OK) \
-		   strcpy(str, (def)); \
+#define	FITSREADS(buf, k, str, def, maxchar) \
+		{if (fitsread(buf,k,str, H_STRING,T_STRING, maxchar) != RETURN_OK) \
+		   strncpy(str, (def), maxchar); \
 		}
    char		str[MAXCHARS];
    char		wstr1[TNX_MAXCHARS], wstr2[TNX_MAXCHARS];
@@ -359,7 +364,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
   buf = tab->headbuf;
   filename = (tab->cat? tab->cat->filename : strcpy(name, "internal header"));
 
-  FITSREADS(buf, "OBJECT  ", str, "Unnamed");
+  FITSREADS(buf, "OBJECT  ", str, "Unnamed", MAXCHARS);
 
   QCALLOC(wcs, wcsstruct, 1);
   if (tab->naxis > NAXIS)
@@ -376,10 +381,10 @@ wcsstruct	*read_wcs(tabstruct *tab)
     {
     wcs->naxisn[l] = tab->naxisn[l];
     sprintf(str, "CTYPE%-3d", l+1);
-    FITSREADS(buf, str, str, "");
+    FITSREADS(buf, str, str, "", MAXCHARS);
     strncpy(wcs->ctype[l], str, 8);
     sprintf(str, "CUNIT%-3d", l+1);
-    FITSREADS(buf, str, str, "deg");
+    FITSREADS(buf, str, str, "deg", MAXCHARS);
     strncpy(wcs->cunit[l], str, 32);
     sprintf(str, "CRVAL%-3d", l+1);
     FITSREADF(buf, str, wcs->crval[l], 0.0);
@@ -458,7 +463,7 @@ wcsstruct	*read_wcs(tabstruct *tab)
     else
       {
 /*---- Search for an observation date expressed in "civilian" format */
-      FITSREADS(buf, "DATE-OBS", str, "");
+      FITSREADS(buf, "DATE-OBS", str, "", MAXCHARS);
       if (*str)
         {
 /*------ Decode DATE-OBS format: DD/MM/YYThh:mm:ss[.sss] or YYYY-MM-DDThh:mm:ss[.sss] */
@@ -493,9 +498,10 @@ wcsstruct	*read_wcs(tabstruct *tab)
 
     FITSREADF(buf, "EPOCH", wcs->epoch, 2000.0);
     FITSREADF(buf, "EQUINOX", wcs->equinox, wcs->epoch);
-    if (fitsread(buf, "RADESYS", str, H_STRING,T_STRING) != RETURN_OK)
+    if (fitsread(buf, "RADESYS", str, H_STRING,T_STRING, 80) != RETURN_OK)
       FITSREADS(buf, "RADECSYS", str,
-	wcs->equinox >= 2000.0? "ICRS" : (wcs->equinox<1984.0? "FK4" : "FK5"));
+	wcs->equinox >= 2000.0? "ICRS" : (wcs->equinox<1984.0? "FK4" : "FK5"),
+	80);
     if (!strcmp(str, "ICRS"))
       wcs->radecsys = RDSYS_ICRS;
     else if (!strcmp(str, "FK5"))
@@ -544,14 +550,19 @@ wcsstruct	*read_wcs(tabstruct *tab)
 /*------ First we need to concatenate strings */
         pstr = wstr1;
         sprintf(str, "WAT1_001");
-        for (j=2; fitsread(buf,str,pstr,H_STRINGS,T_STRING)==RETURN_OK; j++)
+        for (j=2;
+        	fitsread(buf, str, pstr, H_STRINGS, T_STRING, TNX_MAXCHARS)
+        	== RETURN_OK;
+        	j++)
 	  {
           sprintf(str, "WAT1_%03d", j);
           pstr += strlen(pstr);
 	  }
         pstr = wstr2;
         sprintf(str, "WAT2_001");
-        for (j=2; fitsread(buf,str,pstr,H_STRINGS,T_STRING)==RETURN_OK; j++)
+        for (j=2; fitsread(buf, str, pstr, H_STRINGS, T_STRING, TNX_MAXCHARS)
+        	==RETURN_OK;
+        	j++)
 	  {
           sprintf(str, "WAT2_%03d", j);
           pstr += strlen(pstr);
@@ -584,7 +595,8 @@ wcsstruct	*read_wcs(tabstruct *tab)
       }
     else
       {
-      if (fitsread(buf, "LONPOLE",&wcs->longpole,H_FLOAT,T_DOUBLE) != RETURN_OK)
+      if (fitsread(buf, "LONPOLE",&wcs->longpole, H_FLOAT, T_DOUBLE, 0)
+		!= RETURN_OK)
         FITSREADF(buf, "LONGPOLE", wcs->longpole, 999.0);
       FITSREADF(buf, "LATPOLE ", wcs->latpole, 999.0);
 /*---- Old convention */
@@ -604,6 +616,9 @@ wcsstruct	*read_wcs(tabstruct *tab)
             }
       }
     }
+
+  wcs->cd2[0] = wcs->cd2[3] = 1.0;
+  wcs->cd2[1] = wcs->cd2[2] = 0.0;
 
 /* Initialize other WCS structures */
   init_wcs(wcs);
@@ -629,37 +644,44 @@ INPUT	tab structure,
 OUTPUT	-.
 NOTES	-.
 AUTHOR	E. Bertin (IAP)
-VERSION	27/11/2013
+VERSION	03/02/2021
  ***/
-void	write_wcs(tabstruct *tab, wcsstruct *wcs)
+void	write_wcs(tabstruct *tab, wcsstruct *wcs) {
 
-  {
-   double	mjd;
+   static const int pvxy[] = {
+	0,2,1,3,
+	6,5,4,
+	10,9,8,7,11,
+	16,15,14,13,12,
+	22,21,20,19,18,17,23,
+	30,29,28,27,26,25,24,
+	38,37,36,35,34,33,32,31,39
+   };
+
+   double	*cd2, *cd3, *projp, *projp2,
+   		mjd;
    char		str[MAXCHARS];
-   int		j, l, naxis;
+   int		j, l, p, naxis, lng, lat, cdflag;
 
   naxis = wcs->naxis;
   addkeywordto_head(tab, "BITPIX  ", "Bits per pixel");
   fitswrite(tab->headbuf, "BITPIX  ", &tab->bitpix, H_INT, T_LONG);
   addkeywordto_head(tab, "NAXIS   ", "Number of axes");
   fitswrite(tab->headbuf, "NAXIS   ", &wcs->naxis, H_INT, T_LONG);
-  for (l=0; l<naxis; l++)
-    {
+  for (l=0; l<naxis; l++) {
     sprintf(str, "NAXIS%-3d", l+1);
     addkeywordto_head(tab, str, "Number of pixels along this axis");
     fitswrite(tab->headbuf, str, &wcs->naxisn[l], H_INT, T_LONG);
-    }
+  }
   addkeywordto_head(tab, "EQUINOX ", "Mean equinox");
   fitswrite(tab->headbuf, "EQUINOX ", &wcs->equinox, H_FLOAT, T_DOUBLE);
-  if (wcs->obsdate!=0.0)
-    {
+  if (wcs->obsdate!=0.0) {
     mjd = (wcs->obsdate-2000.0)*365.25 + MJD2000;
     addkeywordto_head(tab, "MJD-OBS ", "Modified Julian date at start");
     fitswrite(tab->headbuf, "MJD-OBS ", &mjd, H_EXPO,T_DOUBLE);
-    }
+  }
   addkeywordto_head(tab, "RADESYS ", "Astrometric system");
-  switch(wcs->radecsys)
-    {
+  switch(wcs->radecsys) {
     case RDSYS_ICRS:
       fitswrite(tab->headbuf, "RADESYS ", "ICRS", H_STRING, T_STRING);
       break;
@@ -677,9 +699,44 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
       break;
     default:
       error(EXIT_FAILURE, "*Error*: unknown RADESYS type in write_wcs()", "");
-    }
-  for (l=0; l<naxis; l++)
-    {
+  }
+    
+// Apply 2nd "celestial" CD matrix
+  cd2 = wcs->cd2;
+  lng = wcs->lng;
+  lat = wcs->lat;
+
+  // We need a buffer for linear algebra
+  projp = wcs->projp;
+  QMEMCPY(projp, projp2, double, naxis*100);
+
+  cdflag = 1;
+  for (p=40; p--;) {
+    j = p + lng * 100;
+    projp2[j] = cd2[0] * projp[j] + cd2[1] * projp[pvxy[p] + lat * 100] ;
+    if (fabs(projp2[j]) > TINY)
+      cdflag = 0;
+  }
+  for (p=40; p--;) {
+    j = p + lat * 100;
+    projp2[j] = cd2[2] * projp[pvxy[p] + lng * 100] + cd2[3] * projp[j] ;
+    if (fabs(projp2[j]) > TINY)
+      cdflag = 0;
+  }
+
+  QMEMCPY(wcs->cd, cd3, double, naxis * 2);
+  if ((cdflag)) {
+    cd3[lng + naxis * lng] = cd2[0] * wcs->cd[lng + naxis * lng]
+    				+ cd2[1] * wcs->cd[lng + naxis * lat];
+    cd3[lat + naxis * lng] = cd2[0] * wcs->cd[lat + naxis * lng]
+    				+ cd2[1] * wcs->cd[lat + naxis * lat];
+    cd3[lng + naxis * lat] = cd2[2] * wcs->cd[lng + naxis * lng]
+    				+ cd2[3] * wcs->cd[lng + naxis * lat];
+    cd3[lat + naxis * lat] = cd2[2] * wcs->cd[lat + naxis * lng]
+    				+ cd2[3] * wcs->cd[lat + naxis * lat];
+  }
+
+  for (l=0; l<naxis; l++) {
     sprintf(str, "CTYPE%-3d", l+1);
     addkeywordto_head(tab, str, "WCS projection type for this axis");
     fitswrite(tab->headbuf, str, wcs->ctype[l], H_STRING, T_STRING);
@@ -692,20 +749,22 @@ void	write_wcs(tabstruct *tab, wcsstruct *wcs)
     sprintf(str, "CRPIX%-3d", l+1);
     addkeywordto_head(tab, str, "Reference pixel on this axis");
     fitswrite(tab->headbuf, str, &wcs->crpix[l], H_EXPO, T_DOUBLE);
-    for (j=0; j<naxis; j++)
-      {
+    for (j=0; j<naxis; j++) {
       sprintf(str, "CD%d_%d", l+1, j+1);
       addkeywordto_head(tab, str, "Linear projection matrix");
-      fitswrite(tab->headbuf, str, &wcs->cd[l*naxis+j], H_EXPO, T_DOUBLE);
-      }
-    for (j=0; j<100; j++)
-      if (fabs(wcs->projp[j+100*l]) > TINY)
-        {
-        sprintf(str, "PV%d_%d", l+1, j);
-        addkeywordto_head(tab, str, "Projection distortion parameter");
-        fitswrite(tab->headbuf, str, &wcs->projp[j+100*l], H_EXPO, T_DOUBLE);
-        }
+      fitswrite(tab->headbuf, str, &cd3[l*naxis+j], H_EXPO, T_DOUBLE);
     }
+    if (!(cdflag))
+      for (p=0; p<100; p++)
+        if (fabs(projp2[p+100*l]) > TINY) {
+          sprintf(str, "PV%d_%d", l+1, p);
+          addkeywordto_head(tab, str, "Projection distortion parameter");
+          fitswrite(tab->headbuf, str, &projp2[p+100*l], H_EXPO, T_DOUBLE);
+        }
+  }
+
+  free(projp2);
+  free(cd3);
 
 /* Update the tab data */
   readbasic_head(tab);

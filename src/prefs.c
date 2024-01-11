@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2022 IAP/CNRS/SorbonneU
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		12/08/2020
+*	Last modified:		18/09/2022
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -551,7 +551,7 @@ void	useprefs(void)
 #endif
 
 /* Override INTEL CPU detection routine to help performance on 3rd-party CPUs */
-#if defined(__INTEL_COMPILER) && defined (USE_CPUREDISPATCH)
+#if defined(__INTEL_COMPILER) && defined(USE_CPUREDISPATCH)
   __get_cpuid(1, &eax, &ebx, &ecx, &edx);
   if (ebx&bit_AVX2)
     __intel_cpu_indicator = 0x40000;
