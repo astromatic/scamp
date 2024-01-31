@@ -57,6 +57,10 @@
 #include ATLAS_LAPACK_H
 #endif
 
+#ifdef HAVE_ACCELERATE
+#include ACCELERATE_H
+#endif
+
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #endif
@@ -383,6 +387,10 @@ void	astrprop_fgroup(fgroupstruct *fgroup)
       nfreemin = astrprop_solve(fgroup,samp,wcsec,alpha,beta,wis, &chi2min);
 #if defined(HAVE_LAPACKE)
     LAPACKE_dpotri(LAPACK_COL_MAJOR, 'L',ncoeff, alpha, ncoeff);
+#elif defined(HAVE_ACCELERATE)
+    int info,n_beta=1;
+    char* upper_or_lower="U";
+    dpotri_(upper_or_lower, &ncoeff, alpha, &ncoeff, &info);
 #else
     clapack_dpotri(CblasRowMajor, CblasUpper, ncoeff, alpha, ncoeff);
 #endif
@@ -605,6 +613,10 @@ static int	astrprop_solve(fgroupstruct *fgroup, samplestruct *samp,
   memcpy(a,alpha,ncoeff*ncoeff*sizeof(double));
 #if defined(HAVE_LAPACKE)
   LAPACKE_dposv(LAPACK_COL_MAJOR, 'L', ncoeff, 1, alpha, ncoeff, beta, ncoeff);
+#elif defined(HAVE_ACCELERATE)
+  int info,n_beta=1;
+  char* upper_or_lower="U";
+  dposv_(upper_or_lower, &ncoeff, &n_beta, alpha, &ncoeff, beta, &ncoeff, &info);
 #else
   clapack_dposv(CblasRowMajor,CblasUpper,ncoeff,1, alpha,ncoeff,beta,ncoeff);
 #endif
