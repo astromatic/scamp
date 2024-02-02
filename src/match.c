@@ -110,7 +110,7 @@ static const int pvmap[] =
 void match_field(fieldstruct *field, fieldstruct *reffield)
 {
     setstruct *refset, *refset2, *set, *fieldset;
-    char  str[128];
+    char  str[MAXCHAR];
     double wcspos[NAXIS],
     angle,scale,dlng,dlat, dx,dy, dx2,dy2, sig, dlng2,dlat2,sig2, asig,
     dangle,dscale, ddlng,ddlat, shear,sangle, sheartot, sangletot,
@@ -118,7 +118,7 @@ void match_field(fieldstruct *field, fieldstruct *reffield)
     int  i,j,k, lng,lat,
          naxis, nmax;
 
-    sprintf(str, "Matching field %s...", field->rfilename);
+    sprintf(str, "Matching field %.*s ...", MAXCHAR - 20, field->rfilename);
     NFPRINTF(OUTPUT, str);
 
     /* We are going to use FFT routines */
