@@ -162,6 +162,8 @@ int	write_aschead(char *filename, fieldstruct *field)
     {
     tab = new_tab("");
     update_head(tab);
+    addkeywordto_head(tab, "EXTNAME", "Name of this FITS extension");
+    fitswrite(tab->headbuf,"EXTNAME", set[s]->imatab->extname, H_STRING, T_STRING);
     write_wcs(tab, set[s]->wcs);
     switch(prefs.header_type)
       {
