@@ -359,8 +359,8 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
             }
             read_samples(set[n], tab, str);
             nsample += set[n]->nsample;
-            free_tab(set[n]->imatab);
-            set[n]->imatab = NULL;
+            //free_tab(set[n]->imatab);
+            //set[n]->imatab = NULL;
             set[n]->setindex = n;
             n++;
         }
@@ -551,8 +551,13 @@ void end_field(fieldstruct *field)
     if (field->set)
     {
         for (i=0; i<field->nset; i++)
-            if (field->set[i])
+            if (field->set[i]) {
+                if (field->set[i]->imatab) {
+                    free_tab(field->set[i]->imatab);
+                    field->set[i]->imatab = NULL;
+                }
                 end_set(field->set[i]);
+            }
         free(field->set);
     }
     free(field);
