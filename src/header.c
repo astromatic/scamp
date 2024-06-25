@@ -45,7 +45,7 @@
 #include "samples.h"
 
 /*-------------------------- Worthy WCS keywords ----------------------------*/
-char	wcskey[][12] = {"EQUINOX", "RADESYS?", "CTYPE???", "CUNIT???",
+char	wcskey[][12] = {"EXTNAME", "EQUINOX", "RADESYS?", "CTYPE???", "CUNIT???",
 		"CRVAL???", "CRPIX???", "CDELT???", "CD?_?", "PV?_????",
 		"FGROUPNO", "ASTIRMS?", "ASTRRMS?", "ASTINST ",
 		"FLXSCALE", "MAGZEROP", "PHOTIRMS", "PHOTINST", "PHOTLINK",
