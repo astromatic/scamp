@@ -359,8 +359,6 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
             }
             read_samples(set[n], tab, str);
             nsample += set[n]->nsample;
-            //free_tab(set[n]->imatab);
-            //set[n]->imatab = NULL;
             set[n]->setindex = n;
             n++;
         }
