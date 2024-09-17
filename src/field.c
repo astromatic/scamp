@@ -549,13 +549,8 @@ void end_field(fieldstruct *field)
     if (field->set)
     {
         for (i=0; i<field->nset; i++)
-            if (field->set[i]) {
-                if (field->set[i]->imatab) {
-                    free_tab(field->set[i]->imatab);
-                    field->set[i]->imatab = NULL;
-                }
+            if (field->set[i])
                 end_set(field->set[i]);
-            }
         free(field->set);
     }
     free(field);
