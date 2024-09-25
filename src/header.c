@@ -45,7 +45,7 @@
 #include "samples.h"
 
 /*-------------------------- Worthy WCS keywords ----------------------------*/
-char	wcskey[][12] = {"EQUINOX", "RADESYS?", "CTYPE???", "CUNIT???",
+char	wcskey[][12] = {"EXTNAME", "EQUINOX", "RADESYS?", "CTYPE???", "CUNIT???",
 		"CRVAL???", "CRPIX???", "CDELT???", "CD?_?", "PV?_????",
 		"FGROUPNO", "ASTIRMS?", "ASTRRMS?", "ASTINST ",
 		"FLXSCALE", "MAGZEROP", "PHOTIRMS", "PHOTINST", "PHOTLINK",
@@ -162,6 +162,8 @@ int	write_aschead(char *filename, fieldstruct *field)
     {
     tab = new_tab("");
     update_head(tab);
+    addkeywordto_head(tab, "EXTNAME", "Name of this FITS extension");
+    fitswrite(tab->headbuf,"EXTNAME", set[s]->imatab->extname, H_STRING, T_STRING);
     write_wcs(tab, set[s]->wcs);
     switch(prefs.header_type)
       {
