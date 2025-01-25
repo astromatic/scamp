@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
+*	Copyright:		(C) 2002-2024 IAP/CNRS/SorbonneU/CEA/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +22,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/12/2023
+*	Last modified:		25/03/2024
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -249,7 +249,7 @@ INPUT   Catalog name,
 OUTPUT  Pointer to the reference field.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION	05/12/2023
+VERSION	25/03/2024
 */
 fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 				int lng, int lat, int naxis, double maxradius, double epoch_in)
@@ -930,8 +930,8 @@ fieldstruct	*get_astreffield(astrefenum refcat, double *wcspos,
 		  // Add in quadrature positional uncertainties added by PM correction
           poserr[lng] = sqrt(poserr[lng]*poserr[lng]
             + properr[lng]*properr[lng] * propfac*propfac);
-          poserr[lng] = sqrt(poserr[lat]*poserr[lat]
-            + properr[lng]*properr[lng] * propfac*propfac);
+          poserr[lat] = sqrt(poserr[lat]*poserr[lat]
+            + properr[lat]*properr[lat] * propfac*propfac);
         } else {
           // Add in quadrature positional uncert. contributed by unknown PM correction
           propfac = (epoch_in - epoch) * RMS_PROP;
