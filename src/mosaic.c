@@ -58,9 +58,14 @@
 #include ATLAS_LAPACK_H
 #endif
 
+#ifdef HAVE_ACCELERATE
+#include ACCELERATE_H
+#endif
+
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #endif
+
 
 /*------------------- global variables for multithreading -------------------*/
 #ifdef USE_THREADS
@@ -248,6 +253,10 @@ void	adjust_set(fieldstruct **fields, int nfield, int s)
 /* Derive the CRPIXs */
 #if defined(HAVE_LAPACKE)
   LAPACKE_dgesv(LAPACK_ROW_MAJOR, naxis, 1, cd, naxis, ipiv, x, 1);
+#elif defined(HAVE_ACCELERATE)
+  int NRHS=1;
+  int info;
+  dgesv_(&naxis, &NRHS, cd, &naxis, ipiv, x, &naxis, &info);
 #else
   clapack_dgesv(CblasRowMajor, naxis, 1, cd, naxis, ipiv, x, naxis);
 #endif

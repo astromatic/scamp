@@ -50,6 +50,7 @@ AC_SUBST(DATE3, "$date3")
 
 # Include macros
 sinclude(acx_atlas.m4)
+sinclude(acx_accelerate.m4)
 sinclude(acx_openblas.m4)
 sinclude(acx_curl.m4)
 sinclude(acx_fftw.m4)
@@ -114,6 +115,15 @@ AC_ARG_ENABLE(mkl,
         [AC_CHECK_PROGS(CC, [icc icx cc])]
         enable_iccx="yes",
 	AC_MSG_RESULT([no]))
+
+# Provide special options for Apple Accelerate
+AC_MSG_CHECKING([whether we should use Appel's Accelerate])
+AC_ARG_ENABLE(accelerate,
+  [AS_HELP_STRING([--enable-accelerate],
+  [Use Apple's Accelerate for linear algebra (off by default)])],
+        CC="cc"
+  AC_MSG_RESULT([yes]),
+  AC_MSG_RESULT([no]))
 
 # Checks for programs.
 AC_LANG(C)
@@ -295,32 +305,36 @@ else
     ],
     AC_MSG_ERROR([$FFTW_ERROR Exiting.])
   )
-
   if test "x$enable_openblas" = "xyes"; then
 ######## Handle the OpenBLAS library (linear algebra: BLAS + LAPACKe) ########
     ACX_OPENBLAS($with_openblas_libdir, $with_openblas_incdir, $use_pthreads, no,
-      [
-        AM_CFLAGS="$AM_CFLAGS $OPENBLAS_CFLAGS "
-        AM_LDFLAGS="$AM_LDFLAGS $OPENBLAS_LDFLAGS "
-        LIBS="$OPENBLAS_LIBS $LIBS"
-        if test "$OPENBLAS_WARN" != ""; then
-          AC_MSG_WARN([$OPENBLAS_WARN])
-        fi
-      ],
-      AC_MSG_ERROR([$OPENBLAS_ERROR Exiting.])
+    [
+    AM_CFLAGS="$AM_CFLAGS $OPENBLAS_CFLAGS "
+    AM_LDFLAGS="$AM_LDFLAGS $OPENBLAS_LDFLAGS "
+    LIBS="$OPENBLAS_LIBS $LIBS"
+    if test "$OPENBLAS_WARN" != ""; then
+      AC_MSG_WARN([$OPENBLAS_WARN])
+    fi
+    ],
+    AC_MSG_ERROR([$OPENBLAS_ERROR Exiting.])
     )
-
   else
+################ handle the Apple Accelerate framework (linear algebra) ######
+    if test x$enable_accelerate = xyes; then
+      ACX_ACCEL()
+      LIBS="$ACCEL_LIBS $LIBS"
+    else
 ######### handle the ATLAS library (linear algebra: BLAS + cLAPACK) ##########
-    ACX_ATLAS($with_atlas_libdir, $with_atlas_incdir, $use_pthreads,
-      [
+      ACX_ATLAS($with_atlas_libdir, $with_atlas_incdir, $use_pthreads,
+        [
         [LIBS="$ATLAS_LIBS $LIBS"]
         if test "$ATLAS_WARN" != ""; then
-	  AC_MSG_WARN([$ATLAS_WARN])
-	fi
-      ],
-      AC_MSG_ERROR([$ATLAS_ERROR Exiting.])
-    )
+          AC_MSG_WARN([$ATLAS_WARN])
+        fi
+        ],
+        AC_MSG_ERROR([$ATLAS_ERROR Exiting.])
+      )
+    fi
   fi
 fi
 
