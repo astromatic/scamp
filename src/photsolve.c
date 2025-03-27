@@ -50,6 +50,10 @@
 #include ATLAS_LAPACK_H
 #endif
 
+#ifdef HAVE_ACCELERATE
+#include ACCELERATE_H
+#endif
+
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #endif
@@ -378,7 +382,11 @@ void	photsolve_fgroups(fgroupstruct **fgroups, int nfgroup)
 #if defined(HAVE_LAPACKE)
       LAPACKE_dposv(LAPACK_COL_MAJOR, 'L',
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
-#else
+#elif defined(HAVE_ACCELERATE)
+      int info,n_beta=1;
+      char* upper_or_lower="U";
+      dposv_(upper_or_lower, &ncoefftot, &n_beta, alpha, &ncoefftot, beta, &ncoefftot, &info);
+ #else
       clapack_dposv(CblasRowMajor, CblasUpper,
 		ncoefftot, 1, alpha, ncoefftot, beta, ncoefftot);
 #endif
