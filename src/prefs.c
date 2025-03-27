@@ -7,7 +7,11 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2022 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 1994,1997 ESO
+*	          		(C) 1995,1996 Leiden Observatory 
+*	          		(C) 1998-2021 IAP/CNRS/SorbonneU
+*	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +26,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		18/09/2022
+*	Last modified:		27/03/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -528,13 +532,6 @@ void	useprefs(void)
       warning("Cannot find the number of CPUs on this system:", str);
       }
     }
-
-#if defined(HAVE_ATLAS) && !defined(HAVE_ATLAS_MP)
-   if (prefs.nthreads>1)
-     warning("This executable has been compiled using a version of the ATLAS "
-	"library without support for multithreading. ",
-	"Performance will be degraded.");
-#endif
 
 #ifdef HAVE_MKL
 /* Set default number of MKL threads (may be changed later in the code) */
