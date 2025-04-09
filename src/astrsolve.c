@@ -46,6 +46,10 @@
 #include ATLAS_LAPACK_H
 #endif
 
+#ifdef HAVE_ACCELERATE
+#include ACCELERATE_H
+#endif
+
 #ifdef HAVE_LAPACKE
 #include LAPACKE_H
 #define MATSTORAGE_PACKED 1
@@ -521,6 +525,12 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
 #endif
         free(lap_ipiv);
 
+#elif defined(HAVE_ACCELERATE)
+    int info,n_beta=1;
+    char* upper_or_lower="U";
+    if (dposv_(upper_or_lower, &ncoefftot,
+        &n_beta, alpha, &ncoefftot, beta, &ncoefftot, &info) != 0)
+      warning("Not a positive definite matrix", " in astrometry solver");
 
 #else
 
