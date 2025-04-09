@@ -7,7 +7,9 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2010 Emmanuel Bertin -- IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+*	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		10/10/2010
+*	Last modified:		09/04/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -103,8 +105,8 @@ INPUT	Number of plots along the x axis,
 	device number.
 OUTPUT	RETURN_OK if everything went fine, RETURN_ERROR otherwise.
 NOTES	.
-AUTHOR	E. Bertin (IAP)
-VERSION	10/09/2009
+AUTHOR  E. Bertin (CEA/AIM/UParisSaclay)
+VERSION 09/04/2025
  ***/
 int	cplot_init(int nx, int ny, cplotenum cplottype)
   {
@@ -124,10 +126,12 @@ int	cplot_init(int nx, int ny, cplotenum cplottype)
 	&& (prefs.cplot_device[dev-1] == CPLOT_PNG
 	|| prefs.cplot_device[dev-1] == CPLOT_JPEG))
     {
-    sprintf(str, "convert -geometry \"%dx%d\" -antialias %s %s",
+    sprintf(str, "%s %s -geometry \"%dx%d\" -antialias %s",
+    prefs.cplot_antialiasexec,
+    plotfilename,
 	prefs.cplot_res[0]? prefs.cplot_res[0] : CPLOT_DEFRESX,
 	prefs.cplot_res[1]? prefs.cplot_res[1] : CPLOT_DEFRESY,
-	plotfilename, plotfilename);
+	plotfilename);
     system(str);
     }
 

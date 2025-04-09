@@ -7,7 +7,9 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2018 IAP/CNRS/UPMC
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+*	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		03/05/2018
+*	Last modified:		09/04/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -37,15 +39,15 @@
 
 /*------------------------ what, who, when and where ------------------------*/
 
-#define         BANNER		"SCAMP"
-#define         MYVERSION       VERSION
-#define         COPYRIGHT       "2010-2018 Sorbonne Université/Université de Bordeaux/CNRS"
-#define		DISCLAIMER	BANNER " comes with ABSOLUTELY NO WARRANTY\n" \
+#define BANNER		"SCAMP"
+#define MYVERSION   VERSION
+#define COPYRIGHT   "2002-2025 IAP/CNRS/SorbonneU/CFHT/CEA/AIM/UParisSaclay"
+#define	DISCLAIMER	BANNER " comes with ABSOLUTELY NO WARRANTY\n" \
 		"You may redistribute copies of " BANNER "\n" \
 		"under the terms of the GNU General Public License."
-#define		AUTHORS		"Emmanuel BERTIN <bertin@iap.fr> and Sébastien Serre <serre@u-bordeaux.fr>"
-#define		WEBSITE		"http://astromatic.net/software/scamp"
-#define         INSTITUTE	"IAP  http://www.iap.fr"
+#define	AUTHORS		"Emmanuel BERTIN <bertin@universite-paris-saclay.fr> and Sébastien Serre <serre@u-bordeaux.fr>"
+#define	WEBSITE		"http://astromatic.net/software/scamp"
+#define	INSTITUTE	"AIM https://irfu.cea.fr/dap/"
 
 /*----------------------------- Physical constants --------------------------*/
 

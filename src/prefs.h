@@ -7,7 +7,9 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+*	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/12/2023
+*	Last modified:		09/04/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -215,6 +217,7 @@ typedef struct
   int		cplot_res[2];			/* X,Y check-plot resolution */
   int		ncplot_res;			/* nb of params */
   int		cplot_antialiasflag;		/* Anti-aliasing on/off */
+  char      *cplot_antialiasexec;  /* Executable filename for anti-aliasing */
   int		stats_maxmeshsize;		/* Max mesh size for stats */
 /* Check-images */
   checkenum	check_type[MAXCHECK];		/* check-image types */

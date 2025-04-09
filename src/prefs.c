@@ -7,7 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 1998-2021 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
 *	          		(C) 2021-2023 CFHT/CNRS
 *	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *
@@ -24,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		27/03/2025
+*	Last modified:		09/04/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -65,6 +65,7 @@
 #include	"fitswcs.h"
 
 int		findkeys(char *str, char key[][32], int mode);
+void    get_magick(void);
 
 prefstruct	prefs;
 
@@ -485,8 +486,7 @@ Update various structures according to the prefs.
 void	useprefs(void)
 
   {
-   FILE			*testfile;
-   char			teststr[80],str[80],
+   char			str[80],
 			*pstr;
    int			i, flag;
 #ifdef USE_THREADS
@@ -681,19 +681,9 @@ void	useprefs(void)
   if (flag && prefs.ncplot_name!=prefs.ncplot_type)
     error(EXIT_FAILURE, "*Error*: CHECKPLOT_NAME(s) and CHECKPLOT_TYPE(s)",
 	" are not in equal number");
-/* Deactivate antialiasing if the convert tool is not available */
-  if (prefs.cplot_flag && prefs.cplot_antialiasflag)
-    {
-    if ((testfile=popen("convert", "r")))
-      {
-      fgets(teststr, 80, testfile);
-      if (!strstr(teststr, "ImageMagick"))
-        prefs.cplot_antialiasflag = 0;
-      pclose(testfile);
-      }
-    else
-      prefs.cplot_antialiasflag = 0;
-    }
+/* Deactivate antialiasing if the magick/convert tool is not available */
+  if (flag)
+    get_magick();
 
 /* S/N thresholds */
   if (prefs.sn_thresh[1]<prefs.sn_thresh[0])
@@ -702,6 +692,40 @@ void	useprefs(void)
   return;
   }
 
+
+/***i** get_magick ***********************************************************
+PROTO	void get_magick(void)
+PURPOSE	Get the name of an ImageMagick executable
+INPUT	-.
+OUTPUT  Executable filename.
+NOTES   -.
+AUTHOR  E. Bertin (CEA/AIM/UParisSaclay)
+VERSION 09/04/2025
+*/
+void    get_magick(void) {
+   FILE *testfile;
+   static char exec_names[][MAXCHAR] = {"magick", "convert", ""},
+        teststr[80];
+   int  i;
+
+  prefs.cplot_antialiasexec = NULL;
+  for (i=0; *exec_names[i]; i++) {
+    sprintf(teststr, "%s 2>/dev/null", exec_names[i]);
+    if (!(testfile=popen(teststr, "r")))
+      continue;
+    fgets(teststr, 80, testfile);
+    pclose(testfile);
+    if (!strstr(teststr, "ImageMagick"))
+      continue;
+    prefs.cplot_antialiasexec = exec_names[i];
+    break;
+    }
+
+  if (!prefs.cplot_antialiasexec) {
+    prefs.cplot_antialiasflag = 0;
+	warning("ImageMagick package not found: ", "anti-aliasing de-activated in plots");
+  }
+}
 
 /********************************* endprefs *********************************/
 /*
