@@ -23,7 +23,7 @@ dnl	You should have received a copy of the GNU General Public License
 dnl	along with AstrOmatic software.
 dnl	If not, see <http://www.gnu.org/licenses/>.
 dnl
-dnl	Last modified:		15/02/2023
+dnl	Last modified:		09/04/2025
 dnl
 dnl %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 dnl
@@ -50,7 +50,7 @@ acx_curl_ok=yes
 if test x$2 = x && test x$1 = x; then
   AC_CHECK_PROG(acx_curlconfig_ok, [curl-config], [yes], [no])
   if test x$acx_curlconfig_ok = xyes; then
-    [CURL_CFLAGS=` --cflags`]
+    [CURL_CFLAGS=`curl-config --cflags`]
     [CURL_LIBS=`curl-config --libs`]
     AC_DEFINE(CURL_H, "curl/curl.h", [cURL header filename.])
   fi

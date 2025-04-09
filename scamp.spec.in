@@ -7,7 +7,9 @@
 #
 #	This file part of:	SCAMP
 #
-#	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+#	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+#	          		(C) 2021-2023 CFHT/CNRS
+#	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 #
 #	License:		GNU General Public License
 #
@@ -22,7 +24,7 @@
 #	You should have received a copy of the GNU General Public License
 #	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 #
-#	Last modified:		02/01/2020
+#	Last modified:		09/04/2025
 #
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -36,8 +38,8 @@ Summary: compute astrometric and photometric solutions from SExtractor catalogs
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Source0: http://astromatic.net/download/%{name}/%{name}-%{version}.tar.gz
-URL: http://astromatic.net/software/%{name}/
+Source0: https://download.astromatic.net/%{name}/%{name}-%{version}.tar.gz
+URL: https://astromatic.net/software/%{name}/
 License: GPL v3+
 Group: Sciences/Astronomy
 BuildRoot: %{_tmppath}/%{name}-buildroot

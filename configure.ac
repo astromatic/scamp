@@ -33,8 +33,8 @@ define([AC_CACHE_LOAD],)
 define([AC_CACHE_SAVE],)
 
 # This is your standard AstrOmatic source code...
-AC_INIT(SCAMP, 2.14.0, [astromatic@astromatic.net],
-	scamp, [http://astromatic.net/software/scamp])
+AC_INIT(SCAMP, 2.14.1, [astromatic@astromatic.net],
+	scamp, [https://astromatic.net/software/scamp])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR(autoconf)
 AC_CONFIG_SRCDIR(src/makeit.c)
