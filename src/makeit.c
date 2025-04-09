@@ -142,6 +142,7 @@ void makeit(void)
     {
         /*-- Load catalogs */
         fields[f] = load_field(prefs.file_name[f], f, prefs.ahead_name[f]);
+        label_field(fields[f]);
         NFPRINTF(OUTPUT, "");
 
         /*-- Compute basic field astrometric features (center, field size,...) */

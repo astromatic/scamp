@@ -7,9 +7,7 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 1994,1997 ESO
-*	          		(C) 1995,1996 Leiden Observatory 
-*	          		(C) 1998-2021 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 1998-2021 IAP/CNRS/SorbonneU
 *	          		(C) 2021-2023 CFHT/CNRS
 *	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *

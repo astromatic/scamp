@@ -62,15 +62,15 @@ int			*pthread_field_fviewflag,
 
 
 /****** load_field ***********************************************************
-PROTO	fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
-PURPOSE	Read catalog(s) and load field data.
-INPUT	Character string that contains the file name.
-OUTPUT	A pointer to the created field structure.
-NOTES	Global preferences are used. The function is not reentrant because
-	of static variables (prefs structure members are updated),
-	FITS header filename (null=none).
-AUTHOR	E. Bertin (IAP & CFHT)
-VERSION	11/01/2022
+PROTO   fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
+PURPOSE Read catalog(s) and load field data.
+INPUT   Character string that contains the file name.
+OUTPUT  A pointer to the created field structure.
+NOTES   Global preferences are used. The function is not reentrant because
+        of static variables (prefs structure members are updated),
+        FITS header filename (null=none).
+AUTHOR  E. Bertin (CEA/AIM/UParisSaclay)
+VERSION 09/04/2025
  */
 fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
 {
@@ -82,8 +82,8 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     setstruct **set;
     h_type htype;
     t_type ttype;
-    char  str[MAXCHAR], label[72], keystr[16],
-    *rfilename, *pstr, *astrombuf, *photombuf, *pspath;
+    char str[MAXCHAR], label[72], keystr[16],
+         *rfilename, *pstr, *pspath;
     int  d, i, j, n, s, nsample, line;
 
     /* A short, "relative" version of the filename */
@@ -146,39 +146,38 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     field->cplot_colour = 15;
     fitsread(cat->tab->headbuf, prefs.cplot_colourkey, &field->cplot_colour,
             H_INT, T_LONG, 0);
+
     /* Put an astrometric label to the present field */
     field->astromlabel = 0;
     /* Create a dummy FITS header to store all keyword values */
-    QMALLOC(astrombuf, char, FBSIZE);
-    memset(astrombuf, ' ', FBSIZE);
-    strncpy(astrombuf, "END     ", 8);
-    for (s=0; s<prefs.nastrinstru_key; s++)
-    {
-        fitsadd(astrombuf, prefs.astrinstru_key[s], "");
+    QMALLOC(field->astrombuf, char, FBSIZE);
+    memset(field->astrombuf, ' ', FBSIZE);
+    strncpy(field->astrombuf, "END     ", 8);
+    for (s=0; s<prefs.nastrinstru_key; s++) {
+        fitsadd(field->astrombuf, prefs.astrinstru_key[s], "");
         if ((line=fitsfind(cat->tab->headbuf,prefs.astrinstru_key[s]))
-                != RETURN_ERROR)
-        {
+                != RETURN_ERROR) {
             fitspick(cat->tab->headbuf+line*80, str,(void *)label,
                     &htype,&ttype, str);
-            fitswrite(astrombuf, prefs.astrinstru_key[s], label, htype, ttype);
+            fitswrite(field->astrombuf, prefs.astrinstru_key[s], label,
+                htype, ttype);
         }
     }
 
     /* Put a photometric label to the present field */
     field->photomlabel = 0;
     /* Create dummy a FITS header to store all keyword values */
-    QMALLOC(photombuf, char, FBSIZE);
-    memset(photombuf, ' ', FBSIZE);
-    strncpy(photombuf, "END     ", 8);
-    for (s=0; s<prefs.nphotinstru_key; s++)
-    {
-        fitsadd(photombuf, prefs.photinstru_key[s], "");
+    QMALLOC(field->photombuf, char, FBSIZE);
+    memset(field->photombuf, ' ', FBSIZE);
+    strncpy(field->photombuf, "END     ", 8);
+    for (s=0; s<prefs.nphotinstru_key; s++) {
+        fitsadd(field->photombuf, prefs.photinstru_key[s], "");
         if ((line=fitsfind(cat->tab->headbuf,prefs.photinstru_key[s]))
-                != RETURN_ERROR)
-        {
+                != RETURN_ERROR) {
             fitspick(cat->tab->headbuf+line*80, str,(void *)label,
                     &htype,&ttype, str);
-            fitswrite(photombuf, prefs.photinstru_key[s], label, htype, ttype);
+            fitswrite(field->photombuf, prefs.photinstru_key[s], label,
+                htype, ttype);
         }
     }
     n = 0;
@@ -207,30 +206,29 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
                 strcpy(field->ident, "no ident");
             set[n]->imatab = imatab;
             if (field->cplot_colour==15)
-                fitsread(imatab->headbuf, prefs.cplot_colourkey, &field->cplot_colour,
-                        H_INT, T_LONG, 0);
+                fitsread(imatab->headbuf, prefs.cplot_colourkey,
+                    &field->cplot_colour, H_INT, T_LONG, 0);
             /*---- Try to read the astrometric label again */
-            for (s=0; s<prefs.nastrinstru_key; s++)
-            {
-                fitsadd(astrombuf, prefs.astrinstru_key[s], "");
+            for (s=0; s<prefs.nastrinstru_key; s++) {
+                fitsadd(field->astrombuf, prefs.astrinstru_key[s], "");
                 if ((line=fitsfind(imatab->headbuf, prefs.astrinstru_key[s]))
-                        != RETURN_ERROR)
-                {
+                        != RETURN_ERROR) {
                     fitspick(imatab->headbuf+line*80, str,(void *)label,
-                            &htype,&ttype, str);
-                    fitswrite(astrombuf, prefs.astrinstru_key[s], label, htype, ttype);
+                        &htype,&ttype, str);
+                    fitswrite(field->astrombuf, prefs.astrinstru_key[s], label,
+                        htype, ttype);
                 }
             }
             /*---- Try to read the photometric label again */
-            for (s=0; s<prefs.nphotinstru_key; s++)
-            {
-                fitsadd(photombuf, prefs.photinstru_key[s], "");
+            for (s=0; s<prefs.nphotinstru_key; s++) {
+                fitsadd(field->photombuf, prefs.photinstru_key[s], "");
                 if ((line=fitsfind(imatab->headbuf, prefs.photinstru_key[s]))
                         != RETURN_ERROR)
                 {
                     fitspick(imatab->headbuf+line*80, str,(void *)label,
-                            &htype,&ttype, str);
-                    fitswrite(photombuf, prefs.photinstru_key[s], label, htype, ttype);
+                        &htype,&ttype, str);
+                    fitswrite(field->photombuf, prefs.photinstru_key[s], label,
+                        htype, ttype);
                 }
             }
             n++;
@@ -248,58 +246,7 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     if (field->cplot_colour<0 || field->cplot_colour>15)
         warning("CHECKPLOT field colour out of range, defaulted to ", "15");
 
-#ifdef USE_THREADS
-    QPTHREAD_MUTEX_LOCK(&field_instrumutex);
-#endif
-    /* Compare the dummy astrometric FITS header to the ones previously stored */
-    for (j=0; j<prefs.nastrinstrustr; j++)
-        if (!strncmp((const char *)prefs.astrinstrustr[j], astrombuf,
-                    80*prefs.nastrinstru_key) && field->nset == prefs.nastrinstruext[j])
-        {
-            field->astromlabel = j;
-            break;
-        }
-    if (j>=prefs.nastrinstrustr)
-    {
-        QMEMCPY(astrombuf, prefs.astrinstrustr[prefs.nastrinstrustr], char,FBSIZE);
-        prefs.nastrinstruext[prefs.nastrinstrustr] = field->nset;
-        field->astromlabel = prefs.nastrinstrustr++;
-        if (prefs.nastrinstrustr > MAXASTRINSTRU)
-        {
-            sprintf(str, "%d", prefs.nastrinstrustr);
-            error(EXIT_FAILURE,"*Error*: Too many astrometric instruments: ", str);
-        }
-    }
-    free(astrombuf);
-
-    /* Use the derived astrometric label index to associate the right */
-    /* mosaic and stability types to the present field */
-    field->mosaic_type = prefs.mosaic_type[field->astromlabel]; 
-    field->stability_type = prefs.stability_type[field->astromlabel]; 
     field->projection_type = prefs.projection_type[field->fieldindex];
-
-    /* Compare the dummy photometric FITS header to the ones previously stored */
-    for (j=0; j<prefs.nphotinstrustr; j++)
-        if (!strncmp((const char *)prefs.photinstrustr[j], photombuf,
-                    80*prefs.nphotinstru_key))
-        {
-            field->photomlabel = j;
-            break;
-        }
-    if (j>=prefs.nphotinstrustr)
-    {
-        QMEMCPY(photombuf, prefs.photinstrustr[prefs.nphotinstrustr], char, FBSIZE);
-        field->photomlabel = prefs.nphotinstrustr++;
-        if (prefs.nphotinstrustr > MAXPHOTINSTRU)
-        {
-            sprintf(str, "%d", prefs.nphotinstrustr);
-            error(EXIT_FAILURE,"*Error*: Too many photometric instruments: ", str);
-        }
-    }
-    free(photombuf);
-#ifdef USE_THREADS
-    QPTHREAD_MUTEX_UNLOCK(&field_instrumutex);
-#endif
 
     /* For every header the catalog contains */
     for (i=0; i<field->nset; i++)
@@ -374,6 +321,62 @@ fieldstruct *load_field(char *filename, int fieldindex, char *hfilename)
     }
 
     return field;
+}
+
+
+/****** label_field *********************************************************
+  PROTO   void label_fields(fieldstruct *field)
+  PURPOSE Set astrometric and photometric labels and related settings 
+  INPUT   Pointer to field structure.
+  OUTPUT  -.
+  NOTES   Relies on global variables.
+  AUTHOR  E. Bertin (CEA/AIM/UParisSaclay)
+  VERSION 09/04/2025
+ ***/
+void    label_field(fieldstruct *field) {
+   char str[MAXCHAR];
+   int  j;
+
+    // Compare the dummy astrometric FITS header to the ones previously stored
+    for (j=0; j<prefs.nastrinstrustr; j++)
+       if (!strncmp((const char *)prefs.astrinstrustr[j], field->astrombuf,
+           80*prefs.nastrinstru_key) && field->nset == prefs.nastrinstruext[j]) {
+            field->astromlabel = j;
+            break;
+        }
+    if (j>=prefs.nastrinstrustr) {
+        QMEMCPY(field->astrombuf, prefs.astrinstrustr[prefs.nastrinstrustr],
+            char, FBSIZE);
+        prefs.nastrinstruext[prefs.nastrinstrustr] = field->nset;
+        field->astromlabel = prefs.nastrinstrustr++;
+        if (prefs.nastrinstrustr > MAXASTRINSTRU)
+        {
+            sprintf(str, "%d", prefs.nastrinstrustr);
+            error(EXIT_FAILURE,"*Error*: Too many astrometric instruments: ", str);
+        }
+    }
+    // Compare the dummy photometric FITS header to the ones previously stored
+    for (j=0; j<prefs.nphotinstrustr; j++)
+        if (!strncmp((const char *)prefs.photinstrustr[j], field->photombuf,
+                    80*prefs.nphotinstru_key)) {
+            field->photomlabel = j;
+            break;
+        }
+    if (j>=prefs.nphotinstrustr) {
+        QMEMCPY(field->photombuf, prefs.photinstrustr[prefs.nphotinstrustr],
+            char, FBSIZE);
+        field->photomlabel = prefs.nphotinstrustr++;
+        if (prefs.nphotinstrustr > MAXPHOTINSTRU) {
+            sprintf(str, "%d", prefs.nphotinstrustr);
+            error(EXIT_FAILURE,"*Error*: Too many photometric instruments: ",
+                str);
+        }
+    }
+
+    /* Use the derived astrometric label index to associate the right */
+    /* mosaic and stability types to the present field */
+    field->mosaic_type = prefs.mosaic_type[field->astromlabel]; 
+    field->stability_type = prefs.stability_type[field->astromlabel]; 
 }
 
 
@@ -534,25 +537,25 @@ void locate_field(fieldstruct *field)
 
 
 /****** end_field ***********************************************************
-  PROTO   void end_field(fieldstruct *field)
-  PURPOSE Deallocate field data.
-  INPUT   Field pointer.
-  OUTPUT  -.
-  NOTES   -.
-  AUTHOR  E. Bertin (IAP)
-  VERSION 24/06/2004
- */
-void end_field(fieldstruct *field)
-{
+PROTO   void end_field(fieldstruct *field)
+PURPOSE Deallocate field data.
+INPUT   Field pointer.
+OUTPUT  -.
+NOTES   -.
+AUTHOR  E. Bertin (CEA/AIM/UParisSaclay)
+VERSION 09/05/2025
+*/
+void end_field(fieldstruct *field) {
     int i;
 
-    if (field->set)
-    {
+    if (field->set) {
         for (i=0; i<field->nset; i++)
             if (field->set[i])
                 end_set(field->set[i]);
         free(field->set);
     }
+    free(field->astrombuf);
+    free(field->photombuf);
     free(field);
 
     return;
@@ -677,36 +680,35 @@ double   dhmedian(double *ra, int n)
  ***/
 void    *pthread_load_field(void *arg)
 {
-    int findex, proc;
+   int findex, proc;
 
     findex = -1;
     proc = *((int *)arg);
     threads_gate_sync(pthread_startgate);
-    while (!pthread_field_endflag)
-    {
+    while (!pthread_field_endflag) {
         QPTHREAD_MUTEX_LOCK(&field_readmutex);
         if (findex>-1)
-            /*---- Indicate that the field info is now suitable for viewing */
+            // Indicate that the field is now suitable for order-dependent
+            // operations such as labeling or info display.
             pthread_field_fviewflag[findex] = 1;
         while (pthread_field_fviewindex<pthread_field_nfield
-                && pthread_field_fviewflag[pthread_field_fviewindex])
+                && pthread_field_fviewflag[pthread_field_fviewindex]) {
+            label_field(pthread_field_fields[pthread_field_fviewindex]);
             print_fieldinfo(pthread_field_fields[pthread_field_fviewindex++]);
-        if (pthread_field_findex<pthread_field_nfield)
-        {
+        }
+        if (pthread_field_findex<pthread_field_nfield) {
             findex = pthread_field_findex++;
             QPTHREAD_MUTEX_UNLOCK(&field_readmutex);
-            /*---- Load catalogs */
+            // Load catalogs
             pthread_field_fields[findex] = load_field(prefs.file_name[findex], findex,
                     prefs.ahead_name[findex]);
-            /*---- Compute basic field astrometric features (center, field size,...) */
+            // Compute basic field astrometric features (center, field size,...)
             locate_field(pthread_field_fields[findex]);
-        }
-        else
-        {
+        } else {
             QPTHREAD_MUTEX_UNLOCK(&field_readmutex);
-            /*---- Wait for the input buffer to be updated */
+            // Wait for the input buffer to be updated
             threads_gate_sync(pthread_stopgate);
-            /* ( Master thread process loads and saves new data here ) */
+            // ( Master thread process loads and saves new data here )
             threads_gate_sync(pthread_startgate);
         }
     }
@@ -715,6 +717,7 @@ void    *pthread_load_field(void *arg)
 
     return (void *)NULL;
 }
+
 
 /****** pthread_load_fields ***************************************************
   PROTO   void pthread_load_fields(fieldstruct **fields, int nfield)

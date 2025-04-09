@@ -7,7 +7,9 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+*	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2025 CEA/AIM/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		05/12/2023
+*	Last modified:		09/04/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -181,7 +183,7 @@ pkeystruct key[] =
   {"PHOTFLUX_KEY", P_STRING, prefs.photflux_key},
   {"PHOTFLUXERR_KEY", P_STRING, prefs.photfluxerr_key},
   {"PHOTINSTRU_KEY", P_STRINGLIST, prefs.photinstru_key, 0,0, 0.0,0.0,
-   {""}, 0, 32, &prefs.nphotinstru_key},
+   {""}, 0, 35, &prefs.nphotinstru_key},
   {"PHOTOMFLAG_KEY", P_STRING, prefs.photomflag_key},
   {"PIXSCALE_MAXERR", P_FLOAT, &prefs.pixscale_maxerr, 0,0, 1.0,2.0},
   {"POSANGLE_MAXERR", P_FLOAT, &prefs.posangle_maxerr, 0,0, 0.0,180.0},

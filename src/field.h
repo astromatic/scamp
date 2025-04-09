@@ -7,7 +7,9 @@
  *
  * This file part of: SCAMP
  *
- ** Copyright:  (C) 2002-2023 IAP/CNRS/SorbonneU/CEA/UParisSaclay
+ *	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+ *	          		(C) 2021-2023 CFHT/CNRS
+ *	          		(C) 2023-2025 CEA/AIM/UParisSaclay
  *
  * License:  GNU General Public License
  *
@@ -22,7 +24,7 @@
  * You should have received a copy of the GNU General Public License
  * along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
  *
- * Last modified:  05/12/2023
+ * Last modified:  09/05/2025
  *
  *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -62,7 +64,10 @@ typedef struct field
     int  headflag;  /* header found? */
     char  ident[MAXCHAR];  /* field identifier (read from FITS) */
     /* ----  instrumental parameters */
+    char *astrombuf;   /* Pseudo-header with keywords defining astrom group */
     int  astromlabel;  /* Astrometry "instrument" label */
+    char *photombuf;   /* Pseudo-header with keywords defining photom group */
+    int  photomlabel;  /* Photometry "instrument" label */
     mosaicenum mosaic_type;  /* Mosaic type */
     stabilityenum stability_type;  /* how stable the imager is */
     /* ---- catalog parameters */
@@ -97,7 +102,6 @@ typedef struct field
     long double chi2_ref, chi2_ref_hsn; /* External astrometry chi2 */
     long long nchi2_ref,nchi2_ref_hsn;/* Number of degrees of freedom */
     /* ---- photometric parameters */
-    int  photomlabel;  /* Photometry "instrument" label */
     int  photomflag;  /* True if exposure is photometric */
     int  photomrank;  /* Rank as a photometric field */
     int  photomlink;  /* True if linked to a photom field*/
@@ -130,6 +134,7 @@ extern double  dhmedian(double *ra, int n),
        get_fields_meanepoch(fieldstruct **fields, int nfield);
 
 extern void  end_field(fieldstruct *field),
+       label_field(fieldstruct *field),
        locate_field(fieldstruct *field),
        print_fieldinfo(fieldstruct *field),
        scale_field(fieldstruct *field, fieldstruct *reffield);
