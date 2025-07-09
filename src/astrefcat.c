@@ -7,7 +7,9 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2024 IAP/CNRS/SorbonneU/CEA/UParisSaclay
+#	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+#	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2025 CEA/AIM/OSUPS
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		25/03/2024
+*	Last modified:		09/07/2025
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -1314,8 +1316,8 @@ INPUT	Set structure pointer,
 OUTPUT  setstruct pointer (allocated if the input setstruct pointer is NULL).
 NOTES   The filename is used for error messages only. Global preferences are
 	used.
-AUTHOR  E. Bertin (IAP)
-VERSION 28/06/2020
+AUTHOR  E. Bertin (CEA/OSUPS)
+VERSION 09/07/2025
 */
 setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
 				double *wcspos, int lng, int lat, int naxis,
@@ -1543,6 +1545,10 @@ setstruct *read_astrefsamples(setstruct *set, tabstruct *tab, char *rfilename,
     sample->set = set;
     sample->sexflags = objflags;
     sample->mag = mag? mag[band] : dmag[band];
+#ifdef HAVE_ISNAN2
+    if (isnan(sample->mag))
+      sample->mag = maglim[1];
+#endif
     sample->magerr = magerr? magerr[band] : (dmagerr? dmagerr[band] : 0.0);
     sample->epoch = dobsdate? *dobsdate : (obsdate? *obsdate : 0.0);
     sample->flux = 0.0;
