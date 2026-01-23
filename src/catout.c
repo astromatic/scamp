@@ -7,7 +7,9 @@
 *
 *	This file part of:	SCAMP
 *
-*	Copyright:		(C) 2002-2020 IAP/CNRS/SorbonneU
+*	Copyright:		(C) 2002-2021 IAP/CNRS/SorbonneU
+*	          		(C) 2021-2023 CFHT/CNRS
+*	          		(C) 2023-2026 CEA/AIM/UParisSaclay
 *
 *	License:		GNU General Public License
 *
@@ -22,7 +24,7 @@
 *	You should have received a copy of the GNU General Public License
 *	along with SCAMP. If not, see <http://www.gnu.org/licenses/>.
 *
-*	Last modified:		28/06/2020
+*	Last modified:		23/01/2026
 *
 *%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%*/
 
@@ -61,7 +63,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 28/06/2020
+VERSION 23/01/2026
 */
 void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -93,7 +95,6 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
 			weight,weights, dummy;
    char			str[80],
 			*buf, *rfilename;
-   long			dptr;
    unsigned short	sexflagmask;
    unsigned int		imaflagmask;
    int			nmag[MAXPHOTINSTRU],
@@ -113,7 +114,6 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
   objtab = new_tab("LDAC_OBJECTS");
 /* Set key pointers */
   QCALLOC(objkeys, keystruct, (sizeof(refmergedkey) / sizeof(keystruct)));
-  dptr = (long)((char *)&mergedsample - (char *)&refmergedsample);
   for (k=0; refmergedkey[k].name[0]; k++)
     {
     if (!prefs.spread_flag
@@ -122,7 +122,7 @@ void	writemergedcat_fgroup(char *filename, fgroupstruct *fgroup)
     objkeys[k] = refmergedkey[k];
     key = objkeys+k;
 /*-- A trick to access the fields of the dynamic mergedsample structure */
-    key->ptr = (void *)((char *)key->ptr + dptr);
+    key->ptr = (void *)((char *)key->ptr - (char *)&refmergedsample + (char *)&mergedsample);
     key->nbytes = t_size[key->ttype]*(key->naxis? *key->naxisn : 1);
     add_key(key,objtab, 0);
     }
@@ -355,7 +355,7 @@ INPUT	File name,
 OUTPUT  -.
 NOTES   Global preferences are used.
 AUTHOR  E. Bertin (IAP)
-VERSION 12/11/2013
+VERSION 23/01/2026
 */
 void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 
@@ -381,7 +381,6 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
 			mag, magerr,epoch;
    char			str[80],
 			*buf, *rfilename;
-   long			dptr;
    int			nmag[MAXPHOTINSTRU],
 			d,i,k,m,n,p,nm, npinstru, naxis, index;
 
@@ -394,7 +393,6 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
   objtab = new_tab("LDAC_OBJECTS");
 /* Set key pointers */
   QCALLOC(objkeys, keystruct, (sizeof(reffullkey) / sizeof(keystruct)));
-  dptr = (long)((char *)&fsample - (char *)&reffullsample);
   for (k=0; reffullkey[k].name[0]; k++)
     {
     if (!prefs.spread_flag
@@ -403,7 +401,7 @@ void	writefullcat_fgroup(char *filename, fgroupstruct *fgroup)
     objkeys[k] = reffullkey[k];
     key = objkeys+k;
 /*-- A trick to access the fields of the dynamic fullsample structure */
-    key->ptr = (void *)((char *)key->ptr + dptr);
+    key->ptr = (void *)((char *)key->ptr - (char *)&reffullsample + (char *)&fsample);
     key->nbytes = t_size[key->ttype]*(key->naxis? *key->naxisn : 1);
     add_key(key,objtab, 0);
     }
