@@ -110,18 +110,8 @@ void	adjust_mosaic(fieldstruct **fields, int nfield)
     wcsmean = field->meanwcspos;
     naxis = field->naxis;
     sets = field->set;
-    if (prefs.mosaic_type[field->astromlabel] == MOSAIC_SAMECRVAL)
-      for (s=0; s<field->nset; s++)
-        {
-        for (d=0; d<naxis; d++)
-          sets[s]->wcs->crval[d] = wcsmean[d];
-        init_wcs(sets[s]->wcs);
-        range_wcs(sets[s]->wcs);
-        invert_wcs(sets[s]->wcs);
-        }
-    else
-      for (s=0; s<field->nset; s++)
-        crval_to_crpix(sets[s]->wcs, wcsmean);
+    for (s=0; s<field->nset; s++)
+      crval_to_crpix(sets[s]->wcs, wcsmean);
 
     if (prefs.mosaic_type[field->astromlabel] == MOSAIC_FIXFOCALPLANE)
       flag = 0;
