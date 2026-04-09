@@ -272,7 +272,7 @@ void	astrsolve_fgroups(fgroupstruct **fgroups, int nfgroup) {
 
     for (i=0; i<ninstru; i++)
     {
-        if (prefs.stability_type[instru]!=STABILITY_PREDISTORTED)
+        if (prefs.stability_type[i]!=STABILITY_PREDISTORTED)
             findex2[i+1]--;	/* Remove first field (too many degrees of freedom) */
         /*-- Set the extra exposure-dependent parameter flag */
         if (findex[i+1]>0)
