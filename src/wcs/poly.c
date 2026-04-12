@@ -736,16 +736,13 @@ VERSION 10/07/2012
  ***/
 void	poly_initortho(polystruct *poly, double *data, int ndata)
   {
-   double	*basis, *coeff, *invec,*invect0,*invect,*invect02,*invect2,
+   double	*invect0,*invect,*invect02,*invect2,
 		*rdiag, *deortho,
 		scale,s, dval;
-   int		c,i,j,m,n, ndmc, ndim,ncoeff;
+   int		c,i,j, ndmc, ncoeff;
 
 /* Prepare the vectors and counters */
-  ndim = poly->ndim;
   ncoeff = poly->ncoeff;
-  basis = poly->basis;
-  coeff = poly->coeff;
 
 /* Allocate memory for orthonormalization matrix and vector */
   QCALLOC(poly->deorthomat, double, ncoeff*ncoeff);
@@ -754,9 +751,6 @@ void	poly_initortho(polystruct *poly, double *data, int ndata)
 
 /* Do a QR decomposition of input vector set */
 /* Vectors are stored as rows to speed up the Householder transformation */
-  n = ncoeff;
-  m = ndata;
-  invec = data;
   for (c=0; c<ncoeff; c++)
     {
     ndmc = ndata - c;

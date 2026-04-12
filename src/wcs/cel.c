@@ -308,7 +308,7 @@ const char *celrev_errmsg[] = {
    "Invalid value of (x,y)"};
  
 
-int celset(const char pcode[4], struct celprm *cel, struct prjprm *prj)
+int celset(const char *pcode, struct celprm *cel, struct prjprm *prj)
 
 {
    int dophip;
@@ -561,7 +561,7 @@ int celset(const char pcode[4], struct celprm *cel, struct prjprm *prj)
 
 /*--------------------------------------------------------------------------*/
 
-int celfwd(const char pcode[4], const double lng, const double lat, struct celprm *cel, double *phi, double *theta, struct prjprm *prj, double *x, double *y)
+int celfwd(const char *pcode, const double lng, const double lat, struct celprm *cel, double *phi, double *theta, struct prjprm *prj, double *x, double *y)
 
 {
    int    err;
@@ -583,7 +583,7 @@ int celfwd(const char pcode[4], const double lng, const double lat, struct celpr
 
 /*--------------------------------------------------------------------------*/
 
-int celrev(const char pcode[4], const double x, const double y, struct prjprm *prj, double *phi, double *theta, struct celprm *cel, double *lng, double *lat)
+int celrev(const char *pcode, const double x, const double y, struct prjprm *prj, double *phi, double *theta, struct celprm *cel, double *lng, double *lat)
 
 {
    int    err;

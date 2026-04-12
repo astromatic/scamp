@@ -140,7 +140,7 @@
 
 const double tol = 1.0e-5;
 
-int sphfwd(const double lng, const double lat, const double eul[5], double *phi, double *theta)
+int sphfwd(const double lng, const double lat, const double eul[], double *phi, double *theta)
 
 {
    double coslat, coslng, dlng, dphi, sinlat, sinlng, x, y, z;
@@ -194,7 +194,7 @@ int sphfwd(const double lng, const double lat, const double eul[5], double *phi,
 
 /*-----------------------------------------------------------------------*/
 
-int sphrev(const double phi, const double theta, const double eul[5], double *lng, double *lat)
+int sphrev(const double phi, const double theta, const double eul[], double *lng, double *lat)
 
 {
    double cosphi, costhe, dlng, dphi, sinphi, sinthe, x, y, z;

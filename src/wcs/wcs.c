@@ -718,7 +718,7 @@ int wcsrev(const char ctype[][9], struct wcsprm *wcs, const double pixcrd[],
 /*--------------------------------------------------------------------------*/
 
 int wcsmix(const char ctype[][9], struct wcsprm *wcs, const int mixpix,
-           const int mixcel, const double vspan[2], const double vstep,
+           const int mixcel, const double vspan[], const double vstep,
            int viter, double world[], const double crval[], struct celprm *cel,
            double *phi, double *theta, struct prjprm *prj, double imgcrd[],
            struct linprm *lin, double pixcrd[])
