@@ -81,9 +81,7 @@ const double r2d = 180.0 / PI;
 
 #ifndef HAVE_MATHIMF_H
 
-double wcs_cosd(angle)
-
-const double angle;
+double wcs_cosd(const double angle)
 
 {
    double resid;
@@ -104,9 +102,7 @@ const double angle;
 
 /*--------------------------------------------------------------------------*/
 
-double wcs_sind(angle)
-
-const double angle;
+double wcs_sind(const double angle)
 
 {
    double resid;
@@ -127,9 +123,7 @@ const double angle;
 
 /*--------------------------------------------------------------------------*/
 
-double wcs_tand(angle)
-
-const double angle;
+double wcs_tand(const double angle)
 
 {
    double resid;
@@ -148,9 +142,7 @@ const double angle;
 
 /*--------------------------------------------------------------------------*/
 
-double wcs_acosd(v)
-
-const double v;
+double wcs_acosd(const double v)
 
 {
    if (v >= 1.0) {
@@ -166,9 +158,7 @@ const double v;
 
 /*--------------------------------------------------------------------------*/
 
-double wcs_asind(v)
-
-const double v;
+double wcs_asind(const double v)
 
 {
    if (v <= -1.0) {
@@ -184,9 +174,7 @@ const double v;
 
 /*--------------------------------------------------------------------------*/
 
-double wcs_atand(v)
-
-const double v;
+double wcs_atand(const double v)
 
 {
    if (v == -1.0) {
@@ -202,9 +190,7 @@ const double v;
 
 /*--------------------------------------------------------------------------*/
 
-double wcs_atan2d(y, x)
-
-const double x, y;
+double wcs_atan2d(const double y, const double x)
 
 {
    if (y == 0.0) {
