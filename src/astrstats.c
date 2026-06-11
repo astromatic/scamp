@@ -176,7 +176,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
                     corr_hsn *= dx;
                     lsig_hsn[i] += dx*dx / (nmean_hsn-1.0);
                     }
-                  gcorr_int_hsn += corr / (nmean_hsn - 1.0);
+                  gcorr_int_hsn += corr_hsn / (nmean_hsn - 1.0);
                   }
                 }
               field2 = samp2->set->field;
@@ -237,7 +237,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
     }
 
   fgroup->sig_corr_int = nsource? gcorr_int / nsource : 0.0;
-  fgroup->sig_corr_int_hsn = nsource_hsn? gcorr_int / nsource_hsn : 0.0;
+  fgroup->sig_corr_int_hsn = nsource_hsn? gcorr_int_hsn / nsource_hsn : 0.0;
   fgroup->chi2_int = ndeg? lchi2 / ((double)naxis*ndeg) : 0.0;
   fgroup->chi2_int_hsn = ndeg_hsn?
 		lchi2_hsn / ((double)naxis*ndeg_hsn) : 0.0;
@@ -369,7 +369,7 @@ void	astrstats_fgroup(fgroupstruct *fgroup, fieldstruct *reffield,
     }
 
   fgroup->sig_corr_ref = nmatch? gcorr_ref / nmatch : 0.0;
-  fgroup->sig_corr_ref_hsn = nmatch_hsn? gcorr_ref / nmatch_hsn : 0.0;
+  fgroup->sig_corr_ref_hsn = nmatch_hsn? gcorr_ref_hsn / nmatch_hsn : 0.0;
   fgroup->chi2_ref = ndeg? lchi2 / ((double)naxis*ndeg) : 0.0;
   fgroup->chi2_ref_hsn = ndeg_hsn?
 			lchi2_hsn / ((double)naxis*ndeg_hsn) : 0.0;
